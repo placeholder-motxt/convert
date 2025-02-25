@@ -129,16 +129,16 @@ class ArgumentObject():
         self.__type: TypeObject = None
     
     def __str__(self):
-        pass
+        return f'''ArgumentObject:\n\tmethodObject: \n\t[{self.__methodObject}]\n\tname: {self.__name}\n\ttype: \n\t[{self.__type}]'''
     
     def set_methodObject(self, methodObject):
-        pass
+        self.__methodObject = methodObject
 
     def set_name(self, name):
-        pass
+        self.__name = name
 
     def set_type(self, type):
-        pass
+        self.__type = type
 
 class OneToOneRelationshipObject(RelationshipObject):
     def __init__(self):
