@@ -26,7 +26,7 @@ class TestClassObject(unittest.TestCase):
         self.assertIn(method, self.class_object._ClassObject__methods)
 
     def test_add_relationship(self):
-        relationship = RelationshipObject()
+        relationship = AbstractRelationshipObject()
         self.class_object.add_relationship(relationship)
         self.assertIn(relationship, self.class_object._ClassObject__relationships)
 
@@ -67,7 +67,7 @@ class TestTypeObject(unittest.TestCase):
 class TestRelationshipObject(unittest.TestCase):
 
     def setUp(self):
-        self.relationship_object = RelationshipObject()
+        self.relationship_object = AbstractRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
 
@@ -76,11 +76,11 @@ class TestRelationshipObject(unittest.TestCase):
     
     def test_positive_set_sourceClass(self):
         self.relationship_object.setSourceClass(self.source_class)
-        self.assertEqual(self.relationship_object._RelationshipObject__sourceClass, self.source_class)
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClass, self.source_class)
 
     def test_positive_set_targetClass(self):
         self.relationship_object.setTargetClass(self.target_class)
-        self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.target_class)
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClass, self.target_class)
     
     def test_negative_set_sourceClass_as_None(self):
         with self.assertRaises(Exception) as context:
@@ -98,8 +98,8 @@ class TestRelationshipObject(unittest.TestCase):
         self.relationship_object.setSourceClass(self.source_class)
         self.relationship_object.setTargetClass(self.source_class)
 
-        self.assertEqual(self.relationship_object._RelationshipObject__sourceClass, self.source_class)
-        self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.source_class)
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClass, self.source_class)
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClass, self.source_class)
         
         
 class TestAbstractMethodObject(unittest.TestCase):
@@ -251,6 +251,18 @@ class TestAbstractMethodCallObject(unittest.TestCase):
     def test_str_representation(self):
         expected_output = """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
         self.assertEqual(str(self.method_call_object), expected_output)
+
+
+class TestControllerMethodObject(unittest.TestCase):
+
+    def setUp(self):
+        self.controller_method = ControllerMethodObject()
+        self.class_method = ClassMethodObject()  # Assuming ClassMethodObject is a valid object
+
+    def test_set_caller(self):
+        self.controller_method.set_caller(self.class_method)
+        self.assertEqual(self.controller_method._ControllerMethodObject__caller, self.class_method)
+
 
 if __name__ == "__main__":
     unittest.main()
