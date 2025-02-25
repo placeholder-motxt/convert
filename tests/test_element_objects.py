@@ -261,7 +261,7 @@ class TestControllerMethodCallObject(unittest.TestCase):
 
     def test_set_caller(self):
         self.controller_method.set_caller(self.class_method)
-        self.assertEqual(self.controller_method._ControllerMethodObject__caller, self.class_method)
+        self.assertEqual(self.controller_method._ControllerMethodCallObject__caller, self.class_method)
 
 
 if __name__ == "__main__":
