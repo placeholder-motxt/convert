@@ -153,4 +153,4 @@ class ControllerMethodObject(AbstractMethodObject):
         self.__calls : list[AbstractMethodCallObject] = []
     
     def add_calls(self, call_object : AbstractMethodCallObject):
-        pass
+        self.__calls.append(call_object)
