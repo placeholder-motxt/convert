@@ -123,7 +123,22 @@ class AbstractMethodCallObject():
         self.__returnVarName = returnVarName
 
 class ArgumentObject():
-    pass
+    def __init__(self):
+        self.__methodObject: AbstractMethodCallObject = None
+        self.__name: str = ""
+        self.__type: TypeObject = None
+    
+    def __str__(self):
+        return f'''ArgumentObject:\n\tmethodObject: \n\t[{self.__methodObject}]\n\tname: {self.__name}\n\ttype: \n\t[{self.__type}]'''
+    
+    def set_methodObject(self, methodObject):
+        self.__methodObject = methodObject
+
+    def set_name(self, name):
+        self.__name = name
+
+    def set_type(self, type):
+        self.__type = type
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
