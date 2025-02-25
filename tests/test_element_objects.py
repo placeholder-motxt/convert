@@ -55,5 +55,15 @@ class TestFieldObject(unittest.TestCase):
         expected_output = """FieldObject:\n\tname: TestField\n\ttype: None"""
         self.assertEqual(str(self.field_object), expected_output)
 
+class TestTypeObject(unittest.TestCase):
+    
+    def setUp(self):
+        self.type_object = TypeObject()
+    
+    def test_set_name(self):
+        self.type_object.set_name("TestType")
+        self.assertEqual(self.type_object._TypeObject__name, "TestType")
+
+
 if __name__ == "__main__":
     unittest.main()
