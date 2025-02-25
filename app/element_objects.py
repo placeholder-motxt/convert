@@ -123,7 +123,22 @@ class AbstractMethodCallObject():
         self.__returnVarName = returnVarName
 
 class ArgumentObject():
-    pass
+    def __init__(self):
+        self.__methodObject: AbstractMethodCallObject = None
+        self.__name: str = ""
+        self.__type: TypeObject = None
+    
+    def __str__(self):
+        pass
+    
+    def set_methodObject(self, methodObject):
+        pass
+
+    def set_name(self, name):
+        pass
+
+    def set_type(self, type):
+        pass
 
 class OneToOneRelationshipObject(RelationshipObject):
     def __init__(self):
