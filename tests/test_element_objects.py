@@ -1,5 +1,5 @@
 import unittest
-from app.element_objects import ClassObject, FieldObject, ClassMethodObject, RelationshipObject, TypeObject
+from app.element_objects import *
 
 class TestClassObject(unittest.TestCase):
 
@@ -101,6 +101,29 @@ class TestRelationshipObject(unittest.TestCase):
         self.assertEqual(self.relationship_object._RelationshipObject__sourceClass, self.source_class)
         self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.source_class)
         
+class TestAbstractMethodObject(unittest.TestCase):
+    def setUp(self):
+        self.method_object = AbstractMethodObject()
+
+    def test_set_name(self):
+        self.method_object.set_name("TestMethod")
+        self.assertEqual(self.method_object._AbstractMethodObject__name, "TestMethod")
+
+    def test_add_parameter(self):
+        parameter = ParameterObject()
+        self.method_object.add_parameter(parameter)
+        self.assertIn(parameter, self.method_object._AbstractMethodObject__parameters)
+
+    def test_set_returnType(self):
+        return_type = TypeObject()
+        self.method_object.set_returnType(return_type)
+        self.assertEqual(self.method_object._AbstractMethodObject__returnType, return_type)
+
+    def test_str_representation(self):
+        self.method_object.set_name("TestMethod")
+        expected_output = """MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"""
+        self.assertEqual(str(self.method_object), expected_output)
+
 
 if __name__ == "__main__":
     unittest.main()
