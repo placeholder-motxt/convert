@@ -64,6 +64,43 @@ class TestTypeObject(unittest.TestCase):
         self.type_object.set_name("TestType")
         self.assertEqual(self.type_object._TypeObject__name, "TestType")
 
+class TestRelationshipObject(unittest.TestCase):
+
+    def setUp(self):
+        self.relationship_object = RelationshipObject()
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+
+        self.source_class.set_name("SourceClass")
+        self.target_class.set_name("TargetClass")
+    
+    def test_positive_set_sourceClass(self):
+        self.relationship_object.setSourceClass(self.source_class)
+        self.assertEqual(self.relationship_object._RelationshipObject__sourceClass, self.source_class)
+
+    def test_positive_set_targetClass(self):
+        self.relationship_object.setTargetClass(self.target_class)
+        self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.target_class)
+    
+    def test_negative_set_sourceClass_as_None(self):
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setSourceClass(None)
+
+        self.assertEqual(str(context.exception), "Source Class cannot be SET to be None!")
+    
+    def test_negative_set_targetClass_as_None(self):
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setTargetClass(None)
+
+        self.assertEqual(str(context.exception), "Target Class cannot be SET to be None!")
+    
+    def test_edge_source_equals_target(self):
+        self.relationship_object.setSourceClass(self.source_class)
+        self.relationship_object.setTargetClass(self.source_class)
+
+        self.assertEqual(self.relationship_object._RelationshipObject__sourceClass, self.source_class)
+        self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.source_class)
+        
 
 if __name__ == "__main__":
     unittest.main()
