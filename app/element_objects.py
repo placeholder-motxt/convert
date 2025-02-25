@@ -52,16 +52,16 @@ class AbstractMethodObject():
         self.__returnType : TypeObject = None
 
     def __str__(self):
-        pass
+        return f'''MethodObject:\n\tname: {self.__name}\n\tparameters: {self.__parameters}\n\treturnType: {self.__returnType}'''
     
     def set_name(self, name):
-        pass
+        self.__name = name
 
     def add_parameter(self, parameter):
-        pass
+        self.__parameters.append(parameter)
 
     def set_returnType(self, returnType):
-        pass
+        self.__returnType = returnType
 
 
 class ClassMethodObject(AbstractMethodObject):
