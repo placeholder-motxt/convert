@@ -257,7 +257,7 @@ class TestControllerMethodObject(unittest.TestCase):
 
     def setUp(self):
         self.controller_method = ControllerMethodObject()
-        self.class_method = ClassMethodObject()  # Assuming ClassMethodObject is a valid object
+        self.class_method = ClassMethodObject()
 
     def test_set_caller(self):
         self.controller_method.set_caller(self.class_method)

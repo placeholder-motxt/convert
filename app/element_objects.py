@@ -5,7 +5,7 @@ class ClassObject():
         self.__parent: ClassObject = None
         self.__fields : list[FieldObject] = []
         self.__methods : list[ClassMethodObject] = []
-        self.__relationships : list[RelationshipObject] = []
+        self.__relationships : list[AbstractRelationshipObject] = []
         
 
 
@@ -67,7 +67,7 @@ class AbstractMethodObject():
 class ClassMethodObject(AbstractMethodObject):
     pass
 
-class RelationshipObject():
+class AbstractRelationshipObject():
     def __init__(self):
         self.__sourceClass: ClassObject = None
         self.__targetClass: ClassObject = None
@@ -125,18 +125,30 @@ class AbstractMethodCallObject():
 class ArgumentObject():
     pass
 
-class OneToOneRelationshipObject(RelationshipObject):
+class OneToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
 
-class ManyToOneRelationshipObject(RelationshipObject):
+class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
 
 
-class ManyToManyRelationshipObject(RelationshipObject):
+class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
+
+
+class ControllerMethodObject(AbstractMethodCallObject):
+    def __init__(self):
+        super().__init__()
+        self.__caller : ClassMethodObject = None
+
+    def set_caller(self, caller : ClassMethodObject):
+        pass
+
+
+
 
             
             
