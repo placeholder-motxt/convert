@@ -54,7 +54,15 @@ class ClassMethodObject(AbstractMethodObject):
     pass
 
 class RelationshipObject():
-    pass
+    def __init__(self):
+        self.__sourceClass: ClassObject = None
+        self.__targetClass: ClassObject = None
+    
+    def setSourceClass(self, sourceClass):
+        pass
+    
+    def setTargetClass(self, targetClass):
+        pass
 
 class TypeObject():
     def __init__(self):
