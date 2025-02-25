@@ -252,5 +252,36 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         expected_output = """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
         self.assertEqual(str(self.method_call_object), expected_output)
 
+class TestArgumentObject(unittest.TestCase):
+    def setUp(self):
+        self.argument_object = ArgumentObject()
+
+    def test_set_method_object(self):
+        method_object = AbstractMethodObject()
+        self.argument_object.set_methodObject(method_object)
+        self.assertEqual(self.argument_object._ArgumentObject__methodObject, method_object)
+
+    def test_set_name(self):
+        self.argument_object.set_name("TestArgument")
+        self.assertEqual(self.argument_object._ArgumentObject__name, "TestArgument")
+
+    def test_set_type(self):
+        type_obj = TypeObject()
+        self.argument_object.set_type(type_obj)
+        self.assertEqual(self.argument_object._ArgumentObject__type, type_obj)
+
+    def test_str_representation(self):
+        method_object = AbstractMethodObject()
+        method_object.set_name("TestMethod")
+        self.argument_object.set_methodObject(method_object)
+        self.argument_object.set_name("TestArgument")
+        type_obj = TypeObject()
+        type_obj.set_name("TestType")
+        self.argument_object.set_type(type_obj)
+        print(self.argument_object)
+        expected_output = f"""ArgumentObject:\n\tmethodObject: \n\t[MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None]\n\tname: TestArgument\n\ttype: \n\t[{self.argument_object._ArgumentObject__type}]"""
+        self.assertEqual(str(self.argument_object), expected_output)
+
+
 if __name__ == "__main__":
     unittest.main()
