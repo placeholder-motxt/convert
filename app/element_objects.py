@@ -147,3 +147,10 @@ class ControllerMethodCallObject(AbstractMethodCallObject):
     def set_caller(self, caller : ClassMethodObject):
         self.__caller = caller
 
+class ControllerMethodObject(AbstractMethodObject):
+    def __init__(self):
+        super().__init__()
+        self.__calls : list[AbstractMethodCallObject] = []
+    
+    def add_calls(self, call_object : AbstractMethodCallObject):
+        pass
