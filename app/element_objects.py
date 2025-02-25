@@ -75,15 +75,4 @@ class TypeObject():
     def set_name(self, name):
         self.__name = name
 
-# Abstract
-class RelationshipObject:
-    def __init__(self):
-        self.__source_class = None
-        self.__target_class = None
-
-    def set_source_class(self, source_class):
-        pass
-    
-    def set_target_class(self, target_class):
-        pass
 

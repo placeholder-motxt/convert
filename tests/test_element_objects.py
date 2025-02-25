@@ -102,20 +102,6 @@ class TestRelationshipObject(unittest.TestCase):
         self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.source_class)
 
 
-class TestRelationshipObject(unittest.TestCase):
-
-    def setUp(self):
-        self.relationship_object = RelationshipObject()
-
-    def test_set_source_class(self):
-        source_class = ClassObject()
-        self.relationship_object.set_source_class(source_class)
-        self.assertEqual(self.relationship_object._RelationshipObject__source_class, source_class)
-
-    def test_set_target_class(self):
-        target_class = ClassObject()
-        self.relationship_object.set_target_class(target_class)
-        self.assertEqual(self.relationship_object._RelationshipObject__target_class, target_class)
         
 
 if __name__ == "__main__":
