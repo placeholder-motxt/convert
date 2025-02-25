@@ -124,3 +124,21 @@ class AbstractMethodCallObject():
 
 class ArgumentObject():
     pass
+
+class OneToOneRelationshipObject(RelationshipObject):
+    def __init__(self):
+        super().__init__()
+
+class ManyToOneRelationshipObject(RelationshipObject):
+    def __init__(self):
+        super().__init__()
+
+
+class ManyToManyRelationshipObject(RelationshipObject):
+    def __init__(self):
+        super().__init__()
+
+            
+            
+
+

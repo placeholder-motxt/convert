@@ -101,6 +101,94 @@ class TestRelationshipObject(unittest.TestCase):
         self.assertEqual(self.relationship_object._RelationshipObject__sourceClass, self.source_class)
         self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.source_class)
         
+        
+class TestAbstractMethodObject(unittest.TestCase):
+    def setUp(self):
+        self.method_object = AbstractMethodObject()
+
+    def test_set_name(self):
+        self.method_object.set_name("TestMethod")
+        self.assertEqual(self.method_object._AbstractMethodObject__name, "TestMethod")
+
+    def test_add_parameter(self):
+        parameter = ParameterObject()
+        self.method_object.add_parameter(parameter)
+        self.assertIn(parameter, self.method_object._AbstractMethodObject__parameters)
+
+    def test_set_returnType(self):
+        return_type = TypeObject()
+        self.method_object.set_returnType(return_type)
+        self.assertEqual(self.method_object._AbstractMethodObject__returnType, return_type)
+
+    def test_str_representation(self):
+        self.method_object.set_name("TestMethod")
+        expected_output = """MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"""
+        self.assertEqual(str(self.method_object), expected_output)
+
+class TestParameterObject(unittest.TestCase):
+    def setUp(self):
+        self.parameter_object = ParameterObject()
+
+    def test_set_name(self):
+        self.parameter_object.set_name("TestParameter")
+        self.assertEqual(self.parameter_object._ParameterObject__name, "TestParameter")
+
+    def test_set_type(self):
+        type_obj = TypeObject()
+        self.parameter_object.set_type(type_obj)
+        self.assertEqual(self.parameter_object._ParameterObject__type, type_obj)
+
+    def test_str_representation(self):
+        self.parameter_object.set_name("TestParameter")
+        expected_output = """ParameterObject:\n\tname: TestParameter\n\ttype: None"""
+        self.assertEqual(str(self.parameter_object), expected_output)
+
+class TestAbstractMethodCallObject(unittest.TestCase):
+    def setUp(self):
+        self.method_call_object = AbstractMethodCallObject()
+
+    def test_set_method(self):
+        method = AbstractMethodObject()
+        self.method_call_object.set_method(method)
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__method, method)
+
+    def test_add_argument(self):
+        argument = ArgumentObject()
+        self.method_call_object.add_argument(argument)
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__arguments, [argument])
+
+    def test_return_var_name(self):
+        self.method_call_object.set_returnVarName("TestVarName")
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__returnVarName, "TestVarName")
+
+    def test_str_representation(self):
+        expected_output = """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
+        self.assertEqual(str(self.method_call_object), expected_output)
+
+
+class TestOneToOneRelationshipObject(unittest.TestCase):
+
+    def setUp(self):
+        self.one_to_one_relationship = OneToOneRelationshipObject()
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+
+class TestManyToOneRelationshipObject(unittest.TestCase):
+
+    def setUp(self):
+        self.one_to_one_relationship = ManyToOneRelationshipObject()
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+
+class TestManyToManyRelationshipObject(unittest.TestCase):
+
+    def setUp(self):
+        self.one_to_one_relationship = ManyToManyRelationshipObject()
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+    
+
+        
 class TestAbstractMethodObject(unittest.TestCase):
     def setUp(self):
         self.method_object = AbstractMethodObject()
