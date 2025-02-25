@@ -253,10 +253,10 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         self.assertEqual(str(self.method_call_object), expected_output)
 
 
-class TestControllerMethodObject(unittest.TestCase):
+class TestControllerMethodCallObject(unittest.TestCase):
 
     def setUp(self):
-        self.controller_method = ControllerMethodObject()
+        self.controller_method = ControllerMethodCallObject()
         self.class_method = ClassMethodObject()
 
     def test_set_caller(self):

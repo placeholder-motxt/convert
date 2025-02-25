@@ -139,7 +139,7 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
 
-class ControllerMethodObject(AbstractMethodCallObject):
+class ControllerMethodCallObject(AbstractMethodCallObject):
     def __init__(self):
         super().__init__()
         self.__caller : ClassMethodObject = None
