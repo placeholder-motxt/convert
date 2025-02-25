@@ -102,4 +102,25 @@ class ParameterObject():
         self.__name = name
     
     def set_type(self, type):
-        self.__type = type      
+        self.__type = type
+
+class AbstractMethodCallObject():
+    def __init__(self):
+        self.__method: AbstractMethodObject = None
+        self.__arguments: list[ArgumentObject] = []
+        self.__returnVarName: str = ""
+
+    def __str__(self):
+        pass
+    
+    def set_method(self, method):
+        pass
+
+    def add_argument(self, argument):
+        pass
+
+    def set_returnVarName(self, returnVarName):
+        pass
+
+class ArgumentObject():
+    pass
