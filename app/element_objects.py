@@ -111,16 +111,16 @@ class AbstractMethodCallObject():
         self.__returnVarName: str = ""
 
     def __str__(self):
-        pass
+        return f'''MethodCallObject:\n\tmethod: {self.__method}\n\targuments: {self.__arguments}\n\treturnVarName: {self.__returnVarName}'''
     
     def set_method(self, method):
-        pass
+        self.__method = method
 
     def add_argument(self, argument):
-        pass
+        self.__arguments.append(argument)
 
     def set_returnVarName(self, returnVarName):
-        pass
+        self.__returnVarName = returnVarName
 
 class ArgumentObject():
     pass
