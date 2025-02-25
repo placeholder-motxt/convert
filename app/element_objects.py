@@ -30,7 +30,20 @@ methods: {self.__methods}\n\trelationships: {self.__relationships}'''
 
 
 class FieldObject():
-    pass
+    
+    def __init__(self):
+        self.__name : str = ""
+        self.__type : TypeObject = None
+
+    def __str__(self):
+        pass
+    
+    def set_name(self, name):
+        pass
+    
+    def set_type(self, type):
+        pass
+
 
 class AbstractMethodObject():
     pass
@@ -41,3 +54,5 @@ class ClassMethodObject(AbstractMethodObject):
 class RelationshipObject():
     pass
 
+class TypeObject():
+    pass
