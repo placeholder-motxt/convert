@@ -1,5 +1,5 @@
 import unittest
-from app.element_objects import ClassObject, FieldObject, ClassMethodObject, RelationshipObject, TypeObject
+from app.element_objects import ClassObject, FieldObject, ClassMethodObject, RelationshipObject, TypeObject, OneToOneRelationshipObject
 
 class TestClassObject(unittest.TestCase):
 
@@ -102,6 +102,33 @@ class TestRelationshipObject(unittest.TestCase):
         self.assertEqual(self.relationship_object._RelationshipObject__targetClass, self.source_class)
 
 
+
+class TestOneToOneRelationshipObject(unittest.TestCase):
+
+    def setUp(self):
+        self.one_to_one_relationship = OneToOneRelationshipObject()
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+
+    def test_set_source_class(self):
+        
+        self.one_to_one_relationship.setSourceClass(self.source_class)
+        self.assertEqual(self.one_to_one_relationship._RelationshipObject__sourceClass, self.source_class)
+        
+        
+        with self.assertRaises(Exception) as context:
+            self.one_to_one_relationship.setSourceClass(None)
+        self.assertEqual(str(context.exception), "Source Class cannot be SET to be None!")
+
+    def test_set_target_class(self):
+        
+        self.one_to_one_relationship.setTargetClass(self.target_class)
+        self.assertEqual(self.one_to_one_relationship._RelationshipObject__targetClass, self.target_class)
+        
+        
+        with self.assertRaises(Exception) as context:
+            self.one_to_one_relationship.setTargetClass(None)
+        self.assertEqual(str(context.exception), "Target Class cannot be SET to be None!")
         
 
 if __name__ == "__main__":
