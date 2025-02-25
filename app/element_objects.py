@@ -59,10 +59,14 @@ class RelationshipObject():
         self.__targetClass: ClassObject = None
     
     def setSourceClass(self, sourceClass):
-        pass
+        if sourceClass == None:
+            raise Exception("Source Class cannot be SET to be None!")
+        self.__sourceClass = sourceClass
     
     def setTargetClass(self, targetClass):
-        pass
+        if targetClass == None:
+            raise Exception("Target Class cannot be SET to be None!")
+        self.__targetClass = targetClass
 
 class TypeObject():
     def __init__(self):
