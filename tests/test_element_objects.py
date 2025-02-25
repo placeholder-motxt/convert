@@ -142,5 +142,27 @@ class TestParameterObject(unittest.TestCase):
         expected_output = """ParameterObject:\n\tname: TestParameter\n\ttype: None"""
         self.assertEqual(str(self.parameter_object), expected_output)
 
+class TestAbstractMethodCallObject(unittest.TestCase):
+    def setUp(self):
+        self.method_call_object = AbstractMethodCallObject()
+
+    def test_set_method(self):
+        method = AbstractMethodObject()
+        self.method_call_object.set_method(method)
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__method, method)
+
+    def test_add_argument(self):
+        argument = ArgumentObject()
+        self.method_call_object.add_argument(argument)
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__arguments, [argument])
+
+    def test_return_var_name(self):
+        self.method_call_object.set_returnVarName("TestVarName")
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__returnVarName, "TestVarName")
+
+    def test_str_representation(self):
+        expected_output = """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
+        self.assertEqual(str(self.method_call_object), expected_output)
+
 if __name__ == "__main__":
     unittest.main()
