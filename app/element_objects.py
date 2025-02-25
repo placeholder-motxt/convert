@@ -45,10 +45,24 @@ class FieldObject():
         self.__type = type
 
 
-
-
 class AbstractMethodObject():
-    pass
+    def __init__(self):
+        self.__name : str = ""
+        self.__parameters : list[ParameterObject] = []
+        self.__returnType : TypeObject = None
+
+    def __str__(self):
+        pass
+    
+    def set_name(self, name):
+        pass
+
+    def add_parameter(self, parameter):
+        pass
+
+    def set_returnType(self, returnType):
+        pass
+
 
 class ClassMethodObject(AbstractMethodObject):
     pass
@@ -74,3 +88,6 @@ class TypeObject():
     
     def set_name(self, name):
         self.__name = name
+
+class ParameterObject():
+    pass      
