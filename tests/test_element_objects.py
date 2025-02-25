@@ -1,6 +1,6 @@
 import unittest
 from app.element_objects import ClassObject, FieldObject, ClassMethodObject, RelationshipObject, \
-    TypeObject, OneToOneRelationshipObject, ManyToOneRelationshipObject
+    TypeObject, OneToOneRelationshipObject, ManyToOneRelationshipObject, ManyToManyRelationshipObject
 
 class TestClassObject(unittest.TestCase):
 
@@ -115,6 +115,13 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
 
     def setUp(self):
         self.one_to_one_relationship = ManyToOneRelationshipObject()
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+
+class TestManyToManyRelationshipObject(unittest.TestCase):
+
+    def setUp(self):
+        self.one_to_one_relationship = ManyToManyRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
     
