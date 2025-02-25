@@ -1,5 +1,5 @@
 import unittest
-from app.element_objects import ClassObject, FieldObject, ClassMethodObject, RelationshipObject
+from app.element_objects import ClassObject, FieldObject, ClassMethodObject, RelationshipObject, TypeObject
 
 class TestClassObject(unittest.TestCase):
 
@@ -34,6 +34,26 @@ class TestClassObject(unittest.TestCase):
         self.class_object.set_name("TestClass")
         expected_output = """Class Object:\n\tname: TestClass\n\tparent: None\n\tfields:[]\n\t methods: []\n\trelationships: []"""
         self.assertEqual(str(self.class_object), expected_output)
+
+
+class TestFieldObject(unittest.TestCase):
+
+    def setUp(self):
+        self.field_object = FieldObject()
+
+    def test_set_name(self):
+        self.field_object.set_name("TestField")
+        self.assertEqual(self.field_object._FieldObject__name, "TestField")
+
+    def test_set_type(self):
+        type_obj = TypeObject()
+        self.field_object.set_type(type_obj)
+        self.assertEqual(self.field_object._FieldObject__type, type_obj)
+
+    def test_str_representation(self):
+        self.field_object.set_name("TestField")
+        expected_output = """FieldObject:\n\tname: TestField\n\ttype: None"""
+        self.assertEqual(str(self.field_object), expected_output)
 
 if __name__ == "__main__":
     unittest.main()
