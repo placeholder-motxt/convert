@@ -88,6 +88,18 @@ class TypeObject():
     
     def set_name(self, name):
         self.__name = name
+        
 
 class ParameterObject():
-    pass      
+    def __init__(self):
+        self.__name: str = ""
+        self.__type: TypeObject = None
+
+    def __str__(self):
+        pass
+    
+    def set_name(self, name):
+        pass
+    
+    def set_type(self, type):
+        pass     
