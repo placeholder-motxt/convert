@@ -10,21 +10,23 @@ class ClassObject():
 
 
     def __str__(self) -> str:
-        pass
+        return f'''Class Object:\n\tname: {self.__name}\n\tparent: {self.__parent}\n\tfields:{self.__fields}\n\t \
+methods: {self.__methods}\n\trelationships: {self.__relationships}'''
+    
     def set_name(self, name):
-        pass
+        self.__name = name
     
     def set_parent(self, parent):
-        pass
+        self.__parent = parent
 
     def add_field(self, field):
-        pass
+        self.__fields.append(field)
     
     def add_method(self, method):
-        pass
+        self.__methods.append(method)
 
     def add_relationship(self, relationship):
-        pass
+        self.__relationships.append(relationship)
 
 
 class FieldObject():
