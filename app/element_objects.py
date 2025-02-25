@@ -57,4 +57,8 @@ class RelationshipObject():
     pass
 
 class TypeObject():
-    pass
+    def __init__(self):
+        self.__name = ""
+    
+    def set_name(self, name):
+        pass
