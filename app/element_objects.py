@@ -84,6 +84,10 @@ class ManyToOneRelationshipObject(RelationshipObject):
         super().__init__()
 
 
+class ManyToManyRelationshipObject(RelationshipObject):
+    def __init__(self):
+        super().__init__()
+
             
             
 
