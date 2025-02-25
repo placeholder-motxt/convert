@@ -75,4 +75,9 @@ class TypeObject():
     def set_name(self, name):
         self.__name = name
 
+class OneToOneRelationshipObject(RelationshipObject):
+    def __init__(self):
+        super().__init__()
+            
+
 
