@@ -264,5 +264,16 @@ class TestControllerMethodCallObject(unittest.TestCase):
         self.assertEqual(self.controller_method._ControllerMethodCallObject__caller, self.class_method)
 
 
+class TestControllerMethodObject(unittest.TestCase):
+
+    def setUp(self):
+        self.controller_method = ControllerMethodObject()
+        self.method_call = AbstractMethodCallObject()
+
+    def test_add_calls(self):
+        self.controller_method.add_calls(self.method_call)
+        self.assertIn(self.method_call, self.controller_method._ControllerMethodObject__calls)
+
+
 if __name__ == "__main__":
     unittest.main()
