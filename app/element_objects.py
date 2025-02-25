@@ -145,12 +145,5 @@ class ControllerMethodObject(AbstractMethodCallObject):
         self.__caller : ClassMethodObject = None
 
     def set_caller(self, caller : ClassMethodObject):
-        pass
-
-
-
-
-            
-            
-
+        self.__caller = caller
 
