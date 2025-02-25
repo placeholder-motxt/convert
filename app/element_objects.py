@@ -78,6 +78,13 @@ class TypeObject():
 class OneToOneRelationshipObject(RelationshipObject):
     def __init__(self):
         super().__init__()
+
+class ManyToOneRelationshipObject(RelationshipObject):
+    def __init__(self):
+        super().__init__()
+
+
+            
             
 
 
