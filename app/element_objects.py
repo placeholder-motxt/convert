@@ -36,13 +36,15 @@ class FieldObject():
         self.__type : TypeObject = None
 
     def __str__(self):
-        pass
+        return f'''FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}'''
     
     def set_name(self, name):
-        pass
+        self.__name = name
     
     def set_type(self, type):
-        pass
+        self.__type = type
+
+
 
 
 class AbstractMethodObject():
