@@ -334,6 +334,31 @@ class TestClassMethodCallObject(unittest.TestCase):
 
         self.assertEqual(str(context.exception), "ClassMethodObject cannot be SET to be None!")
 
+class TestFileElements(unittest.TestCase):
+    def test_fileelements_valid_filename(self):
+        obj = FileElements("valid_file.txt")
+        self.assertIsInstance(obj, FileElements)
+
+    def test_fileelements_invalid_filename_type(self):
+        with self.assertRaises(AssertionError):
+            FileElements(123)  # Invalid type
+
+    def test_fileelements_empty_filename(self): # cornercase
+        with self.assertRaises(AssertionError):
+            FileElements("")
+
+class TestModelsElements(unittest.TestCase):
+    def test_modelselements_valid_filename(self):
+        obj = ModelsElements("model_file.py")
+        self.assertIsInstance(obj, ModelsElements)
+
+class TestViewsElements(unittest.TestCase):
+    def test_viewselements_valid_filename(self):
+        obj = ViewsElements("view_file.py")
+        self.assertIsInstance(obj, ViewsElements)
+
+
+
 
 if __name__ == "__main__":
     unittest.main()
