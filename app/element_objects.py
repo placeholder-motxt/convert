@@ -1,14 +1,20 @@
 class FileElements():
     def __init__(self, file_name : str):
-        pass
+        assert isinstance(file_name, str), "File name must be a string!"
+        assert file_name != "", "File name can't be empty!"
+        self.__name : str = file_name
 
 class ModelsElements(FileElements):
     def __init__(self, file_name : str):
-        pass
+        super().__init__(file_name)
+        self.__classes : list[ClassObject] = []
 
 class ViewsElements(FileElements):
     def __init__(self, file_name : str):
-        pass
+        super().__init__(file_name)
+        self.__class_methods : list[ClassMethodObject] = []
+        self.__controller_methods : list[ControllerMethodObject] = []
+
 
 
 class ClassObject():
