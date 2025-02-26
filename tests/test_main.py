@@ -30,3 +30,23 @@ def test_download_file(test_file):
 
     file_path = test_file["filename"] + ".py"
     assert not os.path.exists(file_path)
+
+def test_file_already_exists():
+    with open("a.py", "w") as f:
+        f.write("Some initial content")
+        
+    try:
+        # Try to upload a file
+        response = client.post("/download/", json={"filename":"a","content": "Some content"})
+        assert response.status_code, 400
+        assert response.json()["detail"], "The file already exists."
+    finally:
+        # Clean up: remove the file created for the test
+        if os.path.exists("a.py"):
+            os.remove("a.py")
+
+def test_slash_on_filename():
+    # Try to upload a file
+    response = client.post("/download/", json={"filename":"app/main2","content": "Some content"})
+    assert response.status_code==400
+    assert response.json()["detail"]=="/ not allowed"
