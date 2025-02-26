@@ -6,7 +6,7 @@ class ClassObject():
         self.__fields : list[FieldObject] = []
         self.__methods : list[ClassMethodObject] = []
         self.__relationships : list[AbstractRelationshipObject] = []
-        
+        self.__id: int
 
 
     def __str__(self) -> str:
@@ -27,6 +27,9 @@ methods: {self.__methods}\n\trelationships: {self.__relationships}'''
 
     def add_relationship(self, relationship):
         self.__relationships.append(relationship)
+
+    def set_id(self, id):
+        pass
 
 
 class FieldObject():
