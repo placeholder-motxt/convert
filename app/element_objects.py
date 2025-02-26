@@ -29,7 +29,7 @@ methods: {self.__methods}\n\trelationships: {self.__relationships}'''
         self.__relationships.append(relationship)
 
     def set_id(self, id):
-        pass
+        self.__id = id
 
 
 class FieldObject():
