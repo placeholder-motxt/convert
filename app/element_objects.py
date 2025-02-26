@@ -65,7 +65,12 @@ class AbstractMethodObject():
 
 
 class ClassMethodObject(AbstractMethodObject):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.__calls: list[ClassMethodCallObject] = []
+    
+    def add_class_method_call(self, class_method_call):
+        pass
 
 class AbstractRelationshipObject():
     def __init__(self):
@@ -169,3 +174,6 @@ class ControllerMethodObject(AbstractMethodObject):
     
     def add_calls(self, call_object : AbstractMethodCallObject):
         self.__calls.append(call_object)
+
+class ClassMethodCallObject(AbstractMethodCallObject):
+    pass
