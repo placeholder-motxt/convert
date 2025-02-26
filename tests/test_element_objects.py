@@ -278,7 +278,6 @@ class TestArgumentObject(unittest.TestCase):
         type_obj = TypeObject()
         type_obj.set_name("TestType")
         self.argument_object.set_type(type_obj)
-        print(self.argument_object)
         expected_output = f"""ArgumentObject:\n\tmethodObject: \n\t[MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None]\n\tname: TestArgument\n\ttype: \n\t[{self.argument_object._ArgumentObject__type}]"""
         self.assertEqual(str(self.argument_object), expected_output)
 
