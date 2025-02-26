@@ -320,6 +320,21 @@ class TestClassMethodObject(unittest.TestCase):
 
         self.assertEqual(str(context.exception), "Cannot add None to ClassMethodCallObject!")
 
+class TestClassMethodCallObject(unittest.TestCase):
+    def setUp(self):
+        self.class_method_call = ClassMethodCallObject()
+    
+    def test_positive_set_caller(self):
+        method_object = ClassMethodObject()
+        self.class_method_call.set_caller(method_object)
+        self.assertEqual(method_object, self.class_method_call._ClassMethodCallObject__caller)
+    
+    def test_negative_set_caller_as_none(self):
+        with self.assertRaises(Exception) as context:
+            self.class_method_call.set_caller(None)
+
+        self.assertEqual(str(context.exception), "ClassMethodObject cannot be SET to be None!")
+
 
 if __name__ == "__main__":
     unittest.main()
