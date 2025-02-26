@@ -6,6 +6,10 @@ class TestClassObject(unittest.TestCase):
     def setUp(self):
         self.class_object = ClassObject()
 
+    def test_set_id(self):
+        self.class_object.set_id(1)
+        self.assertEqual(self.class_object._ClassObject__id, 1)
+
     def test_set_name(self):
         self.class_object.set_name("TestClass")
         self.assertEqual(self.class_object._ClassObject__name, "TestClass")
