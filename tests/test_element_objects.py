@@ -104,6 +104,56 @@ class TestRelationshipObject(unittest.TestCase):
 
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClass, self.source_class)
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClass, self.source_class)
+
+    def test_valid_single_number(self):
+        # Test valid single number
+        self.relationship_object.setSourceClassOwnAmount("1")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount, "1")
+
+    def test_valid_star(self):
+        # Test valid star value
+        self.relationship_object.setTargetClassOwnAmount("*")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount, "*")
+
+    def test_valid_range(self):
+        # Test valid range (min..max)
+        self.relationship_object.setSourceClassOwnAmount("1..5")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount, "1..5")
+
+    def test_valid_range_with_star(self):
+        # Test valid range (min..*)
+        self.relationship_object.setTargetClassOwnAmount("1..*")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount, "1..*")
+
+    def test_invalid_empty(self):
+        # Test invalid empty value
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setSourceClassOwnAmount("")
+        self.assertEqual(str(context.exception), "Association multiplicity cannot be empty")
+
+    def test_invalid_star_usage(self):
+        # Test invalid usage of '*' (not at the end)
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setTargetClassOwnAmount("1*2")
+        self.assertEqual(str(context.exception), "Invalid use of * in multiplicity")
+
+    def test_invalid_non_numeric(self):
+        # Test invalid non-numeric and non-range value
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setSourceClassOwnAmount("abc")
+        self.assertEqual(str(context.exception), "Invalid multiplicity in a relationship")
+
+    def test_invalid_range_no_start(self):
+        # Test invalid range format without a minimum value
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setTargetClassOwnAmount("..5")
+        self.assertEqual(str(context.exception), "Invalid multiplicity in a relationship")
+
+    def test_invalid_range_no_end(self):
+        # Test invalid range format (missing start number)
+        with self.assertRaises(Exception) as context:
+            self.relationship_object.setTargetClassOwnAmount("1..")
+        self.assertEqual(str(context.exception), "Invalid multiplicity in a relationship")
         
         
 class TestAbstractMethodObject(unittest.TestCase):
