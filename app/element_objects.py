@@ -178,4 +178,9 @@ class ControllerMethodObject(AbstractMethodObject):
         self.__calls.append(call_object)
 
 class ClassMethodCallObject(AbstractMethodCallObject):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.__caller: ClassMethodObject = None
+    
+    def set_caller(self, method_object):
+        pass
