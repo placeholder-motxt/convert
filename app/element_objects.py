@@ -70,7 +70,9 @@ class ClassMethodObject(AbstractMethodObject):
         self.__calls: list[ClassMethodCallObject] = []
     
     def add_class_method_call(self, class_method_call):
-        pass
+        if class_method_call == None:
+            raise Exception("Cannot add None to ClassMethodCallObject!")
+        self.__calls.append(class_method_call)
 
 class AbstractRelationshipObject():
     def __init__(self):
