@@ -183,4 +183,6 @@ class ClassMethodCallObject(AbstractMethodCallObject):
         self.__caller: ClassMethodObject = None
     
     def set_caller(self, method_object):
-        pass
+        if method_object == None:
+            raise Exception("ClassMethodObject cannot be SET to be None!")
+        self.__caller = method_object
