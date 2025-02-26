@@ -304,6 +304,21 @@ class TestControllerMethodObject(unittest.TestCase):
     def test_add_calls(self):
         self.controller_method.add_calls(self.method_call)
         self.assertIn(self.method_call, self.controller_method._ControllerMethodObject__calls)
+    
+class TestClassMethodObject(unittest.TestCase):
+    def setUp(self):
+        self.class_method_object = ClassMethodObject()
+    
+    def test_positive_add_class_method_call_object(self):
+        class_method_call_object = ClassMethodCallObject()
+        self.class_method_object.add_class_method_call(class_method_call_object)
+        self.assertIn(class_method_call_object, self.class_method_object._ClassMethodObject__calls)
+    
+    def test_negative_add_none(self):
+        with self.assertRaises(Exception) as context:
+            self.class_method_object.add_class_method_call(None)
+
+        self.assertEqual(str(context.exception), "Cannot add None to ClassMethodCallObject!")
 
 
 if __name__ == "__main__":
