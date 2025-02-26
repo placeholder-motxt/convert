@@ -1,3 +1,16 @@
+class FileElements():
+    def __init__(self, file_name : str):
+        pass
+
+class ModelsElements(FileElements):
+    def __init__(self, file_name : str):
+        pass
+
+class ViewsElements(FileElements):
+    def __init__(self, file_name : str):
+        pass
+
+
 class ClassObject():
 
     def __init__(self):
