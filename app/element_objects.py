@@ -81,6 +81,8 @@ class AbstractRelationshipObject():
     def __init__(self):
         self.__sourceClass: ClassObject = None
         self.__targetClass: ClassObject = None
+        self.__sourceClassOwnAmount: str = ""
+        self.__targetClassOwnAmount: str = ""
     
     def setSourceClass(self, sourceClass):
         if sourceClass == None:
@@ -91,6 +93,12 @@ class AbstractRelationshipObject():
         if targetClass == None:
             raise Exception("Target Class cannot be SET to be None!")
         self.__targetClass = targetClass
+    
+    def setSourceClassOwnAmount(self, amount):
+        self.__sourceClassOwnAmount = amount
+
+    def setTargetClassOwnAmount(self, amount):
+        self.__targetClassOwnAmount = amount
 
 class TypeObject():
     def __init__(self):
