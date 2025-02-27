@@ -185,6 +185,22 @@ class TestParseJsonToObject(unittest.TestCase):
         ro = class_from_id.add_relationship.call_args[0][0]  # Extract the relationship object
         self.assertIsInstance(ro, OneToOneRelationshipObject)
 
+    def test_parse_relationships_inheritance(self):
+        uml_json = {'edges':[{
+                'start': 1,
+                'end': 2,
+                'type': 'GeneralizationEdge'
+            }]}
+        self.parser = ParseJsonToObject(uml_json)
+        classes = self.parser.parse_relationships(self.classes, uml_json)
+        class_from_id = self.classes[1]
+        class_to_id = self.classes[2]
+        
+        class_from_id.set_parent.assert_called_with(class_to_id)
+
+        # Ensure the parent is set as expected
+        self.assertEqual(class_from_id.set_parent.call_args[0][0], class_to_id)
+
     def test_validate_amount_valid_cases(self):
         # Test valid multiplicities
         uml_json = {'edges':[{
