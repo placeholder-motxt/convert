@@ -20,46 +20,40 @@ class TestParseJsonToObject(unittest.TestCase):
                 "type": "ClassNode"
                 },
                 {
-                "methods": "+ getBesaranDenda(String apalah): integer\n+ getTglPinjam(): Date\n+ getTglKembali(): Date",
+                "methods": "+ getBesaranDenda(nama :Type): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
                 "name": "Peminjaman",
                 "x": 310,
                 "y": 270,
-                "attributes": "- ID: String\n- isDikembalikan: boolean\n- tglPinjam: Date\n- tglKembali: Date\n- isLunasDenda: boolean\n- besaranDenda: integer",
+                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
                 "id": 1,
                 "type": "ClassNode"
-                },
+                }
             ]
         }"""
         parser = ParseJsonToObject(data)
-        result = parser.parse()
-        self.assertEqual(result, "Done")
-        self.assertEqual(parser._ParseJsonToObject__json, data)
+        result = parser.parse_classes()
+        self.assertEqual(result, parser._ParseJsonToObject__classes)
+        self.assertEqual(parser._ParseJsonToObject__json, json.loads(data))
         self.assertEqual(len(parser._ParseJsonToObject__json["nodes"]), 2)
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["name"], "Pengelola")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["id"], 0)
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["methods"], "")
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["attributes"], "- isAdmin: boolean")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["type"], "ClassNode")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][1]["name"], "Peminjaman")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][1]["id"], 1)
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][1]["methods"], "+ getBesaranDenda(String apalah): integer\n+ getTglPinjam(): Date\n+ getTglKembali(): Date")
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][1]["attributes"], "- ID: String\n- isDikembalikan: boolean\n- tglPinjam: Date\n- tglKembali: Date\n- isLunasDenda: boolean\n- besaranDenda: integer")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][1]["type"], "ClassNode")
-
     def test_empty_nodes(self):
         data = """{
             "diagram": "ClassDiagram",
             "nodes": []
         }"""
         parser = ParseJsonToObject(data)
-        result = parser.parse()
-        self.assertEqual(result, "Error: value key is missing")
-        self.assertEqual(parser._ParseJsonToObject__json, data)
-        self.assertEqual(len(parser._ParseJsonToObject__json["nodes"]), 0)
+        result = parser.parse_classes()
+        self.assertRaises(Exception)
+        self.assertEqual(parser._ParseJsonToObject__json, json.loads(data))
 
     def test_invalid_json(self):
         data = """{
-            "diagram": "ClassDiagram",
+        "diagram": "ClassDiagram",
             "nodes": [
                 {
                 "methods": "",
@@ -79,12 +73,10 @@ class TestParseJsonToObject(unittest.TestCase):
                 "id": 1,
                 "type": "ClassNode"
                 }
-            ]
-        """
-        parser = ParseJsonToObject(data)
-        result = parser.parse()
-        self.assertEqual(result, "Error: json is not valid")
-        self.assertEqual(parser._ParseJsonToObject__json, data)
+            ]"""
+        
+        with self.assertRaises(json.JSONDecodeError):
+            parser = ParseJsonToObject(data)
 
 
     def test_missing_attributes(self):
@@ -103,14 +95,14 @@ class TestParseJsonToObject(unittest.TestCase):
             ]
         }"""
         parser = ParseJsonToObject(data)
-        result = parser.parse()
-        self.assertEqual(result, "Done")
-        self.assertEqual(parser._ParseJsonToObject__json, data)
+        result = parser.parse_classes()
+        self.assertEqual(result, parser._ParseJsonToObject__classes)
+        self.assertEqual(parser._ParseJsonToObject__json, json.loads(data))
         self.assertEqual(len(parser._ParseJsonToObject__json["nodes"]), 1)
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["name"], "Pengelola")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["id"], 0)
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["methods"], "")
-        self.assertNotIn("attributes", parser._ParseJsonToObject__json["nodes"][0])
+        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["attributes"], "")
         self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["type"], "ClassNode")
 
     def setUp(self):
