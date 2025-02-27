@@ -2,11 +2,49 @@ import json
 from app.element_objects import *
 
 class ParseJsonToObject:
-    def __init__(self,data):
+    def __init__(self, data):
         self.__json = data
+        if isinstance(data,str):
+            self.__json = json.loads(data)
+        self.__classes = []
     
-    def parse_methods(self):
-        pass
+    def parse_classes(self):
+        data = self.__json
+        
+        if data['nodes'] is None or data['nodes'] == '':
+            raise Exception("Error: nodes not found in the json")
+
+        for classes in data['nodes']:
+            if classes['name'] == '':
+                raise Exception("Error: class not found in the json")
+            a = ClassObject()
+            a.set_name(classes['name'])
+            a.set_id(classes['id'])
+            for method in classes['methods'].split('\n'):
+                if method != '':
+                    b = ClassMethodObject()
+                    b.set_name(method.split('(')[0].lstrip('+- '))
+                    
+                    for parameter in method.split('(')[1].split(')')[0].split(','):
+                        if parameter:
+                            c = ParameterObject().set_name(parameter.split(':')[0])
+                            d = TypeObject().set_name(parameter.split(':')[1])
+
+                            b.add_parameter(c)
+                            b.set_returnType(d)
+                    for field in classes['attributes'].split('\n'):
+                        if field != '':
+                            field = field.lstrip('+- ')
+                        
+                            f = FieldObject()
+                            field_parts = field.split(':')
+                            f.set_name(field_parts[0].strip())
+                            g = TypeObject()
+                            g.set_name(field_parts[1].strip())
+                            f.set_type(g)
+                            a.add_field(f)
+            self.__classes.append(a)
+        return self.__classes
 
     def parse_relationships(self, classes, uml_json):
         edges = uml_json['edges']
@@ -103,3 +141,4 @@ class ParseJsonToObject:
         if amount_str.isnumeric():
             return int(amount_str) > compared_to
         return False
+
