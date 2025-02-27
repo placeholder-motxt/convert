@@ -6,7 +6,7 @@ class ClassObject():
         self.__fields : list[FieldObject] = []
         self.__methods : list[ClassMethodObject] = []
         self.__relationships : list[AbstractRelationshipObject] = []
-        
+        self.__id: int
 
 
     def __str__(self) -> str:
@@ -27,6 +27,9 @@ methods: {self.__methods}\n\trelationships: {self.__relationships}'''
 
     def add_relationship(self, relationship):
         self.__relationships.append(relationship)
+
+    def set_id(self, id):
+        self.__id = id
 
 
 class FieldObject():
@@ -78,6 +81,8 @@ class AbstractRelationshipObject():
     def __init__(self):
         self.__sourceClass: ClassObject = None
         self.__targetClass: ClassObject = None
+        self.__sourceClassOwnAmount: str = ""
+        self.__targetClassOwnAmount: str = ""
     
     def setSourceClass(self, sourceClass):
         if sourceClass == None:
@@ -88,6 +93,12 @@ class AbstractRelationshipObject():
         if targetClass == None:
             raise Exception("Target Class cannot be SET to be None!")
         self.__targetClass = targetClass
+    
+    def setSourceClassOwnAmount(self, amount):
+        self.__sourceClassOwnAmount = amount
+
+    def setTargetClassOwnAmount(self, amount):
+        self.__targetClassOwnAmount = amount
 
 class TypeObject():
     def __init__(self):

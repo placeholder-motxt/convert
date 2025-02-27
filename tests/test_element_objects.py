@@ -6,6 +6,10 @@ class TestClassObject(unittest.TestCase):
     def setUp(self):
         self.class_object = ClassObject()
 
+    def test_set_id(self):
+        self.class_object.set_id(1)
+        self.assertEqual(self.class_object._ClassObject__id, 1)
+
     def test_set_name(self):
         self.class_object.set_name("TestClass")
         self.assertEqual(self.class_object._ClassObject__name, "TestClass")
@@ -101,7 +105,14 @@ class TestRelationshipObject(unittest.TestCase):
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClass, self.source_class)
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClass, self.source_class)
         
+    def test_set_Source_Class_Own_Amount(self):
+        self.relationship_object.setSourceClassOwnAmount("2")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount, "2")
         
+    def test_set_Target_Class_Own_Amount(self):
+        self.relationship_object.setTargetClassOwnAmount("1")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount, "1")
+    
 class TestAbstractMethodObject(unittest.TestCase):
     def setUp(self):
         self.method_object = AbstractMethodObject()
