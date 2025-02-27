@@ -105,7 +105,14 @@ class TestRelationshipObject(unittest.TestCase):
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClass, self.source_class)
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClass, self.source_class)
         
+    def test_set_Source_Class_Own_Amount(self):
+        self.relationship_object.setSourceClassOwnAmount("2")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount, "2")
         
+    def test_set_Target_Class_Own_Amount(self):
+        self.relationship_object.setTargetClassOwnAmount("1")
+        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount, "1")
+    
 class TestAbstractMethodObject(unittest.TestCase):
     def setUp(self):
         self.method_object = AbstractMethodObject()
