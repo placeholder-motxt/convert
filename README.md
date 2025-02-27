@@ -7,7 +7,7 @@ MoTxT reads UML Diagrams in .jet format that is based on JSON and parses it in a
 ## UML Class Diagram
 There are few UML elements that will be transformed from the .jet file:
 - *diagram*
-    - 'diagram' will define the name of Django Project that will be generated
+    - 'diagram' will define the type of UML Diagram given
 - *nodes*
     - 'nodes' has value of list of all class object defined in the Class Diagram. Each class object will be parsed into ClassObject. There are few elements in the 'nodes':
         - *methods*
