@@ -290,6 +290,11 @@ class TestArgumentObject(unittest.TestCase):
         expected_output = f"""ArgumentObject:\n\tmethodObject: \n\t[MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None]\n\tname: TestArgument\n\ttype: \n\t[{self.argument_object._ArgumentObject__type}]"""
         self.assertEqual(str(self.argument_object), expected_output)
 
+    def test_print_django_style(self):
+        test_name = "test_argument"
+        self.argument_object.set_name(test_name)
+        self.assertEqual(self.argument_object.print_django_style(), test_name)
+
 
 
 class TestControllerMethodCallObject(unittest.TestCase):
