@@ -89,15 +89,31 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         )
         self.assertEqual(result, self.method_with_parameters.to_views_code())
 
-    def test_to_views_code_empty_method(self):
-        # Should realistically not happen if the parser catches it
-        # If the ClassMethodObject for some reason does not have a name or is None, then raise
-        # a ValueError
+    def test_to_views_code_invalid_method_name(self):
+        # Should not happen if the parser catches it
+        # If the ClassMethodObject __name attribute is a Python keyword
+        # or is not a valid Python identifier, raise a ValueError
         with self.assertRaises(ValueError) as ctx:
             self.empty_method.to_views_code()
             self.assertEqual(
                 str(ctx.exception),
-                "ClassMethodObject must have at least a name to generate a function",
+                "Invalid method name: ",
+            )
+
+        self.method_with_name.set_name("123")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_name.to_views_code()
+            self.assertEqual(
+                str(ctx.exception),
+                "Invalid method name: 123",
+            )
+
+        self.method_with_name.set_name("abcd!")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_name.to_views_code()
+            self.assertEqual(
+                str(ctx.exception),
+                "Invalid method name: abcd!",
             )
 
     def test_to_views_code_invalid_param_type(self):
