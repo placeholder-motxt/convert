@@ -230,6 +230,20 @@ class ControllerMethodObject(AbstractMethodObject):
     def add_call(self, call_object : AbstractMethodCallObject):
         self.__calls.append(call_object)
 
+    def print_django_style(self):
+        if not self.get_name():
+            raise TypeError("method cannot be empty")
+        result = StringIO()
+        result.write(f"def {self.get_name()}(request")
+        for parameter in self.get_parameters():
+            result.write(f", {parameter.get_name()}")
+        result.write("):\n\t")
+        for abstract_method_call_object in self.__calls:
+            result.write(abstract_method_call_object.print_django_style())
+            result.write("\n\t")
+        result.write("\n")
+        return result.getvalue()
+
 class ClassMethodCallObject(AbstractMethodCallObject):
     def __init__(self):
         super().__init__()
