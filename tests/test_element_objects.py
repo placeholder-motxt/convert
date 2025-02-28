@@ -39,6 +39,44 @@ class TestClassObject(unittest.TestCase):
         expected_output = """Class Object:\n\tname: TestClass\n\tparent: None\n\tfields:[]\n\t methods: []\n\trelationships: []"""
         self.assertEqual(str(self.class_object), expected_output)
 
+    def test_to_models_code(self):
+        self.class_object.set_name("ClassTest")
+
+        target_class = ClassObject()
+
+        target_class.set_name("TargetClass")
+
+        one_to_one_relationship = OneToOneRelationshipObject()
+        many_to_one_relationship = ManyToOneRelationshipObject()
+        many_to_many_relationship = ManyToManyRelationshipObject()
+
+        one_to_one_relationship.setTargetClass(target_class)
+        many_to_one_relationship.setTargetClass(target_class)
+        many_to_many_relationship.setTargetClass(target_class)
+        
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("field1")
+        field_type.set_name('boolean')
+        field.set_type(field_type)
+        self.class_object.add_field(field)
+
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("field2")
+        field_type.set_name('integer')
+        field.set_type(field_type)
+        self.class_object.add_field(field)
+
+        self.class_object.add_relationship(one_to_one_relationship)
+        self.class_object.add_relationship(many_to_one_relationship)
+        self.class_object.add_relationship(many_to_many_relationship)
+
+        assert self.class_object.to_models_code() == "class ClassTest(models.Model):\n\t\
+field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
+targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
+targetclass = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
+listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\n"
 
 class TestFieldObject(unittest.TestCase):
 
@@ -58,6 +96,118 @@ class TestFieldObject(unittest.TestCase):
         self.field_object.set_name("TestField")
         expected_output = """FieldObject:\n\tname: TestField\n\ttype: None"""
         self.assertEqual(str(self.field_object), expected_output)
+
+    def test_to_models_code_boolean(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("boolean")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.BooleanField()"
+
+    def test_to_models_code_string(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("String")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.CharField(max_length=255)"
+
+    def test_to_models_code_integer(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("integer")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.IntegerField()"
+
+    def test_to_models_code_float(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("float")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.FloatField()"
+
+    def test_to_models_code_double(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("double")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.FloatField()"
+
+    def test_to_models_code_date(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("Date")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.DateField()"
+
+    def test_to_models_code_datetime(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("DateTime")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.DateField()"
+
+    def test_to_models_code_time(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("Time")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.TimeField()"
+
+    def test_to_models_code_text(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("Text")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.TextField()"
+
+    def test_to_models_code_email(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("Email")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.EmailField()"
+
+    def test_to_models_code_url(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("URL")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.URLField()"
+
+    def test_to_models_code_uuid(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("UUID")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.UUIDField()"
+
+    def test_to_models_code_decimal(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("Decimal")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.DecimalField(max_digits=10, decimal_places=2)"
+
+    def test_to_models_code_unknown(self):
+        field_object = FieldObject()
+        field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("Unknown")
+        field_object.set_type(type_obj)
+        assert field_object.to_models_code() == "test_field = models.CharField(max_length=255)"
 
 class TestTypeObject(unittest.TestCase):
     
@@ -104,7 +254,7 @@ class TestRelationshipObject(unittest.TestCase):
 
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClass, self.source_class)
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClass, self.source_class)
-        
+  
     def test_set_Source_Class_Own_Amount(self):
         self.relationship_object.setSourceClassOwnAmount("2")
         self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount, "2")
@@ -183,22 +333,41 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
         self.one_to_one_relationship = OneToOneRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
+        self.source_class.set_name("SourceClass")
+        self.target_class.set_name("TargetClass")
+
+    def test_one_to_one_relationship(self):
+        self.one_to_one_relationship.setSourceClass(self.source_class)
+        self.one_to_one_relationship.setTargetClass(self.target_class)
+        assert self.one_to_one_relationship.to_models_code() == "targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)"
 
 class TestManyToOneRelationshipObject(unittest.TestCase):
 
     def setUp(self):
-        self.one_to_one_relationship = ManyToOneRelationshipObject()
+        self.many_to_one_relationship = ManyToOneRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
+        self.source_class.set_name("SourceClass")
+        self.target_class.set_name("TargetClass")
+
+    def test_many_to_one_relationship(self):
+        self.many_to_one_relationship.setSourceClass(self.source_class)
+        self.many_to_one_relationship.setTargetClass(self.target_class)
+        assert self.many_to_one_relationship.to_models_code() == "targetclass = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
 
 class TestManyToManyRelationshipObject(unittest.TestCase):
 
     def setUp(self):
-        self.one_to_one_relationship = ManyToManyRelationshipObject()
+        self.many_to_many_relationship = ManyToManyRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
-    
+        self.source_class.set_name("SourceClass")
+        self.target_class.set_name("TargetClass")
 
+    def test_many_to_many_relationship(self):
+        self.many_to_many_relationship.setSourceClass(self.source_class)
+        self.many_to_many_relationship.setTargetClass(self.target_class)
+        assert self.many_to_many_relationship.to_models_code() == "listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)"
         
 class TestAbstractMethodObject(unittest.TestCase):
     def setUp(self):
