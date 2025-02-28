@@ -326,9 +326,48 @@ class TestControllerMethodObject(unittest.TestCase):
         self.controller_method = ControllerMethodObject()
         self.method_call = AbstractMethodCallObject()
 
+        self.controller_method.get_name = mock.Mock(return_value="sample_method")
+        self.controller_method.get_parameters = mock.Mock(return_value=[])
+
     def test_add_call(self):
         self.controller_method.add_call(self.method_call)
         self.assertIn(self.method_call, self.controller_method._ControllerMethodObject__calls)
+
+    
+    def test_print_django_style_positive(self):
+        mock_call = mock.Mock()
+        mock_call.print_django_style.return_value = "mock_call()"
+        self.controller_method.add_call(mock_call)
+        expected_output = "def sample_method(request):\n\tmock_call()\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
+    
+    def test_print_django_style_negative(self):
+        self.controller_method.get_name = mock.Mock(return_value="")  # No method name
+        with self.assertRaises(TypeError):
+            self.controller_method.print_django_style()
+    
+    def test_print_django_style_corner_case_empty_parameters(self):
+        expected_output = "def sample_method(request):\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
+    
+    def test_print_django_style_with_parameters(self):
+        param1 = mock.Mock()
+        param1.get_name.return_value = "param1"
+        param2 = mock.Mock()
+        param2.get_name.return_value = "param2"
+        self.controller_method.get_parameters = mock.Mock(return_value=[param1, param2])
+        expected_output = "def sample_method(request, param1, param2):\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
+    
+    def test_print_django_style_with_multiple_calls(self):
+        mock_call1 = mock.Mock()
+        mock_call1.print_django_style.return_value = "mock_call1()"
+        mock_call2 = mock.Mock()
+        mock_call2.print_django_style.return_value = "mock_call2()"
+        self.controller_method.add_call(mock_call1)
+        self.controller_method.add_call(mock_call2)
+        expected_output = "def sample_method(request):\n\tmock_call1()\n\tmock_call2()\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
     
 class TestClassMethodObject(unittest.TestCase):
     def setUp(self):
