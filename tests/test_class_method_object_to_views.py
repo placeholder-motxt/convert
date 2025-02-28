@@ -74,7 +74,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result += (
             "    raise NotImplementedError('method function is not yet implemented')\n"
         )
-        self.assertEqual(result, self.method_with_name)
+        self.assertEqual(result, self.method_with_name.to_views_code())
 
     def test_to_views_code_multiple_params(self):
         # All params should appear in order with its type annotation
@@ -129,12 +129,12 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
     def test_to_views_code_invalid_param_type(self):
         # Should not happen if parser catches it
         # But if the param type of a ParameterObject inside
-        # ClassMethodObject is not Python's, a known type, or has whitespaces
-        # then return ValueError
-        self.param_type.set_name("invalid_type")
+        # ClassMethodObject is not a valid Python identifier or
+        # is a Python keyword, then return ValueError
+        self.param_type.set_name("")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid type: invalid_type")
+            self.assertEqual(str(ctx.exception), "Invalid type: ")
 
         self.param_type.set_name("invalid type")
         with self.assertRaises(ValueError) as ctx:
@@ -160,12 +160,12 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             self.method_with_parameters.to_views_code()
             self.assertEqual(str(ctx.exception), "Invalid param name: 123")
 
-        self.param_type.set_name("invalid name")
+        self.param.set_name("invalid name")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
             self.assertEqual(str(ctx.exception), "Invalid param name: invalid name")
 
-        self.param_type.set_name("param_!$")
+        self.param.set_name("param_!$")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
             self.assertEqual(str(ctx.exception), "Invalid param name: param_!$")
