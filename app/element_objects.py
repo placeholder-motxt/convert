@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from io import StringIO
 
 class FileElements():
     def __init__(self, file_name : str):
@@ -141,11 +142,12 @@ class ParameterObject():
     def get_name(self):
         return self.__name
 
-class AbstractMethodCallObject():
+class AbstractMethodCallObject(ABC):
     def __init__(self):
         self.__method: AbstractMethodObject = None
         self.__arguments: list[ArgumentObject] = []
         self.__returnVarName: str = ""
+        self.__condition = ""
 
     def __str__(self):
         return f'''MethodCallObject:\n\tmethod: {self.__method}\n\targuments: {self.__arguments}\n\treturnVarName: {self.__returnVarName}'''
@@ -159,6 +161,24 @@ class AbstractMethodCallObject():
     def set_returnVarName(self, returnVarName):
         self.__returnVarName = returnVarName
 
+    def set_condition(self, condition):
+        self.__condition = condition
+
+    def print_django_style(self):
+        result = StringIO()
+        print("condition:", self.__condition)
+        if self.__condition:
+            print("ma2")
+            result.write(f"if {self.__condition}:\n\t\t")
+        if self.__returnVarName:
+            result.write(f"{self.__returnVarName} = ")
+        result.write(f"{self.__method.get_name()}(")
+        if self.__arguments:
+            arguments_str = ", ".join(arg.print_django_style() for arg in self.__arguments)
+            result.write(arguments_str)
+        result.write(")")
+        return result.getvalue()
+    
 class ArgumentObject():
     def __init__(self):
         self.__methodObject: AbstractMethodCallObject = None
