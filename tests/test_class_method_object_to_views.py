@@ -124,3 +124,22 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
             self.assertEqual(str(ctx.exception), "Invalid type: int!@")
+
+    def test_to_views_code_invalid_param_name(self):
+        # Should not happen if parser catches it
+        # But if the param name is not a Python identifier
+        # or is a Python keyword, then raise ValueError
+        self.param.set_name("123")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid param name: 123")
+
+        self.param_type.set_name("invalid name")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid param name: invalid name")
+
+        self.param_type.set_name("param_!$")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid param name: param_!$")
