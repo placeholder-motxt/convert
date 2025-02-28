@@ -384,7 +384,7 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
     def test_many_to_one_relationship(self):
         self.many_to_one_relationship.setSourceClass(self.source_class)
         self.many_to_one_relationship.setTargetClass(self.target_class)
-        assert self.many_to_one_relationship.to_models_code() == "targetclass = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
+        assert self.many_to_one_relationship.to_models_code() == "targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
 
 class TestManyToManyRelationshipObject(unittest.TestCase):
 
