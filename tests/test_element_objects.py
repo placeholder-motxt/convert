@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 from app.element_objects import *
 from abc import ABC
 
@@ -181,7 +182,14 @@ class TestParameterObject(unittest.TestCase):
 
 class TestAbstractMethodCallObject(unittest.TestCase):
     def setUp(self):
+        self.method_mock = unittest.mock.Mock()
+        self.method_mock.get_name.return_value = "mock_method"
+        self.argument_mock1 = unittest.mock.Mock()
+        self.argument_mock1.print_django_style.return_value = "arg1"
+        self.argument_mock2 = unittest.mock.Mock()
+        self.argument_mock2.print_django_style.return_value = "arg2"
         self.method_call_object = AbstractMethodCallObject()
+        self.method_call_object.set_method(self.method_mock)
 
     def test_set_method(self):
         method = AbstractMethodObject()
@@ -198,8 +206,40 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         self.assertEqual(self.method_call_object._AbstractMethodCallObject__returnVarName, "TestVarName")
 
     def test_str_representation(self):
-        expected_output = """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
+        expected_output = f"""MethodCallObject:\n\tmethod: {self.method_mock}\n\targuments: []\n\treturnVarName: """
         self.assertEqual(str(self.method_call_object), expected_output)
+
+
+    def test_print_django_style_one_argument(self):
+        self.method_call_object.set_returnVarName("result")
+        self.method_call_object.add_argument(self.argument_mock1)
+        expected_output = "result = mock_method(arg1)"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+
+    def test_print_django_style_two_arguments(self):
+        self.method_call_object.set_returnVarName("result")
+        self.method_call_object.add_argument(self.argument_mock1)
+        self.method_call_object.add_argument(self.argument_mock2)
+        expected_output = "result = mock_method(arg1, arg2)"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+    
+    def test_print_django_style_negative(self):
+        self.method_call_object.set_method(None)  # No method set
+        with self.assertRaises(AttributeError):
+            self.method_call_object.print_django_style()
+
+    def test_print_django_style_corner_case_empty_arguments(self):
+        self.method_call_object.set_returnVarName("output")
+        expected_output = "output = mock_method()"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+    
+    def test_print_django_style_with_condition(self):
+        self.method_call_object.set_condition("x > 5")
+        self.method_call_object.set_returnVarName("value")
+        self.method_call_object.add_argument(self.argument_mock1)
+        expected_output = "if x > 5:\n\t\tvalue = mock_method(arg1)"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+
 
 
 class TestOneToOneRelationshipObject(unittest.TestCase):
@@ -224,27 +264,7 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.target_class = ClassObject()
     
 
-class TestAbstractMethodCallObject(unittest.TestCase):
-    def setUp(self):
-        self.method_call_object = AbstractMethodCallObject()
 
-    def test_set_method(self):
-        method = AbstractMethodObject()
-        self.method_call_object.set_method(method)
-        self.assertEqual(self.method_call_object._AbstractMethodCallObject__method, method)
-
-    def test_add_argument(self):
-        argument = ArgumentObject()
-        self.method_call_object.add_argument(argument)
-        self.assertEqual(self.method_call_object._AbstractMethodCallObject__arguments, [argument])
-
-    def test_return_var_name(self):
-        self.method_call_object.set_returnVarName("TestVarName")
-        self.assertEqual(self.method_call_object._AbstractMethodCallObject__returnVarName, "TestVarName")
-
-    def test_str_representation(self):
-        expected_output = """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
-        self.assertEqual(str(self.method_call_object), expected_output)
 
 class TestArgumentObject(unittest.TestCase):
     def setUp(self):
