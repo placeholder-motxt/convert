@@ -108,9 +108,19 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.param_type.set_name("invalid_type")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Unknown Type: invalid_type")
+            self.assertEqual(str(ctx.exception), "Invalid type: invalid_type")
 
         self.param_type.set_name("invalid type")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Type cannot have whitespaces")
+            self.assertEqual(str(ctx.exception), "Invalid type: invalid type")
+
+        self.param_type.set_name("123")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid type: 123")
+
+        self.param_type.set_name("int!@")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid type: int!@")
