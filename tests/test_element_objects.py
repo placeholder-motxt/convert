@@ -65,7 +65,7 @@ class TestTypeObject(unittest.TestCase):
         self.type_object.set_name("TestType")
         self.assertEqual(self.type_object._TypeObject__name, "TestType")
 
-class TestRelationshipObject(unittest.TestCase):
+class TestAbstractRelationshipObject(unittest.TestCase):
 
     def setUp(self):
         self.relationship_object = AbstractRelationshipObject()
@@ -74,6 +74,9 @@ class TestRelationshipObject(unittest.TestCase):
 
         self.source_class.set_name("SourceClass")
         self.target_class.set_name("TargetClass")
+
+    def test_instance_of_abc(self):
+        self.assertIsInstance(self.relationship_object, ABC)
     
     def test_positive_set_sourceClass(self):
         self.relationship_object.setSourceClass(self.source_class)
