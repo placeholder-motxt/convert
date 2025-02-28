@@ -175,6 +175,10 @@ class TestParameterObject(unittest.TestCase):
         expected_output = """ParameterObject:\n\tname: TestParameter\n\ttype: None"""
         self.assertEqual(str(self.parameter_object), expected_output)
 
+    def test_get_name(self):
+        self.parameter_object.set_name("TestParameter")
+        self.assertEqual(self.parameter_object.get_name(), "TestParameter")
+
 class TestAbstractMethodCallObject(unittest.TestCase):
     def setUp(self):
         self.method_call_object = AbstractMethodCallObject()
@@ -219,25 +223,6 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.source_class = ClassObject()
         self.target_class = ClassObject()
     
-
-
-class TestParameterObject(unittest.TestCase):
-    def setUp(self):
-        self.parameter_object = ParameterObject()
-
-    def test_set_name(self):
-        self.parameter_object.set_name("TestParameter")
-        self.assertEqual(self.parameter_object._ParameterObject__name, "TestParameter")
-
-    def test_set_type(self):
-        type_obj = TypeObject()
-        self.parameter_object.set_type(type_obj)
-        self.assertEqual(self.parameter_object._ParameterObject__type, type_obj)
-
-    def test_str_representation(self):
-        self.parameter_object.set_name("TestParameter")
-        expected_output = """ParameterObject:\n\tname: TestParameter\n\ttype: None"""
-        self.assertEqual(str(self.parameter_object), expected_output)
 
 class TestAbstractMethodCallObject(unittest.TestCase):
     def setUp(self):
