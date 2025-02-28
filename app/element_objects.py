@@ -138,6 +138,9 @@ class ParameterObject():
     def set_type(self, type):
         self.__type = type
 
+    def get_name(self):
+        return self.__name
+
 class AbstractMethodCallObject():
     def __init__(self):
         self.__method: AbstractMethodObject = None
