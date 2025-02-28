@@ -209,6 +209,10 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         expected_output = f"""MethodCallObject:\n\tmethod: {self.method_mock}\n\targuments: []\n\treturnVarName: """
         self.assertEqual(str(self.method_call_object), expected_output)
 
+    def test_set_condition(self):
+        condition = "True"
+        self.method_call_object.set_condition(condition)
+        self.assertEqual(self.method_call_object._AbstractMethodCallObject__condition, "True")
 
     def test_print_django_style_one_argument(self):
         self.method_call_object.set_returnVarName("result")
