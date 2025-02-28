@@ -1,5 +1,6 @@
 import unittest
 from app.element_objects import *
+from abc import ABC
 
 class TestClassObject(unittest.TestCase):
 
@@ -106,6 +107,9 @@ class TestAbstractMethodObject(unittest.TestCase):
     def setUp(self):
         self.method_object = AbstractMethodObject()
 
+    def test_abc(self):
+        self.assertIsInstance(self.method_object, ABC)
+
     def test_set_name(self):
         self.method_object.set_name("TestMethod")
         self.assertEqual(self.method_object._AbstractMethodObject__name, "TestMethod")
@@ -124,6 +128,31 @@ class TestAbstractMethodObject(unittest.TestCase):
         self.method_object.set_name("TestMethod")
         expected_output = """MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"""
         self.assertEqual(str(self.method_object), expected_output)
+
+    def test_get_name_empty(self):
+        self.assertEqual(self.method_object.get_name(), "")
+    
+    def test_get_name(self):
+        name = "TestMethod"
+        self.method_object.set_name(name)
+        self.assertEqual(self.method_object.get_name(), name)
+
+    def test_get_parameters_empty(self):
+        self.assertEqual(self.method_object.get_parameters(), [])
+    
+    def test_get_parameters_with__parameter(self):
+        param = ParameterObject()
+        self.method_object.add_parameter(param)
+        
+        self.assertEqual(self.method_object.get_parameters(), [param])
+    
+    def test_get_parameters_with_multiple_parameters(self):
+        param1 = ParameterObject()
+        param2 = ParameterObject()
+        self.method_object.add_parameter(param1)
+        self.method_object.add_parameter(param2)
+        self.assertEqual(self.method_object.get_parameters(), [param1, param2])
+    
 
 class TestParameterObject(unittest.TestCase):
     def setUp(self):
@@ -188,29 +217,6 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.target_class = ClassObject()
     
 
-        
-class TestAbstractMethodObject(unittest.TestCase):
-    def setUp(self):
-        self.method_object = AbstractMethodObject()
-
-    def test_set_name(self):
-        self.method_object.set_name("TestMethod")
-        self.assertEqual(self.method_object._AbstractMethodObject__name, "TestMethod")
-
-    def test_add_parameter(self):
-        parameter = ParameterObject()
-        self.method_object.add_parameter(parameter)
-        self.assertIn(parameter, self.method_object._AbstractMethodObject__parameters)
-
-    def test_set_returnType(self):
-        return_type = TypeObject()
-        self.method_object.set_returnType(return_type)
-        self.assertEqual(self.method_object._AbstractMethodObject__returnType, return_type)
-
-    def test_str_representation(self):
-        self.method_object.set_name("TestMethod")
-        expected_output = """MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"""
-        self.assertEqual(str(self.method_object), expected_output)
 
 class TestParameterObject(unittest.TestCase):
     def setUp(self):
@@ -300,8 +306,8 @@ class TestControllerMethodObject(unittest.TestCase):
         self.controller_method = ControllerMethodObject()
         self.method_call = AbstractMethodCallObject()
 
-    def test_add_calls(self):
-        self.controller_method.add_calls(self.method_call)
+    def test_add_call(self):
+        self.controller_method.add_call(self.method_call)
         self.assertIn(self.method_call, self.controller_method._ControllerMethodObject__calls)
     
 class TestClassMethodObject(unittest.TestCase):
