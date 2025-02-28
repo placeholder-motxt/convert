@@ -48,6 +48,16 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         )
         self.assertEqual(result, self.method_with_parameters.to_views_code())
 
+    def test_to_views_code_param_no_type(self):
+        # Parameter doesn't have a type somehow
+        result = "def method_params(param1):\n"
+        result += "    # TODO: Auto generated function stub\n"
+        result += (
+            "    raise NotImplementedError('method function is not yet implemented')\n"
+        )
+        self.param.set_type(None)
+        self.assertEqual(result, self.method_with_parameters.to_views_code())
+
     def test_to_views_code_no_parameters(self):
         # Should have the return type annotation but no params
         result = "def method_rettype() -> str:\n"
