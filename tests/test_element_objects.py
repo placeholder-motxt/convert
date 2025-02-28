@@ -75,8 +75,39 @@ class TestClassObject(unittest.TestCase):
         assert self.class_object.to_models_code() == "class ClassTest(models.Model):\n\t\
 field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
 targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
-targetclass = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
+targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
 listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\n"
+
+    def test_get_name(self):
+        model = ClassObject()
+        model.set_name("TestModel")
+        assert model.get_name() == "TestModel"
+
+    def test_get_attributes_to_code(self):
+        model = ClassObject()
+        model.set_name("TestModel")
+        field1 = FieldObject()
+        field1.set_name("field1")
+        type1 = TypeObject()
+        type1.set_name("integer")
+        field1.set_type(type1)
+        model.add_field(field1)
+        assert model._ClassObject__get_attributes_to_code() == "\tfield1 = models.IntegerField()\n"
+
+    def test_get_relationships_to_code(self):
+        model = ClassObject()
+        model.set_name("TestModel")
+        user = ClassObject()
+        user.set_name("User")
+        relationship = OneToOneRelationshipObject()
+        relationship.setTargetClass(user)
+        model.add_relationship(relationship)
+        assert model._ClassObject__get_relationships_to_code() == "\tuser = models.OneToOneField(User, on_delete = models.CASCADE)\n"
+
+    def test_get_methods_to_code(self):
+        # TODO
+        pass
+
 
 class TestFieldObject(unittest.TestCase):
 
