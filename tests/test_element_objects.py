@@ -283,19 +283,30 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
         self.source_class = ClassObject()
         self.target_class = ClassObject()
 
+    def test_is_instance_of_abstract_relationship_object(self):
+        self.assertIsInstance(self.one_to_one_relationship, AbstractRelationshipObject)
+
 
 class TestManyToOneRelationshipObject(unittest.TestCase):
     def setUp(self):
-        self.one_to_one_relationship = ManyToOneRelationshipObject()
+        self.many_to_one_relationship = ManyToOneRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
+
+    def test_is_instance_of_abstract_relationship_object(self):
+        self.assertIsInstance(self.many_to_one_relationship, AbstractRelationshipObject)
 
 
 class TestManyToManyRelationshipObject(unittest.TestCase):
     def setUp(self):
-        self.one_to_one_relationship = ManyToManyRelationshipObject()
+        self.many_to_many_relationship = ManyToManyRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
+
+    def test_is_instance_of_abstract_relationship_object(self):
+        self.assertIsInstance(self.many_to_many_relationship, AbstractRelationshipObject)
+
+
 
 
 
