@@ -191,6 +191,9 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         self.method_call_object = AbstractMethodCallObject()
         self.method_call_object.set_method(self.method_mock)
 
+    def test_is_instance_of_abc(self):
+        self.assertIsInstance(self.method_call_object, ABC)
+
     def test_set_method(self):
         method = AbstractMethodObject()
         self.method_call_object.set_method(method)
