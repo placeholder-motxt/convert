@@ -101,7 +101,7 @@ class ClassMethodObject(AbstractMethodObject):
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
 
-class AbstractRelationshipObject():
+class AbstractRelationshipObject(ABC):
     def __init__(self):
         self.__sourceClass: ClassObject = None
         self.__targetClass: ClassObject = None
