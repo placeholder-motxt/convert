@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 class FileElements():
     def __init__(self, file_name : str):
         assert isinstance(file_name, str), "File name must be a string!"
@@ -64,7 +66,7 @@ class FieldObject():
         self.__type = type
 
 
-class AbstractMethodObject():
+class AbstractMethodObject(ABC):
     def __init__(self):
         self.__name : str = ""
         self.__parameters : list[ParameterObject] = []
@@ -81,6 +83,12 @@ class AbstractMethodObject():
 
     def set_returnType(self, returnType):
         self.__returnType = returnType
+
+    def get_name(self):
+        return self.__name
+    
+    def get_parameters(self):
+        return self.__parameters
 
 
 class ClassMethodObject(AbstractMethodObject):
@@ -193,7 +201,7 @@ class ControllerMethodObject(AbstractMethodObject):
         super().__init__()
         self.__calls : list[AbstractMethodCallObject] = []
     
-    def add_calls(self, call_object : AbstractMethodCallObject):
+    def add_call(self, call_object : AbstractMethodCallObject):
         self.__calls.append(call_object)
 
 class ClassMethodCallObject(AbstractMethodCallObject):
