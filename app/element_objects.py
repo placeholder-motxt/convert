@@ -174,6 +174,9 @@ class ArgumentObject():
     def set_type(self, type):
         self.__type = type
 
+    def print_django_style(self):
+        return self.__name
+
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
