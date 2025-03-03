@@ -1,9 +1,7 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
+
+from abc import ABC
 from io import StringIO
-
-
-
 
 
 class ClassObject:
@@ -73,10 +71,10 @@ class AbstractMethodObject(ABC):
     def set_returnType(self, returnType: TypeObject):
         self.__returnType = returnType
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.__name
-    
-    def get_parameters(self):
+
+    def get_parameters(self) -> list[ParameterObject]:
         return self.__parameters
 
 
@@ -89,6 +87,7 @@ class ClassMethodObject(AbstractMethodObject):
         if class_method_call is None:
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
+
 
 class AbstractRelationshipObject(ABC):
     def __init__(self):
@@ -128,8 +127,9 @@ class ParameterObject:
     def set_type(self, type: str):
         self.__type = type
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.__name
+
 
 class AbstractMethodCallObject(ABC):
     def __init__(self):
@@ -153,10 +153,10 @@ class AbstractMethodCallObject(ABC):
     def set_returnVarName(self, returnVarName: str):
         self.__returnVarName = returnVarName
 
-    def set_condition(self, condition):
+    def set_condition(self, condition: str):
         self.__condition = condition
 
-    def print_django_style(self):
+    def print_django_style(self) -> str:
         result = StringIO()
         print("condition:", self.__condition)
         if self.__condition:
@@ -166,12 +166,15 @@ class AbstractMethodCallObject(ABC):
             result.write(f"{self.__returnVarName} = ")
         result.write(f"{self.__method.get_name()}(")
         if self.__arguments:
-            arguments_str = ", ".join(arg.print_django_style() for arg in self.__arguments)
+            arguments_str = ", ".join(
+                arg.print_django_style() for arg in self.__arguments
+            )
             result.write(arguments_str)
         result.write(")")
         return result.getvalue()
-    
-class ArgumentObject():
+
+
+class ArgumentObject:
     def __init__(self):
         self.__methodObject: AbstractMethodCallObject = None
         self.__name: str = ""
@@ -192,8 +195,9 @@ class ArgumentObject():
     def set_type(self, type: TypeObject):
         self.__type = type
 
-    def print_django_style(self):
+    def print_django_style(self) -> str:
         return self.__name
+
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
@@ -222,12 +226,12 @@ class ControllerMethodCallObject(AbstractMethodCallObject):
 class ControllerMethodObject(AbstractMethodObject):
     def __init__(self):
         super().__init__()
-        self.__calls : list[AbstractMethodCallObject] = []
-    
-    def add_call(self, call_object : AbstractMethodCallObject):
+        self.__calls: list[AbstractMethodCallObject] = []
+
+    def add_call(self, call_object: AbstractMethodCallObject):
         self.__calls.append(call_object)
 
-    def print_django_style(self):
+    def print_django_style(self) -> str:
         if not self.get_name():
             raise TypeError("method cannot be empty")
         result = StringIO()
@@ -241,6 +245,7 @@ class ControllerMethodObject(AbstractMethodObject):
         result.write("\n")
         return result.getvalue()
 
+
 class ClassMethodCallObject(AbstractMethodCallObject):
     def __init__(self):
         super().__init__()
@@ -251,22 +256,25 @@ class ClassMethodCallObject(AbstractMethodCallObject):
             raise Exception("ClassMethodObject cannot be SET to be None!")
         self.__caller = method_object
 
+
 class FileElements(ABC):
-    def __init__(self, file_name : str):
+    def __init__(self, file_name: str):
         assert isinstance(file_name, str), "File name must be a string!"
         assert file_name != "", "File name can't be empty!"
-        self.__name : str = file_name
+        self.__name: str = file_name
+
 
 class ModelsElements(FileElements):
-    def __init__(self, file_name : str):
+    def __init__(self, file_name: str):
         super().__init__(file_name)
-        self.__classes : list[ClassObject] = []
+        self.__classes: list[ClassObject] = []
+
 
 class ViewsElements(FileElements):
-    def __init__(self, file_name : str):
+    def __init__(self, file_name: str):
         super().__init__(file_name)
-        self.__class_methods : list[ClassMethodObject] = []
-        self.__controller_methods : list[ControllerMethodObject] = []
+        self.__class_methods: list[ClassMethodObject] = []
+        self.__controller_methods: list[ControllerMethodObject] = []
 
     def print_django_style(self) -> str:
         result = StringIO()
@@ -277,9 +285,9 @@ class ViewsElements(FileElements):
         for controller_method_object in self.__controller_methods:
             result.write(controller_method_object.print_django_style())
         return result.getvalue()
-    
-    def add__class_method(self, class_method_object : ClassMethodObject):
+
+    def add__class_method(self, class_method_object: ClassMethodObject):
         self.__class_methods.append(class_method_object)
 
-    def add__controller_method(self, controller_method_object : ControllerMethodObject):
+    def add__controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
