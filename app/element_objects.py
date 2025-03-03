@@ -8,10 +8,17 @@ from typing import Optional
 class ClassObject:
     def __init__(self):
         self.__name: str = ""
+
         self.__parent: Optional[ClassObject] = None
         self.__fields: list[FieldObject] = []
         self.__methods: list[ClassMethodObject] = []
         self.__relationships: list[AbstractRelationshipObject] = []
+
+        self.__id: int
+
+    def to_models_code(self) -> str:
+        return f"""class {self.__name}({self.__parent.get_name() if self.__parent else "models.Model"}):\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}\n{self.__get_methods_to_code()}"""
+
 
     def __str__(self) -> str:
         return (
@@ -35,6 +42,27 @@ class ClassObject:
     def add_relationship(self, relationship: AbstractRelationshipObject):
         self.__relationships.append(relationship)
 
+    def set_id(self, id):
+        self.__id = id
+
+    def get_name(self):
+        return self.__name
+
+    def __get_attributes_to_code(self):
+        res=""
+        for attribute in self.__fields:
+            res+='\t'+attribute.to_models_code()+'\n'
+        return res
+    
+    def __get_relationships_to_code(self):
+        res=""
+        for relation in self.__relationships:
+            res+='\t'+relation.to_models_code()+'\n'
+        return res
+    
+    def __get_methods_to_code(self):
+        # TODO: Implement this
+        return ""
 
 class FieldObject:
     def __init__(self):
@@ -50,6 +78,30 @@ class FieldObject:
     def set_type(self, type: TypeObject):
         self.__type = type
 
+    def to_models_code(self):
+        type_mapping = {
+        "boolean": "models.BooleanField()",
+        "String": "models.CharField(max_length=255)",
+        "integer": "models.IntegerField()",
+        "float": "models.FloatField()",
+        "double": "models.FloatField()",
+        "Date": "models.DateField()",
+        "DateTime": "models.DateTimeField()",
+        "Time": "models.TimeField()",
+        "Text": "models.TextField()",
+        "Email": "models.EmailField()",
+        "URL": "models.URLField()",
+        "UUID": "models.UUIDField()",
+        "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
+        }
+    
+        field_type = self.__type.to_models_code().lower()
+        
+        for key, value in type_mapping.items():
+            if key.lower() in field_type:
+                return f"{self.__name} = {value}"
+        
+        return f"{self.__name} = models.CharField(max_length=255)"  # Default fallback
 
 class AbstractMethodObject(ABC):
     def __init__(self):
@@ -94,7 +146,9 @@ class AbstractRelationshipObject(ABC):
     def __init__(self):
         self.__source_class: ClassObject = None
         self.__target_class: ClassObject = None
-
+        self.__sourceClassOwnAmount: str = ""
+        self.__targetClassOwnAmount: str = ""
+   
     def set_source_class(self, source_class: ClassObject):
         if source_class is None:
             raise Exception("Source Class cannot be SET to be None!")
@@ -103,7 +157,21 @@ class AbstractRelationshipObject(ABC):
     def set_target_class(self, target_class: ClassObject):
         if target_class is None:
             raise Exception("Target Class cannot be SET to be None!")
+
         self.__target_class = target_class
+
+    def setSourceClassOwnAmount(self, amount):
+        self.__sourceClassOwnAmount = amount
+
+    def setTargetClassOwnAmount(self, amount):
+        self.__targetClassOwnAmount = amount
+
+    def get_source_class(self):
+        return self.__sourceClass
+    
+    def get_target_class(self):
+        return self.__targetClass
+
 
 
 class TypeObject:
@@ -112,6 +180,9 @@ class TypeObject:
 
     def set_name(self, name: str):
         self.__name = name
+    
+    def to_models_code(self):
+        return self.__name.title()
 
 
 class ParameterObject:
@@ -201,16 +272,24 @@ class ArgumentObject:
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
+    
+    def to_models_code(self):
+        return f"{self.get_target_class().get_name().lower()} = models.OneToOneField({self.get_target_class().get_name()}, on_delete = models.CASCADE)"
 
 
 class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
 
+    def to_models_code(self):
+        return f"{self.get_target_class().get_name().lower()}FK = models.ForeignKey({self.get_target_class().get_name()}, on_delete = models.CASCADE)"
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
+    
+    def to_models_code(self):
+        return f"listOf{self.get_target_class().get_name().title()} = models.ManyToManyField({self.get_target_class().get_name()}, on_delete = models.CASCADE)"
 
 
 class ControllerMethodCallObject(AbstractMethodCallObject):

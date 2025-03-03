@@ -2,7 +2,10 @@ fastapi
 uvicorn
 pytest
 httpx
+pydantic
+starlette
 pre-commit
 ruff
 coverage
 pytest-cov
+
