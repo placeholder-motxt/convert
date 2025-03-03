@@ -145,7 +145,7 @@ class AbstractMethodObject(ABC):
 
     def get_returnType(self) -> TypeObject:
         # TODO: Make immutable if needed
-        return self.__returnType
+        return self.__return_type
 
 
 class ClassMethodObject(AbstractMethodObject):
