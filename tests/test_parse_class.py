@@ -7,10 +7,10 @@ from app.element_objects import (
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
 )
-from app.parse_json_to_object_class import ParseJsonToObject
+from app.parse_json_to_object_class import ParseJsonToObjectClass
 
 
-class TestParseJsonToObject(unittest.TestCase):
+class TestParseJsonToObjectClass(unittest.TestCase):
     def test_parse(self):
         data = """{
             "diagram": "ClassDiagram",
@@ -35,24 +35,24 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
         }"""  # noqa: E501
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         result = parser.parse_classes()
-        self.assertEqual(result, parser._ParseJsonToObject__classes)
-        self.assertEqual(parser._ParseJsonToObject__json, json.loads(data))
-        self.assertEqual(len(parser._ParseJsonToObject__json["nodes"]), 2)
+        self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
+        self.assertEqual(parser._ParseJsonToObjectClass__json, json.loads(data))
+        self.assertEqual(len(parser._ParseJsonToObjectClass__json["nodes"]), 2)
         self.assertEqual(
-            parser._ParseJsonToObject__json["nodes"][0]["name"], "Pengelola"
+            parser._ParseJsonToObjectClass__json["nodes"][0]["name"], "Pengelola"
         )
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["id"], 0)
+        self.assertEqual(parser._ParseJsonToObjectClass__json["nodes"][0]["id"], 0)
         self.assertEqual(
-            parser._ParseJsonToObject__json["nodes"][0]["type"], "ClassNode"
+            parser._ParseJsonToObjectClass__json["nodes"][0]["type"], "ClassNode"
         )
         self.assertEqual(
-            parser._ParseJsonToObject__json["nodes"][1]["name"], "Peminjaman"
+            parser._ParseJsonToObjectClass__json["nodes"][1]["name"], "Peminjaman"
         )
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][1]["id"], 1)
+        self.assertEqual(parser._ParseJsonToObjectClass__json["nodes"][1]["id"], 1)
         self.assertEqual(
-            parser._ParseJsonToObject__json["nodes"][1]["type"], "ClassNode"
+            parser._ParseJsonToObjectClass__json["nodes"][1]["type"], "ClassNode"
         )
 
     def test_empty_nodes(self):
@@ -60,7 +60,7 @@ class TestParseJsonToObject(unittest.TestCase):
             "diagram": "ClassDiagram",
             "nodes": []
         }"""
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         with self.assertRaises(Exception) as context:
             parser.parse_classes()
             self.assertEqual(context.exception, "Error: nodes not found in the json")
@@ -90,7 +90,7 @@ class TestParseJsonToObject(unittest.TestCase):
             ]"""  # noqa: E501
 
         with self.assertRaises(json.JSONDecodeError) as context:
-            ParseJsonToObject(data)
+            ParseJsonToObjectClass(data)
             self.assertEqual(context.exception, "Error: nodes not found in the json")
 
     def test_missing_attributes(self):
@@ -108,19 +108,23 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
         }"""
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         result = parser.parse_classes()
-        self.assertEqual(result, parser._ParseJsonToObject__classes)
-        self.assertEqual(parser._ParseJsonToObject__json, json.loads(data))
-        self.assertEqual(len(parser._ParseJsonToObject__json["nodes"]), 1)
+        self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
+        self.assertEqual(parser._ParseJsonToObjectClass__json, json.loads(data))
+        self.assertEqual(len(parser._ParseJsonToObjectClass__json["nodes"]), 1)
         self.assertEqual(
-            parser._ParseJsonToObject__json["nodes"][0]["name"], "Pengelola"
+            parser._ParseJsonToObjectClass__json["nodes"][0]["name"], "Pengelola"
         )
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["id"], 0)
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["methods"], "")
-        self.assertEqual(parser._ParseJsonToObject__json["nodes"][0]["attributes"], "")
+        self.assertEqual(parser._ParseJsonToObjectClass__json["nodes"][0]["id"], 0)
         self.assertEqual(
-            parser._ParseJsonToObject__json["nodes"][0]["type"], "ClassNode"
+            parser._ParseJsonToObjectClass__json["nodes"][0]["methods"], ""
+        )
+        self.assertEqual(
+            parser._ParseJsonToObjectClass__json["nodes"][0]["attributes"], ""
+        )
+        self.assertEqual(
+            parser._ParseJsonToObjectClass__json["nodes"][0]["type"], "ClassNode"
         )
 
     def test_invalid_class_name(self):
@@ -147,7 +151,7 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
             }"""  # noqa: E501
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
             self.assertEqual(context.exception, "Error: class name is not valid")
@@ -167,7 +171,7 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
             }"""  # noqa: E501
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
             self.assertEqual(context.exception, "ValueError: method name is not valid")
@@ -187,7 +191,7 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
             }"""  # noqa: E501
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
             self.assertEqual(context.exception, "Error: parameter name is not valid")
@@ -207,7 +211,7 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
             }"""  # noqa: E501
-        parser = ParseJsonToObject(data)
+        parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
             self.assertEqual(
@@ -233,7 +237,7 @@ class TestParseJsonToObject(unittest.TestCase):
             uml_json["edges"][0]["startLabel"] = n
             for m in multiplicities:
                 uml_json["edges"][0]["endLabel"] = m
-                self.parser = ParseJsonToObject(uml_json)
+                self.parser = ParseJsonToObjectClass(uml_json)
                 self.parser.parse_relationships(self.classes, uml_json)
 
                 class_from_id = self.classes[1]
@@ -256,7 +260,7 @@ class TestParseJsonToObject(unittest.TestCase):
             uml_json["edges"][0]["startLabel"] = n
             for m in multiplicities:
                 uml_json["edges"][0]["endLabel"] = m
-                self.parser = ParseJsonToObject(uml_json)
+                self.parser = ParseJsonToObjectClass(uml_json)
                 self.parser.parse_relationships(self.classes, uml_json)
 
                 class_to_id = self.classes[2]
@@ -267,7 +271,7 @@ class TestParseJsonToObject(unittest.TestCase):
             uml_json["edges"][0]["startLabel"] = n
             for m in ["1"]:
                 uml_json["edges"][0]["endLabel"] = m
-                self.parser = ParseJsonToObject(uml_json)
+                self.parser = ParseJsonToObjectClass(uml_json)
                 self.parser.parse_relationships(self.classes, uml_json)
 
                 class_from_id = self.classes[1]
@@ -280,7 +284,7 @@ class TestParseJsonToObject(unittest.TestCase):
         uml_json = {
             "edges": [{"start": 1, "end": 2, "startLabel": "1", "endLabel": "1"}]
         }
-        self.parser = ParseJsonToObject(uml_json)
+        self.parser = ParseJsonToObjectClass(uml_json)
         self.parser.parse_relationships(self.classes, uml_json)
 
         class_from_id = self.classes[1]
@@ -292,7 +296,7 @@ class TestParseJsonToObject(unittest.TestCase):
 
     def test_parse_relationships_inheritance(self):
         uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
-        self.parser = ParseJsonToObject(uml_json)
+        self.parser = ParseJsonToObjectClass(uml_json)
         self.parser.parse_relationships(self.classes, uml_json)
         class_from_id = self.classes[1]
         class_to_id = self.classes[2]
@@ -312,13 +316,13 @@ class TestParseJsonToObject(unittest.TestCase):
                 }
             ]
         }
-        self.parser = ParseJsonToObject(uml_json)
+        self.parser = ParseJsonToObjectClass(uml_json)
         valid_multiplicities = ["1", "*", "1..*", "0..1", "0..10"]
 
         for amount_str in valid_multiplicities:
             uml_json["edges"][0]["endLabel"] = amount_str
             try:
-                self.parser._ParseJsonToObject__validate_amount(amount_str)
+                self.parser._ParseJsonToObjectClass__validate_amount(amount_str)
             except Exception as e:
                 self.fail(
                     f"__validate_amount raised an exception for a valid multiplicity: {amount_str} - {e}"  # noqa: E501
@@ -326,15 +330,15 @@ class TestParseJsonToObject(unittest.TestCase):
 
     def test_validate_amount_empty(self):
         with self.assertRaises(Exception):
-            self.parser._ParseJsonToObject__validate_amount("")
+            self.parser._ParseJsonToObjectClass__validate_amount("")
 
     def test_validate_amount_no_max(self):
         with self.assertRaises(Exception):
-            self.parser._ParseJsonToObject__validate_amount("1..")
+            self.parser._ParseJsonToObjectClass__validate_amount("1..")
 
     def test_validate_amount_no_min(self):
         with self.assertRaises(Exception):
-            self.parser._ParseJsonToObject__validate_amount("..1")
+            self.parser._ParseJsonToObjectClass__validate_amount("..1")
 
     def test_validate_amount_invalid_star_placement(self):
         invalid_multiplicities = [
@@ -343,7 +347,7 @@ class TestParseJsonToObject(unittest.TestCase):
         ]
         for im in invalid_multiplicities:
             with self.assertRaises(Exception):
-                self.parser._ParseJsonToObject__validate_amount(im)
+                self.parser._ParseJsonToObjectClass__validate_amount(im)
 
     def test_validate_amount_invalid_titik_count(self):
         invalid_multiplicities = [
@@ -353,7 +357,7 @@ class TestParseJsonToObject(unittest.TestCase):
         ]
         for im in invalid_multiplicities:
             with self.assertRaises(Exception):
-                self.parser._ParseJsonToObject__validate_amount(im)
+                self.parser._ParseJsonToObjectClass__validate_amount(im)
 
 
 if __name__ == "__main__":
