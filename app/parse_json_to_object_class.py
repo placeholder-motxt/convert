@@ -12,7 +12,7 @@ from app.element_objects import (
 )
 
 
-class ParseJsonToObject:
+class ParseJsonToObjectClass:
     def __init__(self, data: str):
         self.__json = data
         if isinstance(data, str):

@@ -7,7 +7,7 @@ from app.element_objects import (
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
 )
-from app.parse_json_to_object import ParseJsonToObject
+from app.parse_json_to_object_class import ParseJsonToObject
 
 
 class TestParseJsonToObject(unittest.TestCase):
