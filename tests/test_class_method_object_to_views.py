@@ -105,26 +105,26 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # or is not a valid Python identifier, raise a ValueError
         with self.assertRaises(ValueError) as ctx:
             self.empty_method.to_views_code()
-            self.assertEqual(
-                str(ctx.exception),
-                "Invalid method name: ",
-            )
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name: ",
+        )
 
         self.method_with_name.set_name("123")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_name.to_views_code()
-            self.assertEqual(
-                str(ctx.exception),
-                "Invalid method name: 123",
-            )
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name: 123",
+        )
 
         self.method_with_name.set_name("abcd!")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_name.to_views_code()
-            self.assertEqual(
-                str(ctx.exception),
-                "Invalid method name: abcd!",
-            )
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name: abcd!",
+        )
 
     def test_to_views_code_invalid_param_type(self):
         # Should not happen if parser catches it
@@ -134,22 +134,22 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.param_type.set_name("")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid type: ")
+        self.assertEqual(str(ctx.exception), "Invalid param type: ")
 
         self.param_type.set_name("invalid type")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid type: invalid type")
+        self.assertEqual(str(ctx.exception), "Invalid param type: invalid type")
 
         self.param_type.set_name("123")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid type: 123")
+        self.assertEqual(str(ctx.exception), "Invalid param type: 123")
 
         self.param_type.set_name("int!@")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid type: int!@")
+        self.assertEqual(str(ctx.exception), "Invalid param type: int!@")
 
     def test_to_views_code_invalid_param_name(self):
         # Should not happen if parser catches it
@@ -158,17 +158,17 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.param.set_name("123")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid param name: 123")
+        self.assertEqual(str(ctx.exception), "Invalid param name: 123")
 
         self.param.set_name("invalid name")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid param name: invalid name")
+        self.assertEqual(str(ctx.exception), "Invalid param name: invalid name")
 
         self.param.set_name("param_!$")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid param name: param_!$")
+        self.assertEqual(str(ctx.exception), "Invalid param name: param_!$")
 
     def test_to_views_code_invalid_return_type(self):
         # Should not happen if parser catches it
@@ -177,19 +177,19 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.return_type.set_name(" ")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_return_type.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid return type:  ")
+        self.assertEqual(str(ctx.exception), "Invalid return type:  ")
 
         self.return_type.set_name("123")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_return_type.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid return type: 123")
+        self.assertEqual(str(ctx.exception), "Invalid return type: 123")
 
-        self.param.set_name("invalid name")
+        self.return_type.set_name("invalid name")
         with self.assertRaises(ValueError) as ctx:
-            self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid return type: invalid name")
+            self.method_with_return_type.to_views_code()
+        self.assertEqual(str(ctx.exception), "Invalid return type: invalid name")
 
-        self.param.set_name("param_!$")
+        self.return_type.set_name("param_!$")
         with self.assertRaises(ValueError) as ctx:
-            self.method_with_parameters.to_views_code()
-            self.assertEqual(str(ctx.exception), "Invalid return type: param_!$")
+            self.method_with_return_type.to_views_code()
+        self.assertEqual(str(ctx.exception), "Invalid return type: param_!$")
