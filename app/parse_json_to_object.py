@@ -19,6 +19,8 @@ class ParseJsonToObject:
                 raise Exception("Error: class not found in the json")
             a = ClassObject()
             a.set_name(classes['name'])
+            print(a.get_name())
+            print(classes['attributes'])
             a.set_id(classes['id'])
             for method in classes['methods'].split('\n'):
                 if method != '':
@@ -33,6 +35,8 @@ class ParseJsonToObject:
                             b.add_parameter(c)
                             b.set_returnType(d)
                     for field in classes['attributes'].split('\n'):
+                        if a.get_name()=="Pengelola":
+                            print(field)
                         if field != '':
                             field = field.lstrip('+- ')
                         
@@ -46,8 +50,8 @@ class ParseJsonToObject:
             self.__classes.append(a)
         return self.__classes
 
-    def parse_relationships(self, classes, uml_json):
-        edges = uml_json['edges']
+    def parse_relationships(self, classes):
+        edges = self.__json['edges']
         for edge in edges :
             class_from_id = classes[edge['start']]
             class_to_id = classes[edge['end']]
@@ -75,11 +79,14 @@ class ParseJsonToObject:
                 if '*' in edge['startLabel'] or '.' in edge['startLabel'] or self.__is_number_greater_than(edge['startLabel']) :
                     ro.setSourceClassOwnAmount(edge['startLabel'])
                     ro.setTargetClassOwnAmount(edge['endLabel'])
-
+                    ro.setSourceClass(class_from_id)
+                    ro.setTargetClass(class_to_id)
                     class_from_id.add_relationship(ro)
                 else:
                     ro.setSourceClassOwnAmount(edge['endLabel'])
                     ro.setTargetClassOwnAmount(edge['startLabel'])
+                    ro.setSourceClass(class_to_id)
+                    ro.setTargetClass(class_from_id)
 
                     class_to_id.add_relationship(ro)
                 continue
