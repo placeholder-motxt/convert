@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.utils import is_valid_python_identifier
+
 
 class ClassObject:
     def __init__(self):
@@ -117,6 +119,17 @@ class AbstractMethodObject:
     def set_returnType(self, returnType: TypeObject):
         self.__returnType = returnType
 
+    def get_name(self) -> str:
+        return self.__name
+
+    def get_parameters(self) -> list[ParameterObject]:
+        # TODO: Make immutable if needed
+        return self.__parameters
+
+    def get_returnType(self) -> TypeObject:
+        # TODO: Make immutable if needed
+        return self.__returnType
+
 
 class ClassMethodObject(AbstractMethodObject):
     def __init__(self):
@@ -127,6 +140,26 @@ class ClassMethodObject(AbstractMethodObject):
         if class_method_call is None:
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
+
+    def to_views_code(self) -> str:
+        name = self.get_name()
+        if name is None or not is_valid_python_identifier(name):
+            raise ValueError(f"Invalid method name: {name}")
+
+        params = ", ".join([param.to_views_code() for param in self.get_parameters()])
+        res = f"def {name}({params})"
+
+        ret = self.get_returnType()
+        if ret is not None:
+            rettype = ret.get_name()
+            if not is_valid_python_identifier(rettype):
+                raise ValueError(f"Invalid return type: {rettype}")
+            res += f" -> {rettype}"
+        res += ":\n    # TODO: Auto generated function stub\n"
+        res += (
+            "    raise NotImplementedError('method function is not yet implemented')\n"
+        )
+        return res
 
 
 class AbstractRelationshipObject:
@@ -169,6 +202,9 @@ class TypeObject:
     def to_models_code(self):
         return self.__name.title()
 
+    def get_name(self) -> str:
+        return self.__name
+
 
 class ParameterObject:
     def __init__(self):
@@ -183,6 +219,20 @@ class ParameterObject:
 
     def set_type(self, type: str):
         self.__type = type
+
+    def to_views_code(self) -> str:
+        if self.__name is None or not is_valid_python_identifier(self.__name):
+            raise ValueError(f"Invalid param name: {self.__name}")
+
+        res = self.__name
+        if self.__type is not None:
+            param_type = self.__type.get_name()
+            if not is_valid_python_identifier(param_type):
+                raise ValueError(f"Invalid param type: {param_type}")
+
+            res += f": {param_type}"
+
+        return res
 
 
 class AbstractMethodCallObject:
