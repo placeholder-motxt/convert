@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from abc import ABC
 from io import StringIO
+from typing import Optional
 
 
 class ClassObject:
     def __init__(self):
         self.__name: str = ""
-        self.__parent: ClassObject = None
+        self.__parent: Optional[ClassObject] = None
         self.__fields: list[FieldObject] = []
         self.__methods: list[ClassMethodObject] = []
         self.__relationships: list[AbstractRelationshipObject] = []
@@ -54,7 +55,7 @@ class AbstractMethodObject(ABC):
     def __init__(self):
         self.__name: str = ""
         self.__parameters: list[ParameterObject] = []
-        self.__returnType: TypeObject = None
+        self.__returnType: Optional[TypeObject] = None
 
     def __str__(self) -> str:
         return (
