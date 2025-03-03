@@ -169,3 +169,27 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
             self.assertEqual(str(ctx.exception), "Invalid param name: param_!$")
+
+    def test_to_views_code_invalid_return_type(self):
+        # Should not happen if parser catches it
+        # But if the method's return type is not a Python identifier
+        # or is a Python keyword, then raise ValueError
+        self.return_type.set_name(" ")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_return_type.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid return type:  ")
+
+        self.return_type.set_name("123")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_return_type.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid return type: 123")
+
+        self.param.set_name("invalid name")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid return type: invalid name")
+
+        self.param.set_name("param_!$")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_views_code()
+            self.assertEqual(str(ctx.exception), "Invalid return type: param_!$")
