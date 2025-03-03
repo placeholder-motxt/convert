@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import keyword
+from app.utils import is_valid_python_identifier
 
 
 class ClassObject:
@@ -94,7 +94,7 @@ class ClassMethodObject(AbstractMethodObject):
 
     def to_views_code(self) -> str:
         name = self.get_name()
-        if name is None or not name.isidentifier() or keyword.iskeyword(name):
+        if name is None or not is_valid_python_identifier(name):
             raise ValueError(f"Invalid method name: {name}")
 
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
@@ -103,8 +103,8 @@ class ClassMethodObject(AbstractMethodObject):
         ret = self.get_returnType()
         if ret is not None:
             rettype = ret.get_name()
-            if not rettype.isidentifier() or keyword.iskeyword(rettype):
-                raise ValueError(f"Invalid type: {rettype}")
+            if not is_valid_python_identifier(rettype):
+                raise ValueError(f"Invalid return type: {rettype}")
             res += f" -> {rettype}"
         res += ":\n    # TODO: Auto generated function stub\n"
         res += (
@@ -155,18 +155,14 @@ class ParameterObject:
         self.__type = type
 
     def to_views_code(self) -> str:
-        if (
-            self.__name is None
-            or not self.__name.isidentifier()
-            or keyword.iskeyword(self.__name)
-        ):
-            raise ValueError(f"Invalid method name: {self.__name}")
+        if self.__name is None or not is_valid_python_identifier(self.__name):
+            raise ValueError(f"Invalid param name: {self.__name}")
 
         res = self.__name
         if self.__type is not None:
             param_type = self.__type.get_name()
-            if not param_type.isidentifier() or keyword.iskeyword(param_type):
-                raise ValueError(f"Invalid type: {param_type}")
+            if not is_valid_python_identifier(param_type):
+                raise ValueError(f"Invalid param type: {param_type}")
 
             res += f": {param_type}"
 
