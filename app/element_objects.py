@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from io import StringIO
 from typing import Optional
 
@@ -42,7 +42,7 @@ class FieldObject:
         self.__type: TypeObject = None
 
     def __str__(self) -> str:
-        return f"""FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}"""
+        return f"FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}"
 
     def set_name(self, name: str):
         self.__name = name
@@ -120,7 +120,7 @@ class ParameterObject:
         self.__type: TypeObject = None
 
     def __str__(self) -> str:
-        return f"""ParameterObject:\n\tname: {self.__name}\n\ttype: {self.__type}"""
+        return f"ParameterObject:\n\tname: {self.__name}\n\ttype: {self.__type}"
 
     def set_name(self, name: str):
         self.__name = name
@@ -159,9 +159,7 @@ class AbstractMethodCallObject(ABC):
 
     def print_django_style(self) -> str:
         result = StringIO()
-        print("condition:", self.__condition)
         if self.__condition:
-            print("ma2")
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:
             result.write(f"{self.__return_var_name} = ")
@@ -264,11 +262,18 @@ class FileElements(ABC):
         assert file_name != "", "File name can't be empty!"
         self.__name: str = file_name
 
+    @abstractmethod
+    def print_django_style(self) -> str:  # pragma: no cover
+        pass
+
 
 class ModelsElements(FileElements):
     def __init__(self, file_name: str):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
+
+    def print_django_style(self) -> str:
+        pass  # TODO: PBI 1-7
 
 
 class ViewsElements(FileElements):
@@ -281,14 +286,15 @@ class ViewsElements(FileElements):
         result = StringIO()
 
         for class_method_object in self.__class_methods:
+            # TODO: PBI-1-7 and PBI 2-9
             pass
 
         for controller_method_object in self.__controller_methods:
             result.write(controller_method_object.print_django_style())
         return result.getvalue()
 
-    def add__class_method(self, class_method_object: ClassMethodObject):
+    def add_class_method(self, class_method_object: ClassMethodObject):
         self.__class_methods.append(class_method_object)
 
-    def add__controller_method(self, controller_method_object: ControllerMethodObject):
+    def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)

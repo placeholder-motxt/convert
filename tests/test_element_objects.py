@@ -13,7 +13,6 @@ from app.element_objects import (
     ControllerMethodCallObject,
     ControllerMethodObject,
     FieldObject,
-    FileElements,
     ManyToManyRelationshipObject,
     ManyToOneRelationshipObject,
     ModelsElements,
@@ -485,24 +484,22 @@ class TestClassMethodCallObject(unittest.TestCase):
         )
 
 
-class TestFileElements(unittest.TestCase):
-    def test_fileelements_valid_filename(self):
-        obj = FileElements("valid_file.txt")
-        self.assertIsInstance(obj, FileElements)
-
-    def test_fileelements_invalid_filename_type(self):
-        with self.assertRaises(AssertionError):
-            FileElements(123)  # Invalid type
-
-    def test_fileelements_empty_filename(self):  # cornercase
-        with self.assertRaises(AssertionError):
-            FileElements("")
-
-
 class TestModelsElements(unittest.TestCase):
-    def test_modelselements_valid_filename(self):
+    def test_models_elements_valid_filename(self):
         obj = ModelsElements("model_file.py")
         self.assertIsInstance(obj, ModelsElements)
+
+    def test_models_elements_invalid_filename_type(self):
+        with self.assertRaises(AssertionError):
+            ModelsElements(123)  # Invalid type
+
+    def test_models_elements_empty_filename(self):  # cornercase
+        with self.assertRaises(AssertionError):
+            ModelsElements("")
+
+    def test_print_django_style_not_implemented(self):
+        obj = ModelsElements("models.py")
+        self.assertIsNone(obj.print_django_style())
 
 
 class TestViewsElements(unittest.TestCase):
@@ -521,7 +518,7 @@ class TestViewsElements(unittest.TestCase):
         mock_controller_method.print_django_style.return_value = (
             "def sample_controller(request):\n\tpass\n"
         )
-        self.views_elements.add__controller_method(mock_controller_method)
+        self.views_elements.add_controller_method(mock_controller_method)
         expected_output = "def sample_controller(request):\n\tpass\n"
         self.assertEqual(self.views_elements.print_django_style(), expected_output)
 
@@ -535,8 +532,8 @@ class TestViewsElements(unittest.TestCase):
             "def controller_two(request):\n\tpass\n"
         )
 
-        self.views_elements.add__controller_method(mock_controller_method1)
-        self.views_elements.add__controller_method(mock_controller_method2)
+        self.views_elements.add_controller_method(mock_controller_method1)
+        self.views_elements.add_controller_method(mock_controller_method2)
 
         expected_output = (
             "def controller_one(request):\n"
@@ -552,7 +549,7 @@ class TestViewsElements(unittest.TestCase):
         mock_class_method.print_django_style.return_value = (
             "class_method should not be included"
         )
-        self.views_elements.add__class_method(mock_class_method)
+        self.views_elements.add_class_method(mock_class_method)
         expected_output = ""
         self.assertEqual(self.views_elements.print_django_style(), expected_output)
 
