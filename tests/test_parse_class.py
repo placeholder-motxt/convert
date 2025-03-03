@@ -124,7 +124,7 @@ class TestParseJsonToObject(unittest.TestCase):
             for m in multiplicities:
                 uml_json['edges'][0]['endLabel']=m
                 self.parser = ParseJsonToObject(uml_json)
-                self.parser.parse_relationships(self.classes, uml_json)
+                self.parser.parse_relationships(self.classes)
                                                         
                 class_from_id = self.classes[1]
                 
@@ -143,7 +143,7 @@ class TestParseJsonToObject(unittest.TestCase):
             for m in multiplicities:
                 uml_json['edges'][0]['endLabel']=m
                 self.parser = ParseJsonToObject(uml_json)
-                self.parser.parse_relationships(self.classes, uml_json)
+                self.parser.parse_relationships(self.classes)
                                                         
                 class_to_id = self.classes[2]
                 
@@ -154,7 +154,7 @@ class TestParseJsonToObject(unittest.TestCase):
             for m in ['1']:
                 uml_json['edges'][0]['endLabel']=m
                 self.parser = ParseJsonToObject(uml_json)
-                classes = self.parser.parse_relationships(self.classes, uml_json)
+                classes = self.parser.parse_relationships(self.classes)
                                                         
                 class_from_id = self.classes[1]
                 class_to_id = self.classes[2]
@@ -170,7 +170,7 @@ class TestParseJsonToObject(unittest.TestCase):
                 'endLabel':'1'
             }]}
         self.parser = ParseJsonToObject(uml_json)
-        classes = self.parser.parse_relationships(self.classes, uml_json)
+        classes = self.parser.parse_relationships(self.classes)
 
         class_from_id = self.classes[1]
 
@@ -184,7 +184,7 @@ class TestParseJsonToObject(unittest.TestCase):
                 'type': 'GeneralizationEdge'
             }]}
         self.parser = ParseJsonToObject(uml_json)
-        classes = self.parser.parse_relationships(self.classes, uml_json)
+        classes = self.parser.parse_relationships(self.classes)
         class_from_id = self.classes[1]
         class_to_id = self.classes[2]
         
