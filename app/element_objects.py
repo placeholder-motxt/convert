@@ -55,12 +55,12 @@ class AbstractMethodObject(ABC):
     def __init__(self):
         self.__name: str = ""
         self.__parameters: list[ParameterObject] = []
-        self.__returnType: Optional[TypeObject] = None
+        self.__return_type: Optional[TypeObject] = None
 
     def __str__(self) -> str:
         return (
             f"MethodObject:\n\tname: {self.__name}\n\tparameters: {self.__parameters}"
-            f"\n\treturnType: {self.__returnType}"
+            f"\n\treturn_type: {self.__return_type}"
         )
 
     def set_name(self, name: str):
@@ -69,8 +69,8 @@ class AbstractMethodObject(ABC):
     def add_parameter(self, parameter: ParameterObject):
         self.__parameters.append(parameter)
 
-    def set_returnType(self, returnType: TypeObject):
-        self.__returnType = returnType
+    def set_return_type(self, return_type: TypeObject):
+        self.__return_type = return_type
 
     def get_name(self) -> str:
         return self.__name
@@ -92,18 +92,18 @@ class ClassMethodObject(AbstractMethodObject):
 
 class AbstractRelationshipObject(ABC):
     def __init__(self):
-        self.__sourceClass: ClassObject = None
-        self.__targetClass: ClassObject = None
+        self.__source_class: ClassObject = None
+        self.__target_class: ClassObject = None
 
-    def setSourceClass(self, sourceClass: ClassObject):
-        if sourceClass is None:
+    def set_source_class(self, source_class: ClassObject):
+        if source_class is None:
             raise Exception("Source Class cannot be SET to be None!")
-        self.__sourceClass = sourceClass
+        self.__source_class = source_class
 
-    def setTargetClass(self, targetClass: ClassObject):
-        if targetClass is None:
+    def set_target_class(self, target_class: ClassObject):
+        if target_class is None:
             raise Exception("Target Class cannot be SET to be None!")
-        self.__targetClass = targetClass
+        self.__target_class = target_class
 
 
 class TypeObject:
@@ -136,13 +136,13 @@ class AbstractMethodCallObject(ABC):
     def __init__(self):
         self.__method: AbstractMethodObject = None
         self.__arguments: list[ArgumentObject] = []
-        self.__returnVarName: str = ""
+        self.__return_var_name: str = ""
         self.__condition = ""
 
     def __str__(self) -> str:
         return (
             f"MethodCallObject:\n\tmethod: {self.__method}\n\t"
-            f"arguments: {self.__arguments}\n\treturnVarName: {self.__returnVarName}"
+            f"arguments: {self.__arguments}\n\treturn_var_name: {self.__return_var_name}"
         )
 
     def set_method(self, method: AbstractMethodObject):
@@ -151,8 +151,8 @@ class AbstractMethodCallObject(ABC):
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
 
-    def set_returnVarName(self, returnVarName: str):
-        self.__returnVarName = returnVarName
+    def set_return_var_name(self, return_var_name: str):
+        self.__return_var_name = return_var_name
 
     def set_condition(self, condition: str):
         self.__condition = condition
@@ -163,8 +163,8 @@ class AbstractMethodCallObject(ABC):
         if self.__condition:
             print("ma2")
             result.write(f"if {self.__condition}:\n\t\t")
-        if self.__returnVarName:
-            result.write(f"{self.__returnVarName} = ")
+        if self.__return_var_name:
+            result.write(f"{self.__return_var_name} = ")
         result.write(f"{self.__method.get_name()}(")
         if self.__arguments:
             arguments_str = ", ".join(
@@ -177,18 +177,18 @@ class AbstractMethodCallObject(ABC):
 
 class ArgumentObject:
     def __init__(self):
-        self.__methodObject: AbstractMethodCallObject = None
+        self.__method_object: AbstractMethodCallObject = None
         self.__name: str = ""
         self.__type: TypeObject = None
 
     def __str__(self) -> str:
         return (
-            f"ArgumentObject:\n\tmethodObject: \n\t[{self.__methodObject}]"
+            f"ArgumentObject:\n\tmethodObject: \n\t[{self.__method_object}]"
             f"\n\tname: {self.__name}\n\ttype: \n\t[{self.__type}]"
         )
 
     def set_methodObject(self, methodObject: AbstractMethodCallObject):
-        self.__methodObject = methodObject
+        self.__method_object = methodObject
 
     def set_name(self, name: str):
         self.__name = name

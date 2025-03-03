@@ -95,52 +95,52 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         self.source_class = ClassObject()
         self.target_class = ClassObject()
 
-        self.source_class.set_name("SourceClass")
-        self.target_class.set_name("TargetClass")
+        self.source_class.set_name("source_class")
+        self.target_class.set_name("target_class")
 
     def test_instance_of_abc(self):
         self.assertIsInstance(self.relationship_object, ABC)
 
-    def test_positive_set_sourceClass(self):
-        self.relationship_object.setSourceClass(self.source_class)
+    def test_positive_set_source_class(self):
+        self.relationship_object.set_source_class(self.source_class)
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__sourceClass,
+            self.relationship_object._AbstractRelationshipObject__source_class,
             self.source_class,
         )
 
-    def test_positive_set_targetClass(self):
-        self.relationship_object.setTargetClass(self.target_class)
+    def test_positive_set_target_class(self):
+        self.relationship_object.set_target_class(self.target_class)
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__targetClass,
+            self.relationship_object._AbstractRelationshipObject__target_class,
             self.target_class,
         )
 
-    def test_negative_set_sourceClass_as_None(self):
+    def test_negative_set_source_class_as_None(self):
         with self.assertRaises(Exception) as context:
-            self.relationship_object.setSourceClass(None)
+            self.relationship_object.set_source_class(None)
 
         self.assertEqual(
             str(context.exception), "Source Class cannot be SET to be None!"
         )
 
-    def test_negative_set_targetClass_as_None(self):
+    def test_negative_set_target_class_as_None(self):
         with self.assertRaises(Exception) as context:
-            self.relationship_object.setTargetClass(None)
+            self.relationship_object.set_target_class(None)
 
         self.assertEqual(
             str(context.exception), "Target Class cannot be SET to be None!"
         )
 
     def test_edge_source_equals_target(self):
-        self.relationship_object.setSourceClass(self.source_class)
-        self.relationship_object.setTargetClass(self.source_class)
+        self.relationship_object.set_source_class(self.source_class)
+        self.relationship_object.set_target_class(self.source_class)
 
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__sourceClass,
+            self.relationship_object._AbstractRelationshipObject__source_class,
             self.source_class,
         )
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__targetClass,
+            self.relationship_object._AbstractRelationshipObject__target_class,
             self.source_class,
         )
 
@@ -161,17 +161,17 @@ class TestAbstractMethodObject(unittest.TestCase):
         self.method_object.add_parameter(parameter)
         self.assertIn(parameter, self.method_object._AbstractMethodObject__parameters)
 
-    def test_set_returnType(self):
+    def test_set_return_type(self):
         return_type = TypeObject()
-        self.method_object.set_returnType(return_type)
+        self.method_object.set_return_type(return_type)
         self.assertEqual(
-            self.method_object._AbstractMethodObject__returnType, return_type
+            self.method_object._AbstractMethodObject__return_type, return_type
         )
 
     def test_str_representation(self):
         self.method_object.set_name("TestMethod")
         expected_output = (
-            "MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"
+            "MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturn_type: None"
         )
         self.assertEqual(str(self.method_object), expected_output)
 
@@ -252,9 +252,9 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         )
 
     def test_return_var_name(self):
-        self.method_call_object.set_returnVarName("TestVarName")
+        self.method_call_object.set_return_var_name("TestVarName")
         self.assertEqual(
-            self.method_call_object._AbstractMethodCallObject__returnVarName,
+            self.method_call_object._AbstractMethodCallObject__return_var_name,
             "TestVarName",
         )
 
@@ -263,7 +263,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             f"MethodCallObject:\n"
             f"\tmethod: {self.method_mock}\n"
             f"\targuments: []\n"
-            f"\treturnVarName: "
+            f"\treturn_var_name: "
         )
         self.assertEqual(str(self.method_call_object), expected_output)
 
@@ -275,13 +275,13 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         )
 
     def test_print_django_style_one_argument(self):
-        self.method_call_object.set_returnVarName("result")
+        self.method_call_object.set_return_var_name("result")
         self.method_call_object.add_argument(self.argument_mock1)
         expected_output = "result = mock_method(arg1)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
     def test_print_django_style_two_arguments(self):
-        self.method_call_object.set_returnVarName("result")
+        self.method_call_object.set_return_var_name("result")
         self.method_call_object.add_argument(self.argument_mock1)
         self.method_call_object.add_argument(self.argument_mock2)
         expected_output = "result = mock_method(arg1, arg2)"
@@ -293,13 +293,13 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             self.method_call_object.print_django_style()
 
     def test_print_django_style_corner_case_empty_arguments(self):
-        self.method_call_object.set_returnVarName("output")
+        self.method_call_object.set_return_var_name("output")
         expected_output = "output = mock_method()"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
     def test_print_django_style_with_condition(self):
         self.method_call_object.set_condition("x > 5")
-        self.method_call_object.set_returnVarName("value")
+        self.method_call_object.set_return_var_name("value")
         self.method_call_object.add_argument(self.argument_mock1)
         expected_output = "if x > 5:\n\t\tvalue = mock_method(arg1)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
@@ -345,7 +345,7 @@ class TestArgumentObject(unittest.TestCase):
         method_object = AbstractMethodObject()
         self.argument_object.set_methodObject(method_object)
         self.assertEqual(
-            self.argument_object._ArgumentObject__methodObject, method_object
+            self.argument_object._ArgumentObject__method_object, method_object
         )
 
     def test_set_name(self):
@@ -368,7 +368,7 @@ class TestArgumentObject(unittest.TestCase):
         expected_output = (
             "ArgumentObject:\n\tmethodObject: \n\t"
             "[MethodObject:\n\tname: TestMethod\n\tparameters: []"
-            "\n\treturnType: None]\n\tname: TestArgument\n\ttype: "
+            "\n\treturn_type: None]\n\tname: TestArgument\n\ttype: "
             f"\n\t[{self.argument_object._ArgumentObject__type}]"
             ""
         )
