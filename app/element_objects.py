@@ -181,8 +181,8 @@ class ClassMethodObject(AbstractMethodObject):
 
 class AbstractRelationshipObject(ABC):
     def __init__(self):
-        self.__source_class: ClassObject = None
-        self.__target_class: ClassObject = None
+        self.__source_class: Optional[ClassObject] = None
+        self.__target_class: Optional[ClassObject] = None
         self.__sourceClassOwnAmount: str = ""
         self.__targetClassOwnAmount: str = ""
 
@@ -299,11 +299,11 @@ class AbstractMethodCallObject(ABC):
         return result.getvalue()
 
 
-class ArgumentObject:
+class ArgumentObject():
     def __init__(self):
-        self.__method_object: AbstractMethodCallObject = None
+        self.__method_object: Optional[AbstractMethodCallObject] = None
         self.__name: str = ""
-        self.__type: TypeObject = None
+        self.__type: Optional[TypeObject] = None
 
     def __str__(self) -> str:
         return (
