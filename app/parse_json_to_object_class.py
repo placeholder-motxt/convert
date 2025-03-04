@@ -224,7 +224,7 @@ class ParseJsonToObjectClass:
 
         # Amount hanya angka
         if amount_str.isnumeric() or amount_str == "*":
-            return "amount_str"
+            return amount_str
         else:
             # validate minimum and maximum amount
             end_minimum = False
@@ -241,7 +241,7 @@ class ParseJsonToObjectClass:
                 elif has_min_number and ch == ".":
                     end_minimum = True
                     titik_count += 1
-                elif end_minimum and ch.isdigit():
+                elif end_minimum and not start_max and ch.isdigit():
                     start_max = True
                     maximum_amount += int(ch)
                 elif end_minimum and ch == "*" and i == len(amount_str) - 1:
@@ -259,4 +259,3 @@ class ParseJsonToObjectClass:
     def __is_number_greater_than(self, amount_str, compared_to=1):  # noqa: ANN001, ANN201, ANN202,
         if amount_str.isnumeric():
             return int(amount_str) > compared_to
-        return False
