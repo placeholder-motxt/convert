@@ -59,20 +59,19 @@ class ParseJsonToObjectClass:
                 if method != "":
                     class_method_obj = ClassMethodObject()
                     class_method_name = method.split("(")[0].lstrip("+- ").strip()
-                    print(class_method_name)
                     if ":" in method.split(")")[1]:
                         class_method_rettype_name = (
                             method.split(")")[1].split(":")[1].strip()
                         )
                     else:
                         raise ValueError("Error: method return type not found")
-                    print(class_method_rettype_name)
 
                     # check if method and method return type name is valid
                     if (
                         self.check_name(class_method_name)
                         and self.check_name(class_method_rettype_name)
                         or bool(re.match(r"List\[.*\]", class_method_rettype_name))
+
                     ):
                         class_method_obj.set_name(class_method_name)
 
@@ -118,11 +117,11 @@ class ParseJsonToObjectClass:
                                 attr_name = attribute.split(":")[0].strip()
                                 attr_type_name = attribute.split(":")[1].strip()
 
-                                print(attr_name)
                                 if (
                                     self.check_name(attr_name)
                                     and self.check_name(attr_type_name)
                                     or bool(re.match(r"List\[.*\]", attr_type_name))
+
                                 ):
                                     attr.set_name(attr_name)
                                     attr_type.set_name(attr_type_name)
@@ -139,6 +138,7 @@ class ParseJsonToObjectClass:
 
     def parse_relationships(self, classes):  # noqa: ANN001, ANN201, ANN202,
         edges = self.__json["edges"]
+
         for edge in edges:
             class_from_id = classes[edge["start"]]
             class_to_id = classes[edge["end"]]
@@ -184,23 +184,22 @@ class ParseJsonToObjectClass:
                     ro.setTargetClassOwnAmount(edge["endLabel"])
 
                     class_from_id.add_relationship(ro)
-
-                    ro.setSourceClass(class_from_id)
+                    ro.set_source_class(class_from_id)
                     ro.setTargetClass(class_to_id)
                 else:
                     ro.setSourceClassOwnAmount(edge["endLabel"])
                     ro.setTargetClassOwnAmount(edge["startLabel"])
 
                     class_to_id.add_relationship(ro)
-
-                    ro.setSourceClass(class_to_id)
-                    ro.setTargetClass(class_from_id)
+                    ro.set_source_class(class_to_id)
+                    ro.set_target_class(class_from_id)
                 continue
             else:
                 ro = OneToOneRelationshipObject()
 
-            ro.setSourceClass(class_from_id)
-            ro.setTargetClass(class_to_id)
+            ro.set_source_class(class_from_id)
+            ro.set_target_class(class_to_id)
+
 
             ro.setSourceClassOwnAmount(edge["startLabel"])
             ro.setTargetClassOwnAmount(edge["endLabel"])
@@ -218,6 +217,7 @@ class ParseJsonToObjectClass:
         # Amount hanya angka
         if amount_str.isnumeric() or amount_str == "*":
             return amount_str
+
         else:
             # validate minimum and maximum amount
             end_minimum = False
