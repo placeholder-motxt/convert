@@ -1,4 +1,5 @@
 import json
+import re
 
 from app.element_objects import (
     ClassMethodObject,
@@ -64,12 +65,13 @@ class ParseJsonToObjectClass:
                         )
                     else:
                         raise ValueError("Error: method return type not found")
-                    print(class_method_name)
-                    print(class_method_rettype_name)
 
                     # check if method and method return type name is valid
-                    if self.check_name(class_method_name) and self.check_name(
-                        class_method_rettype_name
+                    if (
+                        self.check_name(class_method_name)
+                        and self.check_name(class_method_rettype_name)
+                        or bool(re.match(r"List\[.*\]", class_method_rettype_name))
+
                     ):
                         class_method_obj.set_name(class_method_name)
 
@@ -112,11 +114,14 @@ class ParseJsonToObjectClass:
                                 attr = FieldObject()
                                 attr_type = TypeObject()
 
-                                attr_name = attribute.split(":")[1].strip()
-                                attr_type_name = attribute.split(":")[0].strip()
+                                attr_name = attribute.split(":")[0].strip()
+                                attr_type_name = attribute.split(":")[1].strip()
 
-                                if self.check_name(attr_name) and self.check_name(
-                                    attr_type_name
+                                if (
+                                    self.check_name(attr_name)
+                                    and self.check_name(attr_type_name)
+                                    or bool(re.match(r"List\[.*\]", attr_type_name))
+
                                 ):
                                     attr.set_name(attr_name)
                                     attr_type.set_name(attr_type_name)
@@ -131,8 +136,9 @@ class ParseJsonToObjectClass:
             self.__classes.append(class_obj)
         return self.__classes
 
-    def parse_relationships(self, classes, uml_json):  # noqa: ANN001, ANN201, ANN202,
-        edges = uml_json["edges"]
+    def parse_relationships(self, classes):  # noqa: ANN001, ANN201, ANN202,
+        edges = self.__json["edges"]
+
         for edge in edges:
             class_from_id = classes[edge["start"]]
             class_to_id = classes[edge["end"]]
@@ -178,18 +184,22 @@ class ParseJsonToObjectClass:
                     ro.setTargetClassOwnAmount(edge["endLabel"])
 
                     class_from_id.add_relationship(ro)
+                    ro.set_source_class(class_from_id)
+                    ro.set_target_class(class_to_id)
                 else:
                     ro.setSourceClassOwnAmount(edge["endLabel"])
                     ro.setTargetClassOwnAmount(edge["startLabel"])
 
                     class_to_id.add_relationship(ro)
+                    ro.set_source_class(class_to_id)
+                    ro.set_target_class(class_from_id)
                 continue
             else:
-                print(edge["startLabel"], "one to one", edge["endLabel"])
                 ro = OneToOneRelationshipObject()
 
             ro.set_source_class(class_from_id)
             ro.set_target_class(class_to_id)
+
 
             ro.setSourceClassOwnAmount(edge["startLabel"])
             ro.setTargetClassOwnAmount(edge["endLabel"])
@@ -206,7 +216,8 @@ class ParseJsonToObjectClass:
 
         # Amount hanya angka
         if amount_str.isnumeric() or amount_str == "*":
-            return "amount_str"
+            return amount_str
+
         else:
             # validate minimum and maximum amount
             end_minimum = False
@@ -223,7 +234,7 @@ class ParseJsonToObjectClass:
                 elif has_min_number and ch == ".":
                     end_minimum = True
                     titik_count += 1
-                elif end_minimum and ch.isdigit():
+                elif end_minimum and not start_max and ch.isdigit():
                     start_max = True
                     maximum_amount += int(ch)
                 elif end_minimum and ch == "*" and i == len(amount_str) - 1:
@@ -241,4 +252,3 @@ class ParseJsonToObjectClass:
     def __is_number_greater_than(self, amount_str, compared_to=1):  # noqa: ANN001, ANN201, ANN202,
         if amount_str.isnumeric():
             return int(amount_str) > compared_to
-        return False

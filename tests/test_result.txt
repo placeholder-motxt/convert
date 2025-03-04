@@ -1,0 +1,71 @@
+class Buku(models.Model):
+	ISBN = models.CharField(max_length=255)
+	judul = models.CharField(max_length=255)
+	penulis = models.CharField(max_length=255)
+	penerbit = models.CharField(max_length=255)
+
+	pengelolaFK = models.ForeignKey(Pengelola, on_delete = models.CASCADE)
+	listbukuFK = models.ForeignKey(ListBuku, on_delete = models.CASCADE)
+
+class Pengelola(models.Model):
+
+
+class Peminjam(Pengelola):
+
+	listpeminjamanFK = models.ForeignKey(ListPeminjaman, on_delete = models.CASCADE)
+
+class Peminjaman(models.Model):
+	ID = models.CharField(max_length=255)
+	isDikembalikan = models.BooleanField()
+	tglPinjam = models.DateField()
+	tglKembali = models.DateField()
+	isLunasDenda = models.BooleanField()
+	besaranDenda = models.IntegerField()
+	ID = models.CharField(max_length=255)
+	isDikembalikan = models.BooleanField()
+	tglPinjam = models.DateField()
+	tglKembali = models.DateField()
+	isLunasDenda = models.BooleanField()
+	besaranDenda = models.IntegerField()
+	ID = models.CharField(max_length=255)
+	isDikembalikan = models.BooleanField()
+	tglPinjam = models.DateField()
+	tglKembali = models.DateField()
+	isLunasDenda = models.BooleanField()
+	besaranDenda = models.IntegerField()
+
+	peminjamFK = models.ForeignKey(Peminjam, on_delete = models.CASCADE)
+	semesterFK = models.ForeignKey(Semester, on_delete = models.CASCADE)
+	copybukuFK = models.ForeignKey(CopyBuku, on_delete = models.CASCADE)
+
+class Semester(models.Model):
+	kode = models.CharField(max_length=255)
+	nama = models.CharField(max_length=255)
+	tglMulai = models.DateField()
+	tglKembali = models.DateField()
+	tglSelesai = models.DateField()
+	isActive = models.BooleanField()
+
+
+class CopyBuku(models.Model):
+	kodeBarcode = models.CharField(max_length=255)
+	jenisCopy = models.CharField(max_length=255)
+	kondisi = models.CharField(max_length=255)
+	isAvailabel = models.BooleanField()
+	edisi = models.IntegerField()
+	tahunTerbit = models.IntegerField()
+
+	bukuFK = models.ForeignKey(Buku, on_delete = models.CASCADE)
+	listcopyFK = models.ForeignKey(ListCopy, on_delete = models.CASCADE)
+
+class ListBuku(models.Model):
+	numOfBuku = models.IntegerField()
+
+
+class ListCopy(models.Model):
+	allCopy = models.CharField(max_length=255)
+
+
+class ListPeminjaman(models.Model):
+	allPeminjam = models.CharField(max_length=255)
+	allPeminjam = models.CharField(max_length=255)

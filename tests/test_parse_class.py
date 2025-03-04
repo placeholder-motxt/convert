@@ -304,6 +304,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         result = parser.parse_classes()
         self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
 
+
     def test_invalid_method_parameter(self):
         data = """{
             "diagram": "ClassDiagram",
@@ -384,7 +385,8 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             for m in multiplicities:
                 uml_json["edges"][0]["endLabel"] = m
                 self.parser = ParseJsonToObjectClass(uml_json)
-                self.parser.parse_relationships(self.classes, uml_json)
+                self.parser.parse_relationships(self.classes)
+
 
                 class_from_id = self.classes[1]
 
@@ -407,7 +409,8 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             for m in multiplicities:
                 uml_json["edges"][0]["endLabel"] = m
                 self.parser = ParseJsonToObjectClass(uml_json)
-                self.parser.parse_relationships(self.classes, uml_json)
+                self.parser.parse_relationships(self.classes)
+
 
                 class_to_id = self.classes[2]
 
@@ -418,7 +421,8 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             for m in ["1"]:
                 uml_json["edges"][0]["endLabel"] = m
                 self.parser = ParseJsonToObjectClass(uml_json)
-                self.parser.parse_relationships(self.classes, uml_json)
+                self.parser.parse_relationships(self.classes)
+
 
                 class_from_id = self.classes[1]
                 class_to_id = self.classes[2]
@@ -431,7 +435,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             "edges": [{"start": 1, "end": 2, "startLabel": "1", "endLabel": "1"}]
         }
         self.parser = ParseJsonToObjectClass(uml_json)
-        self.parser.parse_relationships(self.classes, uml_json)
+        self.parser.parse_relationships(self.classes)
 
         class_from_id = self.classes[1]
 
@@ -443,7 +447,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
     def test_parse_relationships_inheritance(self):
         uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
         self.parser = ParseJsonToObjectClass(uml_json)
-        self.parser.parse_relationships(self.classes, uml_json)
+        self.parser.parse_relationships(self.classes)
         class_from_id = self.classes[1]
         class_to_id = self.classes[2]
 
@@ -463,7 +467,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             ]
         }
         self.parser = ParseJsonToObjectClass(uml_json)
-        valid_multiplicities = ["1", "*", "1..*", "0..1", "0..10"]
+        valid_multiplicities = ["1", "*", "1..*", "0..1", "1..12", "12..222"]
 
         for amount_str in valid_multiplicities:
             uml_json["edges"][0]["endLabel"] = amount_str
