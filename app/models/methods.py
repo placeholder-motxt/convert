@@ -37,7 +37,7 @@ class AbstractMethodObject(ABC):
         # TODO: Make immutable if needed
         return self.__parameters
 
-    def get_returnType(self) -> TypeObject:
+    def get_return_type(self) -> TypeObject:
         # TODO: Make immutable if needed
         return self.__return_type
 
@@ -60,7 +60,7 @@ class ClassMethodObject(AbstractMethodObject):
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
         res = f"def {name}({params})"
 
-        ret = self.get_returnType()
+        ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
             if not is_valid_python_identifier(rettype):
@@ -68,7 +68,7 @@ class ClassMethodObject(AbstractMethodObject):
             res += f" -> {rettype}"
         res += ":\n    # TODO: Auto generated function stub\n"
         res += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
         return res
 
