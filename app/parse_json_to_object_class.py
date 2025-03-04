@@ -77,7 +77,7 @@ class ParseJsonToObjectClass:
 
                         class_method_rettype = TypeObject()
                         class_method_rettype.set_name(class_method_rettype_name)
-                        class_method_obj.set_returnType(class_method_rettype)
+                        class_method_obj.set_return_type(class_method_rettype)
 
                     else:
                         raise ValueError(
@@ -185,7 +185,7 @@ class ParseJsonToObjectClass:
 
                     class_from_id.add_relationship(ro)
                     ro.set_source_class(class_from_id)
-                    ro.setTargetClass(class_to_id)
+                    ro.set_target_class(class_to_id)
                 else:
                     ro.setSourceClassOwnAmount(edge["endLabel"])
                     ro.setTargetClassOwnAmount(edge["startLabel"])
