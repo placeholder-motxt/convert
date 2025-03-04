@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from io import StringIO
 from typing import Optional
+
 from app.utils import is_valid_python_identifier
 
 
@@ -129,12 +130,6 @@ class AbstractMethodObject(ABC):
 
     def set_return_type(self, return_type: TypeObject):
         self.__return_type = return_type
-
-    def get_name(self) -> str:
-        return self.__name
-
-    def get_parameters(self) -> list[ParameterObject]:
-        return self.__parameters
 
     def get_name(self) -> str:
         return self.__name
