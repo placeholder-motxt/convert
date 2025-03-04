@@ -150,11 +150,6 @@ class AbstractMethodObject(ABC):
         # TODO: Make immutable if needed
         return self.__parameters
 
-    def get_returnType(self) -> TypeObject:
-        # TODO: Make immutable if needed
-        return self.__returnType
-
-
 class ClassMethodObject(AbstractMethodObject):
     def __init__(self):
         super().__init__()
