@@ -364,7 +364,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         assert self.relationship_object.get_source_class() == 1
 
     def test_get_target_class(self):
-        self.relationship_object.setTargetClass(1)
+        self.relationship_object.set_target_class(1)
         assert self.relationship_object.get_target_class() == 1
 
 class TestAbstractMethodObject(unittest.TestCase):
