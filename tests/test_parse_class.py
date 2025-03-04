@@ -2,7 +2,7 @@ import json
 import unittest
 from unittest.mock import MagicMock
 
-from app.element_objects import (
+from app.models.diagram import (
     ManyToManyRelationshipObject,
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
@@ -304,7 +304,6 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         result = parser.parse_classes()
         self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
 
-
     def test_invalid_method_parameter(self):
         data = """{
             "diagram": "ClassDiagram",
@@ -387,7 +386,6 @@ class TestParseJsonToObjectClass(unittest.TestCase):
                 self.parser = ParseJsonToObjectClass(uml_json)
                 self.parser.parse_relationships(self.classes)
 
-
                 class_from_id = self.classes[1]
 
                 # Check that the ManyToManyRelationshipObject was created
@@ -411,7 +409,6 @@ class TestParseJsonToObjectClass(unittest.TestCase):
                 self.parser = ParseJsonToObjectClass(uml_json)
                 self.parser.parse_relationships(self.classes)
 
-
                 class_to_id = self.classes[2]
 
                 ro = class_to_id.add_relationship.call_args[0][0]
@@ -422,7 +419,6 @@ class TestParseJsonToObjectClass(unittest.TestCase):
                 uml_json["edges"][0]["endLabel"] = m
                 self.parser = ParseJsonToObjectClass(uml_json)
                 self.parser.parse_relationships(self.classes)
-
 
                 class_from_id = self.classes[1]
                 class_to_id = self.classes[2]
