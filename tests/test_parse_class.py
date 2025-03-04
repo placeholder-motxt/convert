@@ -317,7 +317,7 @@ class TestParseJsonToObject(unittest.TestCase):
             ]
         }
         self.parser = ParseJsonToObjectClass(uml_json)
-        valid_multiplicities = ["1", "*", "1..*", "0..1", "0..10"]
+        valid_multiplicities = ["1", "*", "1..*", "0..1", "1..12", "12..222"]
 
         for amount_str in valid_multiplicities:
             uml_json["edges"][0]["endLabel"] = amount_str
