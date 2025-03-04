@@ -5,11 +5,16 @@ from app.element_objects import *
 class ParseJsonToObjectSeq:
     def __init__(self):
         self.__json = None
+        self.__class_object: dict = dict()
+        self.__controller_method: list[ControllerMethodObject] = []
+        self.__call_nodes: dict = dict()
+        self.__edges: list = []
+        self.__implicit_parameter_nodes = dict()
 
     def set_json(self, data):
         try:
             data_json = json.loads(data)
-            
+
             if(self.validate_json(data_json)):
                 self.__json = data_json
                 return "Success"
@@ -75,4 +80,9 @@ class ParseJsonToObjectSeq:
         
         except Exception:
             return False
-        
+    
+    def get_controller_method(self):
+       pass
+    
+    def parse(self):
+        pass
