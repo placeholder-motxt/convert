@@ -1,17 +1,24 @@
 from __future__ import annotations
 
+from app.utils import is_valid_python_identifier
+
 
 class ClassObject:
     def __init__(self):
         self.__name: str = ""
         self.__parent: ClassObject = None
-        self.__fields : list[FieldObject] = []
-        self.__methods : list[ClassMethodObject] = []
-        self.__relationships : list[AbstractRelationshipObject] = []
+        self.__fields: list[FieldObject] = []
+        self.__methods: list[ClassMethodObject] = []
+        self.__relationships: list[AbstractRelationshipObject] = []
         self.__id: int
 
     def to_models_code(self) -> str:
-        return f"""class {self.__name}({self.__parent.get_name() if self.__parent else "models.Model"}):\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}\n{self.__get_methods_to_code()}"""
+        return (
+            f"class {self.__name}"
+            + f"({self.__parent.get_name() if self.__parent else 'models.Model'}):"
+            + f"\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}"
+            + f"\n{self.__get_methods_to_code()}"
+        )
 
     def __str__(self) -> str:
         return (
@@ -35,27 +42,28 @@ class ClassObject:
     def add_relationship(self, relationship: AbstractRelationshipObject):
         self.__relationships.append(relationship)
 
-    def set_id(self, id):
+    def set_id(self, id: int):
         self.__id = id
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.__name
 
-    def __get_attributes_to_code(self):
-        res=""
+    def __get_attributes_to_code(self) -> str:
+        res = ""
         for attribute in self.__fields:
-            res+='\t'+attribute.to_models_code()+'\n'
+            res += "\t" + attribute.to_models_code() + "\n"
         return res
-    
-    def __get_relationships_to_code(self):
-        res=""
+
+    def __get_relationships_to_code(self) -> str:
+        res = ""
         for relation in self.__relationships:
-            res+='\t'+relation.to_models_code()+'\n'
+            res += "\t" + relation.to_models_code() + "\n"
         return res
-    
-    def __get_methods_to_code(self):
+
+    def __get_methods_to_code(self) -> str:
         # TODO: Implement this
         return ""
+
 
 class FieldObject:
     def __init__(self):
@@ -71,30 +79,31 @@ class FieldObject:
     def set_type(self, type: TypeObject):
         self.__type = type
 
-    def to_models_code(self):
+    def to_models_code(self) -> str:
         type_mapping = {
-        "boolean": "models.BooleanField()",
-        "String": "models.CharField(max_length=255)",
-        "integer": "models.IntegerField()",
-        "float": "models.FloatField()",
-        "double": "models.FloatField()",
-        "Date": "models.DateField()",
-        "DateTime": "models.DateTimeField()",
-        "Time": "models.TimeField()",
-        "Text": "models.TextField()",
-        "Email": "models.EmailField()",
-        "URL": "models.URLField()",
-        "UUID": "models.UUIDField()",
-        "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
+            "boolean": "models.BooleanField()",
+            "String": "models.CharField(max_length=255)",
+            "integer": "models.IntegerField()",
+            "float": "models.FloatField()",
+            "double": "models.FloatField()",
+            "Date": "models.DateField()",
+            "DateTime": "models.DateTimeField()",
+            "Time": "models.TimeField()",
+            "Text": "models.TextField()",
+            "Email": "models.EmailField()",
+            "URL": "models.URLField()",
+            "UUID": "models.UUIDField()",
+            "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
         }
-    
+
         field_type = self.__type.to_models_code().lower()
-        
+
         for key, value in type_mapping.items():
             if key.lower() in field_type:
                 return f"{self.__name} = {value}"
-        
+
         return f"{self.__name} = models.CharField(max_length=255)"  # Default fallback
+
 
 class AbstractMethodObject:
     def __init__(self):
@@ -117,6 +126,17 @@ class AbstractMethodObject:
     def set_returnType(self, returnType: TypeObject):
         self.__returnType = returnType
 
+    def get_name(self) -> str:
+        return self.__name
+
+    def get_parameters(self) -> list[ParameterObject]:
+        # TODO: Make immutable if needed
+        return self.__parameters
+
+    def get_returnType(self) -> TypeObject:
+        # TODO: Make immutable if needed
+        return self.__returnType
+
 
 class ClassMethodObject(AbstractMethodObject):
     def __init__(self):
@@ -128,6 +148,26 @@ class ClassMethodObject(AbstractMethodObject):
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
 
+    def to_views_code(self) -> str:
+        name = self.get_name()
+        if name is None or not is_valid_python_identifier(name):
+            raise ValueError(f"Invalid method name: {name}")
+
+        params = ", ".join([param.to_views_code() for param in self.get_parameters()])
+        res = f"def {name}({params})"
+
+        ret = self.get_returnType()
+        if ret is not None:
+            rettype = ret.get_name()
+            if not is_valid_python_identifier(rettype):
+                raise ValueError(f"Invalid return type: {rettype}")
+            res += f" -> {rettype}"
+        res += ":\n    # TODO: Auto generated function stub\n"
+        res += (
+            "    raise NotImplementedError('method function is not yet implemented')\n"
+        )
+        return res
+
 
 class AbstractRelationshipObject:
     def __init__(self):
@@ -135,9 +175,9 @@ class AbstractRelationshipObject:
         self.__targetClass: ClassObject = None
         self.__sourceClassOwnAmount: str = ""
         self.__targetClassOwnAmount: str = ""
-    
-    def setSourceClass(self, sourceClass):
-        if sourceClass == None:
+
+    def setSourceClass(self, sourceClass: ClassObject):
+        if sourceClass is None:
             raise Exception("Source Class cannot be SET to be None!")
         self.__sourceClass = sourceClass
 
@@ -145,17 +185,17 @@ class AbstractRelationshipObject:
         if targetClass is None:
             raise Exception("Target Class cannot be SET to be None!")
         self.__targetClass = targetClass
-    
-    def setSourceClassOwnAmount(self, amount):
+
+    def setSourceClassOwnAmount(self, amount: str):
         self.__sourceClassOwnAmount = amount
 
-    def setTargetClassOwnAmount(self, amount):
+    def setTargetClassOwnAmount(self, amount: str):
         self.__targetClassOwnAmount = amount
 
-    def get_source_class(self):
+    def get_source_class(self) -> ClassObject:
         return self.__sourceClass
-    
-    def get_target_class(self):
+
+    def get_target_class(self) -> ClassObject:
         return self.__targetClass
 
 
@@ -165,9 +205,12 @@ class TypeObject:
 
     def set_name(self, name: str):
         self.__name = name
-    
-    def to_models_code(self):
+
+    def to_models_code(self) -> str:
         return self.__name.title()
+
+    def get_name(self) -> str:
+        return self.__name
 
 
 class ParameterObject:
@@ -183,6 +226,20 @@ class ParameterObject:
 
     def set_type(self, type: str):
         self.__type = type
+
+    def to_views_code(self) -> str:
+        if self.__name is None or not is_valid_python_identifier(self.__name):
+            raise ValueError(f"Invalid param name: {self.__name}")
+
+        res = self.__name
+        if self.__type is not None:
+            param_type = self.__type.get_name()
+            if not is_valid_python_identifier(param_type):
+                raise ValueError(f"Invalid param type: {param_type}")
+
+            res += f": {param_type}"
+
+        return res
 
 
 class AbstractMethodCallObject:
@@ -232,24 +289,37 @@ class ArgumentObject:
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
-    
-    def to_models_code(self):
-        return f"{self.get_target_class().get_name().lower()} = models.OneToOneField({self.get_target_class().get_name()}, on_delete = models.CASCADE)"
+
+    def to_models_code(self) -> str:
+        return (
+            f"{self.get_target_class().get_name().lower()} = "
+            + f"models.OneToOneField({self.get_target_class().get_name()},"
+            + " on_delete = models.CASCADE)"
+        )
 
 
 class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
 
-    def to_models_code(self):
-        return f"{self.get_target_class().get_name().lower()}FK = models.ForeignKey({self.get_target_class().get_name()}, on_delete = models.CASCADE)"
+    def to_models_code(self) -> str:
+        return (
+            f"{self.get_target_class().get_name().lower()}FK "
+            + f"= models.ForeignKey({self.get_target_class().get_name()}, "
+            + "on_delete = models.CASCADE)"
+        )
+
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def __init__(self):
         super().__init__()
-    
-    def to_models_code(self):
-        return f"listOf{self.get_target_class().get_name().title()} = models.ManyToManyField({self.get_target_class().get_name()}, on_delete = models.CASCADE)"
+
+    def to_models_code(self) -> str:
+        return (
+            f"listOf{self.get_target_class().get_name().title()}"
+            + f" = models.ManyToManyField({self.get_target_class().get_name()},"
+            + " on_delete = models.CASCADE)"
+        )
 
 
 class ControllerMethodCallObject(AbstractMethodCallObject):

@@ -8,6 +8,7 @@ from starlette.background import BackgroundTasks
 
 from app.model import DownloadRequest
 from app.parse_json_to_object_class import ParseJsonToObjectClass
+from app.utils import remove_file
 
 app = FastAPI()
 
@@ -37,10 +38,6 @@ async def download_file(
     background_tasks.add_task(remove_file, file)
 
     return response
-
-
-def remove_file(path: str) -> None:
-    os.unlink(path)
 
 
 @app.post("/convert")

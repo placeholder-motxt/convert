@@ -28,8 +28,8 @@ class ParseJsonToObjectClass:
     def parse_classes(self) -> list:
         data = self.__json
 
-        if data["nodes"] is None or data["nodes"] == "":
-            raise Exception("Error: nodes not found in the json")
+        if "nodes" not in data.keys() or data["nodes"] == "":
+            raise ValueError("Error: nodes not found in the json")
 
         # iterate all class in json
         for object in data["nodes"]:
@@ -52,27 +52,27 @@ class ParseJsonToObjectClass:
                 attributes = []
 
             # iterate all method in a class
-            methods = object["methods"].split("\n")
+            methods = (
+                object["methods"].replace("+", "\n").replace("-", "\n").split("\n")
+            )
             for method in methods:
                 if method != "":
                     class_method_obj = ClassMethodObject()
-                    class_method_name = method.split("(")[0].lstrip("+- ")
-                    class_method_rettype_name = method.split(":")[1].strip()
-
-                    if class_method_rettype_name[-1] == ")":
-                        class_method_rettype_name = class_method_rettype_name[
-                            : len(class_method_rettype_name) - 1
-                        ]
+                    class_method_name = method.split("(")[0].lstrip("+- ").strip()
+                    print(class_method_name)
+                    if ":" in method.split(")")[1]:
+                        class_method_rettype_name = (
+                            method.split(")")[1].split(":")[1].strip()
+                        )
+                    else:
+                        raise ValueError("Error: method return type not found")
+                    print(class_method_rettype_name)
 
                     # check if method and method return type name is valid
-                    print(
-                        class_method_name,
-                        self.check_name(class_method_name),
-                        class_method_rettype_name,
-                        self.check_name(class_method_rettype_name),
-                    )
-                    if self.check_name(class_method_name) and self.check_name(
-                        class_method_rettype_name
+                    if (
+                        self.check_name(class_method_name)
+                        and self.check_name(class_method_rettype_name)
+                        or bool(re.match(r"List\[.*\]", class_method_rettype_name))
                     ):
                         class_method_obj.set_name(class_method_name)
 
@@ -86,15 +86,14 @@ class ParseJsonToObjectClass:
                         )
 
                     # iterate all parameter in a method
-                    parameters = method.split("(")[1].split(")")[0].split(",")
+                    parameters = method.split("(")[1].split(")")[0].split(", ")
+
                     if parameters != [""]:
                         for parameter in parameters:
                             param_obj = ParameterObject()
                             param_type = TypeObject()
                             param_name = parameter.split(":")[0]
-                            param_type_name = parameter.split(":")[1]
-                            param_type_name = param_type_name.strip()
-
+                            param_type_name = parameter.split(":")[1].strip()
                             if self.check_name(param_name) and self.check_name(
                                 param_type_name
                             ):
@@ -119,16 +118,11 @@ class ParseJsonToObjectClass:
                                 attr_name = attribute.split(":")[0].strip()
                                 attr_type_name = attribute.split(":")[1].strip()
 
-                                print(
-                                    attr_name,
-                                    self.check_name(attr_name),
-                                    attr_type_name,
-                                    self.check_name(attr_type_name),
-                                )
+                                print(attr_name)
                                 if (
                                     self.check_name(attr_name)
                                     and self.check_name(attr_type_name)
-                                    or bool(re.match(r"^List\[.*\]$", attr_type_name))
+                                    or bool(re.match(r"List\[.*\]", attr_type_name))
                                 ):
                                     attr.set_name(attr_name)
                                     attr_type.set_name(attr_type_name)
@@ -203,7 +197,6 @@ class ParseJsonToObjectClass:
                     ro.setTargetClass(class_from_id)
                 continue
             else:
-                print(edge["startLabel"], "one to one", edge["endLabel"])
                 ro = OneToOneRelationshipObject()
 
             ro.setSourceClass(class_from_id)
