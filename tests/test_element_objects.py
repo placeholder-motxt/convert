@@ -1,4 +1,6 @@
 import unittest
+from abc import ABC
+from unittest import mock
 
 from app.element_objects import (
     AbstractMethodCallObject,
@@ -13,9 +15,11 @@ from app.element_objects import (
     FieldObject,
     ManyToManyRelationshipObject,
     ManyToOneRelationshipObject,
+    ModelsElements,
     OneToOneRelationshipObject,
     ParameterObject,
     TypeObject,
+    ViewsElements,
 )
 
 
@@ -70,21 +74,21 @@ class TestClassObject(unittest.TestCase):
         many_to_one_relationship = ManyToOneRelationshipObject()
         many_to_many_relationship = ManyToManyRelationshipObject()
 
-        one_to_one_relationship.setTargetClass(target_class)
-        many_to_one_relationship.setTargetClass(target_class)
-        many_to_many_relationship.setTargetClass(target_class)
-        
+        one_to_one_relationship.set_target_class(target_class)
+        many_to_one_relationship.set_target_class(target_class)
+        many_to_many_relationship.set_target_class(target_class)
+
         field = FieldObject()
         field_type = TypeObject()
         field.set_name("field1")
-        field_type.set_name('boolean')
+        field_type.set_name("boolean")
         field.set_type(field_type)
         self.class_object.add_field(field)
 
         field = FieldObject()
         field_type = TypeObject()
         field.set_name("field2")
-        field_type.set_name('integer')
+        field_type.set_name("integer")
         field.set_type(field_type)
         self.class_object.add_field(field)
 
@@ -92,11 +96,14 @@ class TestClassObject(unittest.TestCase):
         self.class_object.add_relationship(many_to_one_relationship)
         self.class_object.add_relationship(many_to_many_relationship)
 
-        assert self.class_object.to_models_code() == "class ClassTest(models.Model):\n\t\
+        assert (
+            self.class_object.to_models_code()
+            == "class ClassTest(models.Model):\n\t\
 field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
 targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
 targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
 listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\n"
+        )
 
     def test_get_name(self):
         model = ClassObject()
@@ -112,7 +119,10 @@ listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCA
         type1.set_name("integer")
         field1.set_type(type1)
         model.add_field(field1)
-        assert model._ClassObject__get_attributes_to_code() == "\tfield1 = models.IntegerField()\n"
+        assert (
+            model._ClassObject__get_attributes_to_code()
+            == "\tfield1 = models.IntegerField()\n"
+        )
 
     def test_get_relationships_to_code(self):
         model = ClassObject()
@@ -120,9 +130,12 @@ listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCA
         user = ClassObject()
         user.set_name("User")
         relationship = OneToOneRelationshipObject()
-        relationship.setTargetClass(user)
+        relationship.set_target_class(user)
         model.add_relationship(relationship)
-        assert model._ClassObject__get_relationships_to_code() == "\tuser = models.OneToOneField(User, on_delete = models.CASCADE)\n"
+        assert (
+            model._ClassObject__get_relationships_to_code()
+            == "\tuser = models.OneToOneField(User, on_delete = models.CASCADE)\n"
+        )
 
     def test_get_methods_to_code(self):
         # TODO
@@ -161,7 +174,10 @@ class TestFieldObject(unittest.TestCase):
         type_obj = TypeObject()
         type_obj.set_name("String")
         field_object.set_type(type_obj)
-        assert field_object.to_models_code() == "test_field = models.CharField(max_length=255)"
+        assert (
+            field_object.to_models_code()
+            == "test_field = models.CharField(max_length=255)"
+        )
 
     def test_to_models_code_integer(self):
         field_object = FieldObject()
@@ -249,7 +265,10 @@ class TestFieldObject(unittest.TestCase):
         type_obj = TypeObject()
         type_obj.set_name("Decimal")
         field_object.set_type(type_obj)
-        assert field_object.to_models_code() == "test_field = models.DecimalField(max_digits=10, decimal_places=2)"
+        assert (
+            field_object.to_models_code()
+            == "test_field = models.DecimalField(max_digits=10, decimal_places=2)"
+        )
 
     def test_to_models_code_unknown(self):
         field_object = FieldObject()
@@ -257,7 +276,12 @@ class TestFieldObject(unittest.TestCase):
         type_obj = TypeObject()
         type_obj.set_name("Unknown")
         field_object.set_type(type_obj)
-        assert field_object.to_models_code() == "test_field = models.CharField(max_length=255)"
+        assert (
+            field_object.to_models_code()
+            == "test_field = models.CharField(max_length=255)"
+        )
+
+
 class TestTypeObject(unittest.TestCase):
     def setUp(self):
         self.type_object = TypeObject()
@@ -267,68 +291,81 @@ class TestTypeObject(unittest.TestCase):
         self.assertEqual(self.type_object._TypeObject__name, "TestType")
 
 
-class TestRelationshipObject(unittest.TestCase):
+class TestAbstractRelationshipObject(unittest.TestCase):
     def setUp(self):
         self.relationship_object = AbstractRelationshipObject()
         self.source_class = ClassObject()
         self.target_class = ClassObject()
 
-        self.source_class.set_name("SourceClass")
-        self.target_class.set_name("TargetClass")
+        self.source_class.set_name("source_class")
+        self.target_class.set_name("target_class")
 
-    def test_positive_set_sourceClass(self):
-        self.relationship_object.setSourceClass(self.source_class)
+    def test_instance_of_abc(self):
+        self.assertIsInstance(self.relationship_object, ABC)
+
+    def test_positive_set_source_class(self):
+        self.relationship_object.set_source_class(self.source_class)
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__sourceClass,
+            self.relationship_object._AbstractRelationshipObject__source_class,
             self.source_class,
         )
 
-    def test_positive_set_targetClass(self):
-        self.relationship_object.setTargetClass(self.target_class)
+    def test_positive_set_target_class(self):
+        self.relationship_object.set_target_class(self.target_class)
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__targetClass,
+            self.relationship_object._AbstractRelationshipObject__target_class,
             self.target_class,
         )
 
-    def test_negative_set_sourceClass_as_None(self):
+    def test_negative_set_source_class_as_None(self):
         with self.assertRaises(Exception) as context:
-            self.relationship_object.setSourceClass(None)
+            self.relationship_object.set_source_class(None)
 
         self.assertEqual(
             str(context.exception), "Source Class cannot be SET to be None!"
         )
 
-    def test_negative_set_targetClass_as_None(self):
+    def test_negative_set_target_class_as_None(self):
         with self.assertRaises(Exception) as context:
-            self.relationship_object.setTargetClass(None)
+            self.relationship_object.set_target_class(None)
 
         self.assertEqual(
             str(context.exception), "Target Class cannot be SET to be None!"
         )
 
     def test_edge_source_equals_target(self):
-        self.relationship_object.setSourceClass(self.source_class)
-        self.relationship_object.setTargetClass(self.source_class)
+        self.relationship_object.set_source_class(self.source_class)
+        self.relationship_object.set_target_class(self.source_class)
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__sourceClass,
+            self.relationship_object._AbstractRelationshipObject__source_class,
             self.source_class,
         )
         self.assertEqual(
-            self.relationship_object._AbstractRelationshipObject__targetClass,
+            self.relationship_object._AbstractRelationshipObject__target_class,
             self.source_class,
         )
-        
+
     def test_set_Source_Class_Own_Amount(self):
         self.relationship_object.setSourceClassOwnAmount("2")
-        self.assertEqual(self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount, "2")
-        
+        self.assertEqual(
+            self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount,
+            "2",
+        )
+
     def test_set_Target_Class_Own_Amount(self):
         self.relationship_object.setTargetClassOwnAmount("1")
-        self.assertEqual(self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount, "1")
-    
+        self.assertEqual(
+            self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount,
+            "1",
+        )
+
+
 class TestAbstractMethodObject(unittest.TestCase):
     def setUp(self):
         self.method_object = AbstractMethodObject()
+
+    def test_abc(self):
+        self.assertIsInstance(self.method_object, ABC)
 
     def test_set_name(self):
         self.method_object.set_name("TestMethod")
@@ -339,19 +376,43 @@ class TestAbstractMethodObject(unittest.TestCase):
         self.method_object.add_parameter(parameter)
         self.assertIn(parameter, self.method_object._AbstractMethodObject__parameters)
 
-    def test_set_returnType(self):
+    def test_set_return_type(self):
         return_type = TypeObject()
-        self.method_object.set_returnType(return_type)
+        self.method_object.set_return_type(return_type)
         self.assertEqual(
-            self.method_object._AbstractMethodObject__returnType, return_type
+            self.method_object._AbstractMethodObject__return_type, return_type
         )
 
     def test_str_representation(self):
         self.method_object.set_name("TestMethod")
         expected_output = (
-            "MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"
+            "MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturn_type: None"
         )
         self.assertEqual(str(self.method_object), expected_output)
+
+    def test_get_name_empty(self):
+        self.assertEqual(self.method_object.get_name(), "")
+
+    def test_get_name(self):
+        name = "TestMethod"
+        self.method_object.set_name(name)
+        self.assertEqual(self.method_object.get_name(), name)
+
+    def test_get_parameters_empty(self):
+        self.assertEqual(self.method_object.get_parameters(), [])
+
+    def test_get_parameters_with__parameter(self):
+        param = ParameterObject()
+        self.method_object.add_parameter(param)
+
+        self.assertEqual(self.method_object.get_parameters(), [param])
+
+    def test_get_parameters_with_multiple_parameters(self):
+        param1 = ParameterObject()
+        param2 = ParameterObject()
+        self.method_object.add_parameter(param1)
+        self.method_object.add_parameter(param2)
+        self.assertEqual(self.method_object.get_parameters(), [param1, param2])
 
 
 class TestParameterObject(unittest.TestCase):
@@ -372,10 +433,24 @@ class TestParameterObject(unittest.TestCase):
         expected_output = """ParameterObject:\n\tname: TestParameter\n\ttype: None"""
         self.assertEqual(str(self.parameter_object), expected_output)
 
+    def test_get_name(self):
+        self.parameter_object.set_name("TestParameter")
+        self.assertEqual(self.parameter_object.get_name(), "TestParameter")
+
 
 class TestAbstractMethodCallObject(unittest.TestCase):
     def setUp(self):
+        self.method_mock = unittest.mock.Mock()
+        self.method_mock.get_name.return_value = "mock_method"
+        self.argument_mock1 = unittest.mock.Mock()
+        self.argument_mock1.print_django_style.return_value = "arg1"
+        self.argument_mock2 = unittest.mock.Mock()
+        self.argument_mock2.print_django_style.return_value = "arg2"
         self.method_call_object = AbstractMethodCallObject()
+        self.method_call_object.set_method(self.method_mock)
+
+    def test_is_instance_of_abc(self):
+        self.assertIsInstance(self.method_call_object, ABC)
 
     def test_set_method(self):
         method = AbstractMethodObject()
@@ -392,17 +467,57 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         )
 
     def test_return_var_name(self):
-        self.method_call_object.set_returnVarName("TestVarName")
+        self.method_call_object.set_return_var_name("TestVarName")
         self.assertEqual(
-            self.method_call_object._AbstractMethodCallObject__returnVarName,
+            self.method_call_object._AbstractMethodCallObject__return_var_name,
             "TestVarName",
         )
 
     def test_str_representation(self):
         expected_output = (
-            """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
+            f"MethodCallObject:\n"
+            f"\tmethod: {self.method_mock}\n"
+            f"\targuments: []\n"
+            f"\treturn_var_name: "
         )
         self.assertEqual(str(self.method_call_object), expected_output)
+
+    def test_set_condition(self):
+        condition = "True"
+        self.method_call_object.set_condition(condition)
+        self.assertEqual(
+            self.method_call_object._AbstractMethodCallObject__condition, "True"
+        )
+
+    def test_print_django_style_one_argument(self):
+        self.method_call_object.set_return_var_name("result")
+        self.method_call_object.add_argument(self.argument_mock1)
+        expected_output = "result = mock_method(arg1)"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+
+    def test_print_django_style_two_arguments(self):
+        self.method_call_object.set_return_var_name("result")
+        self.method_call_object.add_argument(self.argument_mock1)
+        self.method_call_object.add_argument(self.argument_mock2)
+        expected_output = "result = mock_method(arg1, arg2)"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+
+    def test_print_django_style_negative(self):
+        self.method_call_object.set_method(None)  # No method set
+        with self.assertRaises(AttributeError):
+            self.method_call_object.print_django_style()
+
+    def test_print_django_style_corner_case_empty_arguments(self):
+        self.method_call_object.set_return_var_name("output")
+        expected_output = "output = mock_method()"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
+
+    def test_print_django_style_with_condition(self):
+        self.method_call_object.set_condition("x > 5")
+        self.method_call_object.set_return_var_name("value")
+        self.method_call_object.add_argument(self.argument_mock1)
+        expected_output = "if x > 5:\n\t\tvalue = mock_method(arg1)"
+        self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
 
 class TestOneToOneRelationshipObject(unittest.TestCase):
@@ -414,9 +529,15 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
         self.target_class.set_name("TargetClass")
 
     def test_one_to_one_relationship(self):
-        self.one_to_one_relationship.setSourceClass(self.source_class)
-        self.one_to_one_relationship.setTargetClass(self.target_class)
-        assert self.one_to_one_relationship.to_models_code() == "targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)"
+        self.one_to_one_relationship.set_source_class(self.source_class)
+        self.one_to_one_relationship.set_target_class(self.target_class)
+        assert (
+            self.one_to_one_relationship.to_models_code()
+            == "targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)"
+        )
+
+    def test_is_instance_of_abstract_relationship_object(self):
+        self.assertIsInstance(self.one_to_one_relationship, AbstractRelationshipObject)
 
 
 class TestManyToOneRelationshipObject(unittest.TestCase):
@@ -428,9 +549,15 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
         self.target_class.set_name("TargetClass")
 
     def test_many_to_one_relationship(self):
-        self.many_to_one_relationship.setSourceClass(self.source_class)
-        self.many_to_one_relationship.setTargetClass(self.target_class)
-        assert self.many_to_one_relationship.to_models_code() == "targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
+        self.many_to_one_relationship.set_source_class(self.source_class)
+        self.many_to_one_relationship.set_target_class(self.target_class)
+        assert (
+            self.many_to_one_relationship.to_models_code()
+            == "targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
+        )
+
+    def test_is_instance_of_abstract_relationship_object(self):
+        self.assertIsInstance(self.many_to_one_relationship, AbstractRelationshipObject)
 
 
 class TestManyToManyRelationshipObject(unittest.TestCase):
@@ -442,88 +569,17 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.target_class.set_name("TargetClass")
 
     def test_many_to_many_relationship(self):
-        self.many_to_many_relationship.setSourceClass(self.source_class)
-        self.many_to_many_relationship.setTargetClass(self.target_class)
-        assert self.many_to_many_relationship.to_models_code() == "listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)"
-
-
-class TestAbstractMethodObject2(unittest.TestCase):
-    def setUp(self):
-        self.method_object = AbstractMethodObject()
-
-    def test_set_name(self):
-        self.method_object.set_name("TestMethod")
-        self.assertEqual(self.method_object._AbstractMethodObject__name, "TestMethod")
-
-    def test_add_parameter(self):
-        parameter = ParameterObject()
-        self.method_object.add_parameter(parameter)
-        self.assertIn(parameter, self.method_object._AbstractMethodObject__parameters)
-
-    def test_set_returnType(self):
-        return_type = TypeObject()
-        self.method_object.set_returnType(return_type)
-        self.assertEqual(
-            self.method_object._AbstractMethodObject__returnType, return_type
+        self.many_to_many_relationship.set_source_class(self.source_class)
+        self.many_to_many_relationship.set_target_class(self.target_class)
+        assert (
+            self.many_to_many_relationship.to_models_code()
+            == "listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)"
         )
 
-    def test_str_representation(self):
-        self.method_object.set_name("TestMethod")
-        expected_output = (
-            "MethodObject:\n\tname: TestMethod\n\tparameters: []\n\treturnType: None"
+    def test_is_instance_of_abstract_relationship_object(self):
+        self.assertIsInstance(
+            self.many_to_many_relationship, AbstractRelationshipObject
         )
-        self.assertEqual(str(self.method_object), expected_output)
-
-
-class TestParameterObject2(unittest.TestCase):
-    def setUp(self):
-        self.parameter_object = ParameterObject()
-
-    def test_set_name(self):
-        self.parameter_object.set_name("TestParameter")
-        self.assertEqual(self.parameter_object._ParameterObject__name, "TestParameter")
-
-    def test_set_type(self):
-        type_obj = TypeObject()
-        self.parameter_object.set_type(type_obj)
-        self.assertEqual(self.parameter_object._ParameterObject__type, type_obj)
-
-    def test_str_representation(self):
-        self.parameter_object.set_name("TestParameter")
-        expected_output = """ParameterObject:\n\tname: TestParameter\n\ttype: None"""
-        self.assertEqual(str(self.parameter_object), expected_output)
-
-
-class TestAbstractMethodCallObject2(unittest.TestCase):
-    def setUp(self):
-        self.method_call_object = AbstractMethodCallObject()
-
-    def test_set_method(self):
-        method = AbstractMethodObject()
-        self.method_call_object.set_method(method)
-        self.assertEqual(
-            self.method_call_object._AbstractMethodCallObject__method, method
-        )
-
-    def test_add_argument(self):
-        argument = ArgumentObject()
-        self.method_call_object.add_argument(argument)
-        self.assertEqual(
-            self.method_call_object._AbstractMethodCallObject__arguments, [argument]
-        )
-
-    def test_return_var_name(self):
-        self.method_call_object.set_returnVarName("TestVarName")
-        self.assertEqual(
-            self.method_call_object._AbstractMethodCallObject__returnVarName,
-            "TestVarName",
-        )
-
-    def test_str_representation(self):
-        expected_output = (
-            """MethodCallObject:\n\tmethod: None\n\targuments: []\n\treturnVarName: """
-        )
-        self.assertEqual(str(self.method_call_object), expected_output)
 
 
 class TestArgumentObject(unittest.TestCase):
@@ -534,7 +590,7 @@ class TestArgumentObject(unittest.TestCase):
         method_object = AbstractMethodObject()
         self.argument_object.set_methodObject(method_object)
         self.assertEqual(
-            self.argument_object._ArgumentObject__methodObject, method_object
+            self.argument_object._ArgumentObject__method_object, method_object
         )
 
     def test_set_name(self):
@@ -557,11 +613,16 @@ class TestArgumentObject(unittest.TestCase):
         expected_output = (
             "ArgumentObject:\n\tmethodObject: \n\t"
             "[MethodObject:\n\tname: TestMethod\n\tparameters: []"
-            "\n\treturnType: None]\n\tname: TestArgument\n\ttype: "
+            "\n\treturn_type: None]\n\tname: TestArgument\n\ttype: "
             f"\n\t[{self.argument_object._ArgumentObject__type}]"
             ""
         )
         self.assertEqual(str(self.argument_object), expected_output)
+
+    def test_print_django_style(self):
+        test_name = "test_argument"
+        self.argument_object.set_name(test_name)
+        self.assertEqual(self.argument_object.print_django_style(), test_name)
 
 
 class TestControllerMethodCallObject(unittest.TestCase):
@@ -582,11 +643,51 @@ class TestControllerMethodObject(unittest.TestCase):
         self.controller_method = ControllerMethodObject()
         self.method_call = AbstractMethodCallObject()
 
-    def test_add_calls(self):
-        self.controller_method.add_calls(self.method_call)
+        self.controller_method.get_name = mock.Mock(return_value="sample_method")
+        self.controller_method.get_parameters = mock.Mock(return_value=[])
+
+    def test_add_call(self):
+        self.controller_method.add_call(self.method_call)
         self.assertIn(
             self.method_call, self.controller_method._ControllerMethodObject__calls
         )
+
+    def test_print_django_style_positive(self):
+        mock_call = mock.Mock()
+        mock_call.print_django_style.return_value = "mock_call()"
+        self.controller_method.add_call(mock_call)
+        expected_output = "def sample_method(request):\n\tmock_call()\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
+
+    def test_print_django_style_negative(self):
+        self.controller_method.get_name = mock.Mock(return_value="")  # No method name
+        with self.assertRaises(TypeError):
+            self.controller_method.print_django_style()
+
+    def test_print_django_style_corner_case_empty_parameters(self):
+        expected_output = "def sample_method(request):\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
+
+    def test_print_django_style_with_parameters(self):
+        param1 = mock.Mock()
+        param1.get_name.return_value = "param1"
+        param2 = mock.Mock()
+        param2.get_name.return_value = "param2"
+        self.controller_method.get_parameters = mock.Mock(return_value=[param1, param2])
+        expected_output = "def sample_method(request, param1, param2):\n\t\n"
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
+
+    def test_print_django_style_with_multiple_calls(self):
+        mock_call1 = mock.Mock()
+        mock_call1.print_django_style.return_value = "mock_call1()"
+        mock_call2 = mock.Mock()
+        mock_call2.print_django_style.return_value = "mock_call2()"
+        self.controller_method.add_call(mock_call1)
+        self.controller_method.add_call(mock_call2)
+        expected_output = (
+            "def sample_method(request):\n\tmock_call1()\n\tmock_call2()\n\t\n"
+        )
+        self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
 
 class TestClassMethodObject(unittest.TestCase):
@@ -627,6 +728,76 @@ class TestClassMethodCallObject(unittest.TestCase):
         self.assertEqual(
             str(context.exception), "ClassMethodObject cannot be SET to be None!"
         )
+
+
+class TestModelsElements(unittest.TestCase):
+    def test_models_elements_valid_filename(self):
+        obj = ModelsElements("model_file.py")
+        self.assertIsInstance(obj, ModelsElements)
+
+    def test_models_elements_invalid_filename_type(self):
+        with self.assertRaises(AssertionError):
+            ModelsElements(123)  # Invalid type
+
+    def test_models_elements_empty_filename(self):  # cornercase
+        with self.assertRaises(AssertionError):
+            ModelsElements("")
+
+    def test_print_django_style_not_implemented(self):
+        obj = ModelsElements("models.py")
+        self.assertIsNone(obj.print_django_style())
+
+
+class TestViewsElements(unittest.TestCase):
+    def setUp(self):
+        self.views_elements = ViewsElements("view_file.py")
+
+    def test_instance_of_file_elements(self):
+        self.assertIsInstance(self.views_elements, ViewsElements)
+
+    def test_print_django_style_no_methods(self):
+        expected_output = ""
+        self.assertEqual(self.views_elements.print_django_style(), expected_output)
+
+    def test_print_django_style_with_one_controller_method(self):
+        mock_controller_method = mock.Mock()
+        mock_controller_method.print_django_style.return_value = (
+            "def sample_controller(request):\n\tpass\n"
+        )
+        self.views_elements.add_controller_method(mock_controller_method)
+        expected_output = "def sample_controller(request):\n\tpass\n"
+        self.assertEqual(self.views_elements.print_django_style(), expected_output)
+
+    def test_print_django_style_with_multiple_controller_methods(self):
+        mock_controller_method1 = mock.Mock()
+        mock_controller_method1.print_django_style.return_value = (
+            "def controller_one(request):\n\tpass\n"
+        )
+        mock_controller_method2 = mock.Mock()
+        mock_controller_method2.print_django_style.return_value = (
+            "def controller_two(request):\n\tpass\n"
+        )
+
+        self.views_elements.add_controller_method(mock_controller_method1)
+        self.views_elements.add_controller_method(mock_controller_method2)
+
+        expected_output = (
+            "def controller_one(request):\n"
+            "\tpass\n"
+            "def controller_two(request):\n"
+            "\tpass\n"
+        )
+
+        self.assertEqual(self.views_elements.print_django_style(), expected_output)
+
+    def test_print_django_style_with_class_methods_ignored(self):
+        mock_class_method = mock.Mock()
+        mock_class_method.print_django_style.return_value = (
+            "class_method should not be included"
+        )
+        self.views_elements.add_class_method(mock_class_method)
+        expected_output = ""
+        self.assertEqual(self.views_elements.print_django_style(), expected_output)
 
 
 if __name__ == "__main__":
