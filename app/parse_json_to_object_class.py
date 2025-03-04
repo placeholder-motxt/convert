@@ -1,16 +1,14 @@
 import json
 import re
 
-from app.element_objects import (
-    ClassMethodObject,
+from app.models.diagram import (
     ClassObject,
-    FieldObject,
     ManyToManyRelationshipObject,
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
-    ParameterObject,
-    TypeObject,
 )
+from app.models.methods import ClassMethodObject
+from app.models.properties import FieldObject, ParameterObject, TypeObject
 
 
 class ParseJsonToObjectClass:
@@ -71,7 +69,6 @@ class ParseJsonToObjectClass:
                         self.check_name(class_method_name)
                         and self.check_name(class_method_rettype_name)
                         or bool(re.match(r"List\[.*\]", class_method_rettype_name))
-
                     ):
                         class_method_obj.set_name(class_method_name)
 
@@ -121,7 +118,6 @@ class ParseJsonToObjectClass:
                                     self.check_name(attr_name)
                                     and self.check_name(attr_type_name)
                                     or bool(re.match(r"List\[.*\]", attr_type_name))
-
                                 ):
                                     attr.set_name(attr_name)
                                     attr_type.set_name(attr_type_name)
@@ -199,7 +195,6 @@ class ParseJsonToObjectClass:
 
             ro.set_source_class(class_from_id)
             ro.set_target_class(class_to_id)
-
 
             ro.setSourceClassOwnAmount(edge["startLabel"])
             ro.setTargetClassOwnAmount(edge["endLabel"])
