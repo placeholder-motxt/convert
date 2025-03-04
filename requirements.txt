@@ -6,6 +6,7 @@ pydantic
 starlette
 pre-commit
 ruff
+jsonschema
 coverage
 pytest-cov
 cosmic-ray
