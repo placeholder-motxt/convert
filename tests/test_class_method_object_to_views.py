@@ -23,12 +23,12 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.method_with_return_type.set_name("method_rettype")
         self.return_type = TypeObject()
         self.return_type.set_name("str")
-        self.method_with_return_type.set_returnType(self.return_type)
+        self.method_with_return_type.set_return_type(self.return_type)
 
         self.method_full = ClassMethodObject()
         self.method_full.set_name("method_full")
         self.method_full.add_parameter(self.param)
-        self.method_full.set_returnType(self.return_type)
+        self.method_full.set_return_type(self.return_type)
 
     def test_to_views_code_full(self):
         # Should have param and type annotations for it as well as return type
