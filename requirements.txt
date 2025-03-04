@@ -2,6 +2,11 @@ fastapi
 uvicorn
 pytest
 httpx
+pydantic
+starlette
 pre-commit
 ruff
 jsonschema
+coverage
+pytest-cov
+cosmic-ray
