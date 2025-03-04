@@ -27,8 +27,8 @@ class ParseJsonToObjectClass:
     def parse_classes(self) -> list:
         data = self.__json
 
-        if data["nodes"] is None or data["nodes"] == "":
-            raise Exception("Error: nodes not found in the json")
+        if "nodes" not in data.keys() or data["nodes"] == "":
+            raise ValueError("Error: nodes not found in the json")
 
         # iterate all class in json
         for object in data["nodes"]:
@@ -47,17 +47,25 @@ class ParseJsonToObjectClass:
 
             if "attributes" in object.keys() and object["attributes"] != "":
                 attributes = object["attributes"].split("\n")
-                print(attributes)
             else:
                 attributes = []
 
             # iterate all method in a class
-            methods = object["methods"].split("\n")
+            methods = (
+                object["methods"].replace("+", "\n").replace("-", "\n").split("\n")
+            )
             for method in methods:
                 if method != "":
                     class_method_obj = ClassMethodObject()
-                    class_method_name = method.split("(")[0].lstrip("+- ")
-                    class_method_rettype_name = method.split(":")[1].strip()
+                    class_method_name = method.split("(")[0].lstrip("+- ").strip()
+                    if ":" in method.split(")")[1]:
+                        class_method_rettype_name = (
+                            method.split(")")[1].split(":")[1].strip()
+                        )
+                    else:
+                        raise ValueError("Error: method return type not found")
+                    print(class_method_name)
+                    print(class_method_rettype_name)
 
                     # check if method and method return type name is valid
                     if self.check_name(class_method_name) and self.check_name(
@@ -75,13 +83,14 @@ class ParseJsonToObjectClass:
                         )
 
                     # iterate all parameter in a method
-                    parameters = method.split("(")[1].split(")")[0].split(",")
+                    parameters = method.split("(")[1].split(")")[0].split(", ")
+
                     if parameters != [""]:
                         for parameter in parameters:
                             param_obj = ParameterObject()
                             param_type = TypeObject()
                             param_name = parameter.split(":")[0]
-                            param_type_name = parameter.split(":")[1]
+                            param_type_name = parameter.split(":")[1].strip()
                             if self.check_name(param_name) and self.check_name(
                                 param_type_name
                             ):
@@ -99,7 +108,6 @@ class ParseJsonToObjectClass:
                         for attribute in attributes:
                             if attribute != "":
                                 attribute = attribute.lstrip("+- ")
-                                print(attribute)
 
                                 attr = FieldObject()
                                 attr_type = TypeObject()
