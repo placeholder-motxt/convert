@@ -26,6 +26,12 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.return_type.set_name("str")
         self.method_with_return_type.set_return_type(self.return_type)
 
+        self.method_with_return_type_list = ClassMethodObject()
+        self.method_with_return_type_list.set_name("method_rettype")
+        return_type = TypeObject()
+        return_type.set_name("list[ABC]")
+        self.method_with_return_type_list.set_return_type(return_type)
+
         self.method_full = ClassMethodObject()
         self.method_full.set_name("method_full")
         self.method_full.add_parameter(self.param)
@@ -69,6 +75,14 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             "    raise NotImplementedError('method function is not yet implemented')\n"
         )
         self.assertEqual(result, self.method_with_name.to_views_code())
+
+    def test_to_views_code_rettype_list(self):
+        # Should only have method name and body but no params and return type
+        result = "def method_rettype() -> list[ABC]:\n"
+        result += "    # TODO: Auto generated function stub\n"
+        result += "    raise NotImplementedError('method_rettype function is not yet implemented')"
+        result += "\n"
+        self.assertEqual(result, self.method_with_return_type_list.to_views_code())
 
     def test_to_views_code_multiple_params(self):
         # All params should appear in order with its type annotation
