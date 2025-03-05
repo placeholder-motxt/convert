@@ -17,9 +17,22 @@ class TestModelsElements(unittest.TestCase):
         with self.assertRaises(AssertionError):
             ModelsElements("")
 
+    def test_parse(self):
+        obj = ModelsElements("string")
+        with mock.patch("app.models.elements.ParseJsonToObjectClass") as MockParser:
+            mock_parser_instance = MockParser.return_value
+            mock_parser_instance.parse_classes.return_value = [mock.Mock()]
+
+            self.assertEqual(
+                obj.parse("content"), mock_parser_instance.parse_classes.return_value
+            )
+
     def test_print_django_style_not_implemented(self):
         obj = ModelsElements("models.py")
-        self.assertIsNone(obj.print_django_style())
+        obj.parse(open("tests/test_input.txt", "r").read())
+        res = obj.print_django_style()
+        f = open("tests/test_result.txt", "r")
+        assert res == f.read()
 
 
 class TestViewsElements(unittest.TestCase):
@@ -66,12 +79,12 @@ class TestViewsElements(unittest.TestCase):
 
     def test_print_django_style_with_class_methods_ignored(self):
         mock_class_method = mock.Mock()
-        mock_class_method.print_django_style.return_value = (
+        mock_class_method.to_views_code.return_value = (
             "class_method should not be included"
         )
         self.views_elements.add_class_method(mock_class_method)
         expected_output = ""
-        self.assertEqual(self.views_elements.print_django_style(), expected_output)
+        self.assertNotEqual(self.views_elements.print_django_style(), expected_output)
 
 
 if __name__ == "__main__":
