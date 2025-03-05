@@ -68,6 +68,9 @@ class ClassMethodObject(AbstractMethodObject):
                 raise ValueError(f"Invalid return type: {rettype}")
             res.write (f" -> {rettype}")
         res.write(":")
+        for method_call in self.__calls:
+            res.write("\n    ")
+            res.write(method_call.print_django_style())
         res.write( "\n    # TODO: Auto generated function stub\n")
         res.write(
             "    raise NotImplementedError('method function is not yet implemented')\n"
@@ -190,12 +193,10 @@ if __name__ == "__main__":
     from unittest import mock
 
     class_method_object = ClassMethodObject()
-    class_method_object.set_name("method_object")
-    class_method_object.set_return_type = mock.Mock(return_value=None)
-    mock_call = mock.Mock()
-    mock_call.print_django_style.return_value = "mock_call()"
-    class_method_object.add_class_method_call(mock_call)
-    result = class_method_object.to_views_code()
-    print(result)
+    class_method_object.set_name("class_method_1")
+    class_method_call = mock.Mock()
+    class_method_call.print_django_style.return_value = "ret_var1 = method_call1(arg1, arg2)"
+    class_method_object.add_class_method_call(class_method_call)
+    print(class_method_object.to_views_code())
 
 
