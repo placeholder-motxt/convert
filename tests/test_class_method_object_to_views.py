@@ -194,3 +194,4 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self.method_with_return_type.to_views_code()
         self.assertEqual(str(ctx.exception), "Invalid return type: param_!$")
+
