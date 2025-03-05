@@ -2177,6 +2177,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
   ],
   "version": "3.8"
 }
+"""
       with self.assertRaises(Exception) as context:
          parser = ParseJsonToObjectSeq()
          parser.set_json(json_data)
