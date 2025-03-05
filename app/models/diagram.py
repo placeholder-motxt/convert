@@ -23,8 +23,7 @@ class ClassObject:
         return (
             f"class {self.__name}"
             + f"({self.__parent.get_name() if self.__parent else 'models.Model'}):"
-            + f"\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}"
-            + f"\n{self.__get_methods_to_code()}"
+            + f"\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}\n"
         )
 
     def to_views_code(self) -> str:
@@ -71,6 +70,9 @@ class ClassObject:
     def get_name(self) -> str:
         return self.__name
 
+    def get_methods(self) -> list[ClassMethodObject]:
+        return self.__methods
+
     def __get_attributes_to_code(self) -> str:
         res = ""
         for attribute in self.__fields:
@@ -82,10 +84,6 @@ class ClassObject:
         for relation in self.__relationships:
             res += "\t" + relation.to_models_code() + "\n"
         return res
-
-    def __get_methods_to_code(self) -> str:
-        # TODO: Implement this
-        return ""
 
 
 class AbstractRelationshipObject(ABC):
