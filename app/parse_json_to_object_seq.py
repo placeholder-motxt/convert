@@ -1,6 +1,9 @@
 import json
-from app.element_objects import ClassObject, ControllerMethodObject, ControllerMethodCallObject, ParameterObject
+from app.models.diagram import ClassObject
 from jsonschema import validate
+
+from app.models.methods import ControllerMethodObject
+from app.models.properties import ParameterObject
 
 
 class ParseJsonToObjectSeq:
