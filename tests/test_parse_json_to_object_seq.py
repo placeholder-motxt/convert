@@ -1764,7 +1764,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
       self.assertEqual(str(context.exception), "Duplicate method!")
     
     def test_edge_duplicate_attribute(self):
-      json_data = json_data = """
+      json_data = """
 {
   "diagram": "SequenceDiagram",
   "nodes": [
