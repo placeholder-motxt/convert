@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
+from copy import deepcopy
 from io import StringIO
 from typing import Optional
 
@@ -34,12 +35,13 @@ class AbstractMethodObject(ABC):
         return self.__name
 
     def get_parameters(self) -> list[ParameterObject]:
-        # TODO: Make immutable if needed
-        return self.__parameters
+        params = []
+        for param in self.__parameters:
+            params.append(deepcopy(param))
+        return params
 
-    def get_returnType(self) -> TypeObject:
-        # TODO: Make immutable if needed
-        return self.__return_type
+    def get_return_type(self) -> TypeObject:
+        return deepcopy(self.__return_type)
 
 
 class ClassMethodObject(AbstractMethodObject):
@@ -60,7 +62,7 @@ class ClassMethodObject(AbstractMethodObject):
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
         res = f"def {name}({params})"
 
-        ret = self.get_returnType()
+        ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
             if not is_valid_python_identifier(rettype):
@@ -68,7 +70,7 @@ class ClassMethodObject(AbstractMethodObject):
             res += f" -> {rettype}"
         res += ":\n    # TODO: Auto generated function stub\n"
         res += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
         return res
 
