@@ -8,11 +8,12 @@ from app.main import (
 
 def test_valid_download_request():
     """Test that a valid DownloadRequest model works correctly."""
-    data = {"filename": "example", "content": "Hello, world!"}
+    data = {"filename": "example", "content": "Hello, world!", "type": "models"}
     request = DownloadRequest(**data)
 
     assert request.filename == "example"
     assert request.content == "Hello, world!"
+    assert request.type == "models"
 
 
 def test_missing_filename():
@@ -36,6 +37,13 @@ def test_empty_filename():
         DownloadRequest(**data)
 
 
+def test_invalid_short_filename():
+    """Test that an empty filename raises a ValidationError."""
+    data = {"filename": "12", "content": "Some content"}
+    with pytest.raises(ValidationError):
+        DownloadRequest(**data)
+
+
 def test_empty_content():
     """Test that an empty content field is allowed."""
     data = {"filename": "example", "content": ""}
@@ -43,3 +51,11 @@ def test_empty_content():
 
     assert request.filename == "example"
     assert request.content == ""  # Empty content is valid
+
+
+def test_empty_type():
+    """Test that an empty type is allowed."""
+    data = {"filename": "filename", "content": "", "type": ""}
+    request = DownloadRequest(**data)
+
+    assert request.type == ""
