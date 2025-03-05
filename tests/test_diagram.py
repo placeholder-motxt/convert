@@ -126,9 +126,11 @@ listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCA
             == "\tuser = models.OneToOneField(User, on_delete = models.CASCADE)\n"
         )
 
-    def test_get_methods_to_code(self):
-        # TODO
-        pass
+    def test_get_methods(self):
+        method = ClassMethodObject()
+        self.class_object.add_method(method)
+
+        assert self.class_object.get_methods() == [method]
 
 
 class TestAbstractRelationshipObject(unittest.TestCase):
