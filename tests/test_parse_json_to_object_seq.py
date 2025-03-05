@@ -1,9 +1,9 @@
 import unittest
-import json
-from app.parse_json_to_object_seq import *
+
+from app.parse_json_to_object_seq import ParseJsonToObjectSeq
+
 
 class TestParseJsonToObjectSeq(unittest.TestCase):
-
     def test_set_valid_json(self):
         json_data = """
 {
@@ -420,11 +420,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 }
 """
         self.assertEqual("Success", ParseJsonToObjectSeq().set_json(json_data))
-    
+
     def test_negative_set_invalid_json(self):
         json_data = """
 {
-  "diagram": "ClassDiagram", 
+  "diagram": "ClassDiagram",
   "nodes": [
     {
       "id": 0,
@@ -442,7 +442,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
   "edges": [
     {
       "start": 1,
-      "end": 999, 
+      "end": 999,
       "type": "CallEdge",
       "middleLabel": "Invalid Edge",
       "signal": true
@@ -455,7 +455,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             ParseJsonToObjectSeq().set_json(json_data)
 
         self.assertEqual(str(context.exception), "Given .jet is not valid!")
-    
+
     def test_negative_set_empty_json(self):
         with self.assertRaises(Exception) as context:
             ParseJsonToObjectSeq().set_json("")
@@ -2177,13 +2177,9 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
   ],
   "version": "3.8"
 }
-"""
       with self.assertRaises(Exception) as context:
          parser = ParseJsonToObjectSeq()
          parser.set_json(json_data)
          parser.parse()
       self.assertEqual(str(context.exception), "Duplicate attribute!")
-                                      
-    
-    
-    
+

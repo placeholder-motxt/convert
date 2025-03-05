@@ -1,6 +1,7 @@
 import json
+from app.element_objects import ClassObject, ControllerMethodObject, ControllerMethodCallObject, ParameterObject
 from jsonschema import validate
-from app.element_objects import *
+
 
 class ParseJsonToObjectSeq:
     def __init__(self):
@@ -11,29 +12,26 @@ class ParseJsonToObjectSeq:
         self.__edges: list = []
         self.__implicit_parameter_nodes = dict()
 
-    def set_json(self, data):
+    def set_json(self, data: str) -> str | None:
         try:
             data_json = json.loads(data)
-
-            if(self.validate_json(data_json)):
+            
+            if self.validate_json(data_json):
                 self.__json = data_json
                 return "Success"
 
             else:
-              raise Exception("Given .jet is not valid!")
+                raise Exception("Given .jet is not valid!")
 
         except Exception:
             raise Exception("Given .jet is not valid!")
 
-    def validate_json(self, data):
+    def validate_json(self, data: object) -> bool:
         schema = {
             "type": "object",
             "required": ["diagram", "nodes", "edges", "version"],
             "properties": {
-                "diagram": {
-                    "type": "string",
-                    "enum": ["SequenceDiagram"]
-                },
+                "diagram": {"type": "string", "enum": ["SequenceDiagram"]},
                 "nodes": {
                     "type": "array",
                     "items": {
@@ -43,14 +41,14 @@ class ParseJsonToObjectSeq:
                             "id": {"type": "integer"},
                             "type": {
                                 "type": "string",
-                                "enum": ["ImplicitParameterNode", "CallNode"]
+                                "enum": ["ImplicitParameterNode", "CallNode"],
                             },
                             "name": {"type": "string"},
                             "children": {"type": "array", "items": {"type": "integer"}},
                             "x": {"type": "integer"},
-                            "y": {"type": "integer"}
-                        }
-                    }
+                            "y": {"type": "integer"},
+                        },
+                    },
                 },
                 "edges": {
                     "type": "array",
@@ -62,22 +60,20 @@ class ParseJsonToObjectSeq:
                             "end": {"type": "integer"},
                             "type": {
                                 "type": "string",
-                                "enum": ["CallEdge", "ReturnEdge", "ConstructorEdge"]
+                                "enum": ["CallEdge", "ReturnEdge", "ConstructorEdge"],
                             },
                             "middleLabel": {"type": "string"},
-                            "signal": {"type": "boolean"}
-                        }
-                    }
+                            "signal": {"type": "boolean"},
+                        },
+                    },
                 },
-                "version": {
-                    "type": "string"
-                }
-            }
+                "version": {"type": "string"},
+            },
         }
         try:
             validate(instance=data, schema=schema)
             return True
-        
+
         except Exception:
             return False
     

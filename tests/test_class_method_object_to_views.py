@@ -1,6 +1,7 @@
 import unittest
 
-from app.element_objects import ClassMethodObject, ParameterObject, TypeObject
+from app.models.methods import ClassMethodObject
+from app.models.properties import ParameterObject, TypeObject
 
 
 class TestClassMethodObjectToViewsCode(unittest.TestCase):
