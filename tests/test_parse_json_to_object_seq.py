@@ -463,7 +463,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(str(context.exception), "Given .jet is not valid!")
 
     def test_positive_parse_views(self):
-      json_data = """
+        json_data = """
 {
   "diagram": "SequenceDiagram",
   "nodes": [
@@ -878,51 +878,53 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 }
 """
 
-      parser = ParseJsonToObjectSeq()
-      parser.set_json(json_data)
-      parser.parse()
+        parser = ParseJsonToObjectSeq()
+        parser.set_json(json_data)
+        parser.parse()
 
-      parsed_value = parser.get_controller_method()
+        parsed_value = parser.get_controller_method()
 
-      self.assertEqual(len(parsed_value), 10)
+        self.assertEqual(len(parsed_value), 10)
 
-      self.assertEqual(parsed_value[0].get_name(), "login")
-      self.assertEqual(len(parsed_value[0].get_parameters()), 2)
-      self.assertEqual(parsed_value[0].get_parameters()[0].get_name(), "username")
-      self.assertEqual(parsed_value[0].get_parameters()[1].get_name(), "password")
+        self.assertEqual(parsed_value[0].get_name(), "login")
+        self.assertEqual(len(parsed_value[0].get_parameters()), 2)
+        self.assertEqual(parsed_value[0].get_parameters()[0].get_name(), "username")
+        self.assertEqual(parsed_value[0].get_parameters()[1].get_name(), "password")
 
-      self.assertEqual(parsed_value[1].get_name(), "HalamanPemrosesanPeminjaman")
-      self.assertEqual(len(parsed_value[1].get_parameters()), 0)
+        self.assertEqual(parsed_value[1].get_name(), "HalamanPemrosesanPeminjaman")
+        self.assertEqual(len(parsed_value[1].get_parameters()), 0)
 
-      self.assertEqual(parsed_value[2].get_name(), "LihatDetailBuku")
-      self.assertEqual(len(parsed_value[2].get_parameters()), 1)
-      self.assertEqual(parsed_value[2].get_parameters()[0].get_name(), "isbn")
+        self.assertEqual(parsed_value[2].get_name(), "LihatDetailBuku")
+        self.assertEqual(len(parsed_value[2].get_parameters()), 1)
+        self.assertEqual(parsed_value[2].get_parameters()[0].get_name(), "isbn")
 
-      self.assertEqual(parsed_value[3].get_name(), "FormProsesPeminjaman")
-      self.assertEqual(len(parsed_value[3].get_parameters()), 1)
-      self.assertEqual(parsed_value[3].get_parameters()[0].get_name(), "isbn")
+        self.assertEqual(parsed_value[3].get_name(), "FormProsesPeminjaman")
+        self.assertEqual(len(parsed_value[3].get_parameters()), 1)
+        self.assertEqual(parsed_value[3].get_parameters()[0].get_name(), "isbn")
 
-      self.assertEqual(parsed_value[4].get_name(), "SubmitProsesPeminjaman")
-      self.assertEqual(len(parsed_value[4].get_parameters()), 1)
-      self.assertEqual(parsed_value[4].get_parameters()[0].get_name(), "isbn")
+        self.assertEqual(parsed_value[4].get_name(), "SubmitProsesPeminjaman")
+        self.assertEqual(len(parsed_value[4].get_parameters()), 1)
+        self.assertEqual(parsed_value[4].get_parameters()[0].get_name(), "isbn")
 
-      self.assertEqual(parsed_value[5].get_name(), "prosesPeminjamanValidKeanggotaan")
-      self.assertEqual(len(parsed_value[5].get_parameters()), 0)
+        self.assertEqual(parsed_value[5].get_name(), "prosesPeminjamanValidKeanggotaan")
+        self.assertEqual(len(parsed_value[5].get_parameters()), 0)
 
-      self.assertEqual(parsed_value[6].get_name(), "prosesPeminjamanTidakMemilikiTanggungan")
-      self.assertEqual(len(parsed_value[6].get_parameters()), 0)
+        self.assertEqual(
+            parsed_value[6].get_name(), "prosesPeminjamanTidakMemilikiTanggungan"
+        )
+        self.assertEqual(len(parsed_value[6].get_parameters()), 0)
 
-      self.assertEqual(parsed_value[7].get_name(), "showNotifikasiBerhasilPinjam")
-      self.assertEqual(len(parsed_value[7].get_parameters()), 0)
+        self.assertEqual(parsed_value[7].get_name(), "showNotifikasiBerhasilPinjam")
+        self.assertEqual(len(parsed_value[7].get_parameters()), 0)
 
-      self.assertEqual(parsed_value[8].get_name(), "showNotifikasiGagalPinjam")
-      self.assertEqual(len(parsed_value[8].get_parameters()), 0)
+        self.assertEqual(parsed_value[8].get_name(), "showNotifikasiGagalPinjam")
+        self.assertEqual(len(parsed_value[8].get_parameters()), 0)
 
-      self.assertEqual(parsed_value[9].get_name(), "showNotifikasiDataTidakValid")
-      self.assertEqual(len(parsed_value[9].get_parameters()), 0)
+        self.assertEqual(parsed_value[9].get_name(), "showNotifikasiDataTidakValid")
+        self.assertEqual(len(parsed_value[9].get_parameters()), 0)
 
     def test_edge_duplicate_class_name(self):
-      json_data = """
+        json_data = """
 {
   "diagram": "SequenceDiagram",
   "nodes": [
@@ -1336,14 +1338,14 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
   "version": "3.8"
 }
 """
-      with self.assertRaises(Exception) as context:
-        parser = ParseJsonToObjectSeq()
-        parser.set_json(json_data)
-        parser.parse()
-      self.assertEqual(str(context.exception), "Duplicate class name!")
-    
+        with self.assertRaises(Exception) as context:
+            parser = ParseJsonToObjectSeq()
+            parser.set_json(json_data)
+            parser.parse()
+        self.assertEqual(str(context.exception), "Duplicate class name!")
+
     def test_edge_duplicate_method_name(self):
-      json_data = """
+        json_data = """
 {
   "diagram": "SequenceDiagram",
   "nodes": [
@@ -1757,14 +1759,14 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
   "version": "3.8"
 }
 """
-      with self.assertRaises(Exception) as context:
-        parser = ParseJsonToObjectSeq()
-        parser.set_json(json_data)
-        parser.parse()
-      self.assertEqual(str(context.exception), "Duplicate method!")
-    
+        with self.assertRaises(Exception) as context:
+            parser = ParseJsonToObjectSeq()
+            parser.set_json(json_data)
+            parser.parse()
+        self.assertEqual(str(context.exception), "Duplicate method!")
+
     def test_edge_duplicate_attribute(self):
-      json_data = """
+        json_data = """
 {
   "diagram": "SequenceDiagram",
   "nodes": [
@@ -2178,9 +2180,8 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
   "version": "3.8"
 }
 """
-      with self.assertRaises(Exception) as context:
-         parser = ParseJsonToObjectSeq()
-         parser.set_json(json_data)
-         parser.parse()
-      self.assertEqual(str(context.exception), "Duplicate attribute!")
-
+        with self.assertRaises(Exception) as context:
+            parser = ParseJsonToObjectSeq()
+            parser.set_json(json_data)
+            parser.parse()
+        self.assertEqual(str(context.exception), "Duplicate attribute!")
