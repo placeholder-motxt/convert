@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from abc import ABC
 from copy import deepcopy
 from io import StringIO
@@ -65,7 +66,9 @@ class ClassMethodObject(AbstractMethodObject):
         ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
-            if not is_valid_python_identifier(rettype):
+            if not is_valid_python_identifier(rettype) and not bool(
+                re.match(r"list\[.*\]", rettype.lower())
+            ):
                 raise ValueError(f"Invalid return type: {rettype}")
             res += f" -> {rettype}"
         res += ":\n    # TODO: Auto generated function stub\n"
