@@ -1,3 +1,4 @@
+import json
 import os
 import zipfile
 
@@ -6,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from starlette.background import BackgroundTasks
 
-from app.model import DownloadRequest
+from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import ModelsElements, ViewsElements
 from app.utils import remove_file
 
@@ -35,43 +36,67 @@ async def download_file(request: DownloadRequest) -> FileResponse:
 
 @app.post("/convert")
 async def convert(
-    request: DownloadRequest,
+    request: ConvertRequest,
     background_tasks: BackgroundTasks,
 ) -> Response:
-    writer = ModelsElements(request.filename)
-    classes = writer.parse(request.content)
-    response_content = writer.print_django_style()
+    if len(request.filename) != len(request.content):
+        raise HTTPException(
+            status_code=400, detail="number of Filename and Content is incosistent"
+        )
 
-    await download_file(
-        request=DownloadRequest(
-            filename=request.filename, content=response_content, type="_models"
-        ),
-    )
+    for file_name, content in zip(request.filename, request.content):
+        writer = ModelsElements(file_name)
+        json_content = content[0]
 
-    writer = ViewsElements(request.filename)
-    for model_class in classes:
-        for method in model_class.get_methods():
-            writer.add_class_method(method)
-    response_content = writer.print_django_style()
+        if isinstance(json_content, str):
+            json_content = json.loads(json_content)
 
-    await download_file(
-        request=DownloadRequest(
-            filename=request.filename, content=response_content, type="_views"
-        ),
-    )
+        # Only parse and writes to models.py if from class diagram
+        if (
+            json_content["diagram"] is not None
+            and json_content["diagram"] == "ClassDiagram"
+        ):
+            classes = writer.parse(json_content)
+            response_content = writer.print_django_style()
 
-    zip_filename = request.filename + ".zip"
+            await download_file(
+                request=DownloadRequest(
+                    filename=file_name, content=response_content, type="_models"
+                ),
+            )
+
+            writer = ViewsElements(file_name)
+            for model_class in classes:
+                for method in model_class.get_methods():
+                    writer.add_class_method(method)
+            response_content = writer.print_django_style()
+
+            await download_file(
+                request=DownloadRequest(
+                    filename=file_name, content=response_content, type="_views"
+                ),
+            )
+
+        # TODO: Parse sequence
+
+        # TODO: Validate Class and Sequence consistency
+
+        # TODO: Write sequence to file
+
+    # Write previous files into a .zip
+    zip_filename = request.filename[0] + ".zip"
     with zipfile.ZipFile(zip_filename, "w") as zipf:
-        zipf.write(request.filename + "_models.py")
-        zipf.write(request.filename + "_views.py")
+        for file_name in request.filename:
+            zipf.write(file_name + "_models.py")
+            zipf.write(file_name + "_views.py")
 
-    os.remove(request.filename + "_models.py")
-    os.remove(request.filename + "_views.py")
+            os.remove(file_name + "_models.py")
+            os.remove(file_name + "_views.py")
 
     background_tasks.add_task(remove_file, zip_filename)
 
     return FileResponse(
-        path=request.filename + ".zip",
-        filename=f"{request.filename}.zip",
+        path=request.filename[0] + ".zip",
+        filename=f"{request.filename[0]}.zip",
         media_type="application/zip",
     )
