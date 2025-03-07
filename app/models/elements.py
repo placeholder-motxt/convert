@@ -24,6 +24,9 @@ class ModelsElements(FileElements):
         self.__classes: list[ClassObject] = []
 
     def parse(self, content: str) -> list[ClassObject]:
+        """
+        Parses ClassDiagram to classes
+        """
         parser = ParseJsonToObjectClass(content)
         self.__classes = parser.parse_classes()
         parser.parse_relationships(self.__classes)
