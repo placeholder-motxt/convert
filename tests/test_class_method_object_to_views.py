@@ -198,7 +198,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             "def class_method_1():\n"
             "    ret_var1 = method_call1(arg1, arg2)\n"
             "    # TODO: Auto generated function stub\n"
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
         ))
 
     def test_to_views_code_two_method_calls(self):
@@ -215,7 +215,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             "    ret_var1 = method_call1(arg1, arg2)\n"
             "    ret_var2 = method_call2(arg1, arg2)\n"
             "    # TODO: Auto generated function stub\n"
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
         ))
 
 
