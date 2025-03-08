@@ -252,6 +252,22 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.assertEqual(str(ctx.exception), "Invalid return variable name: $bval")
 
+    def test_parse_self_call_infinite_loop(self):
+        # Edge case when a threat actor intentionally modified
+        # the JetUML JSON such that it creates an infinite self call
+        # loop. Caught thanks to Gemini Reviewer Bot
+        with open(os.path.join(TEST_DIR, "self_call_infinite_loop.json")) as f:
+            self.parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            self.parser.parse()
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Too deep self calls! The maximum allowed "
+            f"is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
