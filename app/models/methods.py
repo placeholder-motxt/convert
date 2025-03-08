@@ -121,7 +121,7 @@ class ClassMethodObject(AbstractMethodObject):
             res.write(method_call.print_django_style())
         res.write( "\n    # TODO: Auto generated function stub\n")
         res.write(
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
         return res.getvalue()
 
