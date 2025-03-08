@@ -236,11 +236,20 @@ class ClassMethodCallObject(AbstractMethodCallObject):
     def __init__(self):
         super().__init__()
         self.__caller: ClassMethodObject = None
+        self.__instance_name = ""
 
     def set_caller(self, method_object: ClassMethodObject):
         if method_object is None:
             raise Exception("ClassMethodObject cannot be SET to be None!")
         self.__caller = method_object
+
+    def set_instance_name(self, instance_name: str):
+        if instance_name == "" or instance_name is None:
+            raise Exception("instance_name cannot be empty!")
+        self.__instance_name = instance_name
+
+    def get_instance_name(self) -> str:
+        return self.__instance_name
 
 
 class ControllerMethodCallObject(AbstractMethodCallObject):
