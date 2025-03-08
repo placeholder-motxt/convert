@@ -48,6 +48,7 @@ class ClassMethodObject(AbstractMethodObject):
         self.__calls: list[ClassMethodCallObject] = []
 
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
+        
         if class_method_call is None:
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
@@ -71,6 +72,9 @@ class ClassMethodObject(AbstractMethodObject):
             "    raise NotImplementedError('method function is not yet implemented')\n"
         )
         return res
+    
+    def get_call(self) -> list[ClassMethodCallObject]:
+        return self.__calls
 
 
 class ControllerMethodObject(AbstractMethodObject):
@@ -80,6 +84,9 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def add_call(self, call_object: AbstractMethodCallObject):
         self.__calls.append(call_object)
+    
+    def get_call(self) -> list[AbstractMethodCallObject]:
+        return self.__calls
 
     def print_django_style(self) -> str:
         if not self.get_name():
@@ -111,6 +118,9 @@ class AbstractMethodCallObject(ABC):
 
     def set_method(self, method: AbstractMethodObject):
         self.__method = method
+    
+    def get_method(self) -> AbstractMethodObject:
+        return self.__method
 
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)

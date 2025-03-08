@@ -53,6 +53,9 @@ class ClassObject:
     def get_name(self) -> str:
         return self.__name
 
+    def get_method(self) -> list[ClassMethodObject]:
+        return self.__methods
+    
     def __get_attributes_to_code(self) -> str:
         res = ""
         for attribute in self.__fields:
