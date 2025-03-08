@@ -4,7 +4,7 @@ from unittest.mock import call, patch
 
 from app.models.diagram import ClassObject
 from app.models.methods import (
-    AbstractMethodObject,
+    AbstractMethodCallObject,
     ClassMethodCallObject,
     ClassMethodObject,
 )
@@ -169,7 +169,7 @@ class TestParseSeqSelfCall(unittest.TestCase):
             self.parser.set_json(f.read())
 
         set_return_var_name = patch.object(
-            AbstractMethodObject, "set_return_var_name"
+            AbstractMethodCallObject, "set_return_var_name"
         ).start()
 
         self.parser.parse()
@@ -190,7 +190,7 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
     def test_parse_self_call_invalid_ret_val(self):
         # Case when the return value is not a Python identifier
-        with open(os.path.join(TEST_DIR, "self_call_invalid_ret_syntax2.json")) as f:
+        with open(os.path.join(TEST_DIR, "self_call_invalid_ret_value.json")) as f:
             self.parser.set_json(f.read())
 
         with self.assertRaises(ValueError) as ctx:
