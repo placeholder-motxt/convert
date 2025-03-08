@@ -1,20 +1,32 @@
 import json
+from typing import TypedDict
 
 from jsonschema import validate
 
 from app.models.diagram import ClassObject
-from app.models.methods import ControllerMethodObject
+from app.models.methods import (
+    ClassMethodCallObject,
+    ClassMethodObject,
+    ControllerMethodObject,
+)
 from app.models.properties import ParameterObject
+
+
+class CallNode(TypedDict):
+    id: int
+    parent: int
+    method: ClassMethodObject | ControllerMethodObject
+    caller: int
 
 
 class ParseJsonToObjectSeq:
     def __init__(self):
         self.__json = None
-        self.__class_object: dict = dict()
+        self.__class_object: dict[str, ClassObject] = dict()
         self.__controller_method: list[ControllerMethodObject] = []
-        self.__call_nodes: dict = dict()
+        self.__call_nodes: dict[str, CallNode] = dict()
         self.__edges: list = []
-        self.__implicit_parameter_nodes = dict()
+        self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
 
     def set_json(self, data: str) -> str | None:
         try:
@@ -81,11 +93,23 @@ class ParseJsonToObjectSeq:
         except Exception:
             return False
 
+    def get_class_objects(self) -> dict[str, ClassObject]:
+        return self.__class_object
+
     def get_controller_method(self) -> list[ControllerMethodObject]:
         return self.__controller_method
 
+    def get_call_nodes(self) -> dict:
+        return self.__call_nodes
+
+    def get_edges(self) -> list:
+        return self.__edges
+
+    def get_implicit_parameter_nodes(self) -> dict:
+        return self.__implicit_parameter_nodes
+
     def parse(self):
-        duplicate_method_checker = dict()
+        # duplicate_method_checker = dict()
 
         """
         Assign all nodes into ClassObject and keep the information in a dictionary
@@ -129,6 +153,7 @@ class ParseJsonToObjectSeq:
         # Process edges
         edges = self.__json["edges"]
 
+        valid_caller: set[int] = set()
         for edge in edges:
             edge_type = edge.get("type")
             start_id = edge.get("start")
@@ -138,21 +163,27 @@ class ParseJsonToObjectSeq:
             self.__edges.append(
                 {"type": edge_type, "start": start_id, "end": end_id, "label": label}
             )
+            valid_caller.add(end_id)
 
         # Assign edge to classObject
 
+        # method_tracker: dict[int, ClassMethodObject] = {}
         for edge in self.__edges:
             if edge["type"] == "CallEdge":
+                start_id = edge["start"]
                 end_id = edge["end"]
                 parent_id = self.__call_nodes[end_id]["parent"]
                 class_name = self.__implicit_parameter_nodes[parent_id]["class_name"]
+                class_obj = self.__class_object[class_name]
 
                 if class_name == "views":
                     method = ControllerMethodObject()
 
                 else:
-                    # TODO: Create for Class Object
-                    continue
+                    method = ClassMethodObject()
+
+                self.__call_nodes[end_id]["method"] = method
+                self.__call_nodes[end_id]["caller"] = start_id
 
                 method_label = edge["label"].split(" ")
                 is_name_setup = False
@@ -178,12 +209,23 @@ class ParseJsonToObjectSeq:
                         method.add_parameter(param_object)
 
                     else:
-                        if value in duplicate_method_checker:
-                            raise Exception("Duplicate method!")
-
                         method.set_name(value)
-                        duplicate_method_checker[value] = 1
                         is_name_setup = True
 
                 if class_name == "views":
                     self.__controller_method.append(method)
+
+                elif method not in class_obj.get_methods():
+                    class_obj.add_method(method)
+
+        for node_id, call_node in self.__call_nodes.items():
+            caller_id = call_node.get("caller", None)
+            if caller_id not in valid_caller:
+                continue
+
+            caller_method = self.__call_nodes[caller_id]["method"]
+            callee_method = call_node["method"]
+            call_obj = ClassMethodCallObject()
+            call_obj.set_caller(caller_method)
+            call_obj.set_method(callee_method)
+            caller_method.add_class_method_call(call_obj)

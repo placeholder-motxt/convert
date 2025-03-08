@@ -22,6 +22,21 @@ class AbstractMethodObject(ABC):
             f"\n\treturn_type: {self.__return_type}"
         )
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, other: AbstractMethodObject) -> bool:
+        return (
+            self.__name == other.__name
+            and all(
+                self_param == other_param
+                for self_param, other_param in zip(
+                    self.__parameters, other.__parameters
+                )
+            )
+            and self.__return_type == other.__return_type
+        )
+
     def set_name(self, name: str):
         self.__name = name
 
@@ -49,6 +64,11 @@ class ClassMethodObject(AbstractMethodObject):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
 
+    def __eq__(self, other: ClassMethodObject) -> bool:
+        return all(
+            s_call == o_call for s_call, o_call in zip(self.__calls, other.__calls)
+        ) and super().__eq__(other)
+
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
         if class_method_call is None:
             raise Exception("Cannot add None to ClassMethodCallObject!")
@@ -73,6 +93,10 @@ class ClassMethodObject(AbstractMethodObject):
             f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
         return res
+
+    def get_calls(self) -> list[ClassMethodCallObject]:
+        # TODO: Make immutable if needed
+        return self.__calls
 
 
 class ControllerMethodObject(AbstractMethodObject):
@@ -111,6 +135,20 @@ class AbstractMethodCallObject(ABC):
             f"arguments: {self.__arguments}\n\treturn_var_name: {self.__return_var_name}"
         )
 
+    def __eq__(self, other: AbstractMethodCallObject) -> str:
+        return (
+            self.__method == other.__method
+            and all(
+                s_arg == o_arg
+                for s_arg, o_arg in zip(self.__arguments, other.__arguments)
+            )
+            and self.__return_var_name == other.__return_var_name
+            and self.__condition == other.__condition
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def set_method(self, method: AbstractMethodObject):
         self.__method = method
 
@@ -122,6 +160,10 @@ class AbstractMethodCallObject(ABC):
 
     def set_condition(self, condition: str):
         self.__condition = condition
+
+    def get_method(self) -> AbstractMethodObject:
+        # TODO: Make immutable if needed
+        return self.__method
 
     def print_django_style(self) -> str:
         result = StringIO()
@@ -144,10 +186,17 @@ class ClassMethodCallObject(AbstractMethodCallObject):
         super().__init__()
         self.__caller: ClassMethodObject = None
 
+    def __eq__(self, other: ClassMethodCallObject) -> bool:
+        return self.__caller == other.__caller and super().__eq__(other)
+
     def set_caller(self, method_object: ClassMethodObject):
         if method_object is None:
             raise Exception("ClassMethodObject cannot be SET to be None!")
         self.__caller = method_object
+
+    def get_caller(self) -> ClassMethodObject:
+        # TODO: Make immutable if needed
+        return self.__caller
 
 
 class ControllerMethodCallObject(AbstractMethodCallObject):
@@ -157,6 +206,10 @@ class ControllerMethodCallObject(AbstractMethodCallObject):
 
     def set_caller(self, caller: ClassMethodObject):
         self.__caller = caller
+
+    def get_caller(self) -> ClassMethodObject:
+        # TODO: Make immutable if needed
+        return self.__caller
 
 
 class ArgumentObject:
