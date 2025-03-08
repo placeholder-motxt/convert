@@ -25,6 +25,7 @@ class ModelsElements(FileElements):
         pass  # TODO: PBI 1-7
 
 
+
 class ViewsElements(FileElements):
     def __init__(self, file_name: str):
         super().__init__(file_name)
@@ -35,8 +36,9 @@ class ViewsElements(FileElements):
         result = StringIO()
 
         for class_method_object in self.__class_methods:
-            # TODO: PBI-1-7 and PBI 2-9
-            pass
+            result.write(f"#-----method from class {class_method_object.get_name()}------\n\n")
+            result.write(class_method_object.print_django_style())
+            result.write("\n\n\n")
 
         for controller_method_object in self.__controller_methods:
             result.write(controller_method_object.print_django_style())
@@ -47,3 +49,4 @@ class ViewsElements(FileElements):
 
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
+

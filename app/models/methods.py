@@ -75,24 +75,31 @@ class ClassMethodObject(AbstractMethodObject):
         self.__calls.append(class_method_call)
 
     def to_views_code(self) -> str:
+        res = StringIO()
         name = self.get_name()
         if name is None or not is_valid_python_identifier(name):
             raise ValueError(f"Invalid method name: {name}")
 
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
-        res = f"def {name}({params})"
+        res.write(f"def {name}({params})")
 
         ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
             if not is_valid_python_identifier(rettype):
                 raise ValueError(f"Invalid return type: {rettype}")
-            res += f" -> {rettype}"
-        res += ":\n    # TODO: Auto generated function stub\n"
-        res += (
-            f"    raise NotImplementedError('{name} function is not yet implemented')\n"
+            res.write (f" -> {rettype}")
+        res.write(":")
+        for method_call in self.__calls:
+            res.write("\n    ")
+            res.write(method_call.print_django_style())
+        res.write( "\n    # TODO: Auto generated function stub\n")
+        res.write(
+            "    raise NotImplementedError('method function is not yet implemented')\n"
         )
-        return res
+        return res.getvalue()
+
+
 
     def get_calls(self) -> list[ClassMethodCallObject]:
         # TODO: Make immutable if needed
@@ -235,3 +242,16 @@ class ArgumentObject:
 
     def print_django_style(self) -> str:
         return self.__name
+
+
+if __name__ == "__main__":
+    from unittest import mock
+
+    class_method_object = ClassMethodObject()
+    class_method_object.set_name("class_method_1")
+    class_method_call = mock.Mock()
+    class_method_call.print_django_style.return_value = "ret_var1 = method_call1(arg1, arg2)"
+    class_method_object.add_class_method_call(class_method_call)
+    print(class_method_object.to_views_code())
+
+
