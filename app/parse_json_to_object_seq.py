@@ -24,6 +24,8 @@ class CallNode(TypedDict):
 
 
 class ParseJsonToObjectSeq:
+    ALLOWED_SELF_CALL_DEPTH = 5
+
     def __init__(self):
         self.__json = None
         self.__class_object: dict[str, ClassObject] = dict()
@@ -123,7 +125,7 @@ class ParseJsonToObjectSeq:
         Assign all nodes into ClassObject and keep the information in a dictionary
         """
         for node in self.__json["nodes"]:
-            node_id = node["id"]
+            callee_id = node["id"]
             node_type = node["type"]
 
             if node_type == "ImplicitParameterNode":
@@ -140,23 +142,23 @@ class ParseJsonToObjectSeq:
                 else:
                     raise Exception("Duplicate class name!")
 
-                self.__implicit_parameter_nodes[node_id] = {
-                    "id": node_id,
+                self.__implicit_parameter_nodes[callee_id] = {
+                    "id": callee_id,
                     "instance_name": instance_name,
                     "class_name": class_name,
                     "children": node["children"],
                 }
 
             elif node_type == "CallNode":
-                self.__call_nodes[node_id] = {"id": node_id, "parent": None}
+                self.__call_nodes[callee_id] = {"id": callee_id, "parent": None}
 
         """
         Assign children's node into their parents
         """
-        for node_id, node_info in self.__implicit_parameter_nodes.items():
+        for callee_id, node_info in self.__implicit_parameter_nodes.items():
             for child_id in node_info["children"]:
                 if child_id in self.__call_nodes:
-                    self.__call_nodes[child_id]["parent"] = node_id
+                    self.__call_nodes[child_id]["parent"] = callee_id
 
         # Process edges
         edges = self.__json["edges"]
@@ -236,10 +238,24 @@ class ParseJsonToObjectSeq:
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
 
-        for node_id, call_node in self.__call_nodes.items():
+        rev_call_tree = {}
+        for callee_id, call_node in self.__call_nodes.items():
             caller_id = call_node.get("caller", None)
             if caller_id not in valid_caller:
                 continue
+
+            caller_parent = self.__call_nodes[caller_id]["parent"]
+            callee_parent = call_node["parent"]
+            caller_class = self.__implicit_parameter_nodes[caller_parent]["class_name"]
+            callee_class = self.__implicit_parameter_nodes[callee_parent]["class_name"]
+            if caller_class == callee_class:
+                rev_call_tree[callee_id] = caller_id
+                call_depth = self.check_call_depth(rev_call_tree, callee_id)
+                if call_depth > self.ALLOWED_SELF_CALL_DEPTH:
+                    raise ValueError(
+                        "Too deep self calls! "
+                        f"The maximum allowed is {self.ALLOWED_SELF_CALL_DEPTH}"
+                    )
 
             caller_method = self.__call_nodes[caller_id]["method"]
             callee_method = call_node["method"]
@@ -250,3 +266,11 @@ class ParseJsonToObjectSeq:
             if ret_var is not None:
                 call_obj.set_return_var_name(ret_var)
             caller_method.add_class_method_call(call_obj)
+
+    def check_call_depth(self, rev_call_tree: dict[int, int], callee: int) -> int:
+        depth = 0
+        caller = rev_call_tree[callee]
+        while caller > 0:
+            caller = rev_call_tree.get(caller, -1)
+            depth += 1
+        return depth
