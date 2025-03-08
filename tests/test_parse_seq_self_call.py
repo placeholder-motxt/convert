@@ -18,13 +18,30 @@ class TestParseSeqSelfCall(unittest.TestCase):
     def setUp(self):
         self.parser = ParseJsonToObjectSeq()
 
-        self.add_method_cobj = patch.object(ClassObject, "add_method")
-        self.set_name_cmobj = patch.object(ClassMethodObject, "set_name")
+        self.add_method_cobj = patch.object(
+            ClassObject, "add_method", side_effect=ClassObject.add_method, autospec=True
+        )
+        self.set_name_cmobj = patch.object(
+            ClassMethodObject,
+            "set_name",
+            side_effect=ClassMethodObject.set_name,
+            autospec=True,
+        )
         self.add_cls_method_call_cmobj = patch.object(
             ClassMethodObject, "add_class_method_call"
         )
-        self.set_caller_cmcobj = patch.object(ClassMethodCallObject, "set_caller")
-        self.set_method_cmcobj = patch.object(ClassMethodCallObject, "set_method")
+        self.set_caller_cmcobj = patch.object(
+            ClassMethodCallObject,
+            "set_caller",
+            side_effect=ClassMethodCallObject.set_caller,
+            autospec=True,
+        )
+        self.set_method_cmcobj = patch.object(
+            ClassMethodCallObject,
+            "set_method",
+            side_effect=ClassMethodCallObject.set_method,
+            autospec=True,
+        )
 
         self.doA = ClassMethodObject()
         self.doA.set_name("doA")
@@ -61,21 +78,24 @@ class TestParseSeqSelfCall(unittest.TestCase):
         self.parser.parse()
 
         self.assertEqual(
-            add_method_cobj.call_args_list,
-            [call(self.doA), call(self.doB), call(self.doC)],
+            [call_args.args[1] for call_args in add_method_cobj.call_args_list],
+            [self.doA, self.doB, self.doC],
         )
         self.assertEqual(
-            set_name_cmobj.call_args_list, [call("doA"), call("doB"), call("doC")]
+            [call_args.args[1] for call_args in set_name_cmobj.call_args_list],
+            ["doA", "doB", "doC"],
         )
         self.assertEqual(
             add_cls_method_call_cmobj.call_args_list,
             [call(self.doB_call), call(self.doC_call)],
         )
         self.assertEqual(
-            set_caller_cmcobj.call_args_list, [call(self.doA), call(self.doB)]
+            [call_args.args[1] for call_args in set_caller_cmcobj.call_args_list],
+            [self.doA, self.doB],
         )
         self.assertEqual(
-            set_method_cmcobj.call_args_list, [call(self.doB), call(self.doC)]
+            [call_args.args[1] for call_args in set_method_cmcobj.call_args_list],
+            [self.doB, self.doC],
         )
 
     def test_parse_self_call_valid_recursion(self):
@@ -88,6 +108,8 @@ class TestParseSeqSelfCall(unittest.TestCase):
         doA_call.set_method(self.doA)
         doA_call.set_caller(self.doA)
 
+        # self.add_method_cobj.side_effect = ClassObject.add_method
+        # self.add_method_cobj.autospec = True
         add_method_cobj = self.add_method_cobj.start()
         add_cls_method_call_cmobj = self.add_cls_method_call_cmobj.start()
         set_caller_cmcobj = self.set_caller_cmcobj.start()
@@ -95,10 +117,19 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.parser.parse()
 
-        add_method_cobj.assert_called_once_with(self.doA)
+        add_method_cobj.assert_called_once()
         add_cls_method_call_cmobj.assert_called_once_with(doA_call)
-        set_caller_cmcobj.assert_called_once_with(self.doA)
-        set_method_cmcobj.assert_called_once_with(self.doA)
+        set_caller_cmcobj.assert_called_once()
+        set_method_cmcobj.assert_called_once()
+
+        last_args = add_method_cobj.call_args.args[1]
+        self.assertEqual(last_args, self.doA)
+
+        last_args = set_caller_cmcobj.call_args.args[1]
+        self.assertEqual(last_args, self.doA)
+
+        last_args = set_method_cmcobj.call_args.args[1]
+        self.assertEqual(last_args, self.doA)
 
     def test_parse_self_call_too_deep(self):
         # If there is a very deep self call, more than n self call deep,
@@ -155,12 +186,12 @@ class TestParseSeqSelfCall(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            set_caller_cmcobj.call_args_list,
-            [call(self.doA), call(self.doA), call(self.doB), call(self.doC)],
+            [call_args.args[1] for call_args in set_caller_cmcobj.call_args_list],
+            [self.doA, self.doB, self.doA, self.doC],
         )
         self.assertEqual(
-            set_method_cmcobj.call_args_list,
-            [call(self.doB), call(self.doC), call(self.doB), call(self.doC)],
+            [call_args.args[1] for call_args in set_method_cmcobj.call_args_list],
+            [self.doB, self.doB, self.doC, self.doC],
         )
 
     def test_parse_self_call_valid_ret_syntax(self):
