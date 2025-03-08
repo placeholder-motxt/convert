@@ -198,21 +198,22 @@ class AbstractMethodCallObject(ABC):
         argument names = 'arg1', 'arg2'
         return var name = 'return_var1'
         condition = no condition
+        method is instance of ClassMethodCallObject with instance name = "instance_name"
 
         Output:
-        return_var1 = method1(request, arg1, arg2)
+        return_var1 = method1(request, instance_name, arg1, arg2)
 
         Example 2:
-        metho
 
         method name = 'method2'
         argument names = no arguments
         return var name = no return value
         condition = True
+        method is instance of ControllerMethodCallObject with instance name = "instance_name"
 
         Output:
         if True:
-            method2()
+            method2(request)
 
         """
         result = StringIO()
@@ -220,12 +221,14 @@ class AbstractMethodCallObject(ABC):
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:
             result.write(f"{self.__return_var_name} = ")
-        result.write(f"{self.__method.get_name()}(")
+        result.write(f"{self.__method.get_name()}(request")
+        if isinstance(self, ClassMethodCallObject):
+            result.write(f", {self.get_instance_name()}")
+
         if self.__arguments:
-            arguments_str = ", ".join(
+            arguments_str = ", " + ", ".join(
                 arg.print_django_style() for arg in self.__arguments
             )
-            # TODO: add 'request' as first argument to every method call.
             result.write(arguments_str)
         result.write(")")
         return result.getvalue()
