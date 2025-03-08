@@ -44,54 +44,53 @@ async def convert(
             status_code=400, detail="number of Filename and Content is incosistent"
         )
 
-    for file_name, content in zip(request.filename, request.content):
-        writer = ModelsElements(file_name)
-        json_content = content[0]
+    response_content_models = ""
+    response_content_views = ""
 
+    for file_name, content in zip(request.filename, request.content):
+        json_content = content[0]
         if isinstance(json_content, str):
             json_content = json.loads(json_content)
 
-        # Only parse and writes to models.py if from class diagram
         if (
             json_content["diagram"] is not None
             and json_content["diagram"] == "ClassDiagram"
         ):
-            classes = writer.parse(json_content)
-            response_content = writer.print_django_style()
+            writer_models = ModelsElements(file_name)
+            classes = writer_models.parse(json_content)
 
-            await download_file(
-                request=DownloadRequest(
-                    filename=file_name, content=response_content, type="_models"
-                ),
-            )
-
-            writer = ViewsElements(file_name)
+            writer_views = ViewsElements(file_name)
             for model_class in classes:
                 for method in model_class.get_methods():
-                    writer.add_class_method(method)
-            response_content = writer.print_django_style()
-
-            await download_file(
-                request=DownloadRequest(
-                    filename=file_name, content=response_content, type="_views"
-                ),
-            )
+                    writer_views.add_class_method(method)
 
         # TODO: Parse sequence
 
         # TODO: Validate Class and Sequence consistency
 
-        # TODO: Write sequence to file
+    response_content_models += writer_models.print_django_style()
+    response_content_views += writer_views.print_django_style()
+
+    await download_file(
+        request=DownloadRequest(
+            filename=file_name, content=response_content_models, type="_models"
+        ),
+    )
+
+    await download_file(
+        request=DownloadRequest(
+            filename=file_name, content=response_content_views, type="_views"
+        ),
+    )
 
     # Write previous files into a .zip
     zip_filename = request.filename[0] + ".zip"
     with zipfile.ZipFile(zip_filename, "w") as zipf:
-        for file_name in request.filename:
-            zipf.write(file_name + "_models.py")
-            zipf.write(file_name + "_views.py")
+        zipf.write(request.filename[0] + "_models.py")
+        zipf.write(request.filename[0] + "_views.py")
 
-            os.remove(file_name + "_models.py")
-            os.remove(file_name + "_views.py")
+        os.remove(request.filename[0] + "_models.py")
+        os.remove(request.filename[0] + "_views.py")
 
     background_tasks.add_task(remove_file, zip_filename)
 

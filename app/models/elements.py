@@ -23,14 +23,19 @@ class ModelsElements(FileElements):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
 
+    """
+    Parses ClassDiagram to classes
+    """
+
     def parse(self, content: str) -> list[ClassObject]:
-        """
-        Parses ClassDiagram to classes
-        """
         parser = ParseJsonToObjectClass(content)
         self.__classes = parser.parse_classes()
         parser.parse_relationships(self.__classes)
         return self.__classes
+
+    """
+    Writes classes to models.py
+    """
 
     def print_django_style(self) -> str:
         # A faster way to build string
