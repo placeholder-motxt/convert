@@ -255,6 +255,32 @@ class TestClassMethodCallObject(unittest.TestCase):
             str(context.exception), "ClassMethodObject cannot be SET to be None!"
         )
 
+    def test_set_instance_name_valid(self):
+        obj = ClassMethodCallObject()
+        obj.set_instance_name("valid_instance")
+        self.assertEqual(obj._ClassMethodCallObject__instance_name, "valid_instance")
+
+    def test_set_instance_name_empty(self):
+        obj = ClassMethodCallObject()
+        with self.assertRaises(Exception) as context:
+            obj.set_instance_name("")
+        self.assertTrue("instance_name cannot be empty!" in str(context.exception))
+
+    def test_set_instance_name_none(self):
+        obj = ClassMethodCallObject()
+        with self.assertRaises(Exception) as context:
+            obj.set_instance_name(None)
+        self.assertTrue("instance_name cannot be empty!" in str(context.exception))
+
+    def test_get_instance_name_empty(self):
+        obj = ClassMethodCallObject()
+        self.assertEqual(obj.get_instance_name(), "")
+
+    def test_get_instance_name_set_value(self):
+        obj = ClassMethodCallObject()
+        obj.set_instance_name("valid_instance")
+        self.assertEqual(obj.get_instance_name(), "valid_instance")
+
 
 class TestArgumentObject(unittest.TestCase):
     def setUp(self):
