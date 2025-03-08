@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from copy import deepcopy
+
 from app.utils import is_valid_python_identifier
 
 
@@ -18,6 +22,17 @@ class TypeObject:
 
     def get_name(self) -> str:
         return self.__name
+
+    def __copy__(self) -> TypeObject:
+        copy = TypeObject()
+        copy.set_name(self.__name)
+        return copy
+
+    def __deepcopy__(self, _) -> TypeObject:
+        return self.__copy__()
+
+    def __eq__(self, other: TypeObject) -> TypeObject:
+        return self.__name == other.__name
 
 
 class FieldObject:
@@ -102,3 +117,18 @@ class ParameterObject:
 
     def get_name(self) -> str:
         return self.__name
+
+    def __copy__(self) -> ParameterObject:
+        copy = ParameterObject()
+        copy.set_name(self.__name)
+        copy.set_type(self.__type)
+        return copy
+
+    def __deepcopy__(self, _) -> ParameterObject:
+        copy = ParameterObject()
+        copy.set_name(self.__name)
+        copy.set_type(deepcopy(self.__type))
+        return copy
+
+    def __eq__(self, other: ParameterObject) -> bool:
+        return self.__name == other.__name and self.__type == other.__type

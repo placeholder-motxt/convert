@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from io import StringIO
 
+from app.parse_json_to_object_class import ParseJsonToObjectClass
+
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
 
@@ -35,9 +37,21 @@ class ModelsElements(FileElements):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
 
-    def print_django_style(self) -> str:
-        pass  # TODO: PBI 1-7
+    def parse(self, content: str) -> list[ClassObject]:
+        parser = ParseJsonToObjectClass(content)
+        self.__classes = parser.parse_classes()
+        parser.parse_relationships(self.__classes)
+        return self.__classes
 
+    def print_django_style(self) -> str:
+        # A faster way to build string
+        # https://stackoverflow.com/questions/2414667/python-string-class-like-stringbuilder-in-c
+        response_content = "".join(
+            [model_class.to_models_code() for model_class in self.__classes]
+        )
+        response_content = response_content.strip()
+        response_content += "\n" if len(response_content) != 0 else ""
+        return response_content
 
 
 class ViewsElements(FileElements):

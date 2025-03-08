@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 from abc import ABC
+from copy import deepcopy
 from io import StringIO
 from typing import Optional
 
@@ -40,12 +42,13 @@ class AbstractMethodObject(ABC):
         return self.__name
 
     def get_parameters(self) -> list[ParameterObject]:
-        # TODO: Make immutable if needed
-        return self.__parameters
+        params = []
+        for param in self.__parameters:
+            params.append(deepcopy(param))
+        return params
 
-    def get_returnType(self) -> TypeObject:
-        # TODO: Make immutable if needed
-        return self.__return_type
+    def get_return_type(self) -> TypeObject:
+        return deepcopy(self.__return_type)
 
 
 class ClassMethodObject(AbstractMethodObject):
@@ -104,10 +107,12 @@ class ClassMethodObject(AbstractMethodObject):
         else:
             res.write(")")
 
-        ret = self.get_returnType()
+        ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
-            if not is_valid_python_identifier(rettype):
+            if not is_valid_python_identifier(rettype) and not bool(
+                re.match(r"list\[.*\]", rettype.lower())
+            ):
                 raise ValueError(f"Invalid return type: {rettype}")
             res.write (f" -> {rettype}")
         res.write(":")
