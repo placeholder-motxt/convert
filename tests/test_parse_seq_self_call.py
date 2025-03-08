@@ -223,7 +223,7 @@ class TestParseSeqSelfCall(unittest.TestCase):
             self.parser.parse()
 
         self.assertEqual(
-            str(ctx.exception), "Invalid self call syntax: doB () -> bval -> cval"
+            str(ctx.exception), "Invalid return variable name: bval -> cval"
         )
 
     def test_parse_self_call_invalid_ret_val(self):
@@ -234,7 +234,7 @@ class TestParseSeqSelfCall(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self.parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid return var name: $bval")
+        self.assertEqual(str(ctx.exception), "Invalid return variable name: $bval")
 
 
 if __name__ == "__main__":
