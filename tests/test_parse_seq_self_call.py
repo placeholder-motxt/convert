@@ -100,13 +100,10 @@ class TestParseSeqSelfCall(unittest.TestCase):
         set_caller_cmcobj.assert_called_once_with(self.doA)
         set_method_cmcobj.assert_called_once_with(self.doA)
 
-    def test_parse_self_call_invalid_recursion(self):
-        # If there is a recursion in the sequence diagram and the author
-        # made it in such a way that it is just n self calls
-        # with the same method name within the same lifeline block
-        # (ex: doA() -> doA() -> doA(), all in one class and in the first doA call),
-        # assume it is invalid. For the time being, the limit is 3 recursive calls
-        # (not counting the initial call).
+    def test_parse_self_call_too_deep(self):
+        # If there is a very deep self call, more than n self call deep,
+        # assume that it is invalid as if we try to make it valid,
+        # it can lead to DoS. Currently n is 5.
         with open(os.path.join(TEST_DIR, "self_call_recursion_invalid.json")) as f:
             self.parser.set_json(f.read())
 
@@ -115,7 +112,7 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Invalid recursion syntax! Use only one self message with the same name",
+            "Too deep self calls, 6 > 5!",
         )
 
     def test_parse_self_call_multiple_valid_recursion(self):
