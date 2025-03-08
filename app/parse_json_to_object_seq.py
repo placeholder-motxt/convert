@@ -1,4 +1,5 @@
 import json
+import re
 from typing import TypedDict
 
 from jsonschema import validate
@@ -11,12 +12,15 @@ from app.models.methods import (
 )
 from app.models.properties import ParameterObject
 
+from .utils import is_valid_python_identifier
+
 
 class CallNode(TypedDict):
     id: int
     parent: int
     method: ClassMethodObject | ControllerMethodObject
     caller: int
+    ret_var: str
 
 
 class ParseJsonToObjectSeq:
@@ -27,6 +31,10 @@ class ParseJsonToObjectSeq:
         self.__call_nodes: dict[str, CallNode] = dict()
         self.__edges: list = []
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
+        self.__label_pattern: re.Pattern = re.compile(
+            r"(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
+            r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?"
+        )
 
     def set_json(self, data: str) -> str | None:
         try:
@@ -158,7 +166,7 @@ class ParseJsonToObjectSeq:
             edge_type = edge.get("type")
             start_id = edge.get("start")
             end_id = edge.get("end")
-            label = edge.get("middleLabel", "")
+            label = edge.get("middleLabel", "").strip()
 
             self.__edges.append(
                 {"type": edge_type, "start": start_id, "end": end_id, "label": label}
@@ -167,7 +175,6 @@ class ParseJsonToObjectSeq:
 
         # Assign edge to classObject
 
-        # method_tracker: dict[int, ClassMethodObject] = {}
         for edge in self.__edges:
             if edge["type"] == "CallEdge":
                 start_id = edge["start"]
@@ -185,32 +192,43 @@ class ParseJsonToObjectSeq:
                 self.__call_nodes[end_id]["method"] = method
                 self.__call_nodes[end_id]["caller"] = start_id
 
-                method_label = edge["label"].split(" ")
-                is_name_setup = False
-                duplicate_attribute_checker = dict()
+                match: re.Match[str] | None = self.__label_pattern.match(edge["label"])
+                if match is None:
+                    raise ValueError(
+                        f"Wrong label format: {edge['label']}\n"
+                        "Check that the format is in compliance with the guide"
+                    )
+                condition = match.group("cond")
+                method_name = match.group("method_name")
+                params = match.group("params")
+                ret_var = match.group("ret_var")
 
-                for value in method_label:
-                    if "[" in value or "]" in value:
-                        # TODO: Request Method Implementation
+                if condition is not None:
+                    # TODO: Implement condition checking
+                    pass
+
+                if not is_valid_python_identifier(method_name):
+                    raise ValueError(f"Invalid method name: {method_name}")
+                method.set_name(method_name)
+
+                duplicate_attribute_checker: set[str] = set()
+                for param in params.split(","):
+                    param = param.strip()
+                    if param == "":
                         continue
+                    if not is_valid_python_identifier(param):
+                        raise ValueError(f"Invalid param name: {param}")
+                    if param in duplicate_attribute_checker:
+                        raise Exception("Duplicate attribute!")
+                    param_obj = ParameterObject()
+                    param_obj.set_name(param)
+                    method.add_parameter(param_obj)
+                    duplicate_attribute_checker.add(param)
 
-                    elif is_name_setup:
-                        param = value.replace("(", "").replace(")", "").replace(",", "")
-
-                        if param == "":
-                            continue
-
-                        if param in duplicate_attribute_checker:
-                            raise Exception("Duplicate attribute!")
-
-                        param_object = ParameterObject()
-                        param_object.set_name(param)
-                        duplicate_attribute_checker[param] = 1
-                        method.add_parameter(param_object)
-
-                    else:
-                        method.set_name(value)
-                        is_name_setup = True
+                if ret_var is not None:
+                    if not is_valid_python_identifier(ret_var):
+                        raise ValueError(f"Invalid return variable name: {ret_var}")
+                    self.__call_nodes[end_id]["ret_var"] = ret_var
 
                 if class_name == "views":
                     self.__controller_method.append(method)
@@ -225,7 +243,10 @@ class ParseJsonToObjectSeq:
 
             caller_method = self.__call_nodes[caller_id]["method"]
             callee_method = call_node["method"]
+            ret_var = call_node.get("ret_var", None)
             call_obj = ClassMethodCallObject()
             call_obj.set_caller(caller_method)
             call_obj.set_method(callee_method)
+            if ret_var is not None:
+                call_obj.set_return_var_name(ret_var)
             caller_method.add_class_method_call(call_obj)
