@@ -265,12 +265,22 @@ class ParseJsonToObjectSeq:
             call_obj.set_method(callee_method)
             if ret_var is not None:
                 call_obj.set_return_var_name(ret_var)
-            caller_method.add_class_method_call(call_obj)
 
-    def check_call_depth(self, rev_call_tree: dict[int, int], callee: int) -> int:
+            if isinstance(caller_method, ClassMethodObject):
+                caller_method.add_class_method_call(call_obj)
+            else:
+                caller_method.add_call(call_obj)
+
+    def check_call_depth(
+        self, rev_call_tree: dict[int, int], callee: int
+    ) -> int | float:
         depth = 0
+        visited = set()
         caller = rev_call_tree[callee]
         while caller > 0:
+            if caller in visited:
+                return float("inf")
+            visited.add(caller)
             caller = rev_call_tree.get(caller, -1)
             depth += 1
         return depth
