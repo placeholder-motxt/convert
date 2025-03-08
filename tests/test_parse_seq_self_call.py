@@ -150,7 +150,23 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Too deep self calls, 6 > 5!",
+            "Too deep self calls! The maximum allowed "
+            f"is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
+        )
+
+    def test_parse_self_call_too_deep_edge(self):
+        # Edge case when the self call is in between some other non
+        # self calls
+        with open(os.path.join(TEST_DIR, "self_call_too_many_calls_edge.json")) as f:
+            self.parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            self.parser.parse()
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Too deep self calls! The maximum allowed "
+            f"is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
         )
 
     def test_parse_self_call_multiple_valid_recursion(self):
