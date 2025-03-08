@@ -61,6 +61,13 @@ class TestParseSeqSelfCall(unittest.TestCase):
         self.doA.add_class_method_call(self.doB_call)
         self.doB.add_class_method_call(self.doC_call)
 
+    def tearDown(self):
+        self.add_method_cobj.stop()
+        self.add_cls_method_call_cmobj.stop()
+        self.set_caller_cmcobj.stop()
+        self.set_method_cmcobj.stop()
+        self.set_name_cmobj.stop()
+
     def test_parse_self_call_valid(self):
         # Valid test when there is a call from one method
         # to another method in the same class (not recursion)
