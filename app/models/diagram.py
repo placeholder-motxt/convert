@@ -3,6 +3,8 @@ from __future__ import annotations
 from abc import ABC
 from typing import Optional
 
+from app.utils import is_valid_python_identifier
+
 from .methods import ClassMethodObject
 from .properties import FieldObject
 
@@ -24,6 +26,22 @@ class ClassObject:
             + f"\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}"
             + f"\n{self.__get_methods_to_code()}"
         )
+
+    def to_views_code(self) -> str:
+        if not is_valid_python_identifier(self.__name):
+            raise ValueError(f"Invalid class name: {self.__name}")
+
+        res = ""
+        if len(self.__methods) > 0:
+            res = f"from .models import {self.__name}\n"
+
+        if self.__parent is not None:
+            res += self.__parent.to_views_code()
+
+        for method in self.__methods:
+            res += method.to_views_code()
+
+        return res
 
     def __str__(self) -> str:
         return (
@@ -52,6 +70,9 @@ class ClassObject:
 
     def get_name(self) -> str:
         return self.__name
+
+    def get_methods(self) -> list[ClassMethodObject]:
+        return self.__methods
 
     def __get_attributes_to_code(self) -> str:
         res = ""

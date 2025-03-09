@@ -36,27 +36,21 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Should have param and type annotations for it as well as return type
         result = "def method_full(param1: int) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
-        )
+        result += "    raise NotImplementedError('method_full function is not yet implemented')\n"
         self.assertEqual(result, self.method_full.to_views_code())
 
     def test_to_views_code_no_return_type(self):
         # Should have params and its type annotation but no return type
         result = "def method_params(param1: int):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
-        )
+        result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         self.assertEqual(result, self.method_with_parameters.to_views_code())
 
     def test_to_views_code_param_no_type(self):
         # Parameter doesn't have a type somehow
         result = "def method_params(param1):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
-        )
+        result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         self.param.set_type(None)
         self.assertEqual(result, self.method_with_parameters.to_views_code())
 
@@ -64,9 +58,8 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Should have the return type annotation but no params
         result = "def method_rettype() -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
-        )
+        result += "    raise NotImplementedError('method_rettype"
+        result += " function is not yet implemented')\n"
         self.assertEqual(result, self.method_with_return_type.to_views_code())
 
     def test_to_views_code_no_params_or_rettype(self):
@@ -96,9 +89,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
 
         result = "def method_params(param1: int, param2: str, param3: float):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method function is not yet implemented')\n"
-        )
+        result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         self.assertEqual(result, self.method_with_parameters.to_views_code())
 
     def test_to_views_code_invalid_method_name(self):
@@ -207,7 +198,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             "def class_method_1():\n"
             "    ret_var1 = method_call1(arg1, arg2)\n"
             "    # TODO: Auto generated function stub\n"
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
         ))
 
     def test_to_views_code_two_method_calls(self):
@@ -224,7 +215,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             "    ret_var1 = method_call1(arg1, arg2)\n"
             "    ret_var2 = method_call2(arg1, arg2)\n"
             "    # TODO: Auto generated function stub\n"
-            "    raise NotImplementedError('method function is not yet implemented')\n"
+            "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
         ))
 
 

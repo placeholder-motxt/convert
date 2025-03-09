@@ -329,7 +329,7 @@
       "signal": false
     },
     {
-      "middleLabel": "borrow(isbn)",
+      "middleLabel": "borrow (isbn)",
       "start": 10,
       "end": 20,
       "type": "CallEdge",
