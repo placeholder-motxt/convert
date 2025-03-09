@@ -36,7 +36,7 @@ class ParseJsonToObjectSeq:
         self.__call_nodes: dict[str, CallNode] = dict()
         self.__edges: list = []
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
-        self.__method_call: dict[str, dict] = dict()
+        self.__method_call: dict[tuple, dict] = dict()
         self.__label_pattern: re.Pattern = re.compile(
             r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
             r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
@@ -180,6 +180,14 @@ class ParseJsonToObjectSeq:
             self.__edges.append(
                 {"type": edge_type, "start": start_id, "end": end_id, "label": label}
             )
+            key_tuple = (start_id, end_id)
+            self.__method_call[key_tuple] = {
+                "end": end_id,
+                "condition": None,
+                "method": None,
+                "ret_var": None,
+                "method_call": None,
+            }
             valid_caller.add(end_id)
 
         # Assign edge to classObject
@@ -212,12 +220,6 @@ class ParseJsonToObjectSeq:
                 params = match.group("params")
                 ret_var = match.group("ret_var")
 
-                if condition is not None:
-                    controller_call = ControllerMethodCallObject()
-                    controller_call.set_condition(condition)
-
-                method_call = AbstractMethodCallObject()
-
                 if not is_valid_python_identifier(method_name):
                     raise ValueError(f"Invalid method name: {method_name}")
                 method.set_name(method_name)
@@ -247,19 +249,11 @@ class ParseJsonToObjectSeq:
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
 
+                method_call_dictionary = self.__method_call[(start_id, end_id)]
                 if condition is not None:
-                    method_call = controller_call
-
-                method_call_value = {
-                    "start": start_id,
-                    "end": end_id,
-                    "name": method_name,
-                    "method": method_call,
-                }
-                key = f"{start_id},{end_id}"
-                self.__method_call[key] = method_call_value
-            if edge["type"] == "ReturnEdge":
-                self.parse_return_edge()
+                    if method_call_dictionary["end"] == end_id:
+                        method_call_dictionary["condition"] = condition
+                method_call_dictionary["method"] = method
 
         rev_call_tree = {}
         for callee_id, call_node in self.__call_nodes.items():
@@ -284,14 +278,29 @@ class ParseJsonToObjectSeq:
             callee_method = call_node["method"]
             ret_var = call_node.get("ret_var", None)
 
+            start = caller_id
+            end = callee_id
+            method_call_dictionary = self.__method_call[(start, end)]
             if isinstance(caller_method, ControllerMethodObject):
                 call_obj = ControllerMethodCallObject()
+                if (
+                    method_call_dictionary["condition"] is not None
+                    and method_call_dictionary["end"] == end
+                ):
+                    call_obj.set_condition(method_call_dictionary["condition"])
 
             else:
                 call_obj = ClassMethodCallObject()
+                if (
+                    method_call_dictionary["condition"] is not None
+                    and method_call_dictionary["end"] == end
+                ):
+                    call_obj.set_condition(method_call_dictionary["condition"])
 
             call_obj.set_caller(caller_method)
             call_obj.set_method(callee_method)
+
+            method_call_dictionary["method_call"] = call_obj
 
             for param in callee_method.get_parameters():
                 argument = ArgumentObject()
@@ -322,6 +331,7 @@ class ParseJsonToObjectSeq:
         return depth
 
     def parse_return_edge(self) -> str:
+        return_variables = []
         for edge in self.__edges:
             if edge["type"] == "ReturnEdge":
                 start_id = edge["start"]
@@ -334,12 +344,19 @@ class ParseJsonToObjectSeq:
                         "Return edge label must be a valid variable name!"
                         f" Given: {edge['label']}"
                     )
-                key = f"{end_id},{start_id}"
-                try:
-                    self.__method_call[key]["method"].set_return_var_name(return_var)
-                except KeyError:
+                tupl = (end_id, start_id)
+                if tupl not in self.__method_call:
                     raise ValueError(
-                        f"Return edge must have a corresponding call edge! {start_id} -> {end_id}"
+                        f"Return edge must have a corresponding call edge! "
+                        f"{end_id} -> {start_id}"
                     )
-                return "Success"
-        return "Error"
+                else:
+                    method_call_dictionary = self.__method_call[tupl]
+                if method_call_dictionary["end"] == start_id:
+                    if method_call_dictionary["method_call"] is not None:
+                        method_call: AbstractMethodCallObject = method_call_dictionary[
+                            "method_call"
+                        ]
+                        method_call.set_return_var_name(return_var)
+                        return_variables.append(return_var)
+        return return_variables

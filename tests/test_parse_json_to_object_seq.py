@@ -208,6 +208,10 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             "prosesPeminjamanValidKeanggotaan",
         )
         self.assertEqual(
+            parsed_value_controller[4].get_call()[0].get_condition(),
+            "isValid",
+        )
+        self.assertEqual(
             len(parsed_value_controller[4].get_call()[0].get_arguments()), 0
         )
         self.assertEqual(
