@@ -248,8 +248,6 @@ class ParseJsonToObjectSeq:
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
 
-                if start_id == 6 and end_id == 1:
-                    print(method)
                 abcde = {
                     "start": start_id,
                     "end": end_id,
@@ -258,8 +256,8 @@ class ParseJsonToObjectSeq:
                 }
                 key = f"{start_id},{end_id}"
                 self.__method_call[key] = abcde
-            # if edge["type"] == "ReturnEdge":
-            #     self.parse_return_edge()
+            if edge["type"] == "ReturnEdge":
+                self.parse_return_edge()
 
         rev_call_tree = {}
         for callee_id, call_node in self.__call_nodes.items():
@@ -310,4 +308,24 @@ class ParseJsonToObjectSeq:
         return depth
 
     def parse_return_edge(self) -> str:
-        pass
+        for edge in self.__edges:
+            if edge["type"] == "ReturnEdge":
+                start_id = edge["start"]
+                end_id = edge["end"]
+                return_var = None
+                if edge["label"].strip().isalnum():
+                    return_var = edge["label"].strip()
+                else:
+                    raise ValueError(
+                        "Return edge label must be a valid variable name!"
+                        f" Given: {edge['label']}"
+                    )
+                key = f"{end_id},{start_id}"
+                try:
+                    self.__method_call[key]["method"].set_return_var_name(return_var)
+                except KeyError:
+                    raise ValueError(
+                        f"Return edge must have a corresponding call edge! {start_id} -> {end_id}"
+                    )
+                return "Success"
+        return "Error"
