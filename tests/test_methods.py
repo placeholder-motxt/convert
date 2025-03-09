@@ -181,7 +181,8 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             f"MethodCallObject:\n"
             f"\tmethod: {self.method_mock}\n"
             f"\targuments: []\n"
-            f"\treturn_var_name: "
+            f"\treturn_var_name: \n"
+            f"\tcondition: "
         )
         self.assertEqual(str(self.method_call_object), expected_output)
 
