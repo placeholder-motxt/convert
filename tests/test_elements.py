@@ -80,12 +80,12 @@ class TestViewsElements(unittest.TestCase):
     def test_print_django_style_with_class_methods(self):
         mock_class_method_1 = mock.Mock()
         mock_class_method_1.get_name.return_value = "Class1"
-        mock_class_method_1.print_django_style.return_value = (
+        mock_class_method_1.to_views_code.return_value = (
             "def class_method():\n\tmethod_call = inner_method1(arg1, arg2)"
         )
         mock_class_method_2 = mock.Mock()
         mock_class_method_2.get_name.return_value = "Class2"
-        mock_class_method_2.print_django_style.return_value = (
+        mock_class_method_2.to_views_code.return_value = (
             "def class_method():\n\tmethod_call = inner_method2(arg1, arg2)"
         )
         self.views_elements.add_class_method(mock_class_method_1)
@@ -105,7 +105,7 @@ class TestViewsElements(unittest.TestCase):
     def test_print_django_style_with_one_class_method(self):
         mock_class_method_1 = mock.Mock()
         mock_class_method_1.get_name.return_value = "Class1"
-        mock_class_method_1.print_django_style.return_value = (
+        mock_class_method_1.to_views_code.return_value = (
             "def class_method():\n\tmethod_call = inner_method1(arg1, arg2)"
         )
         self.views_elements.add_class_method(mock_class_method_1)
