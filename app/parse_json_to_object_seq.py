@@ -6,8 +6,10 @@ from jsonschema import validate
 
 from app.models.diagram import ClassObject
 from app.models.methods import (
+    AbstractMethodCallObject,
     ClassMethodCallObject,
     ClassMethodObject,
+    ControllerMethodCallObject,
     ControllerMethodObject,
 )
 from app.models.properties import ParameterObject
@@ -33,6 +35,7 @@ class ParseJsonToObjectSeq:
         self.__call_nodes: dict[str, CallNode] = dict()
         self.__edges: list = []
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
+        self.__method_call: dict[str, dict] = dict()
         self.__label_pattern: re.Pattern = re.compile(
             r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
             r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
@@ -102,6 +105,9 @@ class ParseJsonToObjectSeq:
 
         except Exception:
             return False
+
+    def get_method_call(self) -> dict:  # pragma: no cover
+        return self.__method_call
 
     def get_class_objects(self) -> dict[str, ClassObject]:  # pragma: no cover
         return self.__class_object
@@ -208,9 +214,10 @@ class ParseJsonToObjectSeq:
                 ret_var = match.group("ret_var")
 
                 if condition is not None:
-                    # TODO: Implement condition checking
-                    pass
+                    controller_call = ControllerMethodCallObject()
+                    controller_call.set_condition(condition)
 
+                method_call = AbstractMethodCallObject()
                 if not is_valid_python_identifier(method_name):
                     raise ValueError(f"Invalid method name: {method_name}")
                 method.set_name(method_name)
@@ -236,9 +243,25 @@ class ParseJsonToObjectSeq:
 
                 if class_name == "views":
                     self.__controller_method.append(method)
+                    controller_call.set_method(method)
+                    method.add_call(controller_call)
 
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
+
+                if condition is not None:
+                    method_call = controller_call
+
+                method_call_value = {
+                    "start": start_id,
+                    "end": end_id,
+                    "name": method_name,
+                    "method": method_call,
+                }
+                key = f"{start_id},{end_id}"
+                self.__method_call[key] = method_call_value
+            if edge["type"] == "ReturnEdge":
+                self.parse_return_edge()
 
         rev_call_tree = {}
         for callee_id, call_node in self.__call_nodes.items():
@@ -286,3 +309,26 @@ class ParseJsonToObjectSeq:
             caller = rev_call_tree.get(caller, -1)
             depth += 1
         return depth
+
+    def parse_return_edge(self) -> str:
+        for edge in self.__edges:
+            if edge["type"] == "ReturnEdge":
+                start_id = edge["start"]
+                end_id = edge["end"]
+                return_var = None
+                if is_valid_python_identifier(edge["label"].strip()):
+                    return_var = edge["label"].strip()
+                else:
+                    raise ValueError(
+                        "Return edge label must be a valid variable name!"
+                        f" Given: {edge['label']}"
+                    )
+                key = f"{end_id},{start_id}"
+                try:
+                    self.__method_call[key]["method"].set_return_var_name(return_var)
+                except KeyError:
+                    raise ValueError(
+                        f"Return edge must have a corresponding call edge! {start_id} -> {end_id}"
+                    )
+                return "Success"
+        return "Error"

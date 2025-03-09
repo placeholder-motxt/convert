@@ -12,6 +12,7 @@ from .properties import FieldObject
 
 class ClassObject:
     """Represents a single JetUML ClassNode."""
+
     def __init__(self):
         self.__name: str = ""
         self.__parent: Optional[ClassObject] = None
@@ -91,6 +92,7 @@ class ClassObject:
 
 class AbstractRelationshipObject(ABC):
     """Represents JetUML's Association Edge"""
+
     def __init__(self):
         self.__source_class: Optional[ClassObject] = None
         self.__target_class: Optional[ClassObject] = None
@@ -122,6 +124,7 @@ class AbstractRelationshipObject(ABC):
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where the the startLabel and endLabel are both '1'"""
+
     def __init__(self):
         super().__init__()
 
@@ -141,6 +144,7 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
     Code generation must handle cases where startLabel is 1 and endLabel is *, and
     cases where startLabel is * and endLabel is *
     """
+
     def __init__(self):
         super().__init__()
 
@@ -154,6 +158,7 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where both startLabel and endLabel are '*'"""
+
     def __init__(self):
         super().__init__()
 

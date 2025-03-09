@@ -293,14 +293,18 @@ class TestClassMethodCallObject(unittest.TestCase):
         self.class_method_call_object.set_return_var_name("result")
         self.class_method_call_object.add_argument(self.argument_mock1)
         expected_output = "result = mock_method(request, instance_name, arg1)"
-        self.assertEqual(self.class_method_call_object.print_django_style(), expected_output)
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
 
     def test_print_django_style_two_arguments(self):
         self.class_method_call_object.set_return_var_name("result")
         self.class_method_call_object.add_argument(self.argument_mock1)
         self.class_method_call_object.add_argument(self.argument_mock2)
         expected_output = "result = mock_method(request, instance_name, arg1, arg2)"
-        self.assertEqual(self.class_method_call_object.print_django_style(), expected_output)
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
 
     def test_print_django_style_negative(self):
         self.class_method_call_object.set_method(None)  # No method set
@@ -310,14 +314,20 @@ class TestClassMethodCallObject(unittest.TestCase):
     def test_print_django_style_corner_case_empty_arguments(self):
         self.class_method_call_object.set_return_var_name("output")
         expected_output = "output = mock_method(request, instance_name)"
-        self.assertEqual(self.class_method_call_object.print_django_style(), expected_output)
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
 
     def test_print_django_style_with_condition(self):
         self.class_method_call_object.set_condition("x > 5")
         self.class_method_call_object.set_return_var_name("value")
         self.class_method_call_object.add_argument(self.argument_mock1)
-        expected_output = "if x > 5:\n\t\tvalue = mock_method(request, instance_name, arg1)"
-        self.assertEqual(self.class_method_call_object.print_django_style(), expected_output)
+        expected_output = (
+            "if x > 5:\n\t\tvalue = mock_method(request, instance_name, arg1)"
+        )
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
 
 
 class TestArgumentObject(unittest.TestCase):

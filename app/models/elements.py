@@ -18,6 +18,7 @@ class FileElements(ABC):
 
 
     """
+
     def __init__(self, file_name: str):
         assert isinstance(file_name, str), "File name must be a string!"
         assert file_name != "", "File name can't be empty!"
@@ -33,6 +34,7 @@ class ModelsElements(FileElements):
 
     Note: this class is NOT FRAMEWORK SPECIFIC
     """
+
     def __init__(self, file_name: str):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
@@ -54,7 +56,6 @@ class ModelsElements(FileElements):
         return response_content
 
 
-
 class ViewsElements(FileElements):
     """
     An intermediate representation of information inside a views file
@@ -62,6 +63,7 @@ class ViewsElements(FileElements):
     A views file is a file that contains the business logic of the web application.
     The file name may differ across different frameworks.
     """
+
     def __init__(self, file_name: str):
         """
         Object initialization
@@ -103,7 +105,9 @@ class ViewsElements(FileElements):
         result = StringIO()
 
         for class_method_object in self.__class_methods:
-            result.write(f"#-----method from class {class_method_object.get_name()}------\n\n")
+            result.write(
+                f"#-----method from class {class_method_object.get_name()}------\n\n"
+            )
             result.write(class_method_object.print_django_style())
             result.write("\n\n\n")
 
@@ -116,4 +120,3 @@ class ViewsElements(FileElements):
 
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
-
