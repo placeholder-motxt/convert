@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 
 from app.models.methods import ClassMethodObject
 from app.models.properties import ParameterObject, TypeObject
@@ -39,21 +40,21 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
 
     def test_to_views_code_full(self):
         # Should have param and type annotations for it as well as return type
-        result = "def method_full(param1: int) -> str:\n"
+        result = "def method_full(request, instance_name, param1: int) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
         result += "    raise NotImplementedError('method_full function is not yet implemented')\n"
         self.assertEqual(result, self.method_full.to_views_code())
 
     def test_to_views_code_no_return_type(self):
         # Should have params and its type annotation but no return type
-        result = "def method_params(param1: int):\n"
+        result = "def method_params(request, instance_name, param1: int):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         self.assertEqual(result, self.method_with_parameters.to_views_code())
 
     def test_to_views_code_param_no_type(self):
         # Parameter doesn't have a type somehow
-        result = "def method_params(param1):\n"
+        result = "def method_params(request, instance_name, param1):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         self.param.set_type(None)
@@ -61,15 +62,16 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
 
     def test_to_views_code_no_parameters(self):
         # Should have the return type annotation but no params
-        result = "def method_rettype() -> str:\n"
+        result = "def method_rettype(request, instance_name) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
         result += "    raise NotImplementedError('method_rettype"
         result += " function is not yet implemented')\n"
         self.assertEqual(result, self.method_with_return_type.to_views_code())
 
     def test_to_views_code_no_params_or_rettype(self):
-        # Should only have method name and body but no params and return type
-        result = "def method():\n"
+        # Should only have method name and body but no params except request and instance_name
+        # and return type
+        result = "def method(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
             "    raise NotImplementedError('method function is not yet implemented')\n"
@@ -78,7 +80,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
 
     def test_to_views_code_rettype_list(self):
         # Should only have method name and body but no params and return type
-        result = "def method_rettype() -> list[ABC]:\n"
+        result = "def method_rettype(request, instance_name) -> list[ABC]:\n"
         result += "    # TODO: Auto generated function stub\n"
         result += "    raise NotImplementedError('method_rettype function is not yet implemented')"
         result += "\n"
@@ -100,7 +102,8 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         param3.set_type(param3_type)
         self.method_with_parameters.add_parameter(param3)
 
-        result = "def method_params(param1: int, param2: str, param3: float):\n"
+        result = "def method_params(request, instance_name, param1: int, param2: str,"
+        result += " param3: float):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         self.assertEqual(result, self.method_with_parameters.to_views_code())
@@ -199,3 +202,45 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self.method_with_return_type.to_views_code()
         self.assertEqual(str(ctx.exception), "Invalid return type: param_!$")
+
+    def test_to_views_code_one_method_call(self):
+        self.class_method_object = ClassMethodObject()
+        self.class_method_object.set_name("class_method_1")
+        class_method_call = mock.Mock()
+        class_method_call.print_django_style.return_value = (
+            "ret_var1 = method_call1(arg1, arg2)"
+        )
+        self.class_method_object.add_class_method_call(class_method_call)
+        self.assertEqual(
+            self.class_method_object.to_views_code(),
+            (
+                "def class_method_1(request, instance_name):\n"
+                "    ret_var1 = method_call1(arg1, arg2)\n"
+                "    # TODO: Auto generated function stub\n"
+                "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
+            ),
+        )
+
+    def test_to_views_code_two_method_calls(self):
+        self.class_method_object = ClassMethodObject()
+        self.class_method_object.set_name("class_method_1")
+        class_method_call1 = mock.Mock()
+        class_method_call1.print_django_style.return_value = (
+            "ret_var1 = method_call1(arg1, arg2)"
+        )
+        self.class_method_object.add_class_method_call(class_method_call1)
+        class_method_call2 = mock.Mock()
+        class_method_call2.print_django_style.return_value = (
+            "ret_var2 = method_call2(arg1, arg2)"
+        )
+        self.class_method_object.add_class_method_call(class_method_call2)
+        self.assertEqual(
+            self.class_method_object.to_views_code(),
+            (
+                "def class_method_1(request, instance_name):\n"
+                "    ret_var1 = method_call1(arg1, arg2)\n"
+                "    ret_var2 = method_call2(arg1, arg2)\n"
+                "    # TODO: Auto generated function stub\n"
+                "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
+            ),
+        )
