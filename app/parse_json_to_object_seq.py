@@ -243,10 +243,12 @@ class ParseJsonToObjectSeq:
                     self.__controller_method.append(method)
                     controller_call.set_method(method)
                     method.add_call(controller_call)
-                    method_call = controller_call
 
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
+
+                if condition is not None:
+                    method_call = controller_call
 
                 abcde = {
                     "start": start_id,
@@ -313,7 +315,7 @@ class ParseJsonToObjectSeq:
                 start_id = edge["start"]
                 end_id = edge["end"]
                 return_var = None
-                if edge["label"].strip().isalnum():
+                if edge["label"].strip().is_valid_python_identifier():
                     return_var = edge["label"].strip()
                 else:
                     raise ValueError(
