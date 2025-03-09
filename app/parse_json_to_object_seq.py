@@ -49,7 +49,7 @@ class ParseJsonToObjectSeq:
             else:
                 raise Exception("Given .jet is not valid!")
 
-        except Exception:
+        except json.JSONDecodeError:
             raise Exception("Given .jet is not valid!")
 
     def validate_json(self, data: object) -> bool:

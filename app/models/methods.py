@@ -99,8 +99,6 @@ class ClassMethodObject(AbstractMethodObject):
         )
         return res.getvalue()
 
-
-
     def get_calls(self) -> list[ClassMethodCallObject]:
         # TODO: Make immutable if needed
         return self.__calls
@@ -209,9 +207,9 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 class ControllerMethodCallObject(AbstractMethodCallObject):
     def __init__(self):
         super().__init__()
-        self.__caller: ClassMethodObject = None
+        self.__caller: ControllerMethodObject = None
 
-    def set_caller(self, caller: ClassMethodObject):
+    def set_caller(self, caller: ControllerMethodObject):
         self.__caller = caller
 
     def get_caller(self) -> ClassMethodObject:
