@@ -158,9 +158,9 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 class ControllerMethodCallObject(AbstractMethodCallObject):
     def __init__(self):
         super().__init__()
-        self.__caller: ClassMethodObject = None
+        self.__caller: ControllerMethodObject = None
 
-    def set_caller(self, caller: ClassMethodObject):
+    def set_caller(self, caller: ControllerMethodObject):
         self.__caller = caller
 
 
