@@ -293,7 +293,6 @@ class ParseJsonToObjectSeq:
                 caller_method.add_class_method_call(call_obj)
             else:
                 caller_method.add_call(call_obj)
-            print(method_call)
 
     def check_call_depth(
         self, rev_call_tree: dict[int, int], callee: int
