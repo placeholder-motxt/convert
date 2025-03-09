@@ -18,6 +18,7 @@ class AbstractMethodObject(ABC):
     Note: This class DOES NOT represent abstract methods, instead it represents any method.
     The name is AbstractMethodObject to indicate that this class is not to be instanciated.
     """
+
     def __init__(self):
         self.__name: str = ""
         self.__parameters: list[ParameterObject] = []
@@ -72,6 +73,7 @@ class ClassMethodObject(AbstractMethodObject):
 
     Its counterpart is the ControllerMethodObject class
     """
+
     def __init__(self):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
@@ -158,6 +160,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     Its counterpart is the ClassMethodObject class
     """
+
     def __init__(self):
         super().__init__()
         self.__calls: list[AbstractMethodCallObject] = []
@@ -191,6 +194,7 @@ class AbstractMethodCallObject(ABC):
     calls to any method.
     The name AbstractMethodCallObject is to indicate that this class is not to be instanciated.
     """
+
     def __init__(self):
         self.__method: AbstractMethodObject = None
         self.__arguments: list[ArgumentObject] = []
@@ -286,6 +290,7 @@ class AbstractMethodCallObject(ABC):
 
 class ClassMethodCallObject(AbstractMethodCallObject):
     """Represents a method call of a ClassMethod"""
+
     def __init__(self):
         super().__init__()
         self.__caller: ClassMethodObject = None
@@ -314,6 +319,7 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 
 class ControllerMethodCallObject(AbstractMethodCallObject):
     """Represents a method call of a ControllerMethod"""
+
     def __init__(self):
         super().__init__()
         self.__caller: ControllerMethodObject = None
@@ -328,6 +334,7 @@ class ControllerMethodCallObject(AbstractMethodCallObject):
 
 class ArgumentObject:
     """Represents an argument in a method call"""
+
     def __init__(self):
         self.__method_object: Optional[AbstractMethodCallObject] = None
         self.__name: str = ""

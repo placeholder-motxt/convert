@@ -22,7 +22,7 @@
       "children": [
         3
       ],
-      "name": "listbuku:ListBuku",
+      "name": "listBuku:ListBuku",
       "x": 370,
       "y": 91,
       "id": 2,
@@ -252,7 +252,7 @@
       "signal": false
     },
     {
-      "middleLabel": "login ()",
+      "middleLabel": "HalamanPemrosesanPeminjaman ()",
       "start": 25,
       "end": 5,
       "type": "CallEdge",

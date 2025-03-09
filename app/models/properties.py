@@ -11,6 +11,7 @@ class TypeObject:
 
     This class is not framework specific. Instead, it contains methods which return a string
     representation of the datatype according to a specific framework."""
+
     def __init__(self):
         self.__name = ""
 
@@ -42,6 +43,7 @@ class FieldObject:
     The FieldObject class is not framework specific. Instead, it contains methods which return a
     string representation of the datatype according to a specific framework."
     """
+
     def __init__(self):
         self.__name: str = ""
         self.__type: TypeObject = None
@@ -88,6 +90,7 @@ class ParameterObject:
     This class is not framework specific. Instead, it contains methods which return a
     string representation of the datatype according to a specific framework."
     """
+
     def __init__(self):
         self.__name: str = ""
         self.__type: TypeObject = None

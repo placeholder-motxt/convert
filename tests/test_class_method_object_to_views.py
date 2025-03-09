@@ -203,35 +203,44 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             self.method_with_return_type.to_views_code()
         self.assertEqual(str(ctx.exception), "Invalid return type: param_!$")
 
-
     def test_to_views_code_one_method_call(self):
         self.class_method_object = ClassMethodObject()
         self.class_method_object.set_name("class_method_1")
         class_method_call = mock.Mock()
-        class_method_call.print_django_style.return_value = "ret_var1 = method_call1(arg1, arg2)"
+        class_method_call.print_django_style.return_value = (
+            "ret_var1 = method_call1(arg1, arg2)"
+        )
         self.class_method_object.add_class_method_call(class_method_call)
-        self.assertEqual(self.class_method_object.to_views_code(), (
-            "def class_method_1(request, instance_name):\n"
-            "    ret_var1 = method_call1(arg1, arg2)\n"
-            "    # TODO: Auto generated function stub\n"
-            "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
-        ))
+        self.assertEqual(
+            self.class_method_object.to_views_code(),
+            (
+                "def class_method_1(request, instance_name):\n"
+                "    ret_var1 = method_call1(arg1, arg2)\n"
+                "    # TODO: Auto generated function stub\n"
+                "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
+            ),
+        )
 
     def test_to_views_code_two_method_calls(self):
         self.class_method_object = ClassMethodObject()
         self.class_method_object.set_name("class_method_1")
         class_method_call1 = mock.Mock()
-        class_method_call1.print_django_style.return_value = "ret_var1 = method_call1(arg1, arg2)"
+        class_method_call1.print_django_style.return_value = (
+            "ret_var1 = method_call1(arg1, arg2)"
+        )
         self.class_method_object.add_class_method_call(class_method_call1)
         class_method_call2 = mock.Mock()
-        class_method_call2.print_django_style.return_value = "ret_var2 = method_call2(arg1, arg2)"
+        class_method_call2.print_django_style.return_value = (
+            "ret_var2 = method_call2(arg1, arg2)"
+        )
         self.class_method_object.add_class_method_call(class_method_call2)
-        self.assertEqual(self.class_method_object.to_views_code(), (
-            "def class_method_1(request, instance_name):\n"
-            "    ret_var1 = method_call1(arg1, arg2)\n"
-            "    ret_var2 = method_call2(arg1, arg2)\n"
-            "    # TODO: Auto generated function stub\n"
-            "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
-        ))
-
-
+        self.assertEqual(
+            self.class_method_object.to_views_code(),
+            (
+                "def class_method_1(request, instance_name):\n"
+                "    ret_var1 = method_call1(arg1, arg2)\n"
+                "    ret_var2 = method_call2(arg1, arg2)\n"
+                "    # TODO: Auto generated function stub\n"
+                "    raise NotImplementedError('class_method_1 function is not yet implemented')\n"
+            ),
+        )
