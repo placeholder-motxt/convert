@@ -1,4 +1,5 @@
 import unittest
+from copy import copy, deepcopy
 
 from app.models.properties import (
     FieldObject,
@@ -177,6 +178,20 @@ class TestParameterObject(unittest.TestCase):
     def test_get_name(self):
         self.parameter_object.set_name("TestParameter")
         self.assertEqual(self.parameter_object.get_name(), "TestParameter")
+
+    def test_copy(self):
+        self.parameter_object.set_name("TestParameter")
+        self.parameter_object.set_type("type1")
+        temp = copy(self.parameter_object)
+        self.assertEqual(temp.get_name(), "TestParameter")
+        self.assertEqual(temp._ParameterObject__type, "type1")
+
+    def test_deep_copy(self):
+        self.parameter_object.set_name("TestParameter")
+        self.parameter_object.set_type("type1")
+        temp = deepcopy(self.parameter_object)
+        self.assertEqual(temp.get_name(), "TestParameter")
+        self.assertEqual(temp._ParameterObject__type, "type1")
 
 
 if __name__ == "__main__":

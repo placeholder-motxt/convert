@@ -505,6 +505,16 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             with self.assertRaises(Exception):
                 self.parser._ParseJsonToObjectClass__validate_amount(im)
 
+    def test_validate_amount_invalid_size(self):
+        invalid_multiplicities = [
+            "2..1",  # Invalid range format
+            "10..1",  # Invalid range with "*" in the middle
+            "*..1",  # Invalid use of "*"
+        ]
+        for im in invalid_multiplicities:
+            with self.assertRaises(Exception):
+                self.parser._ParseJsonToObjectClass__validate_amount(im)
+
 
 if __name__ == "__main__":
     unittest.main()

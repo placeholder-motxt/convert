@@ -103,36 +103,38 @@ class ParseJsonToObjectClass:
                             class_method_obj.add_parameter(param_obj)
 
                     class_obj.add_method(class_method_obj)
-                    if attributes != []:
-                        for attribute in attributes:
-                            if attribute != "":
-                                attribute = attribute.lstrip("+- ")
 
-                                attr = FieldObject()
-                                attr_type = TypeObject()
+            if attributes != []:
+                for attribute in attributes:
+                    if attribute != "":
+                        attribute = attribute.lstrip("+- ")
 
-                                attr_name = attribute.split(":")[0].strip()
-                                attr_type_name = attribute.split(":")[1].strip()
+                        attr = FieldObject()
+                        attr_type = TypeObject()
 
-                                if (
-                                    self.check_name(attr_name)
-                                    and self.check_name(attr_type_name)
-                                    or bool(re.match(r"List\[.*\]", attr_type_name))
-                                ):
-                                    attr.set_name(attr_name)
-                                    attr_type.set_name(attr_type_name)
-                                    attr.set_type(attr_type)
+                        attr_name = attribute.split(":")[0].strip()
+                        attr_type_name = attribute.split(":")[1].strip()
 
-                                    class_obj.add_field(attr)
-                                else:
-                                    raise ValueError(
-                                        "Error: attribute name or type is not valid"
-                                    )
+                        if (
+                            self.check_name(attr_name)
+                            and self.check_name(attr_type_name)
+                            or bool(re.match(r"List\[.*\]", attr_type_name))
+                        ):
+                            attr.set_name(attr_name)
+                            attr_type.set_name(attr_type_name)
+                            attr.set_type(attr_type)
+
+                            class_obj.add_field(attr)
+                        else:
+                            raise ValueError(
+                                f"Error: attribute name or type is not valid: {attr_name} \
+                                    {attr_type_name}"
+                            )
 
             self.__classes.append(class_obj)
         return self.__classes
 
-    def parse_relationships(self, classes):  # noqa: ANN001, ANN201, ANN202,
+    def parse_relationships(self, classes: list[ClassObject]) -> list[ClassObject]:
         edges = self.__json["edges"]
 
         for edge in edges:
@@ -201,7 +203,7 @@ class ParseJsonToObjectClass:
             class_from_id.add_relationship(ro)
         return classes
 
-    def __validate_amount(self, amount_str):  # noqa: ANN001, ANN201, ANN202,
+    def __validate_amount(self, amount_str: str) -> str:
         if not amount_str:
             raise Exception("Association multiplicity cannot be empty")
 
@@ -244,6 +246,6 @@ class ParseJsonToObjectClass:
 
             return amount_str
 
-    def __is_number_greater_than(self, amount_str, compared_to=1):  # noqa: ANN001, ANN201, ANN202,
+    def __is_number_greater_than(self, amount_str: str, compared_to: int = 1) -> bool:
         if amount_str.isnumeric():
             return int(amount_str) > compared_to

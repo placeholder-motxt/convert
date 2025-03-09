@@ -1,7 +1,16 @@
+from __future__ import annotations
+
+from copy import deepcopy
+
 from app.utils import is_valid_python_identifier
 
 
 class TypeObject:
+    """
+    Represents a Datatype
+
+    This class is not framework specific. Instead, it contains methods which return a string
+    representation of the datatype according to a specific framework."""
     def __init__(self):
         self.__name = ""
 
@@ -14,8 +23,25 @@ class TypeObject:
     def get_name(self) -> str:
         return self.__name
 
+    def __copy__(self) -> TypeObject:
+        copy = TypeObject()
+        copy.set_name(self.__name)
+        return copy
+
+    def __deepcopy__(self, _) -> TypeObject:
+        return self.__copy__()
+
+    def __eq__(self, other: TypeObject) -> TypeObject:
+        return self.__name == other.__name
+
 
 class FieldObject:
+    """
+    Represents a field from a class.
+
+    The FieldObject class is not framework specific. Instead, it contains methods which return a
+    string representation of the datatype according to a specific framework."
+    """
     def __init__(self):
         self.__name: str = ""
         self.__type: TypeObject = None
@@ -56,6 +82,12 @@ class FieldObject:
 
 
 class ParameterObject:
+    """
+    Represents parameter of a method definition.
+
+    This class is not framework specific. Instead, it contains methods which return a
+    string representation of the datatype according to a specific framework."
+    """
     def __init__(self):
         self.__name: str = ""
         self.__type: TypeObject = None
@@ -85,3 +117,18 @@ class ParameterObject:
 
     def get_name(self) -> str:
         return self.__name
+
+    def __copy__(self) -> ParameterObject:
+        copy = ParameterObject()
+        copy.set_name(self.__name)
+        copy.set_type(self.__type)
+        return copy
+
+    def __deepcopy__(self, _) -> ParameterObject:
+        copy = ParameterObject()
+        copy.set_name(self.__name)
+        copy.set_type(deepcopy(self.__type))
+        return copy
+
+    def __eq__(self, other: ParameterObject) -> bool:
+        return self.__name == other.__name and self.__type == other.__type
