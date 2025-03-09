@@ -146,6 +146,8 @@ class ParseJsonToObjectSeq:
                     self.__class_object[class_name] = class_object
 
                 else:
+                    print(class_name)
+                    print(self.__class_object.keys())
                     raise Exception("Duplicate class name!")
 
                 self.__implicit_parameter_nodes[callee_id] = {
