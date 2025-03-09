@@ -73,13 +73,15 @@ async def convert(
 
     await download_file(
         request=DownloadRequest(
-            filename=file_name, content=response_content_models, type="_models"
+            filename=request.filename[0],
+            content=response_content_models,
+            type="_models",
         ),
     )
 
     await download_file(
         request=DownloadRequest(
-            filename=file_name, content=response_content_views, type="_views"
+            filename=request.filename[0], content=response_content_views, type="_views"
         ),
     )
 
