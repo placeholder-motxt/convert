@@ -54,6 +54,7 @@ class ModelsElements(FileElements):
         return response_content
 
 
+
 class ViewsElements(FileElements):
     """
     An intermediate representation of information inside a views file
