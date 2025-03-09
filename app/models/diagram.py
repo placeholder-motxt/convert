@@ -73,7 +73,7 @@ class ClassObject:
 
     def get_name(self) -> str:
         return self.__name
-      
+
     def get_methods(self) -> list[ClassMethodObject]:
         return self.__methods
 

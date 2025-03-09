@@ -84,7 +84,6 @@ class ClassMethodObject(AbstractMethodObject):
         ) and super().__eq__(other)
 
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
-        
         if class_method_call is None:
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
@@ -146,7 +145,7 @@ class ClassMethodObject(AbstractMethodObject):
         res.write(
             f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
-        
+
         return res.getvalue()
 
     def get_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
@@ -167,7 +166,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def add_call(self, call_object: AbstractMethodCallObject):
         self.__calls.append(call_object)
-    
+
     def get_call(self) -> list[AbstractMethodCallObject]:
         return self.__calls
 
@@ -223,7 +222,7 @@ class AbstractMethodCallObject(ABC):
 
     def set_method(self, method: AbstractMethodObject):
         self.__method = method
-    
+
     def get_methods(self) -> AbstractMethodObject:
         return self.__method
 
@@ -351,7 +350,7 @@ class ArgumentObject:
 
     def set_name(self, name: str):
         self.__name = name
-    
+
     def get_name(self) -> str:
         return self.__name
 

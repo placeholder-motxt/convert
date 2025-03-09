@@ -219,6 +219,7 @@ class ParseJsonToObjectSeq:
                     controller_call.set_condition(condition)
 
                 method_call = AbstractMethodCallObject()
+
                 if not is_valid_python_identifier(method_name):
                     raise ValueError(f"Invalid method name: {method_name}")
                 method.set_name(method_name)
@@ -244,8 +245,6 @@ class ParseJsonToObjectSeq:
 
                 if class_name == "views":
                     self.__controller_method.append(method)
-                    controller_call.set_method(method)
-                    method.add_call(controller_call)
 
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
@@ -295,13 +294,13 @@ class ParseJsonToObjectSeq:
 
             call_obj.set_caller(caller_method)
             call_obj.set_method(callee_method)
-            
+
             for param in callee_method.get_parameters():
                 argument = ArgumentObject()
                 argument.set_name(param.get_name())
                 argument.set_methodObject(call_obj)
                 call_obj.add_argument(argument)
-            
+
             if ret_var is not None:
                 call_obj.set_return_var_name(ret_var)
 
@@ -323,7 +322,7 @@ class ParseJsonToObjectSeq:
             caller = rev_call_tree.get(caller, -1)
             depth += 1
         return depth
-      
+
     def parse_return_edge(self) -> str:
         for edge in self.__edges:
             if edge["type"] == "ReturnEdge":
