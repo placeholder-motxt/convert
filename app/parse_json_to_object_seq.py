@@ -252,14 +252,14 @@ class ParseJsonToObjectSeq:
                 if condition is not None:
                     method_call = controller_call
 
-                abcde = {
+                method_call_value = {
                     "start": start_id,
                     "end": end_id,
                     "name": method_name,
                     "method": method_call,
                 }
                 key = f"{start_id},{end_id}"
-                self.__method_call[key] = abcde
+                self.__method_call[key] = method_call_value
             if edge["type"] == "ReturnEdge":
                 self.parse_return_edge()
 
