@@ -315,7 +315,7 @@ class ParseJsonToObjectSeq:
                 start_id = edge["start"]
                 end_id = edge["end"]
                 return_var = None
-                if edge["label"].strip().is_valid_python_identifier():
+                if is_valid_python_identifier(edge["label"].strip()):
                     return_var = edge["label"].strip()
                 else:
                     raise ValueError(
