@@ -19,10 +19,9 @@ class TestParseMisc(unittest.TestCase):
         with open("tests/testdata/parse_misc_negative1.json") as file:
             json_data = file.read().replace("\n", "")
             self.parser.set_json(json_data)
-            self.parser.parse()
 
             with self.assertRaises(ValueError) as context:
-                self.parser.parse_return_edge()
+                self.parser.parse()
                 self.assertEqual(
                     context.exception,
                     "Return edge label must be a valid variable name! Given: @return",
@@ -32,10 +31,9 @@ class TestParseMisc(unittest.TestCase):
         with open("tests/testdata/parse_misc_negative2.json") as file:
             json_data = file.read().replace("\n", "")
             self.parser.set_json(json_data)
-            self.parser.parse()
 
             with self.assertRaises(ValueError) as context:
-                self.parser.parse_return_edge()
+                self.parser.parse()
                 self.assertEqual(
                     context.exception,
                     f"Return edge must have a corresponding call edge! {6} -> {3}",
