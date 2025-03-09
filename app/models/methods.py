@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from abc import ABC
 from copy import deepcopy
 from io import StringIO
@@ -21,6 +20,21 @@ class AbstractMethodObject(ABC):
         return (
             f"MethodObject:\n\tname: {self.__name}\n\tparameters: {self.__parameters}"
             f"\n\treturn_type: {self.__return_type}"
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, other: AbstractMethodObject) -> bool:
+        return (
+            self.__name == other.__name
+            and all(
+                self_param == other_param
+                for self_param, other_param in zip(
+                    self.__parameters, other.__parameters
+                )
+            )
+            and self.__return_type == other.__return_type
         )
 
     def set_name(self, name: str):
@@ -50,32 +64,44 @@ class ClassMethodObject(AbstractMethodObject):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
 
+    def __eq__(self, other: ClassMethodObject) -> bool:
+        return all(
+            s_call == o_call for s_call, o_call in zip(self.__calls, other.__calls)
+        ) and super().__eq__(other)
+
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
         if class_method_call is None:
             raise Exception("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
 
     def to_views_code(self) -> str:
+        res = StringIO()
         name = self.get_name()
         if name is None or not is_valid_python_identifier(name):
             raise ValueError(f"Invalid method name: {name}")
 
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
-        res = f"def {name}({params})"
+        res.write(f"def {name}({params})")
 
         ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
-            if not is_valid_python_identifier(rettype) and not bool(
-                re.match(r"list\[.*\]", rettype.lower())
-            ):
+            if not is_valid_python_identifier(rettype):
                 raise ValueError(f"Invalid return type: {rettype}")
-            res += f" -> {rettype}"
-        res += ":\n    # TODO: Auto generated function stub\n"
-        res += (
+            res.write(f" -> {rettype}")
+        res.write(":")
+        for method_call in self.__calls:
+            res.write("\n    ")
+            res.write(method_call.print_django_style())
+        res.write("\n    # TODO: Auto generated function stub\n")
+        res.write(
             f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
-        return res
+        return res.getvalue()
+
+    def get_calls(self) -> list[ClassMethodCallObject]:
+        # TODO: Make immutable if needed
+        return self.__calls
 
 
 class ControllerMethodObject(AbstractMethodObject):
@@ -114,6 +140,20 @@ class AbstractMethodCallObject(ABC):
             f"arguments: {self.__arguments}\n\treturn_var_name: {self.__return_var_name}"
         )
 
+    def __eq__(self, other: AbstractMethodCallObject) -> str:
+        return (
+            self.__method == other.__method
+            and all(
+                s_arg == o_arg
+                for s_arg, o_arg in zip(self.__arguments, other.__arguments)
+            )
+            and self.__return_var_name == other.__return_var_name
+            and self.__condition == other.__condition
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def set_method(self, method: AbstractMethodObject):
         self.__method = method
 
@@ -125,6 +165,10 @@ class AbstractMethodCallObject(ABC):
 
     def set_condition(self, condition: str):
         self.__condition = condition
+
+    def get_method(self) -> AbstractMethodObject:
+        # TODO: Make immutable if needed
+        return self.__method
 
     def print_django_style(self) -> str:
         result = StringIO()
@@ -147,10 +191,17 @@ class ClassMethodCallObject(AbstractMethodCallObject):
         super().__init__()
         self.__caller: ClassMethodObject = None
 
+    def __eq__(self, other: ClassMethodCallObject) -> bool:
+        return self.__caller == other.__caller and super().__eq__(other)
+
     def set_caller(self, method_object: ClassMethodObject):
         if method_object is None:
             raise Exception("ClassMethodObject cannot be SET to be None!")
         self.__caller = method_object
+
+    def get_caller(self) -> ClassMethodObject:
+        # TODO: Make immutable if needed
+        return self.__caller
 
 
 class ControllerMethodCallObject(AbstractMethodCallObject):
@@ -160,6 +211,10 @@ class ControllerMethodCallObject(AbstractMethodCallObject):
 
     def set_caller(self, caller: ClassMethodObject):
         self.__caller = caller
+
+    def get_caller(self) -> ClassMethodObject:
+        # TODO: Make immutable if needed
+        return self.__caller
 
 
 class ArgumentObject:
@@ -185,3 +240,16 @@ class ArgumentObject:
 
     def print_django_style(self) -> str:
         return self.__name
+
+
+if __name__ == "__main__":
+    from unittest import mock
+
+    class_method_object = ClassMethodObject()
+    class_method_object.set_name("class_method_1")
+    class_method_call = mock.Mock()
+    class_method_call.print_django_style.return_value = (
+        "ret_var1 = method_call1(arg1, arg2)"
+    )
+    class_method_object.add_class_method_call(class_method_call)
+    print(class_method_object.to_views_code())

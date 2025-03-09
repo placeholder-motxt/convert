@@ -50,10 +50,11 @@ class ViewsElements(FileElements):
         result = StringIO()
 
         for class_method_object in self.__class_methods:
-            result.write(class_method_object.to_views_code())
-            # TODO: PBI-1-7
-            # TODO: PBI 2-9
-            pass
+            result.write(
+                f"#-----method from class {class_method_object.get_name()}------\n\n"
+            )
+            result.write(class_method_object.print_django_style())
+            result.write("\n\n\n")
 
         for controller_method_object in self.__controller_methods:
             result.write(controller_method_object.print_django_style())
