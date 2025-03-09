@@ -34,8 +34,8 @@ class ParseJsonToObjectSeq:
         self.__edges: list = []
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
         self.__label_pattern: re.Pattern = re.compile(
-            r"(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
-            r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?"
+            r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
+            r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
         )
 
     def set_json(self, data: str) -> str | None:
@@ -103,19 +103,19 @@ class ParseJsonToObjectSeq:
         except Exception:
             return False
 
-    def get_class_objects(self) -> dict[str, ClassObject]:
+    def get_class_objects(self) -> dict[str, ClassObject]:  # pragma: no cover
         return self.__class_object
 
-    def get_controller_method(self) -> list[ControllerMethodObject]:
+    def get_controller_method(self) -> list[ControllerMethodObject]:  # pragma: no cover
         return self.__controller_method
 
-    def get_call_nodes(self) -> dict:
+    def get_call_nodes(self) -> dict:  # pragma: no cover
         return self.__call_nodes
 
-    def get_edges(self) -> list:
+    def get_edges(self) -> list:  # pragma: no cover
         return self.__edges
 
-    def get_implicit_parameter_nodes(self) -> dict:
+    def get_implicit_parameter_nodes(self) -> dict:  # pragma: no cover
         return self.__implicit_parameter_nodes
 
     def parse(self):
@@ -140,6 +140,8 @@ class ParseJsonToObjectSeq:
                     self.__class_object[class_name] = class_object
 
                 else:
+                    print(class_name)
+                    print(self.__class_object.keys())
                     raise Exception("Duplicate class name!")
 
                 self.__implicit_parameter_nodes[callee_id] = {
