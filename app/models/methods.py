@@ -204,6 +204,7 @@ class AbstractMethodCallObject(ABC):
         return (
             f"MethodCallObject:\n\tmethod: {self.__method}\n\t"
             f"arguments: {self.__arguments}\n\treturn_var_name: {self.__return_var_name}"
+            f"\n\tcondition: {self.__condition}"
         )
 
     def __eq__(self, other: AbstractMethodCallObject) -> str:
@@ -238,9 +239,15 @@ class AbstractMethodCallObject(ABC):
     def set_condition(self, condition: str):
         self.__condition = condition
 
+    def get_condition(self) -> str:
+        return self.__condition
+
     def get_method(self) -> AbstractMethodObject:  # pragma: no cover
         # TODO: Make immutable if needed
         return self.__method
+
+    def get_return_var_name(self) -> str:
+        return self.__return_var_name
 
     def print_django_style(self) -> str:
         """
