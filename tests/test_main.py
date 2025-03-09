@@ -1,5 +1,5 @@
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import anyio
 import pytest
@@ -23,101 +23,133 @@ def test_file() -> dict:
 
 
 def test_file_already_exists():
-    with open("a.py", "w") as f:
+    with open("file1_models.py", "w") as f:
         f.write("Some initial content")
 
     try:
-        # Try to upload a file
-        response = client.post(
-            "/convert/", json={"filename": "a", "content": "Some content"}
-        )
-        assert response.status_code, 400
-        assert response.json()["detail"], "The file already exists."
-    finally:
-        # Clean up: remove the file created for the test
-        if os.path.exists("a.py"):
-            os.remove("a.py")
-
-
-def test_slash_on_filename():
-    # Try to upload a file
-    with patch("app.main.ModelsElements") as MockParser:
-        with patch("app.main.ViewsElements") as MockParser2:
-            mock_instance = MockParser.return_value
+        with (
+            patch("app.main.ModelsElements") as mockparser,
+            patch("app.main.ViewsElements") as mockparser2,
+            patch("app.main.json") as mockjson,
+        ):
+            mockjson.loads.return_value = {"diagram": "ClassDiagram"}
+            mock_instance = mockparser.return_value
             mock_instance.parse.return_value = [
                 MagicMock(to_models_code=MagicMock(return_value="class Test {}"))
             ]
 
+            mockjson.return_value = {}
+
             mock_instance.print_django_style.return_value = "ini class write"
 
-            mock_instance = MockParser2.return_value
-            mock_instance.add_class_method.return_value = [
+            mock_instance2 = mockparser2.return_value
+            mock_instance2.add_class_method.return_value = [
                 MagicMock(to_views_code=MagicMock(return_value="view Test {}"))
             ]
+            mock_instance2.print_django_style.return_value = "ini views write"
 
-            mock_instance.print_django_style.return_value = "ini view write"
-
+            # Try to upload a file
             response = client.post(
-                "/convert/", json={"filename": "app/main2", "content": "Some content"}
+                "/convert/",
+                json={"filename": ["file1"], "content": [['{"Some content":"a"}']]},
             )
             assert response.status_code == 400
-            assert response.json()["detail"] == "/ not allowed"
+            assert response.json()["detail"] == "The file already exists."
+    finally:
+        # Clean up: remove the file created for the test
+        if os.path.exists("file1_models.py"):
+            os.remove("file1_models.py")
+
+
+def test_slash_on_filename():
+    # Try to upload a file
+    with (
+        patch("app.main.ModelsElements") as mockparser,
+        patch("app.main.ViewsElements") as mockparser2,
+        patch("app.main.json") as mockjson,
+    ):
+        mockjson.loads.return_value = {"diagram": "ClassDiagram"}
+
+        mock_instance = mockparser.return_value
+        mock_instance.parse.return_value = [MagicMock()]
+        mock_instance.print_django_style.return_value = "ini class write"
+
+        mock_instance2 = mockparser2.return_value
+        mock_instance2.add_class_method.return_value = [MagicMock()]
+
+        response = client.post(
+            "/convert/", json={"filename": ["app/main2"], "content": [["Some content"]]}
+        )
+        assert response.status_code == 400
+        assert response.json()["detail"] == "/ not allowed"
 
 
 @pytest.mark.asyncio
 async def test_convert_endpoint_valid_content():
     # Mock ParseJsonToObjectClass to avoid executing its real implementation
-    with patch("app.main.ModelsElements") as MockParser:
-        with patch("app.main.ViewsElements") as MockParser2:
-            mock_instance = MockParser.return_value
-            mock_instance.parse.return_value = [
-                MagicMock(to_models_code=MagicMock(return_value="class Test {}"))
-            ]
+    with (
+        patch("app.main.ModelsElements") as mockparser,
+        patch("app.main.ViewsElements") as mockparser2,
+        patch("app.main.json") as mockjson,
+    ):
+        mockjson.loads.return_value = {"diagram": "ClassDiagram"}
+        mock_instance = mockparser.return_value
+        m = MagicMock()
+        m.get_methods.return_value = [MagicMock(to_views_code="view Test {}")]
+        mock_instance.parse.return_value = [m]
+        mock_instance.print_django_style.return_value = "ini class write"
 
-            mock_instance.print_django_style.return_value = "ini class write"
+        mock_instance2 = mockparser2.return_value
+        mock_instance2.add_class_method.return_value = [MagicMock()]
+        mock_instance2.print_django_style.return_value = "ini views write"
 
-            mock_instance = MockParser2.return_value
-            mock_instance.add_class_method.return_value = [
-                MagicMock(to_views_code=MagicMock(return_value="view Test {}"))
-            ]
+        # Prepare the request payload with the necessary 'nodes' key
+        payload = {"filename": ["file1"], "content": [['{"content"}']]}
 
-            mock_instance.print_django_style.return_value = "ini view write"
+        async with await anyio.open_file("file1.zip", "w") as f:
+            await f.write("")
 
-            with patch("app.main.download_file") as MockClient:
-                with patch("app.main.download_file") as MockClient2:
-                    with (
-                        patch("zipfile.ZipFile") as mock_zipfile,
-                        patch("os.remove") as mock_remove,
-                    ):
-                        mock_zipf = (
-                            mock_zipfile.return_value.__enter__.return_value
-                        )  # Mock the context manager
-                        mock_zipf.write = MagicMock()
+        # Send the request to the endpoint
+        response = client.post("/convert", json=payload)
+        # Validate the response
 
-                        mock_client_instance = MockClient.return_value
-                        mock_post = AsyncMock()
-                        mock_post.return_value.content = b"mocked response"
-                        mock_post.return_value.headers = {"content-type": "text/plain"}
-                        mock_client_instance.__aenter__.return_value.post = mock_post
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
 
-                        mock_client_instance2 = MockClient2.return_value
-                        mock_post2 = AsyncMock()
-                        mock_post2.return_value.content = b"mocked response"
-                        mock_post2.return_value.headers = {"content-type": "text/plain"}
-                        mock_client_instance2.__aenter__.return_value.post = mock_post
 
-                        # Prepare the request payload with the necessary 'nodes' key
-                        payload = {"filename": "file1", "content": '{"content"}'}
+@pytest.mark.asyncio
+async def test_convert_endpoint_valid_multiple_file_content():
+    # Mock ParseJsonToObjectClass to avoid executing its real implementation
+    with (
+        patch("app.main.ModelsElements") as mockparser,
+        patch("app.main.ViewsElements") as mockparser2,
+        patch("app.main.json") as mockjson,
+    ):
+        mockjson.loads.return_value = {"diagram": "ClassDiagram"}
+        mock_instance = mockparser.return_value
+        m = MagicMock()
+        mock_instance.parse.return_value = [m, m, m]
+        mock_instance.print_django_style.return_value = "ini class write"
+        m.get_methods.return_value = [MagicMock(to_views_code="view Test {}")]
 
-                        async with await anyio.open_file("file1.zip", "w") as f:
-                            await f.write("")
+        mock_instance2 = mockparser2.return_value
+        mock_instance2.add_class_method.return_value = None
+        mock_instance2.print_django_style.return_value = "ini views write"
 
-                        # Send the request to the endpoint
-                        response = client.post("/convert", json=payload)
-                        # Validate the response
+        payload = {
+            "filename": ["file1", "file2"],
+            "content": [['{"content"}'], ['{"content"}']],
+        }
+        response = client.post("/convert", json=payload)
 
-                        assert response.status_code == 200
-                        assert response.headers["content-type"] == "application/zip"
-                        mock_remove.assert_called()
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
 
-                        os.remove("file1.zip")
+
+@pytest.mark.asyncio
+async def test_convert_endpoint_invalid_incosistent_filename_content_amount():
+    payload = {"filename": ["file1"], "content": [['{"content"}'], ['{"content"}']]}
+    response = client.post("/convert", json=payload)
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "number of Filename and Content is incosistent"

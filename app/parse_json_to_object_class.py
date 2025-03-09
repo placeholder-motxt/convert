@@ -159,7 +159,6 @@ class ParseJsonToObjectClass:
                 or self.__is_number_greater_than(edge["endLabel"])
             ):
                 ro = ManyToManyRelationshipObject()
-                print(edge["startLabel"], "many to many", edge["endLabel"])
 
             elif (
                 "*" in edge["startLabel"]
@@ -171,7 +170,6 @@ class ParseJsonToObjectClass:
                 or self.__is_number_greater_than(edge["endLabel"])
             ):
                 ro = ManyToOneRelationshipObject()
-                print(edge["startLabel"], "many to one", edge["endLabel"])
 
                 if (
                     "*" in edge["startLabel"]
