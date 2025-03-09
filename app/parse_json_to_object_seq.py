@@ -5,16 +5,14 @@ from typing import TypedDict
 from jsonschema import validate
 
 from app.models.diagram import ClassObject
-
 from app.models.methods import (
-    ArgumentObject,
     AbstractMethodCallObject,
+    ArgumentObject,
     ClassMethodCallObject,
     ClassMethodObject,
     ControllerMethodCallObject,
     ControllerMethodObject,
 )
-
 from app.models.properties import ParameterObject
 
 from .utils import is_valid_python_identifier
