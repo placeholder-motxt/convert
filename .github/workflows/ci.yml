@@ -6,14 +6,14 @@ on:
       - main
       - staging
       - dev
+    paths:
+      - '**.py'
   pull_request:
-    branches:
-      - main
-      - staging
-      - dev
+    paths:
+      - '**.py'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +27,26 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements-tests.txt
 
       - name: Run Tests
         run: python -m pytest
+
+  linter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run Ruff Check
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: '>=0.9.7'
+          src: './app'
+          args: 'check --output-format github'
