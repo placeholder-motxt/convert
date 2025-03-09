@@ -220,8 +220,11 @@ class AbstractMethodCallObject(ABC):
     def set_method(self, method: AbstractMethodObject):
         self.__method = method
     
-    def get_method(self) -> AbstractMethodObject:
+    def get_methods(self) -> AbstractMethodObject:
         return self.__method
+
+    def get_arguments(self) -> list[ArgumentObject]:
+        return self.__arguments
 
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
@@ -341,6 +344,9 @@ class ArgumentObject:
 
     def set_name(self, name: str):
         self.__name = name
+    
+    def get_name(self) -> str:
+        return self.__name
 
     def set_type(self, type: TypeObject):
         self.__type = type

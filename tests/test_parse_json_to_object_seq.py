@@ -529,23 +529,23 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         parser.set_json(json_data)
         parser.parse()
 
-        parsed_value = parser.get_class_object()
-        self.assertEqual(parsed_value['Buku'].get_method()[0].get_name(), "getDetailBuku")
+        parsed_value = parser.get_class_objects()
+        self.assertEqual(parsed_value['Buku'].get_methods()[0].get_name(), "getDetailBuku")
 
-        self.assertEqual(parsed_value['ListBuku'].get_method()[0].get_name(), "getBuku")
-        self.assertEqual(parsed_value["ListBuku"].get_method()[0].get_parameters()[0].get_name(), "isbn")
+        self.assertEqual(parsed_value['ListBuku'].get_methods()[0].get_name(), "getBuku")
+        self.assertEqual(parsed_value["ListBuku"].get_methods()[0].get_parameters()[0].get_name(), "isbn")
 
-        self.assertEqual(parsed_value['ListPeminjam'].get_method()[0].get_name(), "isValid")
-        self.assertEqual(parsed_value["ListPeminjam"].get_method()[0].get_parameters()[0].get_name(), "dataAnggota")
-        self.assertEqual(parsed_value['ListPeminjam'].get_method()[1].get_name(), "hasTanggungan")
-        self.assertEqual(parsed_value["ListPeminjam"].get_method()[1].get_parameters()[0].get_name(), "peminjam")
+        self.assertEqual(parsed_value['ListPeminjam'].get_methods()[0].get_name(), "isValid")
+        self.assertEqual(parsed_value["ListPeminjam"].get_methods()[0].get_parameters()[0].get_name(), "dataAnggota")
+        self.assertEqual(parsed_value['ListPeminjam'].get_methods()[1].get_name(), "hasTanggungan")
+        self.assertEqual(parsed_value["ListPeminjam"].get_methods()[1].get_parameters()[0].get_name(), "peminjam")
 
-        self.assertEqual(parsed_value["Peminjam"].get_method()[0].get_name(), "hasTanggungan")
+        self.assertEqual(parsed_value["Peminjam"].get_methods()[0].get_name(), "hasTanggungan")
 
-        self.assertEqual(parsed_value["ListCopy"].get_method()[0].get_name(), "borrow")
-        self.assertEqual(parsed_value["ListCopy"].get_method()[0].get_parameters()[0].get_name(), "isbn")
+        self.assertEqual(parsed_value["ListCopy"].get_methods()[0].get_name(), "borrow")
+        self.assertEqual(parsed_value["ListCopy"].get_methods()[0].get_parameters()[0].get_name(), "isbn")
 
-        self.assertEqual(parsed_value["CopyBuku"].get_method()[0].get_name(), "isBorrowed")
+        self.assertEqual(parsed_value["CopyBuku"].get_methods()[0].get_name(), "isBorrowed")
 
     def test_positive_method_call_object(self):
         json_data = """ 
@@ -966,7 +966,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         parser.set_json(json_data)
         parser.parse()
 
-        parsed_value_class_object = parser.get_class_object()
+        parsed_value_class_object = parser.get_class_objects()
         parsed_value_controller = parser.get_controller_method()
 
         self.assertEqual(len(parsed_value_controller[0].get_call()), 0)
@@ -974,28 +974,53 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(len(parsed_value_controller[1].get_call()), 0)
 
         self.assertEqual(len(parsed_value_controller[2].get_call()), 2)
-        self.assertEqual(parsed_value_controller[2].get_call()[0].get_method().get_name(), "getBuku")
-        self.assertEqual(parsed_value_controller[2].get_call()[1].get_method().get_name(), "getDetailBuku")
+        self.assertEqual(parsed_value_controller[2].get_call()[0].get_methods().get_name(), "getDetailBuku")
+        self.assertEqual(len(parsed_value_controller[2].get_call()[0].get_arguments()), 0)
+        self.assertEqual(parsed_value_controller[2].get_call()[1].get_methods().get_name(), "getBuku")
+        self.assertEqual(len(parsed_value_controller[2].get_call()[1].get_arguments()), 1)
+        self.assertEqual(parsed_value_controller[2].get_call()[1].get_arguments()[0].get_name(), "isbn")
+        
 
         self.assertEqual(len(parsed_value_controller[3].get_call()), 0)
 
         self.assertEqual(len(parsed_value_controller[4].get_call()), 3)
-        self.assertEqual(parsed_value_controller[4].get_call()[0].get_method().get_name(), "isValid")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_name(), "prosesPeminjamanValidKeanggotaan")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[0].get_method().get_name(), "hasTanggungan")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[0].get_method().get_call()[0].get_method().get_name(), "hasTanggungan")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[1].get_method().get_name(), "prosesPeminjamanTidakMemilikiTanggungan")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[1].get_method().get_call()[0].get_method().get_name(), "borrow")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[1].get_method().get_call()[0].get_method().get_call()[0].get_method().get_name(), "findCopyBuku")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[1].get_method().get_call()[0].get_method().get_call()[1].get_method().get_name(), "isBorrowed")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[1].get_method().get_call()[1].get_method().get_name(), "showNotifikasiBerhasilPinjam")
-        self.assertEqual(parsed_value_controller[4].get_call()[1].get_method().get_call()[2].get_method().get_name(), "showNotifikasiGagalPinjam")
-        self.assertEqual(parsed_value_controller[4].get_call()[2].get_method().get_name(), "showNotifikasiDataTidakValid")
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_name(), "prosesPeminjamanValidKeanggotaan")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_arguments()), 0)
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()), 3)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_name(), "prosesPeminjamanTidakMemilikiTanggungan")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()), 2)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[0].get_methods().get_name(), "showNotifikasiBerhasilPinjam")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[0].get_methods().get_call()), 0)
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[0].get_arguments()), 0)
 
-        self.assertEqual(len(parsed_value_class_object['ListBuku'].get_method()[0].get_call()), 0)
-        self.assertEqual(len(parsed_value_class_object['Buku'].get_method()[0].get_call()), 0)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[1].get_methods().get_name(), "borrow")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[1].get_methods().get_calls()), 2)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[1].get_methods().get_calls()[0].get_methods().get_name(), "isBorrowed")
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[1].get_methods().get_calls()[1].get_methods().get_name(), "findCopyBuku")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[1].get_arguments()), 1)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_call()[1].get_arguments()[0].get_name(), "isbn")
 
-        self.assertEqual(len(parsed_value_class_object['ListPeminjam'].get_method()[0].get_call()), 0)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[1].get_methods().get_name(), "showNotifikasiGagalPinjam")
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[2].get_methods().get_name(), "hasTanggungan")
+
+        self.assertEqual(parsed_value_controller[4].get_call()[1].get_methods().get_name(), "showNotifikasiDataTidakValid")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[1].get_arguments()), 0)
+        self.assertEqual(len(parsed_value_controller[4].get_call()[1].get_methods().get_call()), 0)
+
+        self.assertEqual(parsed_value_controller[4].get_call()[2].get_methods().get_name(), "isValid")
+        self.assertEqual(len(parsed_value_controller[4].get_call()[2].get_arguments()), 1)
+        self.assertEqual(len(parsed_value_controller[4].get_call()[2].get_methods().get_calls()), 0)
+        self.assertEqual(parsed_value_controller[4].get_call()[2].get_arguments()[0].get_name(), "dataAnggota")
+
+        self.assertEqual(len(parsed_value_controller[4].get_call()[0].get_methods().get_call()), 3)
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[0].get_methods().get_name(), "prosesPeminjamanTidakMemilikiTanggungan")
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[1].get_methods().get_name(), "showNotifikasiGagalPinjam")
+        self.assertEqual(parsed_value_controller[4].get_call()[0].get_methods().get_call()[2].get_methods().get_name(), "hasTanggungan")
+
+        self.assertEqual(len(parsed_value_class_object['ListBuku'].get_methods()[0].get_calls()), 0)
+        self.assertEqual(len(parsed_value_class_object['Buku'].get_methods()[0].get_calls()), 0)
+
+        self.assertEqual(len(parsed_value_class_object['ListPeminjam'].get_methods()[0].get_calls()), 0)
 
     def test_invalid_edge_label_format(self):
         # Invalid label format should throw exceptions, examples:

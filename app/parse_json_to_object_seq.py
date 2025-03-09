@@ -138,8 +138,6 @@ class ParseJsonToObjectSeq:
                     self.__class_object[class_name] = class_object
 
                 else:
-                    print(class_name)
-                    print(self.__class_object.keys())
                     raise Exception("Duplicate class name!")
 
                 self.__implicit_parameter_nodes[callee_id] = {
@@ -190,132 +188,6 @@ class ParseJsonToObjectSeq:
 
                 else:
                     method = ClassMethodObject()
-
-                method_label = edge["label"].split(" ")
-                is_name_setup = False
-                duplicate_attribute_checker = dict()
-
-                for value in method_label:
-                    if "[" in value or "]" in value:
-                        # TODO: Request Method Implementation
-                        continue
-
-                    elif is_name_setup:
-                        param = value.replace("(", "").replace(")", "").replace(",", "")
-
-                        if param == "":
-                            continue
-
-                        if param in duplicate_attribute_checker:
-                            raise Exception("Duplicate attribute!")
-
-                        param_object = ParameterObject()
-                        param_object.set_name(param)
-                        duplicate_attribute_checker[param] = 1
-                        method.add_parameter(param_object)
-
-                    else:
-                        if value in duplicate_method_checker and duplicate_method_checker[value] == class_name:
-                            raise Exception("Duplicate method!")
-
-                        method.set_name(value)
-                        duplicate_method_checker[value] = class_name
-                        is_name_setup = True
-                
-                if class_name == "views":
-                    self.__controller_method.append(method)
-                
-                else:
-                    self.__class_object[class_name].add_method(method)
-        
-        # Create method caller
-        for edge in self.__edges:
-            if edge["type"] == "CallEdge":
-                end_id = edge["end"]
-                parent_id = self.__call_nodes[end_id]["parent"]
-                class_name = self.__implicit_parameter_nodes[parent_id]["class_name"]
-                
-                method_name = None
-
-                method_label = edge["label"].split(" ")
-                is_name_setup = False
-                duplicate_attribute_checker = dict()
-
-                for value in method_label:
-                    if "[" in value or "]" in value:
-                        continue
-
-                    elif is_name_setup:
-                        continue
-
-                    else:
-                        method_name = value
-                        is_name_setup = True
-                
-                method_accessed = None
-                if class_name == "views":
-                    for method in self.__controller_method:
-                        if (method.get_name() == method_name):
-                            method_accessed = method
-                else:
-                    for method in self.__class_object[class_name].get_method():
-                        if (method.get_name() == method_name):
-                            method_accessed = method
-                
-                for edge_call in self.__edges:
-                    if edge_call["type"] == "CallEdge":
-                        edge_start = edge_call["start"]
-
-                        if edge_start == end_id:
-                            parent_id = self.__call_nodes[edge_call["end"]]["parent"]
-                            class_name_being_called = self.__implicit_parameter_nodes[parent_id]["class_name"]
-
-                            method_controller_label = edge_call["label"].split(" ")
-                            method_being_called = None
-                            call_object = None
-                            method_being_called_name = ""
-                            is_name_setup = False
-
-                            if (class_name == "views"):
-                                call_object = ControllerMethodCallObject()
-                                method_accessed.add_call(call_object)
-                                call_object.set_caller(method_accessed)
-                            
-                            else:
-                                call_object = ClassMethodCallObject()
-                                method_accessed.add_class_method_call(call_object)
-                                call_object.set_caller(method_accessed)
-
-                            for value in method_controller_label:
-                                if "[" in value or "]" in value:
-                                    continue
-
-                                elif is_name_setup:
-                                    param = value.replace("(", "").replace(")", "").replace(",", "")
-
-                                    if param == "":
-                                        continue
-
-                                    argument_object = ArgumentObject()
-                                    argument_object.set_methodObject(call_object)
-                                    argument_object.set_name(param)
-                                    call_object.add_argument(argument_object)
-
-                                else:
-                                    method_being_called_name = value
-                                    is_name_setup = True
-
-                            if (class_name_being_called == "views"):
-                                for method in self.__controller_method:
-                                    if (method.get_name() == method_being_called_name):
-                                        method_being_called = method
-                            
-                            else:
-                                for method in self.__class_object[class_name_being_called].get_method():
-                                    if (method.get_name() == method_being_called_name):
-                                        method_being_called = method
-
-                            call_object.set_method(method_being_called)
 
                 self.__call_nodes[end_id]["method"] = method
                 self.__call_nodes[end_id]["caller"] = start_id
@@ -386,9 +258,22 @@ class ParseJsonToObjectSeq:
             caller_method = self.__call_nodes[caller_id]["method"]
             callee_method = call_node["method"]
             ret_var = call_node.get("ret_var", None)
-            call_obj = ClassMethodCallObject()
+
+            if isinstance(caller_method, ControllerMethodObject):
+                call_obj = ControllerMethodCallObject()
+
+            else:
+                call_obj = ClassMethodCallObject()
+
             call_obj.set_caller(caller_method)
             call_obj.set_method(callee_method)
+            
+            for param in callee_method.get_parameters():
+                argument = ArgumentObject()
+                argument.set_name(param.get_name())
+                argument.set_methodObject(call_obj)
+                call_obj.add_argument(argument)
+            
             if ret_var is not None:
                 call_obj.set_return_var_name(ret_var)
 
