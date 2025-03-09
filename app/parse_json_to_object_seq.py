@@ -3,7 +3,7 @@ import json
 from jsonschema import validate
 
 from app.models.diagram import ClassObject
-from app.models.methods import ControllerMethodObject
+from app.models.methods import ArgumentObject, ClassMethodCallObject, ClassMethodObject, ControllerMethodCallObject, ControllerMethodObject
 from app.models.properties import ParameterObject
 
 
@@ -84,6 +84,9 @@ class ParseJsonToObjectSeq:
     def get_controller_method(self) -> list[ControllerMethodObject]:
         return self.__controller_method
 
+    def get_class_object(self) -> list[ClassObject]:
+        return self.__class_object
+
     def parse(self):
         duplicate_method_checker = dict()
 
@@ -151,8 +154,7 @@ class ParseJsonToObjectSeq:
                     method = ControllerMethodObject()
 
                 else:
-                    # TODO: Create for Class Object
-                    continue
+                    method = ClassMethodObject()
 
                 method_label = edge["label"].split(" ")
                 is_name_setup = False
@@ -178,12 +180,105 @@ class ParseJsonToObjectSeq:
                         method.add_parameter(param_object)
 
                     else:
-                        if value in duplicate_method_checker:
+                        if value in duplicate_method_checker and duplicate_method_checker[value] == class_name:
                             raise Exception("Duplicate method!")
 
                         method.set_name(value)
-                        duplicate_method_checker[value] = 1
+                        duplicate_method_checker[value] = class_name
                         is_name_setup = True
-
+                
                 if class_name == "views":
                     self.__controller_method.append(method)
+                
+                else:
+                    self.__class_object[class_name].add_method(method)
+        
+        # Create method caller
+        for edge in self.__edges:
+            if edge["type"] == "CallEdge":
+                end_id = edge["end"]
+                parent_id = self.__call_nodes[end_id]["parent"]
+                class_name = self.__implicit_parameter_nodes[parent_id]["class_name"]
+                
+                method_name = None
+
+                method_label = edge["label"].split(" ")
+                is_name_setup = False
+                duplicate_attribute_checker = dict()
+
+                for value in method_label:
+                    if "[" in value or "]" in value:
+                        continue
+
+                    elif is_name_setup:
+                        continue
+
+                    else:
+                        method_name = value
+                        is_name_setup = True
+                
+                method_accessed = None
+                if class_name == "views":
+                    for method in self.__controller_method:
+                        if (method.get_name() == method_name):
+                            method_accessed = method
+                else:
+                    for method in self.__class_object[class_name].get_method():
+                        if (method.get_name() == method_name):
+                            method_accessed = method
+                
+                for edge_call in self.__edges:
+                    if edge_call["type"] == "CallEdge":
+                        edge_start = edge_call["start"]
+
+                        if edge_start == end_id:
+                            parent_id = self.__call_nodes[edge_call["end"]]["parent"]
+                            class_name_being_called = self.__implicit_parameter_nodes[parent_id]["class_name"]
+
+                            method_controller_label = edge_call["label"].split(" ")
+                            method_being_called = None
+                            call_object = None
+                            method_being_called_name = ""
+                            is_name_setup = False
+                            duplicate_attribute_checker_call = dict()
+
+                            if (class_name == "views"):
+                                call_object = ControllerMethodCallObject()
+                                method_accessed.add_call(call_object)
+                                call_object.set_caller(method_accessed)
+                            
+                            else:
+                                call_object = ClassMethodCallObject()
+                                method_accessed.add_class_method_call(call_object)
+                                call_object.set_caller(method_accessed)
+
+                            for value in method_controller_label:
+                                if "[" in value or "]" in value:
+                                    continue
+
+                                elif is_name_setup:
+                                    param = value.replace("(", "").replace(")", "").replace(",", "")
+
+                                    if param == "":
+                                        continue
+
+                                    argument_object = ArgumentObject()
+                                    argument_object.set_methodObject(call_object)
+                                    argument_object.set_name(param)
+                                    call_object.add_argument(argument_object)
+
+                                else:
+                                    method_being_called_name = value
+                                    is_name_setup = True
+
+                            if (class_name_being_called == "views"):
+                                for method in self.__controller_method:
+                                    if (method.get_name() == method_being_called_name):
+                                        method_being_called = method
+                            
+                            else:
+                                for method in self.__class_object[class_name_being_called].get_method():
+                                    if (method.get_name() == method_being_called_name):
+                                        method_being_called = method
+
+                            call_object.set_method(method_being_called)
