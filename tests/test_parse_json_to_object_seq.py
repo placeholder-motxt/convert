@@ -1,6 +1,10 @@
+import os
 import unittest
 
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
+
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = os.path.join(CUR_DIR, "testdata")
 
 
 class TestParseJsonToObjectSeq(unittest.TestCase):
@@ -74,7 +78,9 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(len(parsed_value[9].get_parameters()), 0)
 
     def test_edge_duplicate_class_name(self):
-        with open("tests/test_duplicate_class_name_seq.txt", "r", encoding="utf-8") as file:
+        with open(
+            "tests/test_duplicate_class_name_seq.txt", "r", encoding="utf-8"
+        ) as file:
             json_data = file.read()
 
         with self.assertRaises(Exception) as context:
@@ -94,10 +100,96 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
     #     self.assertEqual(str(context.exception), "Duplicate method!")
 
     def test_edge_duplicate_attribute(self):
-        with open("tests/test_duplicate_attribute_seq.txt", "r", encoding="utf-8") as file:
+        with open(
+            "tests/test_duplicate_attribute_seq.txt", "r", encoding="utf-8"
+        ) as file:
             json_data = file.read()
         with self.assertRaises(Exception) as context:
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()
         self.assertEqual(str(context.exception), "Duplicate attribute!")
+
+    def test_invalid_edge_label_format(self):
+        # Invalid label format should throw exceptions, examples:
+        # `doA()` -> have to be `doA ()`
+        # `[] doB ()->bval` -> have to be `[] doB () -> bval`
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_label_format1.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Wrong label format: doA()\n"
+            "Check that the format is in compliance with the guide",
+        )
+
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_label_format2.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Wrong label format: [] doB ()->bval\n"
+            "Check that the format is in compliance with the guide",
+        )
+
+    def test_invalid_method_name(self):
+        # Invalid method name should throw exceptions, examples:
+        # `abcd! ()` -> have to be valid Python identifier
+        # `class ()` -> cannot be Python keyword
+        # `[]abcd ()` -> `[]` is counted as part of the method name
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_method_name1.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(str(ctx.exception), "Invalid method name: abcd!")
+
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_method_name2.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(str(ctx.exception), "Invalid method name: class")
+
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_method_name3.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(str(ctx.exception), "Invalid method name: []abcd")
+
+    def test_invalid_param_name(self):
+        # Invalid method name should throw exceptions, examples:
+        # `doA (a!!!)` -> have to be valid Python identifier
+        # `doA (try)` -> cannot be Python keyword
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_param_name1.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(str(ctx.exception), "Invalid param name: a!!!")
+
+        parser = ParseJsonToObjectSeq()
+        with open(os.path.join(TEST_DIR, "seq_invalid_param_name2.json")) as f:
+            parser.set_json(f.read())
+
+        with self.assertRaises(ValueError) as ctx:
+            parser.parse()
+
+        self.assertEqual(str(ctx.exception), "Invalid param name: try")
