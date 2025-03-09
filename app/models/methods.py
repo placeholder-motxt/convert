@@ -12,6 +12,13 @@ from .properties import ParameterObject, TypeObject
 
 
 class AbstractMethodObject(ABC):
+    """
+    Represents a method.
+
+    Note: This class DOES NOT represent abstract methods, instead it represents any method.
+    The name is AbstractMethodObject to indicate that this class is not to be instanciated.
+    """
+
     def __init__(self):
         self.__name: str = ""
         self.__parameters: list[ParameterObject] = []
@@ -23,7 +30,7 @@ class AbstractMethodObject(ABC):
             f"\n\treturn_type: {self.__return_type}"
         )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self.__str__()
 
     def __eq__(self, other: AbstractMethodObject) -> bool:
@@ -61,6 +68,12 @@ class AbstractMethodObject(ABC):
 
 
 class ClassMethodObject(AbstractMethodObject):
+    """
+    Represents class methods, or methods defined in a particular models class.
+
+    Its counterpart is the ControllerMethodObject class
+    """
+
     def __init__(self):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
@@ -76,13 +89,45 @@ class ClassMethodObject(AbstractMethodObject):
         self.__calls.append(class_method_call)
 
     def to_views_code(self) -> str:
+        """
+        Returns Django representation of the class method in string
+
+        Ultimately, the value returned by this method will be written Django's views.py file.
+
+        Example 1:
+        name = 'method_name'
+        parameter names = no parameters
+        return type name = no return type:
+        method call names = 'method_call_1', 'method_call_2'
+
+        Output:
+        def method_name(request, instance):
+            method_call_1(request, instance)
+            # TODO: Auto generated function stub
+            raise NotImplementedError('method function is not yet implemented')
+
+        Example 2:
+        name = 'method_name'
+        parameter names = 'param1', 'param2'
+        return type name = 'str'
+        method call names = no method call
+
+        Output:
+        def method_name(request, instance, param1, param2) -> str:
+            # TODO: Auto generated function stub
+            raise NotImplementedError('method function is not yet implemented')
+        """
         res = StringIO()
         name = self.get_name()
         if name is None or not is_valid_python_identifier(name):
             raise ValueError(f"Invalid method name: {name}")
 
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
-        res.write(f"def {name}({params})")
+        res.write(f"def {name}(request, instance_name")
+        if params:
+            res.write(f", {params})")
+        else:
+            res.write(")")
 
         ret = self.get_return_type()
         if ret is not None:
@@ -102,12 +147,18 @@ class ClassMethodObject(AbstractMethodObject):
         )
         return res.getvalue()
 
-    def get_calls(self) -> list[ClassMethodCallObject]:
+    def get_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
         # TODO: Make immutable if needed
         return self.__calls
 
 
 class ControllerMethodObject(AbstractMethodObject):
+    """
+    Represents controller methods, or methods not bound to a particular models class.
+
+    Its counterpart is the ClassMethodObject class
+    """
+
     def __init__(self):
         super().__init__()
         self.__calls: list[AbstractMethodCallObject] = []
@@ -131,6 +182,14 @@ class ControllerMethodObject(AbstractMethodObject):
 
 
 class AbstractMethodCallObject(ABC):
+    """
+    Represents a method call, represented in JetUML .sequence.jet files as arrows.
+
+    Note: This class DOES NOT represent calls made to abstract methods. Instead, it represents
+    calls to any method.
+    The name AbstractMethodCallObject is to indicate that this class is not to be instanciated.
+    """
+
     def __init__(self):
         self.__method: AbstractMethodObject = None
         self.__arguments: list[ArgumentObject] = []
@@ -154,7 +213,7 @@ class AbstractMethodCallObject(ABC):
             and self.__condition == other.__condition
         )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return self.__str__()
 
     def set_method(self, method: AbstractMethodObject):
@@ -169,19 +228,48 @@ class AbstractMethodCallObject(ABC):
     def set_condition(self, condition: str):
         self.__condition = condition
 
-    def get_method(self) -> AbstractMethodObject:
+    def get_method(self) -> AbstractMethodObject:  # pragma: no cover
         # TODO: Make immutable if needed
         return self.__method
 
     def print_django_style(self) -> str:
+        """
+        Returns Django representation of the method call in string
+
+        Example 1:
+        method name = 'method1'
+        argument names = 'arg1', 'arg2'
+        return var name = 'return_var1'
+        condition = no condition
+        method is instance of ClassMethodCallObject with instance name = "instance_name"
+
+        Output:
+        return_var1 = method1(request, instance_name, arg1, arg2)
+
+        Example 2:
+
+        method name = 'method2'
+        argument names = no arguments
+        return var name = no return value
+        condition = True
+        method is instance of ControllerMethodCallObject with instance name = "instance_name"
+
+        Output:
+        if True:
+            method2(request)
+
+        """
         result = StringIO()
         if self.__condition:
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:
             result.write(f"{self.__return_var_name} = ")
-        result.write(f"{self.__method.get_name()}(")
+        result.write(f"{self.__method.get_name()}(request")
+        if isinstance(self, ClassMethodCallObject):
+            result.write(f", {self.get_instance_name()}")
+
         if self.__arguments:
-            arguments_str = ", ".join(
+            arguments_str = ", " + ", ".join(
                 arg.print_django_style() for arg in self.__arguments
             )
             result.write(arguments_str)
@@ -190,9 +278,12 @@ class AbstractMethodCallObject(ABC):
 
 
 class ClassMethodCallObject(AbstractMethodCallObject):
+    """Represents a method call of a ClassMethod"""
+
     def __init__(self):
         super().__init__()
         self.__caller: ClassMethodObject = None
+        self.__instance_name = ""
 
     def __eq__(self, other: ClassMethodCallObject) -> bool:
         return self.__caller == other.__caller and super().__eq__(other)
@@ -202,25 +293,37 @@ class ClassMethodCallObject(AbstractMethodCallObject):
             raise Exception("ClassMethodObject cannot be SET to be None!")
         self.__caller = method_object
 
-    def get_caller(self) -> ClassMethodObject:
+    def set_instance_name(self, instance_name: str):
+        if instance_name == "" or instance_name is None:
+            raise Exception("instance_name cannot be empty!")
+        self.__instance_name = instance_name
+
+    def get_instance_name(self) -> str:
+        return self.__instance_name
+
+    def get_caller(self) -> ClassMethodObject:  # pragma: no cover
         # TODO: Make immutable if needed
         return self.__caller
 
 
 class ControllerMethodCallObject(AbstractMethodCallObject):
+    """Represents a method call of a ControllerMethod"""
+
     def __init__(self):
         super().__init__()
-        self.__caller: ClassMethodObject = None
+        self.__caller: ControllerMethodObject = None
 
-    def set_caller(self, caller: ClassMethodObject):
+    def set_caller(self, caller: ControllerMethodObject):
         self.__caller = caller
 
-    def get_caller(self) -> ClassMethodObject:
+    def get_caller(self) -> ClassMethodObject:  # pragma: no cover
         # TODO: Make immutable if needed
         return self.__caller
 
 
 class ArgumentObject:
+    """Represents an argument in a method call"""
+
     def __init__(self):
         self.__method_object: Optional[AbstractMethodCallObject] = None
         self.__name: str = ""
@@ -242,17 +345,5 @@ class ArgumentObject:
         self.__type = type
 
     def print_django_style(self) -> str:
+        """Returns Django representation of the argument in string"""
         return self.__name
-
-
-if __name__ == "__main__":
-    from unittest import mock
-
-    class_method_object = ClassMethodObject()
-    class_method_object.set_name("class_method_1")
-    class_method_call = mock.Mock()
-    class_method_call.print_django_style.return_value = (
-        "ret_var1 = method_call1(arg1, arg2)"
-    )
-    class_method_object.add_class_method_call(class_method_call)
-    print(class_method_object.to_views_code())

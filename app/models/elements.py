@@ -8,6 +8,17 @@ from .methods import ClassMethodObject, ControllerMethodObject
 
 
 class FileElements(ABC):
+    """
+    An intermediate representation of information that will be generated into one file
+
+    It is not a representation of JetUML files, rather it is a representation of
+    to-be-generated files.
+    This class contains abstract methods to write the contents of the class into a file
+    according to the chosen framework. Currently the only available framework is Django
+
+
+    """
+
     def __init__(self, file_name: str):
         assert isinstance(file_name, str), "File name must be a string!"
         assert file_name != "", "File name can't be empty!"
@@ -19,6 +30,11 @@ class FileElements(ABC):
 
 
 class ModelsElements(FileElements):
+    """An intermediate representation of information inside a models file
+
+    Note: this class is NOT FRAMEWORK SPECIFIC
+    """
+
     def __init__(self, file_name: str):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
@@ -41,12 +57,51 @@ class ModelsElements(FileElements):
 
 
 class ViewsElements(FileElements):
+    """
+    An intermediate representation of information inside a views file
+
+    A views file is a file that contains the business logic of the web application.
+    The file name may differ across different frameworks.
+    """
+
     def __init__(self, file_name: str):
+        """
+        Object initialization
+
+        This class may contain both ClassMethodObjects and ControllerMethodObjects,
+        """
         super().__init__(file_name)
         self.__class_methods: list[ClassMethodObject] = []
         self.__controller_methods: list[ControllerMethodObject] = []
 
     def print_django_style(self) -> str:
+        """
+        Returns Django's views.py code in string, representing the contents of the class
+
+        Example:
+        ViewsElements object contains two ClassMethodObject objects and one ControllerMethodObject
+        object, with class names Class1 and Class2 respectively, and with method names
+        class_method_1, class_method_2, and controller_method_1 respectively. The output of the
+        method will be as follows:
+
+        #-----method from class Class1------
+
+        def class_method_1(request, ....):
+            ...
+            ...
+
+
+        #-----method from class Class2------
+
+        def class_method_2(request, ....):
+            ...
+            ...
+
+
+        def controller_method_1(request, ...):
+            ...
+            ...
+        """
         result = StringIO()
 
         for class_method_object in self.__class_methods:

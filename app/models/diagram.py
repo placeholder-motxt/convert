@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
+from io import StringIO
 from typing import Optional
 
 from app.utils import is_valid_python_identifier
@@ -10,6 +11,8 @@ from .properties import FieldObject
 
 
 class ClassObject:
+    """Represents a single JetUML ClassNode."""
+
     def __init__(self):
         self.__name: str = ""
         self.__parent: Optional[ClassObject] = None
@@ -43,6 +46,7 @@ class ClassObject:
         return res
 
     def __str__(self) -> str:
+        """__str__ method for debugging purposes."""
         return (
             f"Class Object:\n\tname: {self.__name}\n\tparent: {self.__parent}"
             f"\n\tfields:{self.__fields}\n\t methods: {self.__methods}"
@@ -74,19 +78,21 @@ class ClassObject:
         return self.__methods
 
     def __get_attributes_to_code(self) -> str:
-        res = ""
+        res = StringIO()
         for attribute in self.__fields:
-            res += "\t" + attribute.to_models_code() + "\n"
-        return res
+            res.write("\t" + attribute.to_models_code() + "\n")
+        return res.getvalue()
 
     def __get_relationships_to_code(self) -> str:
-        res = ""
+        res = StringIO()
         for relation in self.__relationships:
-            res += "\t" + relation.to_models_code() + "\n"
-        return res
+            res.write("\t" + relation.to_models_code() + "\n")
+        return res.getvalue()
 
 
 class AbstractRelationshipObject(ABC):
+    """Represents JetUML's Association Edge"""
+
     def __init__(self):
         self.__source_class: Optional[ClassObject] = None
         self.__target_class: Optional[ClassObject] = None
@@ -117,6 +123,8 @@ class AbstractRelationshipObject(ABC):
 
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
+    """Represents JetUML's AssociationEdge where the the startLabel and endLabel are both '1'"""
+
     def __init__(self):
         super().__init__()
 
@@ -129,6 +137,14 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
 
 
 class ManyToOneRelationshipObject(AbstractRelationshipObject):
+    """
+    Represents JetUML's AssociationEdge where one label is '*' and the other is '1'
+
+    Note: Code generation is determined by the VALUES of startLabel and endLabel.
+    Code generation must handle cases where startLabel is 1 and endLabel is *, and
+    cases where startLabel is * and endLabel is *
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -141,6 +157,8 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
 
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
+    """Represents JetUML's AssociationEdge where both startLabel and endLabel are '*'"""
+
     def __init__(self):
         super().__init__()
 

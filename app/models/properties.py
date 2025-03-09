@@ -6,6 +6,12 @@ from app.utils import is_valid_python_identifier
 
 
 class TypeObject:
+    """
+    Represents a Datatype
+
+    This class is not framework specific. Instead, it contains methods which return a string
+    representation of the datatype according to a specific framework."""
+
     def __init__(self):
         self.__name = ""
 
@@ -31,6 +37,13 @@ class TypeObject:
 
 
 class FieldObject:
+    """
+    Represents a field from a class.
+
+    The FieldObject class is not framework specific. Instead, it contains methods which return a
+    string representation of the datatype according to a specific framework."
+    """
+
     def __init__(self):
         self.__name: str = ""
         self.__type: TypeObject = None
@@ -71,6 +84,13 @@ class FieldObject:
 
 
 class ParameterObject:
+    """
+    Represents parameter of a method definition.
+
+    This class is not framework specific. Instead, it contains methods which return a
+    string representation of the datatype according to a specific framework."
+    """
+
     def __init__(self):
         self.__name: str = ""
         self.__type: TypeObject = None

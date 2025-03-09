@@ -1,0 +1,27 @@
+{
+  "diagram": "ClassDiagram",
+  "nodes": [
+    {
+      "id": 0,
+      "type": "UnknownNode",
+      "name": "InvalidNode",
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": 1,
+      "type": "CallNode",
+      "name": "ValidNode"
+    }
+  ],
+  "edges": [
+    {
+      "start": 1,
+      "end": 999,
+      "type": "CallEdge",
+      "middleLabel": "Invalid Edge",
+      "signal": true
+    }
+  ],
+  "version": "3.8"
+}
