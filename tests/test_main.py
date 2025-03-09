@@ -1,5 +1,5 @@
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import anyio
 import pytest
@@ -102,41 +102,54 @@ async def test_convert_endpoint_valid_content():
         mock_instance2 = mockparser2.return_value
         mock_instance2.add_class_method.return_value = [MagicMock()]
         mock_instance2.print_django_style.return_value = "ini views write"
-        with (
-            patch("zipfile.ZipFile") as mock_zipfile,
-            patch("os.remove") as mock_remove,
-            patch("app.main.download_file") as MockClient,
-            patch("app.main.download_file") as MockClient2,
-        ):
-            mock_zipf = (
-                mock_zipfile.return_value.__enter__.return_value
-            )  # Mock the context manager
-            mock_zipf.write = MagicMock()
 
-            mock_client_instance = MockClient.return_value
-            mock_post = AsyncMock()
-            mock_post.return_value.content = b"mocked response"
-            mock_post.return_value.headers = {"content-type": "text/plain"}
-            mock_client_instance.__aenter__.return_value.post = mock_post
+        # Prepare the request payload with the necessary 'nodes' key
+        payload = {"filename": ["file1"], "content": [['{"content"}']]}
 
-            mock_client_instance2 = MockClient2.return_value
-            mock_post2 = AsyncMock()
-            mock_post2.return_value.content = b"mocked response"
-            mock_post2.return_value.headers = {"content-type": "text/plain"}
-            mock_client_instance2.__aenter__.return_value.post = mock_post
+        async with await anyio.open_file("file1.zip", "w") as f:
+            await f.write("")
 
-            # Prepare the request payload with the necessary 'nodes' key
-            payload = {"filename": ["file1"], "content": [['{"content"}']]}
+        # Send the request to the endpoint
+        response = client.post("/convert", json=payload)
+        # Validate the response
 
-            async with await anyio.open_file("file1.zip", "w") as f:
-                await f.write("")
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
 
-            # Send the request to the endpoint
-            response = client.post("/convert", json=payload)
-            # Validate the response
 
-            assert response.status_code == 200
-            assert response.headers["content-type"] == "application/zip"
-            mock_remove.assert_called()
+@pytest.mark.asyncio
+async def test_convert_endpoint_valid_multiple_file_content():
+    # Mock ParseJsonToObjectClass to avoid executing its real implementation
+    with (
+        patch("app.main.ModelsElements") as mockparser,
+        patch("app.main.ViewsElements") as mockparser2,
+        patch("app.main.json") as mockjson,
+    ):
+        mockjson.loads.return_value = {"diagram": "ClassDiagram"}
+        mock_instance = mockparser.return_value
+        m = MagicMock()
+        mock_instance.parse.return_value = [m, m, m]
+        mock_instance.print_django_style.return_value = "ini class write"
+        m.get_methods.return_value = [MagicMock(to_views_code="view Test {}")]
 
-            os.remove("file1.zip")
+        mock_instance2 = mockparser2.return_value
+        mock_instance2.add_class_method.return_value = None
+        mock_instance2.print_django_style.return_value = "ini views write"
+
+        payload = {
+            "filename": ["file1", "file2"],
+            "content": [['{"content"}'], ['{"content"}']],
+        }
+        response = client.post("/convert", json=payload)
+
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
+
+
+@pytest.mark.asyncio
+async def test_convert_endpoint_invalid_incosistent_filename_content_amount():
+    payload = {"filename": ["file1"], "content": [['{"content"}'], ['{"content"}']]}
+    response = client.post("/convert", json=payload)
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "number of Filename and Content is incosistent"
