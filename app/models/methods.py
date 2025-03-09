@@ -145,6 +145,7 @@ class ClassMethodObject(AbstractMethodObject):
         res.write(
             f"    raise NotImplementedError('{name} function is not yet implemented')\n"
         )
+
         return res.getvalue()
 
     def get_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
@@ -165,6 +166,9 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def add_call(self, call_object: AbstractMethodCallObject):
         self.__calls.append(call_object)
+
+    def get_call(self) -> list[AbstractMethodCallObject]:
+        return self.__calls
 
     def print_django_style(self) -> str:
         if not self.get_name():
@@ -218,6 +222,12 @@ class AbstractMethodCallObject(ABC):
 
     def set_method(self, method: AbstractMethodObject):
         self.__method = method
+
+    def get_methods(self) -> AbstractMethodObject:
+        return self.__method
+
+    def get_arguments(self) -> list[ArgumentObject]:
+        return self.__arguments
 
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
@@ -340,6 +350,9 @@ class ArgumentObject:
 
     def set_name(self, name: str):
         self.__name = name
+
+    def get_name(self) -> str:
+        return self.__name
 
     def set_type(self, type: TypeObject):
         self.__type = type

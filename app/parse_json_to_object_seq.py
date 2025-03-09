@@ -7,6 +7,7 @@ from jsonschema import validate
 from app.models.diagram import ClassObject
 from app.models.methods import (
     AbstractMethodCallObject,
+    ArgumentObject,
     ClassMethodCallObject,
     ClassMethodObject,
     ControllerMethodCallObject,
@@ -146,8 +147,6 @@ class ParseJsonToObjectSeq:
                     self.__class_object[class_name] = class_object
 
                 else:
-                    print(class_name)
-                    print(self.__class_object.keys())
                     raise Exception("Duplicate class name!")
 
                 self.__implicit_parameter_nodes[callee_id] = {
@@ -218,6 +217,7 @@ class ParseJsonToObjectSeq:
                     controller_call.set_condition(condition)
 
                 method_call = AbstractMethodCallObject()
+
                 if not is_valid_python_identifier(method_name):
                     raise ValueError(f"Invalid method name: {method_name}")
                 method.set_name(method_name)
@@ -243,8 +243,6 @@ class ParseJsonToObjectSeq:
 
                 if class_name == "views":
                     self.__controller_method.append(method)
-                    controller_call.set_method(method)
-                    method.add_call(controller_call)
 
                 elif method not in class_obj.get_methods():
                     class_obj.add_method(method)
@@ -285,9 +283,22 @@ class ParseJsonToObjectSeq:
             caller_method = self.__call_nodes[caller_id]["method"]
             callee_method = call_node["method"]
             ret_var = call_node.get("ret_var", None)
-            call_obj = ClassMethodCallObject()
+
+            if isinstance(caller_method, ControllerMethodObject):
+                call_obj = ControllerMethodCallObject()
+
+            else:
+                call_obj = ClassMethodCallObject()
+
             call_obj.set_caller(caller_method)
             call_obj.set_method(callee_method)
+
+            for param in callee_method.get_parameters():
+                argument = ArgumentObject()
+                argument.set_name(param.get_name())
+                argument.set_methodObject(call_obj)
+                call_obj.add_argument(argument)
+
             if ret_var is not None:
                 call_obj.set_return_var_name(ret_var)
 
