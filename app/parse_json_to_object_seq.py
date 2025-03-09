@@ -10,11 +10,11 @@ from app.models.properties import ParameterObject
 class ParseJsonToObjectSeq:
     def __init__(self):
         self.__json = None
-        self.__class_object: dict = dict()
+        self.__class_object: dict[str, ClassObject] = dict()
         self.__controller_method: list[ControllerMethodObject] = []
-        self.__call_nodes: dict = dict()
+        self.__call_nodes: dict[str, dict] = dict()
         self.__edges: list = []
-        self.__implicit_parameter_nodes = dict()
+        self.__implicit_parameter_nodes: dict[str, dict] = dict()
 
     def set_json(self, data: str) -> str | None:
         try:
@@ -240,7 +240,6 @@ class ParseJsonToObjectSeq:
                             call_object = None
                             method_being_called_name = ""
                             is_name_setup = False
-                            duplicate_attribute_checker_call = dict()
 
                             if (class_name == "views"):
                                 call_object = ControllerMethodCallObject()
