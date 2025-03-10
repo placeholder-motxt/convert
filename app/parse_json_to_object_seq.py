@@ -7,6 +7,7 @@ from jsonschema import validate
 from app.models.diagram import ClassObject
 from app.models.methods import (
     AbstractMethodCallObject,
+    AbstractMethodObject,
     ArgumentObject,
     ClassMethodCallObject,
     ClassMethodObject,
@@ -188,6 +189,69 @@ class ParseJsonToObjectSeq:
             }
             valid_caller.add(end_id)
 
+    def check_for_duplicate_attribute(
+        self,
+        params: str,
+        method: AbstractMethodObject,
+        duplicate_attribute_checker: set,
+    ):
+        for param in params.split(","):
+            param = param.strip()
+            if param == "":
+                continue
+            if not is_valid_python_identifier(param):
+                raise ValueError(f"Invalid param name: {param}")
+            if param in duplicate_attribute_checker:
+                raise Exception("Duplicate attribute!")
+            param_obj = ParameterObject()
+            param_obj.set_name(param)
+            method.add_parameter(param_obj)
+            duplicate_attribute_checker.add(param)
+
+    def process_regex_into_object(
+        self,
+        edge: dict,
+        method: AbstractMethodObject,
+        start_id: str,
+        end_id: str,
+        class_name: str,
+        class_obj: ClassObject,
+    ):
+        match: re.Match[str] | None = self.__label_pattern.match(edge["label"])
+        if match is None:
+            raise ValueError(
+                f"Wrong label format: {edge['label']}\n"
+                "Check that the format is in compliance with the guide"
+            )
+        condition = match.group("cond")
+        method_name = match.group("method_name")
+        params = match.group("params")
+        ret_var = match.group("ret_var")
+
+        if not is_valid_python_identifier(method_name):
+            raise ValueError(f"Invalid method name: {method_name}")
+        method.set_name(method_name)
+
+        duplicate_attribute_checker: set[str] = set()
+        self.check_for_duplicate_attribute(params, method, duplicate_attribute_checker)
+
+        if ret_var is not None:
+            if not is_valid_python_identifier(ret_var):
+                raise ValueError(f"Invalid return variable name: {ret_var}")
+            self.__call_nodes[end_id]["ret_var"] = ret_var
+
+        if class_name == "views":
+            self.__controller_method.append(method)
+
+        elif method not in class_obj.get_methods():
+            class_obj.add_method(method)
+
+        method_call_dictionary = self.__method_call[(start_id, end_id)]
+        if condition is not None:
+            if method_call_dictionary["end"] == end_id:
+                method_call_dictionary["condition"] = condition
+        method_call_dictionary["method"] = method
+
     def process_edge_into_classobject(self):
         for edge in self.__edges:
             if edge["type"] == "CallEdge":
@@ -206,51 +270,9 @@ class ParseJsonToObjectSeq:
                 self.__call_nodes[end_id]["method"] = method
                 self.__call_nodes[end_id]["caller"] = start_id
 
-                match: re.Match[str] | None = self.__label_pattern.match(edge["label"])
-                if match is None:
-                    raise ValueError(
-                        f"Wrong label format: {edge['label']}\n"
-                        "Check that the format is in compliance with the guide"
-                    )
-                condition = match.group("cond")
-                method_name = match.group("method_name")
-                params = match.group("params")
-                ret_var = match.group("ret_var")
-
-                if not is_valid_python_identifier(method_name):
-                    raise ValueError(f"Invalid method name: {method_name}")
-                method.set_name(method_name)
-
-                duplicate_attribute_checker: set[str] = set()
-                for param in params.split(","):
-                    param = param.strip()
-                    if param == "":
-                        continue
-                    if not is_valid_python_identifier(param):
-                        raise ValueError(f"Invalid param name: {param}")
-                    if param in duplicate_attribute_checker:
-                        raise Exception("Duplicate attribute!")
-                    param_obj = ParameterObject()
-                    param_obj.set_name(param)
-                    method.add_parameter(param_obj)
-                    duplicate_attribute_checker.add(param)
-
-                if ret_var is not None:
-                    if not is_valid_python_identifier(ret_var):
-                        raise ValueError(f"Invalid return variable name: {ret_var}")
-                    self.__call_nodes[end_id]["ret_var"] = ret_var
-
-                if class_name == "views":
-                    self.__controller_method.append(method)
-
-                elif method not in class_obj.get_methods():
-                    class_obj.add_method(method)
-
-                method_call_dictionary = self.__method_call[(start_id, end_id)]
-                if condition is not None:
-                    if method_call_dictionary["end"] == end_id:
-                        method_call_dictionary["condition"] = condition
-                method_call_dictionary["method"] = method
+                self.process_regex_into_object(
+                    edge, method, start_id, end_id, class_name, class_obj
+                )
 
     def process_self_call(
         self, caller_id: str, callee_id: str, rev_call_tree: dict, call_node: CallNode
@@ -267,6 +289,42 @@ class ParseJsonToObjectSeq:
                     "Too deep self calls! "
                     f"The maximum allowed is {self.ALLOWED_SELF_CALL_DEPTH}"
                 )
+
+    def add_argument_object(
+        self, callee_method: str, call_obj: AbstractMethodCallObject
+    ):
+        for param in callee_method.get_parameters():
+            argument = ArgumentObject()
+            argument.set_name(param.get_name())
+            argument.set_methodObject(call_obj)
+            call_obj.add_argument(argument)
+
+    def process_call_obj(
+        self,
+        caller_method: AbstractMethodObject,
+        callee_method: AbstractMethodObject,
+        method_call_dictionary: dict,
+        callee_id: str,
+    ) -> AbstractMethodCallObject:
+        if isinstance(caller_method, ControllerMethodObject):
+            call_obj = ControllerMethodCallObject()
+            if (
+                method_call_dictionary["condition"] is not None
+                and method_call_dictionary["end"] == callee_id
+            ):
+                call_obj.set_condition(method_call_dictionary["condition"])
+
+        else:
+            call_obj = ClassMethodCallObject()
+            if (
+                method_call_dictionary["condition"] is not None
+                and method_call_dictionary["end"] == callee_id
+            ):
+                call_obj.set_condition(method_call_dictionary["condition"])
+
+        call_obj.set_caller(caller_method)
+        call_obj.set_method(callee_method)
+        return call_obj
 
     def parse(self):
         self.assign_node_into_classobject()
@@ -287,35 +345,15 @@ class ParseJsonToObjectSeq:
             callee_method = call_node["method"]
             ret_var = call_node.get("ret_var", None)
 
-            start = caller_id
-            end = callee_id
-            method_call_dictionary = self.__method_call[(start, end)]
-            if isinstance(caller_method, ControllerMethodObject):
-                call_obj = ControllerMethodCallObject()
-                if (
-                    method_call_dictionary["condition"] is not None
-                    and method_call_dictionary["end"] == end
-                ):
-                    call_obj.set_condition(method_call_dictionary["condition"])
+            method_call_dictionary = self.__method_call[(caller_id, callee_id)]
 
-            else:
-                call_obj = ClassMethodCallObject()
-                if (
-                    method_call_dictionary["condition"] is not None
-                    and method_call_dictionary["end"] == end
-                ):
-                    call_obj.set_condition(method_call_dictionary["condition"])
-
-            call_obj.set_caller(caller_method)
-            call_obj.set_method(callee_method)
+            call_obj = self.process_call_obj(
+                caller_method, callee_method, method_call_dictionary, callee_id
+            )
 
             method_call_dictionary["method_call"] = call_obj
 
-            for param in callee_method.get_parameters():
-                argument = ArgumentObject()
-                argument.set_name(param.get_name())
-                argument.set_methodObject(call_obj)
-                call_obj.add_argument(argument)
+            self.add_argument_object(callee_method, call_obj)
 
             if ret_var is not None:
                 call_obj.set_return_var_name(ret_var)
