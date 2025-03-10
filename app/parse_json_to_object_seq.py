@@ -51,10 +51,10 @@ class ParseJsonToObjectSeq:
                 return "Success"
 
             else:
-                raise Exception("Given .jet is not valid!")
+                raise ValueError("Given .jet is not valid!")
 
         except json.JSONDecodeError:
-            raise Exception("Given .jet is not valid!")
+            raise ValueError("Given .jet is not valid!")
 
     def validate_json(self, data: object) -> bool:
         schema = {
@@ -126,7 +126,6 @@ class ParseJsonToObjectSeq:
         return self.__implicit_parameter_nodes
 
     def parse(self):
-        # duplicate_method_checker = dict()
 
         """
         Assign all nodes into ClassObject and keep the information in a dictionary
@@ -147,7 +146,7 @@ class ParseJsonToObjectSeq:
                     self.__class_object[class_name] = class_object
 
                 else:
-                    raise Exception("Duplicate class name!")
+                    raise ValueError("Duplicate class name!")
 
                 self.__implicit_parameter_nodes[callee_id] = {
                     "id": callee_id,
@@ -232,7 +231,7 @@ class ParseJsonToObjectSeq:
                     if not is_valid_python_identifier(param):
                         raise ValueError(f"Invalid param name: {param}")
                     if param in duplicate_attribute_checker:
-                        raise Exception("Duplicate attribute!")
+                        raise ValueError("Duplicate attribute!")
                     param_obj = ParameterObject()
                     param_obj.set_name(param)
                     method.add_parameter(param_obj)
@@ -305,7 +304,7 @@ class ParseJsonToObjectSeq:
             for param in callee_method.get_parameters():
                 argument = ArgumentObject()
                 argument.set_name(param.get_name())
-                argument.set_methodObject(call_obj)
+                argument.set_method_object(call_obj)
                 call_obj.add_argument(argument)
 
             if ret_var is not None:
