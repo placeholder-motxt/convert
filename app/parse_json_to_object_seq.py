@@ -252,6 +252,22 @@ class ParseJsonToObjectSeq:
                         method_call_dictionary["condition"] = condition
                 method_call_dictionary["method"] = method
 
+    def process_self_call(
+        self, caller_id: str, callee_id: str, rev_call_tree: dict, call_node: CallNode
+    ):
+        caller_parent = self.__call_nodes[caller_id]["parent"]
+        callee_parent = call_node["parent"]
+        caller_class = self.__implicit_parameter_nodes[caller_parent]["class_name"]
+        callee_class = self.__implicit_parameter_nodes[callee_parent]["class_name"]
+        if caller_class == callee_class:
+            rev_call_tree[callee_id] = caller_id
+            call_depth = self.check_call_depth(rev_call_tree, callee_id)
+            if call_depth > self.ALLOWED_SELF_CALL_DEPTH:
+                raise ValueError(
+                    "Too deep self calls! "
+                    f"The maximum allowed is {self.ALLOWED_SELF_CALL_DEPTH}"
+                )
+
     def parse(self):
         self.assign_node_into_classobject()
 
@@ -265,18 +281,7 @@ class ParseJsonToObjectSeq:
             if caller_id not in valid_caller:
                 continue
 
-            caller_parent = self.__call_nodes[caller_id]["parent"]
-            callee_parent = call_node["parent"]
-            caller_class = self.__implicit_parameter_nodes[caller_parent]["class_name"]
-            callee_class = self.__implicit_parameter_nodes[callee_parent]["class_name"]
-            if caller_class == callee_class:
-                rev_call_tree[callee_id] = caller_id
-                call_depth = self.check_call_depth(rev_call_tree, callee_id)
-                if call_depth > self.ALLOWED_SELF_CALL_DEPTH:
-                    raise ValueError(
-                        "Too deep self calls! "
-                        f"The maximum allowed is {self.ALLOWED_SELF_CALL_DEPTH}"
-                    )
+            self.process_self_call(caller_id, callee_id, rev_call_tree, call_node)
 
             caller_method = self.__call_nodes[caller_id]["method"]
             callee_method = call_node["method"]
