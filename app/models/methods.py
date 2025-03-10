@@ -195,7 +195,7 @@ class AbstractMethodCallObject(ABC):
     """
 
     def __init__(self):
-        self.__method: AbstractMethodObject = None
+        self.__method: Optional[AbstractMethodObject] = None
         self.__arguments: list[ArgumentObject] = []
         self.__return_var_name: str = ""
         self.__condition = ""
@@ -299,7 +299,7 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 
     def __init__(self):
         super().__init__()
-        self.__caller: ClassMethodObject = None
+        self.__caller: Optional[ClassMethodObject] = None
         self.__instance_name = ""
 
     def __eq__(self, other: ClassMethodCallObject) -> bool:
@@ -307,12 +307,12 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 
     def set_caller(self, method_object: ClassMethodObject):
         if method_object is None:
-            raise Exception("ClassMethodObject cannot be SET to be None!")
+            raise ValueError("ClassMethodObject cannot be SET to be None!")
         self.__caller = method_object
 
     def set_instance_name(self, instance_name: str):
         if instance_name == "" or instance_name is None:
-            raise Exception("instance_name cannot be empty!")
+            raise ValueError("instance_name cannot be empty!")
         self.__instance_name = instance_name
 
     def get_instance_name(self) -> str:
@@ -328,7 +328,7 @@ class ControllerMethodCallObject(AbstractMethodCallObject):
 
     def __init__(self):
         super().__init__()
-        self.__caller: ControllerMethodObject = None
+        self.__caller: Optional[ControllerMethodObject] = None
 
     def set_caller(self, caller: ControllerMethodObject):
         self.__caller = caller
@@ -352,8 +352,8 @@ class ArgumentObject:
             f"\n\tname: {self.__name}\n\ttype: \n\t[{self.__type}]"
         )
 
-    def set_methodObject(self, methodObject: AbstractMethodCallObject):
-        self.__method_object = methodObject
+    def set_method_object(self, method_object: AbstractMethodCallObject):
+        self.__method_object = method_object
 
     def set_name(self, name: str):
         self.__name = name
