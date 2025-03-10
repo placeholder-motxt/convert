@@ -1,0 +1,10 @@
+tests
+requirements-dev.txt
+requirements-tests.txt
+.github
+env
+.*_cache
+**/__pycache__
+htmlcov
+.coverage
+cosmic-ray.sqlite

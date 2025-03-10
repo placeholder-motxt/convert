@@ -1,16 +1,26 @@
 import os
 import zipfile
+from contextlib import asynccontextmanager
 
 import anyio
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
 from app.model import DownloadRequest
 from app.models.elements import ModelsElements, ViewsElements
 from app.utils import remove_file
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    instrumentator.expose(app)
+    yield
+
+
+app = FastAPI(openapi_url=None, lifespan=lifespan)
+instrumentator = Instrumentator().instrument(app)
 
 
 @app.get("/")
