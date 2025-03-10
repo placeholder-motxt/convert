@@ -273,13 +273,13 @@ class TestClassMethodCallObject(unittest.TestCase):
         obj = ClassMethodCallObject()
         with self.assertRaises(ValueError) as context:
             obj.set_instance_name("")
-        self.assertTrue("instance_name cannot be empty!" in str(context.exception))
+        self.assertIn("instance_name cannot be empty!", str(context.exception))
 
     def test_set_instance_name_none(self):
         obj = ClassMethodCallObject()
         with self.assertRaises(ValueError) as context:
             obj.set_instance_name(None)
-        self.assertTrue("instance_name cannot be empty!" in str(context.exception))
+        self.assertIn("instance_name cannot be empty!", str(context.exception))
 
     def test_get_instance_name_empty(self):
         obj = ClassMethodCallObject()
