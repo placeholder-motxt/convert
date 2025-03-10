@@ -85,7 +85,7 @@ def test_slash_on_filename():
 
 
 @pytest.mark.asyncio
-async def test_convert_endpoint_valid_content():
+async def test_convert_endpoint_valid_content_class_diagram():
     # Mock ParseJsonToObjectClass to avoid executing its real implementation
     with (
         patch("app.main.ModelsElements") as mockparser,
@@ -116,6 +116,27 @@ async def test_convert_endpoint_valid_content():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
 
+@pytest.mark.asyncio
+async def test_convert_endpoint_valid_sequence_diagram():
+        payload = {"filename": ["simple.class.jet", "simple.sequence.jet"],
+                   "content": [[('{"diagram":"ClassDiagram",'
+                   '"nodes":[{"methods":"- classMethod (): void","name":"ClassName",'
+                   '"x":390,"y":80,"attributes":"","id":0,"type":"ClassNode"}],"edges":[],"version":"3.8"}')],
+                   [('{"diagram":"SequenceDiagram","nodes":[{"children":[1],"name":":UI",'
+                   '"x":80,"y":58,"id":0,"type":"ImplicitParameterNode"},'
+                   '{"x":0,"y":0,"openBottom":false,"id":1,"type":"CallNode"},'
+                   '{"children":[3],"name":":views","x":450,"y":50,"id":2,'
+                   '"type":"ImplicitParameterNode"},{"x":0,"y":0,"openBottom":false,"id":3,'
+                   '"type":"CallNode"},{"children":[5],"name":"class_name:ClassName","x":730,'
+                   '"y":60,"id":4,"type":"ImplicitParameterNode"},{"x":0,"y":0,"openBottom":false,'
+                   '"id":5,"type":"CallNode"}],"edges":[{"middleLabel":"doA ()","start":1,"end":3,'
+                   '"type":"CallEdge","signal":false},{"middleLabel":"classMethod ()","start":3,'
+                   '"end":5,"type":"CallEdge","signal":false},{"middleLabel":"return_var","start":5,"end":3,"type":"ReturnEdge"}],"version":"3.8"}')]]}
+        response = client.post("/convert", json=payload)
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
+
+        # mock_instance2.add_class_method.assert_called()
 
 @pytest.mark.asyncio
 async def test_convert_endpoint_valid_multiple_file_content():
