@@ -125,9 +125,7 @@ class ParseJsonToObjectSeq:
     def get_implicit_parameter_nodes(self) -> dict:  # pragma: no cover
         return self.__implicit_parameter_nodes
 
-    def parse(self):
-        # duplicate_method_checker = dict()
-
+    def assign_node_into_classobject(self):
         """
         Assign all nodes into ClassObject and keep the information in a dictionary
         """
@@ -167,10 +165,10 @@ class ParseJsonToObjectSeq:
                 if child_id in self.__call_nodes:
                     self.__call_nodes[child_id]["parent"] = callee_id
 
+    def process_edge_json(self, valid_caller: set[int]):
         # Process edges
         edges = self.__json["edges"]
 
-        valid_caller: set[int] = set()
         for edge in edges:
             edge_type = edge.get("type")
             start_id = edge.get("start")
@@ -190,8 +188,7 @@ class ParseJsonToObjectSeq:
             }
             valid_caller.add(end_id)
 
-        # Assign edge to classObject
-
+    def process_edge_into_classobject(self):
         for edge in self.__edges:
             if edge["type"] == "CallEdge":
                 start_id = edge["start"]
@@ -254,6 +251,13 @@ class ParseJsonToObjectSeq:
                     if method_call_dictionary["end"] == end_id:
                         method_call_dictionary["condition"] = condition
                 method_call_dictionary["method"] = method
+
+    def parse(self):
+        self.assign_node_into_classobject()
+
+        valid_caller: set[int] = set()
+        self.process_edge_json(valid_caller)
+        self.process_edge_into_classobject()
 
         rev_call_tree = {}
         for callee_id, call_node in self.__call_nodes.items():
