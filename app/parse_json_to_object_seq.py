@@ -247,9 +247,8 @@ class ParseJsonToObjectSeq:
             class_obj.add_method(method)
 
         method_call_dictionary = self.__method_call[(start_id, end_id)]
-        if condition is not None:
-            if method_call_dictionary["end"] == end_id:
-                method_call_dictionary["condition"] = condition
+        if condition is not None and method_call_dictionary["end"] == end_id:
+            method_call_dictionary["condition"] = condition
         method_call_dictionary["method"] = method
 
     def process_edge_into_classobject(self):
