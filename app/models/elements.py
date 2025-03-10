@@ -116,7 +116,7 @@ class ViewsElements(FileElements):
             result.write(
                 f"#-----method from class {class_method_object.get_name()}------\n\n"
             )
-            result.write(class_method_object.print_django_style())
+            result.write(class_method_object.to_views_code())
             result.write("\n\n\n")
 
         for controller_method_object in self.__controller_methods:
@@ -128,3 +128,4 @@ class ViewsElements(FileElements):
 
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
+
