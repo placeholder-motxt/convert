@@ -203,11 +203,11 @@ class ParseJsonToObjectClass:
 
     def __validate_amount(self, amount_str: str) -> str:
         if not amount_str:
-            raise Exception("Association multiplicity cannot be empty")
+            raise ValueError("Association multiplicity cannot be empty")
 
         # Kalo bentuknya bukan * atau N..*
         if "*" in amount_str and "*" != amount_str[len(amount_str) - 1]:
-            raise Exception("Invalid use of * in multiplicity")
+            raise ValueError("Invalid use of * in multiplicity")
 
         # Amount hanya angka
         if amount_str.isnumeric() or amount_str == "*":
@@ -218,29 +218,23 @@ class ParseJsonToObjectClass:
             end_minimum = False
             start_max = False
             has_min_number = False
-            minimum_amount = 0
-            maximum_amount = 0
             titik_count = 0
             for i, ch in enumerate(amount_str):
                 if ch.isdigit() and not end_minimum:
                     has_min_number = True
-                    minimum_amount *= 10
-                    minimum_amount += int(ch)
                 elif has_min_number and ch == ".":
                     end_minimum = True
                     titik_count += 1
                 elif end_minimum and not start_max and ch.isdigit():
                     start_max = True
-                    maximum_amount += int(ch)
                 elif end_minimum and ch == "*" and i == len(amount_str) - 1:
                     start_max = True
                 elif start_max and ch.isdigit():
-                    maximum_amount *= 10
-                    maximum_amount += int(ch)
+                    pass
                 else:
-                    raise Exception("Invalid multiplicity in a relationship")
+                    raise ValueError("Invalid multiplicity in a relationship")
             if (end_minimum and not start_max) or titik_count != 2:
-                raise Exception("Invalid multiplicity in a relationship")
+                raise ValueError("Invalid multiplicity in a relationship")
 
             return amount_str
 
