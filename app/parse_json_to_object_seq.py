@@ -377,33 +377,27 @@ class ParseJsonToObjectSeq:
             depth += 1
         return depth
 
-    def parse_return_edge(self) -> str:
-        return_variables = []
-        for edge in self.__edges:
-            if edge["type"] == "ReturnEdge":
-                start_id = edge["start"]
-                end_id = edge["end"]
-                return_var = None
-                if is_valid_python_identifier(edge["label"].strip()):
-                    return_var = edge["label"].strip()
-                else:
-                    raise ValueError(
-                        "Return edge label must be a valid variable name!"
-                        f" Given: {edge['label']}"
-                    )
-                tupl = (end_id, start_id)
-                if tupl not in self.__method_call:
-                    raise ValueError(
-                        f"Return edge must have a corresponding call edge! "
-                        f"{end_id} -> {start_id}"
-                    )
-                else:
-                    method_call_dictionary = self.__method_call[tupl]
-                if method_call_dictionary["end"] == start_id:
-                    if method_call_dictionary["method_call"] is not None:
-                        method_call: AbstractMethodCallObject = method_call_dictionary[
-                            "method_call"
-                        ]
-                        method_call.set_return_var_name(return_var)
-                        return_variables.append(return_var)
-        return return_variables
+    def parse_return_edge(self) -> list:
+        return_vars = []
+        for edge in (e for e in self.__edges if e["type"] == "ReturnEdge"):
+            label = edge["label"].strip()
+            if not is_valid_python_identifier(label):
+                raise ValueError(
+                    f"Return edge label must be a valid variable name! Given: {edge['label']}"
+                )
+
+            call_tuple = (edge["end"], edge["start"])
+            if call_tuple not in self.__method_call:
+                raise ValueError(
+                    f"Return edge must have a corresponding call edge! "
+                    f"{edge['end']} -> {edge['start']}"
+                )
+            method_call_info = self.__method_call[call_tuple]
+            if (
+                method_call_info["end"] == edge["start"]
+                and method_call_info["method_call"]
+            ):
+                method_call_info["method_call"].set_return_var_name(label)
+                return_vars.append(label)
+
+        return return_vars
