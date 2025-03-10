@@ -160,7 +160,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         )
 
     def test_negative_set_source_class_as_None(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.relationship_object.set_source_class(None)
 
         self.assertEqual(
@@ -168,7 +168,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         )
 
     def test_negative_set_target_class_as_None(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.relationship_object.set_target_class(None)
 
         self.assertEqual(

@@ -81,7 +81,7 @@ class TestClassMethodObject(unittest.TestCase):
         )
 
     def test_negative_add_none(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.class_method_object.add_class_method_call(None)
 
         self.assertEqual(
@@ -257,7 +257,7 @@ class TestClassMethodCallObject(unittest.TestCase):
         )
 
     def test_negative_set_caller_as_none(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.class_method_call_object.set_caller(None)
 
         self.assertEqual(
