@@ -101,12 +101,12 @@ class AbstractRelationshipObject(ABC):
 
     def set_source_class(self, source_class: ClassObject):
         if source_class is None:
-            raise Exception("Source Class cannot be SET to be None!")
+            raise ValueError("Source Class cannot be SET to be None!")
         self.__source_class = source_class
 
     def set_target_class(self, target_class: ClassObject):
         if target_class is None:
-            raise Exception("Target Class cannot be SET to be None!")
+            raise ValueError("Target Class cannot be SET to be None!")
         self.__target_class = target_class
 
     def setSourceClassOwnAmount(self, amount: str):

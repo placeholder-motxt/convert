@@ -85,7 +85,7 @@ class ClassMethodObject(AbstractMethodObject):
 
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
         if class_method_call is None:
-            raise Exception("Cannot add None to ClassMethodCallObject!")
+            raise ValueError("Cannot add None to ClassMethodCallObject!")
         self.__calls.append(class_method_call)
 
     def to_views_code(self) -> str:

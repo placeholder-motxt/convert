@@ -102,7 +102,7 @@ class ParameterObject:
     def set_name(self, name: str):
         self.__name = name
 
-    def set_type(self, type: str):
+    def set_type(self, type: TypeObject):
         self.__type = type
 
     def to_views_code(self) -> str:

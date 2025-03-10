@@ -81,7 +81,7 @@ class TestClassMethodObject(unittest.TestCase):
         )
 
     def test_negative_add_none(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.class_method_object.add_class_method_call(None)
 
         self.assertEqual(
@@ -257,7 +257,7 @@ class TestClassMethodCallObject(unittest.TestCase):
         )
 
     def test_negative_set_caller_as_none(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.class_method_call_object.set_caller(None)
 
         self.assertEqual(
@@ -273,13 +273,13 @@ class TestClassMethodCallObject(unittest.TestCase):
         obj = ClassMethodCallObject()
         with self.assertRaises(ValueError) as context:
             obj.set_instance_name("")
-        self.assertTrue("instance_name cannot be empty!" in str(context.exception))
+        self.assertIn("instance_name cannot be empty!", str(context.exception))
 
     def test_set_instance_name_none(self):
         obj = ClassMethodCallObject()
         with self.assertRaises(ValueError) as context:
             obj.set_instance_name(None)
-        self.assertTrue("instance_name cannot be empty!" in str(context.exception))
+        self.assertIn("instance_name cannot be empty!", str(context.exception))
 
     def test_get_instance_name_empty(self):
         obj = ClassMethodCallObject()
