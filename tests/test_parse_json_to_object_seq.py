@@ -17,13 +17,13 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with open("tests/test_invalid_json_seq.txt", "r", encoding="utf-8") as file:
             json_data = file.read()
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             ParseJsonToObjectSeq().set_json(json_data)
 
         self.assertEqual(str(context.exception), "Given .jet is not valid!")
 
     def test_negative_set_empty_json(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             ParseJsonToObjectSeq().set_json("")
 
         self.assertEqual(str(context.exception), "Given .jet is not valid!")
@@ -83,7 +83,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         ) as file:
             json_data = file.read()
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()
@@ -104,7 +104,7 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             "tests/test_duplicate_attribute_seq.txt", "r", encoding="utf-8"
         ) as file:
             json_data = file.read()
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()

@@ -271,13 +271,13 @@ class TestClassMethodCallObject(unittest.TestCase):
 
     def test_set_instance_name_empty(self):
         obj = ClassMethodCallObject()
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             obj.set_instance_name("")
         self.assertTrue("instance_name cannot be empty!" in str(context.exception))
 
     def test_set_instance_name_none(self):
         obj = ClassMethodCallObject()
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             obj.set_instance_name(None)
         self.assertTrue("instance_name cannot be empty!" in str(context.exception))
 
@@ -337,7 +337,7 @@ class TestArgumentObject(unittest.TestCase):
 
     def test_set_method_object(self):
         method_object = AbstractMethodObject()
-        self.argument_object.set_methodObject(method_object)
+        self.argument_object.set_method_object(method_object)
         self.assertEqual(
             self.argument_object._ArgumentObject__method_object, method_object
         )
@@ -354,7 +354,7 @@ class TestArgumentObject(unittest.TestCase):
     def test_str_representation(self):
         method_object = AbstractMethodObject()
         method_object.set_name("TestMethod")
-        self.argument_object.set_methodObject(method_object)
+        self.argument_object.set_method_object(method_object)
         self.argument_object.set_name("TestArgument")
         type_obj = TypeObject()
         type_obj.set_name("TestType")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from typing import Optional
 
 from app.utils import is_valid_python_identifier
 
@@ -46,7 +47,7 @@ class FieldObject:
 
     def __init__(self):
         self.__name: str = ""
-        self.__type: TypeObject = None
+        self.__type: Optional[TypeObject] = None
 
     def __str__(self) -> str:
         return f"FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}"
@@ -93,7 +94,7 @@ class ParameterObject:
 
     def __init__(self):
         self.__name: str = ""
-        self.__type: TypeObject = None
+        self.__type: Optional[TypeObject] = None
 
     def __str__(self) -> str:
         return f"ParameterObject:\n\tname: {self.__name}\n\ttype: {self.__type}"
