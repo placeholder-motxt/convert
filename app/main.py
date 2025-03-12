@@ -88,7 +88,7 @@ async def convert(
                                                                  duplicate_class_method_checker)
             for class_method_object in duplicate_class_method_checker.values():
                 writer_views.add_class_method(class_method_object)
-        response_content_views += writer_views.print_django_style()
+    response_content_views += writer_views.print_django_style()
 
     response_content_models += writer_models.print_django_style()
 
@@ -124,12 +124,17 @@ async def convert(
     )
 
 def check_duplicate(class_objects: dict[str, ClassObject],
-                     class_object: ClassObject,
+                     class_object_name: str,
                      duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject]) -> \
     dict[tuple[str, str], ClassMethodObject]:
-    for class_method_object in class_objects[class_object].get_methods():
-        if ((class_object, class_method_object.get_name()) in
+    class_object = class_objects.get(class_object_name,None)
+    if not class_object:
+        return duplicate_class_method_checker
+    for class_method_object in class_objects[class_object_name].get_methods():
+        if ((class_object_name, class_method_object.get_name()) in
             duplicate_class_method_checker):
             duplicate_class_method_checker \
                 [(class_object, class_method_object.get_name())] = class_method_object
+        else:
+            raise ValueError("Cannot call class objects not defined in Class Diagram!")
     return duplicate_class_method_checker
