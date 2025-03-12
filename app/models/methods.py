@@ -183,7 +183,7 @@ class ControllerMethodObject(AbstractMethodObject):
         for abstract_method_call_object in self.__calls:
             result.write(abstract_method_call_object.print_django_style())
             result.write("\n\t")
-        result.write("\n")
+        result.write("pass\n\n")
         return result.getvalue()
 
 
