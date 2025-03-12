@@ -89,7 +89,6 @@ async def convert(
     for class_method_object in duplicate_class_method_checker.values():
                 writer_views.add_class_method(class_method_object)
     response_content_views += writer_views.print_django_style()
-
     response_content_models += writer_models.print_django_style()
 
     await download_file(
