@@ -105,6 +105,7 @@ class ClassMethodObject(AbstractMethodObject):
             method_call_1(request, instance)
             # TODO: Auto generated function stub
             raise NotImplementedError('method function is not yet implemented')
+            pass
 
         Example 2:
         name = 'method_name'
@@ -116,6 +117,7 @@ class ClassMethodObject(AbstractMethodObject):
         def method_name(request, instance, param1, param2) -> str:
             # TODO: Auto generated function stub
             raise NotImplementedError('method function is not yet implemented')
+            pass
         """
         res = StringIO()
         name = self.get_name()
@@ -143,7 +145,7 @@ class ClassMethodObject(AbstractMethodObject):
             res.write(method_call.print_django_style())
         res.write("\n    # TODO: Auto generated function stub\n")
         res.write(
-            f"    raise NotImplementedError('{name} function is not yet implemented')\n"
+            f"    raise NotImplementedError('{name} function is not yet implemented')\n    pass\n"
         )
 
         return res.getvalue()
