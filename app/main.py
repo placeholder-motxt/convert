@@ -63,6 +63,7 @@ async def convert(
             json_content["diagram"] is not None
             and json_content["diagram"] == "ClassDiagram"
         ):
+            print("masuk sini")
             classes = writer_models.parse(json_content)
 
             for model_class in classes:
@@ -86,7 +87,7 @@ async def convert(
             for class_object in class_objects:
                 duplicate_class_method_checker = check_duplicate(class_objects,class_object,
                                                                  duplicate_class_method_checker)
-            for class_method_object in duplicate_class_method_checker.values():
+    for class_method_object in duplicate_class_method_checker.values():
                 writer_views.add_class_method(class_method_object)
     response_content_views += writer_views.print_django_style()
 
