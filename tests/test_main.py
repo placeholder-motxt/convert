@@ -310,9 +310,10 @@ def test_check_duplicate_class_object_not_in_class_objects():
     # Mocking class objects and class method objects
     class_objects = {}  # Empty class_objects dictionary
     class_object = Mock()  # Mocked class object
+    class_object.get_name.return_value = "class1"
     duplicate_class_method_checker = {}
 
-    result = check_duplicate(class_objects, class_object, duplicate_class_method_checker)
+    result = check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
 
     # Assert that duplicate_class_method_checker remains unchanged
     assert result == duplicate_class_method_checker
@@ -355,9 +356,10 @@ def test_check_duplicate_with_matching_method():
                                        class_method_object.get_name()): class_method_object}
 
     # Run the check_duplicate function
-    result = check_duplicate(class_objects, class_object, duplicate_class_method_checker)
+    result = check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
 
     # Assert that the method `method2` has been added/updated in duplicate_class_method_checker
+    assert (len(result) == 1)
     assert (class_object.get_name(), "method1") in result
     assert result[(class_object.get_name(), "method1")] == class_method_object_copy
 
