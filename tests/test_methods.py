@@ -107,7 +107,7 @@ class TestControllerMethodObject(unittest.TestCase):
         mock_call = mock.Mock()
         mock_call.print_django_style.return_value = "mock_call()"
         self.controller_method.add_call(mock_call)
-        expected_output = "def sample_method(request):\n\tmock_call()\n\t\n    pass\n"
+        expected_output = "def sample_method(request):\n\tmock_call()\n\t\n\tpass\n"
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
     def test_print_django_style_negative(self):
@@ -116,7 +116,7 @@ class TestControllerMethodObject(unittest.TestCase):
             self.controller_method.print_django_style()
 
     def test_print_django_style_corner_case_empty_parameters(self):
-        expected_output = "def sample_method(request):\n\t\n    pass\n"
+        expected_output = "def sample_method(request):\n\t\n\tpass\n"
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
     def test_print_django_style_with_parameters(self):
@@ -125,7 +125,7 @@ class TestControllerMethodObject(unittest.TestCase):
         param2 = mock.Mock()
         param2.get_name.return_value = "param2"
         self.controller_method.get_parameters = mock.Mock(return_value=[param1, param2])
-        expected_output = "def sample_method(request, param1, param2):\n\t\n    pass\n"
+        expected_output = "def sample_method(request, param1, param2):\n\t\n\tpass\n"
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
     def test_print_django_style_with_multiple_calls(self):
@@ -136,7 +136,7 @@ class TestControllerMethodObject(unittest.TestCase):
         self.controller_method.add_call(mock_call1)
         self.controller_method.add_call(mock_call2)
         expected_output = (
-            "def sample_method(request):\n\tmock_call1()\n\tmock_call2()\n\t\n    pass\n"
+            "def sample_method(request):\n\tmock_call1()\n\tmock_call2()\n\t\n\tpass\n"
         )
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
