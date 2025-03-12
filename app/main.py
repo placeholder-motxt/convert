@@ -134,7 +134,7 @@ def check_duplicate(class_objects: dict[str, ClassObject],
         if ((class_object_name, class_method_object.get_name()) in
             duplicate_class_method_checker):
             duplicate_class_method_checker \
-                [(class_object, class_method_object.get_name())] = class_method_object
+                [(class_object_name, class_method_object.get_name())] = class_method_object
         else:
             raise ValueError("Cannot call class objects not defined in Class Diagram!")
     return duplicate_class_method_checker
