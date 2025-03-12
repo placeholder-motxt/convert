@@ -200,10 +200,6 @@ async def test_convert_endpoint_sequence_diagram():
         # Prepare the payload
         payload = {"filename": ["file1"], "content": [['{"diagram": "SequenceDiagram"}']]}
 
-        # Mock response_content_models and response_content_views as valid strings
-        response_content_models = "valid class content"
-        response_content_views = "valid views content"
-
         # Send the request to the endpoint
         client = TestClient(app)
 
@@ -243,7 +239,8 @@ async def test_convert_endpoint_invalid_diagram_type():
 
         response = client.post("/convert", json=payload)
 
-        assert response.status_code == 200  # assuming it doesn't throw an error and just skips invalid diagrams
+        assert response.status_code == 200  # assuming it doesn't throw an error and just skips
+        # invalid diagrams
 
 
 
