@@ -63,7 +63,6 @@ async def convert(
             json_content["diagram"] is not None
             and json_content["diagram"] == "ClassDiagram"
         ):
-            print("masuk sini")
             classes = writer_models.parse(json_content)
 
             for model_class in classes:

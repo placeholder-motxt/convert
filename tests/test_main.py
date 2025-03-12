@@ -243,27 +243,43 @@ async def test_convert_endpoint_invalid_diagram_type():
         # invalid diagrams
 
 
-
-
 @pytest.mark.asyncio
 async def test_convert_endpoint_valid_sequence_diagram():
-        payload = {"filename": ["simple.class.jet", "simple.sequence.jet"],
-                   "content": [[('{"diagram":"ClassDiagram",'
-                   '"nodes":[{"methods":"- classMethod (): void","name":"ClassName",'
-                   '"x":390,"y":80,"attributes":"","id":0,"type":"ClassNode"}],"edges":[],"version":"3.8"}')],
-                   [('{"diagram":"SequenceDiagram","nodes":[{"children":[1],"name":":UI",'
-                   '"x":80,"y":58,"id":0,"type":"ImplicitParameterNode"},'
-                   '{"x":0,"y":0,"openBottom":false,"id":1,"type":"CallNode"},'
-                   '{"children":[3],"name":":views","x":450,"y":50,"id":2,'
-                   '"type":"ImplicitParameterNode"},{"x":0,"y":0,"openBottom":false,"id":3,'
-                   '"type":"CallNode"},{"children":[5],"name":"class_name:ClassName","x":730,'
-                   '"y":60,"id":4,"type":"ImplicitParameterNode"},{"x":0,"y":0,"openBottom":false,'
-                   '"id":5,"type":"CallNode"}],"edges":[{"middleLabel":"doA ()","start":1,"end":3,'
-                   '"type":"CallEdge","signal":false},{"middleLabel":"classMethod ()","start":3,'
-                   '"end":5,"type":"CallEdge","signal":false},{"middleLabel":"return_var","start":5,"end":3,"type":"ReturnEdge"}],"version":"3.8"}')]]}
+    payload = {
+        "filename": ["simple.class.jet", "simple.sequence.jet"],
+        "content": [
+            [
+                '{"diagram":"ClassDiagram", "nodes":[{"methods":"classMethod()", "name":"Test", '
+                '"x":100, "y":100}], "edges":[]}'
+            ],
+            [
+                '{"diagram":"SequenceDiagram", "nodes":[{"children":[1], "name":":UI", "x":80,'
+                ' "y":58, "id":0, "type":"ImplicitParameterNode"}], "edges":[{"middleLabel":"doA ()"'
+                ', "start":1, "end":3, "type":"CallEdge"}]}'
+            ]
+        ]
+    }
+
+    with (patch("app.main.ParseJsonToObjectSeq") as mockseq,
+          patch("app.main.ViewsElements") as mockparser2,
+          patch("app.main.json") as mockjson,
+        patch("app.main.check_duplicate") as mock_check_duplicate,
+    ):
+        mockjson.loads.return_value = {"diagram": "SequenceDiagram"}
+
+        seq_parser = mockseq.return_value
+        seq_parser.get_controller_method.return_value = [MagicMock()]
+        seq_parser.get_class_objects.return_value = [MagicMock()]
+
+        mock_instance2 = mockparser2.return_value
+        mock_instance2.add_class_method.return_value = [MagicMock()]
+        mock_instance2.print_django_style.return_value = "views code"
+
         response = client.post("/convert", json=payload)
+        mock_check_duplicate.assert_called()
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+
 
 
 @pytest.mark.asyncio
