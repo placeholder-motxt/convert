@@ -20,8 +20,10 @@ class FileElements(ABC):
     """
 
     def __init__(self, file_name: str):
-        assert isinstance(file_name, str), "File name must be a string!"
-        assert file_name != "", "File name can't be empty!"
+        if not isinstance(file_name, str):
+            raise TypeError("File name must be a string!")
+        if file_name == "":
+            raise ValueError("File name can't be empty!")
         self.__name: str = file_name
 
     @abstractmethod
