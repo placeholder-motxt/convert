@@ -147,3 +147,6 @@ cosmic-ray-report.html
 
 # bandit
 bandit_report.html
+
+# profiling
+profile_stats.prof
