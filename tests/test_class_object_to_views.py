@@ -29,7 +29,7 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n"
+            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
         )
         self.assertEqual(result, self.empty_class.to_views_code())
 
@@ -40,12 +40,12 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n"
+            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
         )
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n"
+            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
         )
         self.assertIn("method1", code)
         self.assertIn("method2", code)
@@ -59,12 +59,12 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n"
+            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
         )
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n"
+            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
         )
         self.assertEqual(result, self.empty_class.to_views_code())
 
@@ -79,17 +79,17 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n"
+            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
         )
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n"
+            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
         )
         result += "def method3(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method3 function is not yet implemented')\n"
+            "    raise NotImplementedError('method3 function is not yet implemented')\n    pass\n"
         )
         self.assertEqual(result, self.empty_class.to_views_code())
 
@@ -101,12 +101,12 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n"
+            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
         )
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n"
+            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
         )
         self.assertEqual(result, self.class_with_methods.to_views_code())
 

@@ -26,7 +26,8 @@ class ClassObject:
         return (
             f"class {self.__name}"
             + f"({self.__parent.get_name() if self.__parent else 'models.Model'}):"
-            + f"\n{self.__get_attributes_to_code()}\n{self.__get_relationships_to_code()}\n"
+            + f"\n{self.__get_attributes_to_code()}\n"
+            + f"{self.__get_relationships_to_code()}\tpass\n\n\n"
         )
 
     def to_views_code(self) -> str:
