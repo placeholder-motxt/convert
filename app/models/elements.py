@@ -56,7 +56,8 @@ class ModelsElements(FileElements):
     def print_django_style(self) -> str:
         # A faster way to build string
         # https://stackoverflow.com/questions/2414667/python-string-class-like-stringbuilder-in-c
-        response_content = "".join(
+        response_content = "from django.db import models\n\n"
+        response_content += "".join(
             [model_class.to_models_code() for model_class in self.__classes]
         )
         response_content = response_content.strip()
