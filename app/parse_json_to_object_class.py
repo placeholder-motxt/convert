@@ -10,6 +10,8 @@ from app.models.diagram import (
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, ParameterObject, TypeObject
 
+from .utils import is_valid_python_identifier
+
 
 class ParseJsonToObjectClass:
     def __init__(self, data: str):
@@ -19,9 +21,7 @@ class ParseJsonToObjectClass:
         self.__classes = []
 
     def check_name(self, name: str) -> bool:
-        if name.isalpha():
-            return True
-        return False
+        return is_valid_python_identifier(name)
 
     def parse_classes(self) -> list:
         data = self.__json
