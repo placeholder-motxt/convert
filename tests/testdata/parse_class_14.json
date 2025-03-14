@@ -1,0 +1,14 @@
+{
+    "diagram": "ClassDiagram",
+    "nodes": [
+        {
+        "methods": "+ methodName(param1: type1, param@!: type2): bool",
+        "name": "ClassName",
+        "x": 330,
+        "y": 10,
+        "attributes": "- attribute: type",
+        "id": 0,
+        "type": "ClassNode"
+        }
+    ]
+}
