@@ -10,23 +10,26 @@ from app.models.diagram import (
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, ParameterObject, TypeObject
 
+from .utils import is_valid_python_identifier
+
 
 class ParseJsonToObjectClass:
     def __init__(self, data: str):
         self.__json = data
         if isinstance(data, str):
-            self.__json = json.loads(data)
+            try:
+                self.__json = json.loads(data)
+            except json.JSONDecodeError:
+                raise ValueError("Error: Invalid JSON format")
         self.__classes = []
 
     def check_name(self, name: str) -> bool:
-        if name.isalpha():
-            return True
-        return False
+        return is_valid_python_identifier(name)
 
     def parse_classes(self) -> list:
         data = self.__json
 
-        if "nodes" not in data.keys() or data["nodes"] == "":
+        if "nodes" not in data.keys() or data["nodes"] == "" or data["nodes"] == []:
             raise ValueError("Error: nodes not found in the json")
 
         # iterate all class in json
@@ -127,8 +130,8 @@ class ParseJsonToObjectClass:
                             class_obj.add_field(attr)
                         else:
                             raise ValueError(
-                                f"Error: attribute name or type is not valid: {attr_name} \
-                                    {attr_type_name}"
+                                f"Error: attribute name or type is not valid: {attr_name}, "
+                                f"{attr_type_name}"
                             )
 
             self.__classes.append(class_obj)

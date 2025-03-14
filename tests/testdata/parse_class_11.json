@@ -1,0 +1,14 @@
+{
+    "diagram": "ClassDiagram",
+    "nodes": [
+        {
+        "methods": "+ getBesaranDenda(): integer\n+ getTglPinjam(): Date\n+ getTglKembali(): Date",
+        "name": "Peminjaman",
+        "x": 310,
+        "y": 270,
+        "attributes": "- @ID: String\n- isDikembalikan: boolean\n- tglPinjam: Date\n- tglKembali: Date\n- isLunasDenda: boolean\n- besaranDenda: integer",
+        "id": 1,
+        "type": "ClassNode"
+        }
+    ]
+}
