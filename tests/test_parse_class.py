@@ -332,7 +332,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             "diagram": "ClassDiagram",
             "nodes": [
                 {
-                "methods": "+ methodName(param1: type1, param2: invalid name)",
+                "methods": "+ methodName(param1: type1, param@!: type2): bool",
                 "name": "ClassName",
                 "x": 330,
                 "y": 10,
@@ -345,16 +345,14 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(
-                str(context.exception), "Error: parameter name is not valid"
-            )
+        self.assertEqual(str(context.exception), "Error: parameter name is not valid")
 
     def test_invalid_method_parameter_type(self):
         data = """{
             "diagram": "ClassDiagram",
             "nodes": [
                 {
-                "methods": "+ methodName(param1: type1, param2: invalid type)",
+                "methods": "+ methodName(param1: type1, param2: invalid type): bool",
                 "name": "ClassName",
                 "x": 330,
                 "y": 10,
@@ -367,9 +365,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(
-                str(context.exception), "Error: parameter name is not valid"
-            )
+        self.assertEqual(str(context.exception), "Error: parameter name is not valid")
 
     def setUp(self):
         # Mocking the classes
