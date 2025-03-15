@@ -10,11 +10,11 @@ class TestModelsElements(unittest.TestCase):
         self.assertIsInstance(obj, ModelsElements)
 
     def test_models_elements_invalid_filename_type(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             ModelsElements(123)  # Invalid type
 
     def test_models_elements_empty_filename(self):  # cornercase
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             ModelsElements("")
 
     def test_parse(self):
