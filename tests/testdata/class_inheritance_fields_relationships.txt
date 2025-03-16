@@ -1,0 +1,7 @@
+from django.db import models
+
+
+class Order(BaseOrder):
+    order_date = models.DateField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    customerFK = models.ForeignKey(Customer, on_delete=models.CASCADE)
