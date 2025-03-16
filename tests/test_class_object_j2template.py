@@ -77,7 +77,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
         self.cls_obj.to_models_code_template("models.py.j2")
         mock_get_template.assert_called_once_with("models.py.j2")
 
-    @patch("app.utils.render_template")
+    @patch("app.models.diagram.render_template")
     def test_render_template_called_with_correct_args(
         self, mock_render_template: MagicMock
     ):
