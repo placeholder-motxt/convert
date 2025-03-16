@@ -85,7 +85,8 @@ class TestClassMethodObject(unittest.TestCase):
             self.class_method_object.add_class_method_call(None)
 
         self.assertEqual(
-            str(context.exception), "Cannot add None to ClassMethodCallObject!"
+            str(context.exception),
+            "Cannot add None to ClassMethodCallObject! please consult the user manual document",
         )
 
 
@@ -112,7 +113,7 @@ class TestControllerMethodObject(unittest.TestCase):
 
     def test_print_django_style_negative(self):
         self.controller_method.get_name = mock.Mock(return_value="")  # No method name
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             self.controller_method.print_django_style()
 
     def test_print_django_style_corner_case_empty_parameters(self):
@@ -261,7 +262,8 @@ class TestClassMethodCallObject(unittest.TestCase):
             self.class_method_call_object.set_caller(None)
 
         self.assertEqual(
-            str(context.exception), "ClassMethodObject cannot be SET to be None!"
+            str(context.exception),
+            "ClassMethodObject cannot be SET to be None!\nplease consult the user manual document",
         )
 
     def test_set_instance_name_valid(self):

@@ -42,7 +42,10 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(Exception) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: nodes not found in the json")
+        self.assertEqual(
+            str(context.exception),
+            "Nodes not found in the json, \nplease make sure the file isn't corrupt",
+        )
 
     def test_missing_nodes(self):
         data = ""
@@ -51,7 +54,11 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: nodes not found in the json")
+
+        self.assertEqual(
+            str(context.exception),
+            "Nodes not found in the json, \nplease make sure the file isn't corrupt",
+        )
 
     def test_invalid_json(self):
         data = ""
@@ -92,7 +99,11 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: class not found in the json")
+
+        self.assertEqual(
+            str(context.exception),
+            "Class not found in the json, \nplease make sure the file isn't corrupt",
+        )
 
     def test_missing_method_attributes(self):
         data = ""
@@ -101,7 +112,13 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'int' is not a valid!"
+            "Parameter name please consult the "
+            "user manual document on how to name parameters",
+        )
 
     def test_invalid_class_name(self):
         data = ""
@@ -110,7 +127,12 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: class name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "Class name is not valid \n"
+            "please consult the user manual document on how to name classes",
+        )
 
     def test_invalid_method_name(self):
         data = ""
@@ -119,8 +141,13 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
+
         self.assertEqual(
-            str(context.exception), "Error: method or method rettype name is not valid"
+            str(context.exception),
+            "'getBesaranDenda@' or 'integer' is not a valid "
+            "method name or method return type name. \n"
+            "please consult the user manual document on "
+            "how to name methods and their return types",
         )
 
     def test_invalid_parameter_name(self):
@@ -130,7 +157,12 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'int' is not a valid!Parameter name please consult "
+            "the user manual document on how to name parameters",
+        )
 
     def test_invalid_attribute_name(self):
         data = ""
@@ -159,7 +191,12 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: method return type not found")
+
+        self.assertEqual(
+            str(context.exception),
+            "Method return type not found, \n"
+            "please add a return type for method  methodName(param1: type1, param2: )",
+        )
 
     def test_invalid_method_parameter_name(self):
         data = ""
@@ -168,7 +205,12 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'param@!' is not a valid!"
+            "Parameter name please consult the user manual document on how to name parameters",
+        )
 
     def test_invalid_method_parameter_type(self):
         data = ""
@@ -177,7 +219,12 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-        self.assertEqual(str(context.exception), "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'param2' is not a valid!"
+            "Parameter name please consult the user manual document on how to name parameters",
+        )
 
     def setUp(self):
         # Mocking the classes
