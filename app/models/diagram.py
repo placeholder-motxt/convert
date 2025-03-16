@@ -110,10 +110,10 @@ class AbstractRelationshipObject(ABC):
             raise ValueError("Target Class cannot be SET to be None!")
         self.__target_class = target_class
 
-    def setSourceClassOwnAmount(self, amount: str):
+    def set_source_class_own_amount(self, amount: str):
         self.__sourceClassOwnAmount = amount
 
-    def setTargetClassOwnAmount(self, amount: str):
+    def set_target_class_own_amount(self, amount: str):
         self.__targetClassOwnAmount = amount
 
     def get_source_class(self) -> ClassObject:
