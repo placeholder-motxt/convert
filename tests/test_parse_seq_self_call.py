@@ -150,8 +150,8 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Too deep self calls! The maximum allowed "
-            f"is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
+            "Too deep self calls on a sequence diagram! \n"
+            f"The maximum allowed is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
         )
 
     def test_parse_self_call_too_deep_edge(self):
@@ -165,8 +165,8 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Too deep self calls! The maximum allowed "
-            f"is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
+            "Too deep self calls on a sequence diagram! \n"
+            f"The maximum allowed is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
         )
 
     def test_parse_self_call_multiple_valid_recursion(self):
@@ -239,7 +239,10 @@ class TestParseSeqSelfCall(unittest.TestCase):
             self.parser.parse()
 
         self.assertEqual(
-            str(ctx.exception), "Invalid return variable name: bval -> cval"
+            str(ctx.exception),
+            "Invalid return "
+            "variable name 'bval -> cval' on sequence diagram \n"
+            "please consult the user manual document on how to name return variables",
         )
 
     def test_parse_self_call_invalid_ret_val(self):
@@ -250,7 +253,11 @@ class TestParseSeqSelfCall(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self.parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid return variable name: $bval")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid return variable name '$bval' on sequence diagram \n"
+            "please consult the user manual document on how to name return variables",
+        )
 
     def test_parse_self_call_infinite_loop(self):
         # Edge case when a threat actor intentionally modified
@@ -264,8 +271,7 @@ class TestParseSeqSelfCall(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Too deep self calls! The maximum allowed "
-            f"is {ParseJsonToObjectSeq.ALLOWED_SELF_CALL_DEPTH}",
+            "Too deep self calls on a sequence diagram! \nThe maximum allowed is 5",
         )
 
 
