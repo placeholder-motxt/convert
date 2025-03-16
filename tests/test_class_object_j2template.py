@@ -41,7 +41,9 @@ class TestClassObjJinja2Template(unittest.TestCase):
         cls_obj = ClassObject()
         cls_obj.set_name(class_name)
         if parent_name is not None:
-            cls_obj.set_parent(parent_name)
+            parent_obj = ClassObject()
+            parent_obj.set_name(parent_name)
+            cls_obj.set_parent(parent_obj)
 
         for field in fields:
             field_obj = FieldObject()
