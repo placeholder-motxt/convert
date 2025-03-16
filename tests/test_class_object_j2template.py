@@ -105,7 +105,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
 
         cls_obj = self.build_class_object("EmptyModel")
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_unknown_field_type(self):
@@ -121,7 +121,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
         field_obj.set_type(type_obj)
         self.cls_obj.add_field(field_obj)
 
-        result = self.cls_obj.to_models_code_template().strip()
+        result = self.cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_inheritance(self):
@@ -136,7 +136,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_one_to_one_relationship(self):
@@ -153,7 +153,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_many_to_one_relationship(self):
@@ -170,7 +170,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_many_to_many_relationship(self):
@@ -187,7 +187,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_multiple_relationships(self):
@@ -206,7 +206,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_fields_and_one_relationship(self):
@@ -224,7 +224,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_fields_and_multiple_relationships(self):
@@ -245,7 +245,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_inheritance_fields_and_relationships(self):
@@ -266,7 +266,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_all_features(self):
@@ -287,5 +287,5 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template().strip()
+        result = cls_obj.to_models_code_template("models.py.j2").strip()
         self.assertEqual(result, expected)
