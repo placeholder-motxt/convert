@@ -188,7 +188,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         )
 
     def test_set_source_class_own_amount(self):
-        self.relationship_object.setSourceClassOwnAmount("2")
+        self.relationship_object.set_source_class_own_amount("2")
         self.assertEqual(
             self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount,
             "2",

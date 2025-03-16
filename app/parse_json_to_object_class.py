@@ -179,14 +179,14 @@ class ParseJsonToObjectClass:
                     or "." in edge["startLabel"]
                     or self.__is_number_greater_than(edge["startLabel"])
                 ):
-                    ro.setSourceClassOwnAmount(edge["startLabel"])
+                    ro.set_source_class_own_amount(edge["startLabel"])
                     ro.set_target_class_own_amount(edge["endLabel"])
 
                     class_from_id.add_relationship(ro)
                     ro.set_source_class(class_from_id)
                     ro.set_target_class(class_to_id)
                 else:
-                    ro.setSourceClassOwnAmount(edge["endLabel"])
+                    ro.set_source_class_own_amount(edge["endLabel"])
                     ro.set_target_class_own_amount(edge["startLabel"])
 
                     class_to_id.add_relationship(ro)
@@ -199,7 +199,7 @@ class ParseJsonToObjectClass:
             ro.set_source_class(class_from_id)
             ro.set_target_class(class_to_id)
 
-            ro.setSourceClassOwnAmount(edge["startLabel"])
+            ro.set_source_class_own_amount(edge["startLabel"])
             ro.set_target_class_own_amount(edge["endLabel"])
             class_from_id.add_relationship(ro)
         return classes
