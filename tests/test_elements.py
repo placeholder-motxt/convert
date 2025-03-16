@@ -19,8 +19,8 @@ class TestModelsElements(unittest.TestCase):
 
     def test_parse(self):
         obj = ModelsElements("string")
-        with mock.patch("app.models.elements.ParseJsonToObjectClass") as MockParser:
-            mock_parser_instance = MockParser.return_value
+        with mock.patch("app.models.elements.ParseJsonToObjectClass") as mock_parser:
+            mock_parser_instance = mock_parser.return_value
             mock_parser_instance.parse_classes.return_value = [mock.Mock()]
 
             self.assertEqual(

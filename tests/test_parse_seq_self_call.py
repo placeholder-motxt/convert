@@ -111,12 +111,10 @@ class TestParseSeqSelfCall(unittest.TestCase):
         with open(os.path.join(TEST_DIR, "self_call_recursion.json")) as f:
             self.parser.set_json(f.read())
 
-        doA_call = ClassMethodCallObject()
+        doA_call = ClassMethodCallObject()  # noqa: N806
         doA_call.set_method(self.doA)
         doA_call.set_caller(self.doA)
 
-        # self.add_method_cobj.side_effect = ClassObject.add_method
-        # self.add_method_cobj.autospec = True
         add_method_cobj = self.add_method_cobj.start()
         add_cls_method_call_cmobj = self.add_cls_method_call_cmobj.start()
         set_caller_cmcobj = self.set_caller_cmcobj.start()
@@ -186,10 +184,10 @@ class TestParseSeqSelfCall(unittest.TestCase):
             self.parser.set_json(f.read())
 
         self.doC_call.set_caller(self.doA)
-        doB_call2 = ClassMethodCallObject()
+        doB_call2 = ClassMethodCallObject()  # noqa: N806
         doB_call2.set_method(self.doB)
         doB_call2.set_caller(self.doB)
-        doC_call2 = ClassMethodCallObject()
+        doC_call2 = ClassMethodCallObject()  # noqa: N806
         doC_call2.set_method(self.doC)
         doC_call2.set_caller(self.doC)
 
