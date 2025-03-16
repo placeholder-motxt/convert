@@ -30,12 +30,17 @@ class ParseJsonToObjectClass:
         data = self.__json
 
         if "nodes" not in data.keys() or data["nodes"] == "" or data["nodes"] == []:
-            raise ValueError("Error: nodes not found in the json")
+            raise ValueError(
+                "Nodes not found in the json, \nplease make sure the file isn't corrupt"
+            )
 
         # iterate all class in json
         for object in data["nodes"]:
             if object["name"] == "":
-                raise ValueError("Error: class not found in the json")
+                raise ValueError(
+                    "Class not found in the json, \n"
+                    "please make sure the file isn't corrupt"
+                )
             class_obj = ClassObject()
 
             object_name = object["name"]
@@ -43,7 +48,10 @@ class ParseJsonToObjectClass:
             if self.check_name(object_name):
                 class_obj.set_name(object_name)
             else:
-                raise ValueError("Error: class name is not valid")
+                raise ValueError(
+                    "Class name is not valid \n"
+                    "please consult the user manual document on how to name classes"
+                )
 
             class_obj.set_id(object["id"])
 
@@ -65,7 +73,10 @@ class ParseJsonToObjectClass:
                             method.split(")")[1].split(":")[1].strip()
                         )
                     else:
-                        raise ValueError("Error: method return type not found")
+                        raise ValueError(
+                            "Method return type not found, \n"
+                            f"please add a return type for method {method}"
+                        )
 
                     # check if method and method return type name is valid
                     if (
@@ -81,7 +92,11 @@ class ParseJsonToObjectClass:
 
                     else:
                         raise ValueError(
-                            "Error: method or method rettype name is not valid"
+                            f"'{class_method_name}' or '{class_method_rettype_name}' "
+                            "is not a valid "
+                            "method name or method return type name. \n"
+                            "please consult the user manual document on "
+                            "how to name methods and their return types"
                         )
 
                     # iterate all parameter in a method
@@ -101,7 +116,11 @@ class ParseJsonToObjectClass:
                                 param_obj.set_type(param_type)
 
                             else:
-                                raise ValueError("Error: parameter name is not valid")
+                                raise ValueError(
+                                    f"'{param_name}' is not a valid!"
+                                    "Parameter name please consult the user "
+                                    "manual document on how to name parameters"
+                                )
 
                             class_method_obj.add_parameter(param_obj)
 
@@ -148,8 +167,13 @@ class ParseJsonToObjectClass:
                 class_from_id.set_parent(class_to_id)
                 continue
 
-            self.__validate_amount(edge["startLabel"])
-            self.__validate_amount(edge["endLabel"])
+            try:
+                self.__validate_amount(edge["startLabel"])
+                self.__validate_amount(edge["endLabel"])
+            except ValueError as ex:
+                raise ValueError(
+                    str(ex) + f" {class_from_id.get_name()} - {class_to_id.get_name()}"
+                )
 
             ro = None
             if (
@@ -206,11 +230,11 @@ class ParseJsonToObjectClass:
 
     def __validate_amount(self, amount_str: str) -> str:
         if not amount_str:
-            raise ValueError("Association multiplicity cannot be empty")
+            raise ValueError("Association multiplicity is empty on relation")
 
         # Kalo bentuknya bukan * atau N..*
         if "*" in amount_str and "*" != amount_str[len(amount_str) - 1]:
-            raise ValueError("Invalid use of * in multiplicity")
+            raise ValueError("Invalid use of * in multiplicity on relation")
 
         # Amount hanya angka
         if amount_str.isnumeric() or amount_str == "*":
@@ -235,9 +259,9 @@ class ParseJsonToObjectClass:
                 elif start_max and ch.isdigit():
                     pass
                 else:
-                    raise ValueError("Invalid multiplicity in a relationship")
+                    raise ValueError("Invalid multiplicity on relationship")
             if (end_minimum and not start_max) or titik_count != 2:
-                raise ValueError("Invalid multiplicity in a relationship")
+                raise ValueError("Invalid multiplicity on relationship")
 
             return amount_str
 
