@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
+from app.config import APP_CONFIG
 from app.model import DownloadRequest
 from app.models.elements import ModelsElements, ViewsElements
 from app.utils import remove_file
@@ -19,7 +20,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(openapi_url=None, lifespan=lifespan)
+app = FastAPI(**APP_CONFIG, lifespan=lifespan)
 instrumentator = Instrumentator().instrument(app)
 
 
