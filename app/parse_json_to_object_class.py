@@ -10,23 +10,26 @@ from app.models.diagram import (
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, ParameterObject, TypeObject
 
+from .utils import is_valid_python_identifier
+
 
 class ParseJsonToObjectClass:
     def __init__(self, data: str):
         self.__json = data
         if isinstance(data, str):
-            self.__json = json.loads(data)
+            try:
+                self.__json = json.loads(data)
+            except json.JSONDecodeError:
+                raise ValueError("Error: Invalid JSON format")
         self.__classes = []
 
     def check_name(self, name: str) -> bool:
-        if name.isalpha():
-            return True
-        return False
+        return is_valid_python_identifier(name)
 
     def parse_classes(self) -> list:
         data = self.__json
 
-        if "nodes" not in data.keys() or data["nodes"] == "":
+        if "nodes" not in data.keys() or data["nodes"] == "" or data["nodes"] == []:
             raise ValueError("Error: nodes not found in the json")
 
         # iterate all class in json
@@ -127,8 +130,8 @@ class ParseJsonToObjectClass:
                             class_obj.add_field(attr)
                         else:
                             raise ValueError(
-                                f"Error: attribute name or type is not valid: {attr_name} \
-                                    {attr_type_name}"
+                                f"Error: attribute name or type is not valid: {attr_name}, "
+                                f"{attr_type_name}"
                             )
 
             self.__classes.append(class_obj)
@@ -159,7 +162,6 @@ class ParseJsonToObjectClass:
                 or self.__is_number_greater_than(edge["endLabel"])
             ):
                 ro = ManyToManyRelationshipObject()
-                print(edge["startLabel"], "many to many", edge["endLabel"])
 
             elif (
                 "*" in edge["startLabel"]
@@ -171,7 +173,6 @@ class ParseJsonToObjectClass:
                 or self.__is_number_greater_than(edge["endLabel"])
             ):
                 ro = ManyToOneRelationshipObject()
-                print(edge["startLabel"], "many to one", edge["endLabel"])
 
                 if (
                     "*" in edge["startLabel"]
@@ -205,11 +206,11 @@ class ParseJsonToObjectClass:
 
     def __validate_amount(self, amount_str: str) -> str:
         if not amount_str:
-            raise Exception("Association multiplicity cannot be empty")
+            raise ValueError("Association multiplicity cannot be empty")
 
         # Kalo bentuknya bukan * atau N..*
         if "*" in amount_str and "*" != amount_str[len(amount_str) - 1]:
-            raise Exception("Invalid use of * in multiplicity")
+            raise ValueError("Invalid use of * in multiplicity")
 
         # Amount hanya angka
         if amount_str.isnumeric() or amount_str == "*":
@@ -220,29 +221,23 @@ class ParseJsonToObjectClass:
             end_minimum = False
             start_max = False
             has_min_number = False
-            minimum_amount = 0
-            maximum_amount = 0
             titik_count = 0
             for i, ch in enumerate(amount_str):
                 if ch.isdigit() and not end_minimum:
                     has_min_number = True
-                    minimum_amount *= 10
-                    minimum_amount += int(ch)
                 elif has_min_number and ch == ".":
                     end_minimum = True
                     titik_count += 1
                 elif end_minimum and not start_max and ch.isdigit():
                     start_max = True
-                    maximum_amount += int(ch)
                 elif end_minimum and ch == "*" and i == len(amount_str) - 1:
                     start_max = True
                 elif start_max and ch.isdigit():
-                    maximum_amount *= 10
-                    maximum_amount += int(ch)
+                    pass
                 else:
-                    raise Exception("Invalid multiplicity in a relationship")
+                    raise ValueError("Invalid multiplicity in a relationship")
             if (end_minimum and not start_max) or titik_count != 2:
-                raise Exception("Invalid multiplicity in a relationship")
+                raise ValueError("Invalid multiplicity in a relationship")
 
             return amount_str
 

@@ -81,7 +81,7 @@ class TestClassMethodObject(unittest.TestCase):
         )
 
     def test_negative_add_none(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.class_method_object.add_class_method_call(None)
 
         self.assertEqual(
@@ -107,7 +107,7 @@ class TestControllerMethodObject(unittest.TestCase):
         mock_call = mock.Mock()
         mock_call.print_django_style.return_value = "mock_call()"
         self.controller_method.add_call(mock_call)
-        expected_output = "def sample_method(request):\n\tmock_call()\n\t\n"
+        expected_output = "def sample_method(request):\n\tmock_call()\n\tpass\n\n"
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
     def test_print_django_style_negative(self):
@@ -116,7 +116,7 @@ class TestControllerMethodObject(unittest.TestCase):
             self.controller_method.print_django_style()
 
     def test_print_django_style_corner_case_empty_parameters(self):
-        expected_output = "def sample_method(request):\n\t\n"
+        expected_output = "def sample_method(request):\n\tpass\n\n"
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
     def test_print_django_style_with_parameters(self):
@@ -125,7 +125,7 @@ class TestControllerMethodObject(unittest.TestCase):
         param2 = mock.Mock()
         param2.get_name.return_value = "param2"
         self.controller_method.get_parameters = mock.Mock(return_value=[param1, param2])
-        expected_output = "def sample_method(request, param1, param2):\n\t\n"
+        expected_output = "def sample_method(request, param1, param2):\n\tpass\n\n"
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
     def test_print_django_style_with_multiple_calls(self):
@@ -136,7 +136,7 @@ class TestControllerMethodObject(unittest.TestCase):
         self.controller_method.add_call(mock_call1)
         self.controller_method.add_call(mock_call2)
         expected_output = (
-            "def sample_method(request):\n\tmock_call1()\n\tmock_call2()\n\t\n"
+            "def sample_method(request):\n\tmock_call1()\n\tmock_call2()\n\tpass\n\n"
         )
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
@@ -181,7 +181,8 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             f"MethodCallObject:\n"
             f"\tmethod: {self.method_mock}\n"
             f"\targuments: []\n"
-            f"\treturn_var_name: "
+            f"\treturn_var_name: \n"
+            f"\tcondition: "
         )
         self.assertEqual(str(self.method_call_object), expected_output)
 
@@ -195,14 +196,14 @@ class TestAbstractMethodCallObject(unittest.TestCase):
     def test_print_django_style_one_argument(self):
         self.method_call_object.set_return_var_name("result")
         self.method_call_object.add_argument(self.argument_mock1)
-        expected_output = "result = mock_method(arg1)"
+        expected_output = "result = mock_method(request, arg1)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
     def test_print_django_style_two_arguments(self):
         self.method_call_object.set_return_var_name("result")
         self.method_call_object.add_argument(self.argument_mock1)
         self.method_call_object.add_argument(self.argument_mock2)
-        expected_output = "result = mock_method(arg1, arg2)"
+        expected_output = "result = mock_method(request, arg1, arg2)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
     def test_print_django_style_negative(self):
@@ -212,14 +213,14 @@ class TestAbstractMethodCallObject(unittest.TestCase):
 
     def test_print_django_style_corner_case_empty_arguments(self):
         self.method_call_object.set_return_var_name("output")
-        expected_output = "output = mock_method()"
+        expected_output = "output = mock_method(request)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
     def test_print_django_style_with_condition(self):
         self.method_call_object.set_condition("x > 5")
         self.method_call_object.set_return_var_name("value")
         self.method_call_object.add_argument(self.argument_mock1)
-        expected_output = "if x > 5:\n\t\tvalue = mock_method(arg1)"
+        expected_output = "if x > 5:\n\t\tvalue = mock_method(request, arg1)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
 
@@ -238,21 +239,95 @@ class TestControllerMethodCallObject(unittest.TestCase):
 
 class TestClassMethodCallObject(unittest.TestCase):
     def setUp(self):
-        self.class_method_call = ClassMethodCallObject()
+        self.method_mock = unittest.mock.Mock()
+        self.method_mock.get_name.return_value = "mock_method"
+        self.argument_mock1 = unittest.mock.Mock()
+        self.argument_mock1.print_django_style.return_value = "arg1"
+        self.argument_mock2 = unittest.mock.Mock()
+        self.argument_mock2.print_django_style.return_value = "arg2"
+        self.class_method_call_object = ClassMethodCallObject()
+        self.class_method_call_object.set_instance_name("instance_name")
+        self.class_method_call_object.set_method(self.method_mock)
 
     def test_positive_set_caller(self):
         method_object = ClassMethodObject()
-        self.class_method_call.set_caller(method_object)
+        self.class_method_call_object.set_caller(method_object)
         self.assertEqual(
-            method_object, self.class_method_call._ClassMethodCallObject__caller
+            method_object, self.class_method_call_object._ClassMethodCallObject__caller
         )
 
     def test_negative_set_caller_as_none(self):
-        with self.assertRaises(Exception) as context:
-            self.class_method_call.set_caller(None)
+        with self.assertRaises(ValueError) as context:
+            self.class_method_call_object.set_caller(None)
 
         self.assertEqual(
             str(context.exception), "ClassMethodObject cannot be SET to be None!"
+        )
+
+    def test_set_instance_name_valid(self):
+        obj = ClassMethodCallObject()
+        obj.set_instance_name("valid_instance")
+        self.assertEqual(obj._ClassMethodCallObject__instance_name, "valid_instance")
+
+    def test_set_instance_name_empty(self):
+        obj = ClassMethodCallObject()
+        with self.assertRaises(ValueError) as context:
+            obj.set_instance_name("")
+        self.assertIn("instance_name cannot be empty!", str(context.exception))
+
+    def test_set_instance_name_none(self):
+        obj = ClassMethodCallObject()
+        with self.assertRaises(ValueError) as context:
+            obj.set_instance_name(None)
+        self.assertIn("instance_name cannot be empty!", str(context.exception))
+
+    def test_get_instance_name_empty(self):
+        obj = ClassMethodCallObject()
+        self.assertEqual(obj.get_instance_name(), "")
+
+    def test_get_instance_name_set_value(self):
+        obj = ClassMethodCallObject()
+        obj.set_instance_name("valid_instance")
+        self.assertEqual(obj.get_instance_name(), "valid_instance")
+
+    def test_print_django_style_one_argument(self):
+        self.class_method_call_object.set_return_var_name("result")
+        self.class_method_call_object.add_argument(self.argument_mock1)
+        expected_output = "result = mock_method(request, instance_name, arg1)"
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
+
+    def test_print_django_style_two_arguments(self):
+        self.class_method_call_object.set_return_var_name("result")
+        self.class_method_call_object.add_argument(self.argument_mock1)
+        self.class_method_call_object.add_argument(self.argument_mock2)
+        expected_output = "result = mock_method(request, instance_name, arg1, arg2)"
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
+
+    def test_print_django_style_negative(self):
+        self.class_method_call_object.set_method(None)  # No method set
+        with self.assertRaises(AttributeError):
+            self.class_method_call_object.print_django_style()
+
+    def test_print_django_style_corner_case_empty_arguments(self):
+        self.class_method_call_object.set_return_var_name("output")
+        expected_output = "output = mock_method(request, instance_name)"
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
+        )
+
+    def test_print_django_style_with_condition(self):
+        self.class_method_call_object.set_condition("x > 5")
+        self.class_method_call_object.set_return_var_name("value")
+        self.class_method_call_object.add_argument(self.argument_mock1)
+        expected_output = (
+            "if x > 5:\n\t\tvalue = mock_method(request, instance_name, arg1)"
+        )
+        self.assertEqual(
+            self.class_method_call_object.print_django_style(), expected_output
         )
 
 
@@ -262,7 +337,7 @@ class TestArgumentObject(unittest.TestCase):
 
     def test_set_method_object(self):
         method_object = AbstractMethodObject()
-        self.argument_object.set_methodObject(method_object)
+        self.argument_object.set_method_object(method_object)
         self.assertEqual(
             self.argument_object._ArgumentObject__method_object, method_object
         )
@@ -279,7 +354,7 @@ class TestArgumentObject(unittest.TestCase):
     def test_str_representation(self):
         method_object = AbstractMethodObject()
         method_object.set_name("TestMethod")
-        self.argument_object.set_methodObject(method_object)
+        self.argument_object.set_method_object(method_object)
         self.argument_object.set_name("TestArgument")
         type_obj = TypeObject()
         type_obj.set_name("TestType")

@@ -1,9 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.main import (
-    DownloadRequest,
-)  # Update this import if the model is in another file
+from app.main import ConvertRequest, DownloadRequest
 
 
 def test_valid_download_request():
@@ -59,3 +57,29 @@ def test_empty_type():
     request = DownloadRequest(**data)
 
     assert request.type == ""
+
+
+def test_valid_convert_request():
+    """Test that a valid DownloadRequest model works correctly."""
+    data = {
+        "filename": ["example1", "example2"],
+        "content": [["Hello, world!"], ["Hello, world!2"]],
+    }
+    request = ConvertRequest(**data)
+
+    assert request.filename == ["example1", "example2"]
+    assert request.content == [["Hello, world!"], ["Hello, world!2"]]
+
+
+def test_empty_content_convert():
+    """Test that missing content raises a ValidationError."""
+    data = {"filename": ["1", "2"], "content": []}
+    with pytest.raises(ValidationError):
+        ConvertRequest(**data)
+
+
+def test_empty_filename_content_convert():
+    """Test that missing content raises a ValidationError."""
+    data = {"filename": [], "content": [[]]}
+    with pytest.raises(ValidationError):
+        ConvertRequest(**data)

@@ -91,7 +91,7 @@ class TestClassObject(unittest.TestCase):
 field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
 targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
 targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
-listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\n"
+listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\tpass\n\n\n"
         )
 
     def test_get_name(self):
@@ -160,7 +160,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         )
 
     def test_negative_set_source_class_as_None(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.relationship_object.set_source_class(None)
 
         self.assertEqual(
@@ -168,7 +168,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
         )
 
     def test_negative_set_target_class_as_None(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             self.relationship_object.set_target_class(None)
 
         self.assertEqual(

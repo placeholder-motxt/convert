@@ -1,8 +1,12 @@
+from django.db import models
+
 class Buku(models.Model):
 	ISBN = models.CharField(max_length=255)
 	judul = models.CharField(max_length=255)
 	penulis = models.CharField(max_length=255)
 	penerbit = models.CharField(max_length=255)
+
+	pass
 
 
 class Peminjaman(models.Model):
@@ -12,6 +16,8 @@ class Peminjaman(models.Model):
 	tglKembali = models.DateField()
 	isLunasDenda = models.BooleanField()
 	besaranDenda = models.IntegerField()
+
+	pass
 
 
 class CopyBuku(models.Model):
@@ -23,3 +29,4 @@ class CopyBuku(models.Model):
 	tahunTerbit = models.IntegerField()
 
 	bukuFK = models.ForeignKey(Buku, on_delete = models.CASCADE)
+	pass

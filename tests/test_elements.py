@@ -10,11 +10,11 @@ class TestModelsElements(unittest.TestCase):
         self.assertIsInstance(obj, ModelsElements)
 
     def test_models_elements_invalid_filename_type(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             ModelsElements(123)  # Invalid type
 
     def test_models_elements_empty_filename(self):  # cornercase
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             ModelsElements("")
 
     def test_parse(self):
@@ -77,14 +77,46 @@ class TestViewsElements(unittest.TestCase):
 
         self.assertEqual(self.views_elements.print_django_style(), expected_output)
 
-    def test_print_django_style_with_class_methods_ignored(self):
-        mock_class_method = mock.Mock()
-        mock_class_method.to_views_code.return_value = (
-            "class_method should not be included"
+    def test_print_django_style_with_class_methods(self):
+        mock_class_method_1 = mock.Mock()
+        mock_class_method_1.get_name.return_value = "Class1"
+        mock_class_method_1.to_views_code.return_value = (
+            "def class_method():\n\tmethod_call = inner_method1(arg1, arg2)"
         )
-        self.views_elements.add_class_method(mock_class_method)
-        expected_output = ""
-        self.assertNotEqual(self.views_elements.print_django_style(), expected_output)
+        mock_class_method_2 = mock.Mock()
+        mock_class_method_2.get_name.return_value = "Class2"
+        mock_class_method_2.to_views_code.return_value = (
+            "def class_method():\n\tmethod_call = inner_method2(arg1, arg2)"
+        )
+        self.views_elements.add_class_method(mock_class_method_1)
+        self.views_elements.add_class_method(mock_class_method_2)
+        self.assertEqual(
+            self.views_elements.print_django_style(),
+            (
+                "#-----method from class Class1------\n\n"
+                "def class_method():\n"
+                "\tmethod_call = inner_method1(arg1, arg2)\n\n\n"
+                "#-----method from class Class2------\n\n"
+                "def class_method():\n"
+                "\tmethod_call = inner_method2(arg1, arg2)\n\n\n"
+            ),
+        )
+
+    def test_print_django_style_with_one_class_method(self):
+        mock_class_method_1 = mock.Mock()
+        mock_class_method_1.get_name.return_value = "Class1"
+        mock_class_method_1.to_views_code.return_value = (
+            "def class_method():\n\tmethod_call = inner_method1(arg1, arg2)"
+        )
+        self.views_elements.add_class_method(mock_class_method_1)
+        self.assertEqual(
+            self.views_elements.print_django_style(),
+            (
+                "#-----method from class Class1------\n\n"
+                "def class_method():\n"
+                "\tmethod_call = inner_method1(arg1, arg2)\n\n\n"
+            ),
+        )
 
 
 if __name__ == "__main__":
