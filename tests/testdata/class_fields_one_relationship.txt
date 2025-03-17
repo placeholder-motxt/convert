@@ -1,0 +1,7 @@
+from django.db import models
+
+
+class Profile(models.Model):
+    bio = models.TextField()
+    birth_date = models.DateField()
+    user = models.OneToOneField(User, on_delete=models.CASCADE)

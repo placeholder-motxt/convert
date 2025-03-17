@@ -159,7 +159,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             self.target_class,
         )
 
-    def test_negative_set_source_class_as_None(self):
+    def test_negative_set_source_class_as_None(self):  # noqa: N802
         with self.assertRaises(ValueError) as context:
             self.relationship_object.set_source_class(None)
 
@@ -169,7 +169,7 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             "Relationship in class diagram is wrong",
         )
 
-    def test_negative_set_target_class_as_None(self):
+    def test_negative_set_target_class_as_None(self):  # noqa: N802
         with self.assertRaises(ValueError) as context:
             self.relationship_object.set_target_class(None)
 
@@ -191,15 +191,15 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             self.source_class,
         )
 
-    def test_set_Source_Class_Own_Amount(self):
-        self.relationship_object.setSourceClassOwnAmount("2")
+    def test_set_source_class_own_amount(self):
+        self.relationship_object.set_source_class_own_amount("2")
         self.assertEqual(
             self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount,
             "2",
         )
 
-    def test_set_Target_Class_Own_Amount(self):
-        self.relationship_object.setTargetClassOwnAmount("1")
+    def test_set_target_class_own_amount(self):
+        self.relationship_object.set_target_class_own_amount("1")
         self.assertEqual(
             self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount,
             "1",

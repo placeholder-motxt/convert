@@ -47,6 +47,7 @@ select = [
     "PIE794", # flake8-pie for duplicate class field
     "Q", # flake8-quotes
     "I", # isort
+    "N", # pep8 naming
 ]
 ignore = []
 
