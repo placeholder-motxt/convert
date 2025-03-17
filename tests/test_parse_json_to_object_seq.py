@@ -20,13 +20,21 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ParseJsonToObjectSeq().set_json(json_data)
 
-        self.assertEqual(str(context.exception), "Given .jet is not valid!")
+        self.assertEqual(
+            str(context.exception),
+            "The .sequence.jet is not valid. \n"
+            "Please make sure the file submitted is not corrupt",
+        )
 
     def test_negative_set_empty_json(self):
         with self.assertRaises(ValueError) as context:
             ParseJsonToObjectSeq().set_json("")
 
-        self.assertEqual(str(context.exception), "Given .jet is not valid!")
+        self.assertEqual(
+            str(context.exception),
+            "The .sequence.jet is not valid. \n"
+            "Please make sure the file submitted is not corrupt",
+        )
 
     def test_positive_parse_views(self):
         with open("tests/test_valid_json_seq.txt", "r", encoding="utf-8") as file:
@@ -87,7 +95,9 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()
-        self.assertEqual(str(context.exception), "Duplicate class name!")
+        self.assertEqual(
+            str(context.exception), "Duplicate class name 'Buku' on sequence diagram"
+        )
 
     # def test_edge_duplicate_method_name(self):
     #     with open("tests/test_duplicate_method_name_seq.txt", "r", encoding="utf-8") as file:
@@ -108,7 +118,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()
-        self.assertEqual(str(context.exception), "Duplicate attribute!")
+        self.assertEqual(
+            str(context.exception),
+            "Duplicate attribute 'username' on sequence diagram \n"
+            "please remove one of the parameters",
+        )
 
     def test_positive_class_object(self):
         with open("tests/test_valid_json_seq.txt", "r", encoding="utf-8") as file:
@@ -448,8 +462,8 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Wrong label format: doA()\n"
-            "Check that the format is in compliance with the guide",
+            "Wrong label format 'doA()' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
         )
 
         parser = ParseJsonToObjectSeq()
@@ -461,8 +475,8 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Wrong label format: [] doB ()->bval\n"
-            "Check that the format is in compliance with the guide",
+            "Wrong label format '[] doB ()->bval' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
         )
 
     def test_invalid_method_name(self):
@@ -477,7 +491,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid method name: abcd!")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name 'abcd!' on sequence diagram \n"
+            "please consult the user manual document on how to name methods",
+        )
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_method_name2.json")) as f:
@@ -486,7 +504,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid method name: class")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name 'class' on sequence diagram \n"
+            "please consult the user manual document on how to name methods",
+        )
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_method_name3.json")) as f:
@@ -495,7 +517,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid method name: []abcd")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name '[]abcd' on sequence diagram \n"
+            "please consult the user manual document on how to name methods",
+        )
 
     def test_invalid_param_name(self):
         # Invalid method name should throw exceptions, examples:
@@ -508,7 +534,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid param name: a!!!")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid param name 'a!!!' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
+        )
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_param_name2.json")) as f:
@@ -517,4 +547,8 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid param name: try")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid param name 'try' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
+        )
