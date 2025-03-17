@@ -8,3 +8,11 @@ env
 htmlcov
 .coverage
 cosmic-ray.sqlite
+sonar-project.properties
+ruff.toml
+cosmic-ray.toml
+.pre-commit-config.yaml
+PPL.postman_collection.json
+bandit_report.html
+profile_stats.prof
+prometheus.yml

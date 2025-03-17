@@ -8,6 +8,14 @@ services:
       - "8000:8000"
     networks:
       - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.50"
+          memory: 256M
 
   prometheus-convert:
     image: prom/prometheus:latest
@@ -18,6 +26,14 @@ services:
       - "9090:9090"
     networks:
       - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+        reservations:
+          cpus: "0.25"
+          memory: 64M
 
 networks:
   monitoring:
