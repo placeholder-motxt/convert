@@ -38,10 +38,10 @@ class ParseJsonToObjectSeq:
         self.__edges: list = []
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
         self.__method_call: dict[tuple, dict] = dict()
-        self.__label_pattern: re.Pattern = re.compile(
-            r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
-            r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
-        )
+        self.__label_pattern = re.compile(
+    r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*?)"
+    r"[ ]?\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
+)
 
     def set_json(self, data: str) -> str | None:
         try:
