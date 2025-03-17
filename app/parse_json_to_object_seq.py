@@ -52,10 +52,16 @@ class ParseJsonToObjectSeq:
                 return "Success"
 
             else:
-                raise ValueError("Given .jet is not valid!")
+                raise ValueError(
+                    "The .sequence.jet is not valid. \n"
+                    "Please make sure the file submitted is not corrupt"
+                )
 
         except json.JSONDecodeError:
-            raise ValueError("Given .jet is not valid!")
+            raise ValueError(
+                "The .sequence.jet is not valid. \n"
+                "Please make sure the file submitted is not corrupt"
+            )
 
     def validate_json(self, data: object) -> bool:
         schema = {
@@ -146,7 +152,9 @@ class ParseJsonToObjectSeq:
                     self.__class_object[class_name] = class_object
 
                 else:
-                    raise ValueError("Duplicate class name!")
+                    raise ValueError(
+                        f"Duplicate class name '{class_name}' on sequence diagram"
+                    )
 
                 self.__implicit_parameter_nodes[callee_id] = {
                     "id": callee_id,
@@ -200,9 +208,15 @@ class ParseJsonToObjectSeq:
             if param == "":
                 continue
             if not is_valid_python_identifier(param):
-                raise ValueError(f"Invalid param name: {param}")
+                raise ValueError(
+                    f"Invalid param name '{param}' on sequence diagram \n\
+please consult the user manual document on how to name parameters"
+                )
             if param in duplicate_attribute_checker:
-                raise ValueError("Duplicate attribute!")
+                raise ValueError(
+                    f"Duplicate attribute '{param}' on sequence diagram \n\
+please remove one of the parameters"
+                )
             param_obj = ParameterObject()
             param_obj.set_name(param)
             method.add_parameter(param_obj)
@@ -220,8 +234,8 @@ class ParseJsonToObjectSeq:
         match: re.Match[str] | None = self.__label_pattern.match(edge["label"])
         if match is None:
             raise ValueError(
-                f"Wrong label format: {edge['label']}\n"
-                "Check that the format is in compliance with the guide"
+                f"Wrong label format '{edge['label']}' on sequence diagram \n\
+please consult the user manual document on how to name parameters"
             )
         condition = match.group("cond")
         method_name = match.group("method_name")
@@ -229,7 +243,10 @@ class ParseJsonToObjectSeq:
         ret_var = match.group("ret_var")
 
         if not is_valid_python_identifier(method_name):
-            raise ValueError(f"Invalid method name: {method_name}")
+            raise ValueError(
+                f"Invalid method name '{method_name}' on sequence diagram \n"
+                "please consult the user manual document on how to name methods"
+            )
         method.set_name(method_name)
 
         duplicate_attribute_checker: set[str] = set()
@@ -237,7 +254,10 @@ class ParseJsonToObjectSeq:
 
         if ret_var is not None:
             if not is_valid_python_identifier(ret_var):
-                raise ValueError(f"Invalid return variable name: {ret_var}")
+                raise ValueError(
+                    f"Invalid return variable name '{ret_var}' on sequence diagram \n\
+please consult the user manual document on how to name return variables"
+                )
             self.__call_nodes[end_id]["ret_var"] = ret_var
 
         if class_name == "views":
@@ -285,7 +305,7 @@ class ParseJsonToObjectSeq:
             call_depth = self.check_call_depth(rev_call_tree, callee_id)
             if call_depth > self.ALLOWED_SELF_CALL_DEPTH:
                 raise ValueError(
-                    "Too deep self calls! "
+                    "Too deep self calls on a sequence diagram! \n"
                     f"The maximum allowed is {self.ALLOWED_SELF_CALL_DEPTH}"
                 )
 
@@ -382,13 +402,14 @@ class ParseJsonToObjectSeq:
             label = edge["label"].strip()
             if not is_valid_python_identifier(label):
                 raise ValueError(
-                    f"Return edge label must be a valid variable name! Given: {edge['label']}"
+                    f"Return edge label must be a valid variable name! Given '{edge['label']}' \n\
+on sequence diagram please consult the user manual document on how to name methods"
                 )
 
             call_tuple = (edge["end"], edge["start"])
             if call_tuple not in self.__method_call:
                 raise ValueError(
-                    f"Return edge must have a corresponding call edge! "
+                    f"Return edge must have a corresponding call edge on sequence diagram\n"
                     f"{edge['end']} -> {edge['start']}"
                 )
             method_call_info = self.__method_call[call_tuple]

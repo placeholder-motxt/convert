@@ -164,7 +164,9 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             self.relationship_object.set_source_class(None)
 
         self.assertEqual(
-            str(context.exception), "Source Class cannot be SET to be None!"
+            str(context.exception),
+            "Source Class cannot be SET to be None!\n "
+            "Relationship in class diagram is wrong",
         )
 
     def test_negative_set_target_class_as_None(self):
@@ -172,7 +174,9 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             self.relationship_object.set_target_class(None)
 
         self.assertEqual(
-            str(context.exception), "Target Class cannot be SET to be None!"
+            str(context.exception),
+            "Target Class cannot be SET to be None!\n "
+            "Relationship in class diagram is wrong",
         )
 
     def test_edge_source_equals_target(self):

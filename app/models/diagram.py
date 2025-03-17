@@ -32,7 +32,10 @@ class ClassObject:
 
     def to_views_code(self) -> str:
         if not is_valid_python_identifier(self.__name):
-            raise ValueError(f"Invalid class name: {self.__name}")
+            raise ValueError(
+                f"Invalid class name '{self.__name}'\n"
+                "please consult the user manual document on how to name classes"
+            )
 
         res = ""
         if len(self.__methods) > 0:
@@ -102,12 +105,18 @@ class AbstractRelationshipObject(ABC):
 
     def set_source_class(self, source_class: ClassObject):
         if source_class is None:
-            raise ValueError("Source Class cannot be SET to be None!")
+            raise ValueError(
+                "Source Class cannot be SET to be None!\n "
+                "Relationship in class diagram is wrong"
+            )
         self.__source_class = source_class
 
     def set_target_class(self, target_class: ClassObject):
         if target_class is None:
-            raise ValueError("Target Class cannot be SET to be None!")
+            raise ValueError(
+                "Target Class cannot be SET to be None!\n "
+                "Relationship in class diagram is wrong"
+            )
         self.__target_class = target_class
 
     def setSourceClassOwnAmount(self, amount: str):
