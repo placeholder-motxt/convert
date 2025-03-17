@@ -456,7 +456,9 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
         parser.parse()
 
-        self.assertEqual(parser.get_class_objects()["ABC"].get_methods()[0].get_name(), "doA")
+        self.assertEqual(
+            parser.get_class_objects()["ABC"].get_methods()[0].get_name(), "doA"
+        )
 
     def test_invalid_edge_label_format(self):
         # Invalid label format should throw exceptions, examples:

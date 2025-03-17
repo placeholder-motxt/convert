@@ -3,6 +3,7 @@ import re
 from typing import TypedDict
 
 from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 
 from app.models.diagram import ClassObject
 from app.models.methods import (
@@ -39,9 +40,9 @@ class ParseJsonToObjectSeq:
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
         self.__method_call: dict[tuple, dict] = dict()
         self.__label_pattern = re.compile(
-    r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*?)"
-    r"[ ]?\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
-)
+            r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*?)"
+            r"[ ]?\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
+        )
 
     def set_json(self, data: str) -> str | None:
         try:
@@ -111,7 +112,7 @@ class ParseJsonToObjectSeq:
             validate(instance=data, schema=schema)
             return True
 
-        except Exception:
+        except ValidationError:
             return False
 
     def get_method_call(self) -> dict:  # pragma: no cover
