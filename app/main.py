@@ -202,4 +202,21 @@ def create_django_project(project_name: str) -> list[str]:
 
 
 def create_django_app(project_name: str, app_name: str) -> list[str]:
-    pass
+    file_names = []
+    if not is_valid_python_identifier(app_name):
+        raise ValueError("App name must not contain whitespace or number!")
+    if not is_valid_python_identifier(project_name):
+        raise ValueError("Project name must not contain whitespace or number!")
+    for file in os.listdir("app/templates/django_app"):
+        # read content of django app
+        with open(os.path.join("app", "templates", "django_app", file), "r") as f:
+            content = f.read()
+        # [TODO] place to add stuff in the file
+        if not os.path.exists(f"{project_name}.zip"):
+            raise ValueError(f"File {project_name}.zip does not exist")
+        with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
+            if file == "__init__.py":
+                zipf.writestr(f"{app_name}/migrations/__init__.py", content)
+            zipf.writestr(f"{app_name}/{file}", content)
+        file_names.append(file)
+    return file_names
