@@ -462,7 +462,6 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
     def test_invalid_edge_label_format(self):
         # Invalid label format should throw exceptions, examples:
-        # `doA()` -> have to be `doA ()`
         # `[] doB ()->bval` -> have to be `[] doB () -> bval`
 
         parser = ParseJsonToObjectSeq()
