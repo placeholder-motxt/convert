@@ -126,7 +126,11 @@ async def convert(
             ),
         )
         # Write previous files into a .zip
-        # project_path: list[str]= create_django_project(request.filename[0])
+        # [TODO] replace the exisiting zip files into zip with django project
+        # create_django_project(request.filename[0])
+        # create_django_app(request.filename[0], "main")
+        # os.remove(request.filename[0] + ".zip")
+        # [TODO] remove project_{project_name} folder (probably use shutil.rmtree)
         zip_filename = request.filename[0] + ".zip"
         with zipfile.ZipFile(zip_filename, "w") as zipf:
             zipf.write(request.filename[0] + "_models.py")
@@ -178,26 +182,24 @@ def create_django_project(project_name: str) -> list[str]:
     if os.path.exists(zipfile_path):
         raise ValueError(f"File {zipfile_path} already exists")
     zipf = zipfile.ZipFile(zipfile_path, "w")
-    try:
-        # write django project template to a folder
-        files = render_project_django_template(
-            os.path.join("app", "templates", "django_project"),
-            {"project_name": project_name},
-        )
+    # write django project template to a folder
+    files = render_project_django_template(
+        os.path.join("app", "templates", "django_project"),
+        {"project_name": project_name},
+    )
 
-        # write folder to zip
-        root = os.path.abspath(f"project_{project_name}")
-        for file in files:
-            file_path = os.path.join(root, file)
-            if file == "manage.py":
-                zipf.write(file_path, arcname=f"{file}")
-            else:
-                zipf.write(file_path, arcname=f"{project_name}/{file}")
-        zipf.close()
-    except ValueError as ex:
-        raise HTTPException(status_code=422, detail=str(ex))
-    except zipfile.BadZipFile as err:
-        # just in case the zipfile is corrupted
-        raise HTTPException(status_code=422, detail=str(err))
+    # write folder to zip
+    root = os.path.abspath(f"project_{project_name}")
+    for file in files:
+        file_path = os.path.join(root, file)
+        if file == "manage.py":
+            zipf.write(file_path, arcname=f"{file}")
+        else:
+            zipf.write(file_path, arcname=f"{project_name}/{file}")
+    zipf.close()
 
     return files
+
+
+def create_django_app(project_name: str, app_name: str) -> list[str]:
+    pass
