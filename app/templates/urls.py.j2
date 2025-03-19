@@ -1,0 +1,16 @@
+from django.urls import path
+from .views import (
+    {% for class in classes -%}
+    create_{{ class.get_name() }},
+    get_{{ class.get_name() }},
+    {% endfor -%}
+)
+
+app_name = "main"
+
+urlpatterns = [
+    {%- for class in classes %}
+    path('create-{{ class.get_name().lower() }}/', create_{{ class.get_name().lower() }}, name="create_{{ class.get_name().lower() }}"),
+    path('get-all-{{ class.get_name().lower() }}/', get_{{ class.get_name().lower() }}, name="get_{{ class.get_name().lower() }}"),
+    {%- endfor %}
+]
