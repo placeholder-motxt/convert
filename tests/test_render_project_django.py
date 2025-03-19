@@ -3,7 +3,7 @@ import shutil
 import unittest
 import zipfile
 
-from app.main import create_django_project
+from app.main import create_django_app, create_django_project
 from app.utils import render_project_django_template
 
 
@@ -111,3 +111,51 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
         finally:
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
+
+
+class TestGenerateDjangoMain(unittest.TestCase):
+    def test_generate_django_app_positive(self):
+        folder_path = "project_test_main"
+        create_django_project("test_main")
+        try:
+            result = create_django_app("test_main", "main")
+            self.assertEqual(
+                result,
+                [
+                    "admin.py",
+                    "apps.py",
+                    "models.py",
+                    "tests.py",
+                    "views.py",
+                    "__init__.py",
+                ],
+            )
+        finally:
+            if os.path.exists(folder_path):
+                shutil.rmtree(folder_path)
+            if os.path.exists("test_main.zip"):
+                os.remove("test_main.zip")
+
+    def test_generate_django_app_negative_invalid_name(self):
+        with self.assertRaises(ValueError) as context:
+            create_django_app("test_main", "buku pin")
+        self.assertEqual(
+            str(context.exception),
+            "App name must not contain whitespace or number!",
+        )
+
+    def test_generate_django_app_negative_invalid_project_name(self):
+        with self.assertRaises(ValueError) as context:
+            create_django_app("test main", "main")
+        self.assertEqual(
+            str(context.exception),
+            "Project name must not contain whitespace or number!",
+        )
+
+    def test_generate_django_app_negative_zip_not_exist(self):
+        with self.assertRaises(ValueError) as context:
+            create_django_app("test_main", "main")
+        self.assertEqual(
+            str(context.exception),
+            "File test_main.zip does not exist",
+        )
