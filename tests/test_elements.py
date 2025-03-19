@@ -1,7 +1,15 @@
+import os
 import unittest
+from pathlib import Path
 from unittest import mock
 
-from app.models.elements import ModelsElements, ViewsElements
+import pytest
+
+from app.models.elements import (
+    ModelsElements,
+    RequirementsElements,
+    ViewsElements,
+)
 
 
 class TestModelsElements(unittest.TestCase):
@@ -117,6 +125,29 @@ class TestViewsElements(unittest.TestCase):
                 "\tmethod_call = inner_method1(arg1, arg2)\n\n\n"
             ),
         )
+
+
+class TestRequirementsElements:
+    def test_print_django_style(self):
+        self.requirements_elements = RequirementsElements("requirements.txt")
+        res = self.requirements_elements.print_django_style()
+        assert (
+            res == "django==4.1.4\n"
+            "gunicorn==20.1.0\n"
+            "whitenoise==6.9.0\n"
+            "psycopg2==2.9.5\n"
+            "pytest==7.2.2\n"
+            "pytest-django==4.5.2\n"
+            "pytest-cov==4.0.0\n"
+        )
+
+    @pytest.mark.asyncio
+    async def test_write_to_file(self):
+        self.requirements_elements = RequirementsElements("requirements.txt")
+        await self.requirements_elements.write_to_file("./app")
+        assert Path("./app/requirements.txt").is_file()
+        if Path("./app/requirements.txt").is_file():
+            os.remove("./app/requirements.txt")
 
 
 if __name__ == "__main__":
