@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from io import StringIO
 
+import anyio
+
 from app.parse_json_to_object_class import ParseJsonToObjectClass
 
 from .diagram import ClassObject
@@ -132,3 +134,46 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
+
+class RequirementsElements(FileElements):
+    def __init__(self, file_name: str):
+        """
+        Object initialization
+
+        This class is only for writing requirements.txt,
+        """
+        super().__init__(file_name)
+
+    """
+    CALL THIS FUNCTION
+    """
+
+    async def write_to_file(self, path: str) -> None:
+        file = path + "/requirements.txt"
+
+        to_be_print = self.print_django_style()
+
+        async with await anyio.open_file(file, "w") as f:
+            await f.write(to_be_print)
+        print("done writing", file)
+        return file
+
+    def print_django_style(self) -> str:
+        """
+        Returns a list of django requirements as string for requirements.tx to run
+        """
+        result = StringIO()
+        requirements = [
+            "django==4.1.4",
+            "gunicorn==20.1.0",
+            "whitenoise==6.9.0",
+            "psycopg2==2.9.5",
+            "pytest==7.2.2",
+            "pytest-django==4.5.2",
+            "pytest-cov==4.0.0",
+        ]
+
+        for requirement in requirements:
+            result.write(requirement + "\n")
+
+        return result.getvalue()
