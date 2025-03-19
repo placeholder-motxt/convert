@@ -1,7 +1,15 @@
+import os
 import unittest
+from pathlib import Path
 from unittest import mock
 
-from app.models.elements import ModelsElements, ViewsElements
+import pytest
+
+from app.models.elements import (
+    ModelsElements,
+    UrlsElement,
+    ViewsElements,
+)
 
 
 class TestModelsElements(unittest.TestCase):
@@ -117,6 +125,36 @@ class TestViewsElements(unittest.TestCase):
                 "\tmethod_call = inner_method1(arg1, arg2)\n\n\n"
             ),
         )
+
+
+class TestUrlsElements:
+    def test_print_django_style(self):
+        self.requirements_elements = UrlsElement("urls.py")
+        mock_class = mock.Mock()
+        mock_class.get_name.return_value = "Class1"
+        res = self.requirements_elements.print_django_style(classes=[mock_class])
+        assert (
+            res == "from django.urls import path\n"
+            "from .views import (\n    "
+            "create_Class1,\n    "
+            "get_Class1,\n    )\n\n"
+            'app_name = "main"\n\n'
+            "urlpatterns = [\n    "
+            "path('create-class1/', create_class1, name=\"create_class1\"),\n    "
+            "path('get-all-class1/', get_class1, name=\"get_class1\"),\n"
+            "]"
+        )
+
+    @pytest.mark.asyncio
+    async def test_write_to_file(self):
+        self.requirements_elements = UrlsElement("urls.py")
+        mock_class = mock.Mock()
+        mock_class.get_name.return_value = "Class1"
+        await self.requirements_elements.write_file(classes=[mock_class], path="./app")
+        print(Path("./app/urls.py").is_file())
+        assert Path("./app/urls.py").is_file()
+        if Path("./app/urls.py").is_file():
+            os.remove("./app/urls.py")
 
 
 if __name__ == "__main__":
