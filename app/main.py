@@ -17,7 +17,7 @@ from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import remove_file
 
 
-@asynccontextmanager
+@asynccontextmanager  # pragma: no cover
 async def lifespan(app: FastAPI):
     instrumentator.expose(app)
     yield
@@ -77,6 +77,10 @@ async def convert(
                 and json_content["diagram"] == "ClassDiagram"
             ):
                 classes = writer_models.parse(json_content)
+
+                # # Uncomment this to write urls.py
+                # writer_url = UrlsElement("urls.py")
+                # await writer_url.write_file(classes=classes, path='./app')
 
                 for model_class in classes:
                     for method in model_class.get_methods():

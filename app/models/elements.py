@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from io import StringIO
 
+import anyio
+from jinja2 import Template
+
 from app.parse_json_to_object_class import ParseJsonToObjectClass
 
 from .diagram import ClassObject
@@ -132,3 +135,19 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
+
+class UrlsElement(FileElements):
+    async def write_file(self, classes: list, path: str) -> str:
+        file = path + "/urls.py"
+
+        to_be_print = self.print_django_style(classes)
+
+        async with await anyio.open_file(file, "w") as f:
+            await f.write(to_be_print)
+
+        return file
+
+    def print_django_style(self, classes: list = []) -> str:
+        template = Template(open("./app/templates/urls.py.j2").read())
+        rendered_yaml = template.render(classes=classes)
+        return rendered_yaml
