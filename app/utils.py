@@ -28,11 +28,9 @@ def render_project_django_template(
         raise ValueError("Project name must not contain whitespace or number!")
     folder_path = f"project_{context['project_name']}"
     try:
-        print(os.path.exists(folder_path))
-        # os.startfile(folder_path)
         os.makedirs(folder_path)
-    except OSError as e:
-        raise FileExistsError(e.strerror)
+    except OSError:
+        raise FileExistsError(f"Folder {folder_path} already exists")
     for template_name in os.listdir(template_path):
         file_path = os.path.join(template_path, template_name)
         file_path = file_path.replace("\\", "/")
