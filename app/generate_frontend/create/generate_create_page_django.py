@@ -1,6 +1,7 @@
-from app.models.elements import ModelsElements
-from app.models.diagram import ClassObject, FieldObject
 from jinja2 import Environment, PackageLoader
+
+from app.models.diagram import ClassObject, FieldObject
+from app.models.elements import ModelsElements
 
 env = Environment(loader=PackageLoader("app"))
 
@@ -18,7 +19,7 @@ def generate_html_create_page_django(class_object: ClassObject) -> str:
 
 
 def generate_forms_create_page_django(models_elements: ModelsElements) -> list[str]:
-    template = env.get_template('forms.py.j2')
+    template = env.get_template("forms.py.j2")
     classes = []
     for class_object in models_elements.get_classes():
         class_context = {"name": class_object.get_name(), "fields": []}
