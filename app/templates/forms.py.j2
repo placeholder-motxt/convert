@@ -1,0 +1,11 @@
+from django import forms
+from .models import *
+
+{% for class in classes %}
+class {{ class.name }}Form(forms.ModelForm):
+    class Meta:
+        model = {{ class.name }}
+        fields = [{% for field in class.fields -%}'{{ field.name }}', {%- endfor -%}]
+
+
+{% endfor %}
