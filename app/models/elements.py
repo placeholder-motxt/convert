@@ -41,6 +41,16 @@ class ModelsElements(FileElements):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
 
+    def get_classes(self) -> list[ClassObject]:  # pragma: no cover
+        return self.__classes
+
+    def add_class(self, class_object: ClassObject):
+        if not isinstance(class_object, ClassObject):
+            raise ValueError(
+                "only ClassObjects can be added to ModelsElements' Class Field!"
+            )
+        self.__classes.append(class_object)
+
     """
     Parses ClassDiagram to classes
     """
@@ -131,4 +141,3 @@ class ViewsElements(FileElements):
 
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
-
