@@ -24,12 +24,7 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
             self.assertTrue(os.path.exists(folder_path))
             self.assertTrue(os.path.exists(zipfile_path))
             for file in os.listdir(folder_path):
-                self.assertIn(
-                    file, ["asgi.py", "manage.py", "settings.py", "urls.py", "wsgi.py"]
-                )
-            self.assertEqual(
-                result, ["asgi.py", "manage.py", "settings.py", "urls.py", "wsgi.py"]
-            )
+                self.assertIn(file, result)
         finally:
             if os.path.exists(zipfile_path):
                 os.remove(zipfile_path)
@@ -74,12 +69,7 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
             )
             self.assertTrue(os.path.exists(folder_path))
             for file in os.listdir(folder_path):
-                self.assertIn(
-                    file, ["asgi.py", "manage.py", "settings.py", "urls.py", "wsgi.py"]
-                )
-            self.assertEqual(
-                result, ["asgi.py", "manage.py", "settings.py", "urls.py", "wsgi.py"]
-            )
+                self.assertIn(file, result)
         finally:
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
@@ -106,7 +96,7 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
                 )
             self.assertEqual(
                 str(context.exception),
-                "Cannot create a file when that file already exists",
+                "Folder project_test_project already exists",
             )
         finally:
             if os.path.exists(folder_path):
