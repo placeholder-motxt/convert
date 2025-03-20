@@ -44,6 +44,7 @@ def render_project_django_template(
             template_name = template_name.replace(".j2", "")
             with open(os.path.join(folder_path, template_name), "w") as file:
                 file.write(template.render(context))
+                file.write("\n")  # add newline at the end of file for linter
             files.append(template_name)
         else:
             raise ValueError(f"Template {template_name} is not a file")

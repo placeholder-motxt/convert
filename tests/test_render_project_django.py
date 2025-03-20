@@ -25,6 +25,12 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
             self.assertTrue(os.path.exists(zipfile_path))
             for file in os.listdir(folder_path):
                 self.assertIn(file, result)
+                print(file)
+                with (
+                    open(os.path.join(folder_path, file), "r") as f1,
+                    open(f"tests\\testdata\\{file}.txt", "r") as f2,
+                ):
+                    self.assertEqual(f1.read(), f2.read())
         finally:
             if os.path.exists(zipfile_path):
                 os.remove(zipfile_path)
