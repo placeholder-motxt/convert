@@ -131,6 +131,7 @@ async def convert(
         # create_django_app(request.filename[0], "main")
         # os.remove(request.filename[0] + ".zip")
         # [TODO] remove project_{project_name} folder (probably use shutil.rmtree)
+        # [TODO] add try catch zipfile.BadZipFile
         zip_filename = request.filename[0] + ".zip"
         with zipfile.ZipFile(zip_filename, "w") as zipf:
             zipf.write(request.filename[0] + "_models.py")
@@ -197,7 +198,6 @@ def create_django_project(project_name: str) -> list[str]:
         else:
             zipf.write(file_path, arcname=f"{project_name}/{file}")
     zipf.close()
-
     return files
 
 
@@ -207,11 +207,14 @@ def create_django_app(project_name: str, app_name: str) -> list[str]:
         raise ValueError("App name must not contain whitespace or number!")
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
+
     for file in os.listdir("app/templates/django_app"):
         # read content of django app
         with open(os.path.join("app", "templates", "django_app", file), "r") as f:
             content = f.read()
         # [TODO] place to add stuff in the file
+
+        # check if project zip file exist
         if not os.path.exists(f"{project_name}.zip"):
             raise ValueError(f"File {project_name}.zip does not exist")
         with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:

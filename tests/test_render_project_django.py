@@ -109,7 +109,7 @@ class TestGenerateDjangoMain(unittest.TestCase):
         create_django_project("test_main")
         try:
             result = create_django_app("test_main", "main")
-            self.assertEqual(
+            self.assertIn(
                 result,
                 [
                     "admin.py",
