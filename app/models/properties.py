@@ -68,6 +68,9 @@ class FieldObject:
     def __str__(self) -> str:
         return f"FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}"
 
+    def get_name(self) -> str:  # pragma: no cover
+        return self.__name
+
     def set_name(self, name: str):
         self.__name = name
 
