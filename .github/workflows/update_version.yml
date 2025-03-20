@@ -18,6 +18,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Determine branches to update
+        run: |
+          if [[ "${{ github.base_ref }}" == "main" ]]; then
+            echo "Major version update detected. Updating staging and dev branches."
+            echo "TARGET_BRANCHES=staging dev" >> $GITHUB_ENV
+          elif [[ "${{ github.base_ref }}" == "staging" ]]; then
+            echo "Minor version update detected. Updating dev branch."
+            echo "TARGET_BRANCHES=dev" >> $GITHUB_ENV
+          else
+            echo "No version update required for this branch."
+            echo "TARGET_BRANCHES=" >> $GITHUB_ENV
+          fi
+
       - name: Run update version script
         run: |
           chmod +x .github/scripts/update_version.sh
@@ -38,6 +51,14 @@ jobs:
           git add .
           git commit -m "[CHORES] bump version to $NEW_VERSION"
           git push
+
+      - name: Sync version bump to other needed branches
+        if: ${{ env.TARGET_BRANCHES != '' }}
+        run: |
+          for BRANCH in $TARGET_BRANCHES; do
+            echo "Pushing version update to $BRANCH branch..."
+            git push origin HEAD:$BRANCH
+          done
 
       - name: Create Git Tag
         uses: anothrNick/github-tag-action@1.71.0
