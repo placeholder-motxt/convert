@@ -99,16 +99,6 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             str(context.exception), "Duplicate class name 'Buku' on sequence diagram"
         )
 
-    # def test_edge_duplicate_method_name(self):
-    #     with open("tests/test_duplicate_method_name_seq.txt", "r", encoding="utf-8") as file:
-    #         json_data = file.read()
-
-    #     with self.assertRaises(Exception) as context:
-    #         parser = ParseJsonToObjectSeq()
-    #         parser.set_json(json_data)
-    #         parser.parse()
-    #     self.assertEqual(str(context.exception), "Duplicate method!")
-
     def test_edge_duplicate_attribute(self):
         with open(
             "tests/test_duplicate_attribute_seq.txt", "r", encoding="utf-8"
