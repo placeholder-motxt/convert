@@ -176,7 +176,7 @@ def create_django_project(project_name: str) -> list[str]:
         raise ValueError("Project name must not contain whitespace or number!")
     zipfile_path = f"{project_name}.zip"
     if os.path.exists(zipfile_path):
-        raise ValueError(f"File {zipfile_path} already exists")
+        raise FileExistsError(f"File {zipfile_path} already exists")
     zipf = zipfile.ZipFile(zipfile_path, "w")
     # write django project template to a folder
     files = render_project_django_template(
