@@ -198,103 +198,154 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(len(parsed_value_controller[2].get_call()), 2)
         self.assertEqual(
             parsed_value_controller[2].get_call()[0].get_methods().get_name(),
+            "getBuku",
+        )
+
+        self.assertEqual(
+            len(parsed_value_controller[2].get_call()[0].get_arguments()), 1
+        )
+        self.assertEqual(
+            parsed_value_controller[2].get_call()[0].get_arguments()[0].get_name(),
+            "isbn",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[2].get_call()[1].get_methods().get_name(),
             "getDetailBuku",
         )
+
         self.assertEqual(
-            len(parsed_value_controller[2].get_call()[0].get_arguments()), 0
-        )
-        self.assertEqual(
-            parsed_value_controller[2].get_call()[1].get_methods().get_name(), "getBuku"
-        )
-        self.assertEqual(
-            len(parsed_value_controller[2].get_call()[1].get_arguments()), 1
-        )
-        self.assertEqual(
-            parsed_value_controller[2].get_call()[1].get_arguments()[0].get_name(),
-            "isbn",
+            len(parsed_value_controller[2].get_call()[1].get_arguments()), 0
         )
 
         self.assertEqual(len(parsed_value_controller[3].get_call()), 0)
 
         self.assertEqual(len(parsed_value_controller[4].get_call()), 3)
+
         self.assertEqual(
-            parsed_value_controller[4].get_call()[0].get_methods().get_name(),
+            parsed_value_controller[4].get_call()[0].get_methods().get_name(), "isValid"
+        )
+        self.assertEqual(
+            len(parsed_value_controller[4].get_call()[0].get_arguments()), 1
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4].get_call()[0].get_arguments()[0].get_name(),
+            "dataAnggota",
+        )
+
+        self.assertEqual(
+            len(parsed_value_controller[4].get_call()[0].get_methods().get_calls()), 0
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4].get_call()[1].get_methods().get_name(),
             "prosesPeminjamanValidKeanggotaan",
         )
         self.assertEqual(
-            parsed_value_controller[4].get_call()[0].get_condition(),
+            parsed_value_controller[4].get_call()[1].get_condition(),
             "isValid",
         )
         self.assertEqual(
-            len(parsed_value_controller[4].get_call()[0].get_arguments()), 0
+            len(parsed_value_controller[4].get_call()[1].get_arguments()), 0
         )
         self.assertEqual(
-            len(parsed_value_controller[4].get_call()[0].get_methods().get_call()), 3
+            len(parsed_value_controller[4].get_call()[1].get_methods().get_call()), 3
         )
+
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[0]
             .get_methods()
             .get_name(),
-            "prosesPeminjamanTidakMemilikiTanggungan",
+            "hasTanggungan",
         )
+
         self.assertEqual(
             len(
                 parsed_value_controller[4]
-                .get_call()[0]
+                .get_call()[1]
                 .get_methods()
                 .get_call()[0]
+                .get_arguments()
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[0]
+            .get_arguments()[0]
+            .get_name(),
+            "peminjam",
+        )
+
+        self.assertEqual(
+            len(
+                parsed_value_controller[4]
+                .get_call()[1]
+                .get_methods()
+                .get_call()[0]
+                .get_methods()
+                .get_calls()
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[0]
+            .get_methods()
+            .get_calls()[0]
+            .get_method()
+            .get_name(),
+            "hasTanggungan",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
+            .get_methods()
+            .get_name(),
+            "prosesPeminjamanTidakMemilikiTanggungan",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
+            .get_condition(),
+            "not hasTanggunganResult",
+        )
+
+        self.assertEqual(
+            len(
+                parsed_value_controller[4]
+                .get_call()[1]
+                .get_methods()
+                .get_call()[1]
                 .get_methods()
                 .get_call()
             ),
             2,
         )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_name(),
-            "showNotifikasiBerhasilPinjam",
-        )
-        self.assertEqual(
-            len(
-                parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_methods()
-                .get_call()
-            ),
-            0,
-        )
-        self.assertEqual(
-            len(
-                parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_arguments()
-            ),
-            0,
-        )
 
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
+            .get_methods()
+            .get_call()[0]
             .get_methods()
             .get_name(),
             "borrow",
@@ -302,38 +353,26 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(
             len(
                 parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
+                .get_call()[1]
                 .get_methods()
                 .get_call()[1]
+                .get_methods()
+                .get_call()[0]
                 .get_methods()
                 .get_calls()
             ),
             2,
         )
+
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
+            .get_methods()
+            .get_call()[0]
             .get_methods()
             .get_calls()[0]
-            .get_methods()
-            .get_name(),
-            "isBorrowed",
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_call()[1]
-            .get_methods()
-            .get_calls()[1]
             .get_methods()
             .get_name(),
             "findCopyBuku",
@@ -341,22 +380,22 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(
             len(
                 parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
+                .get_call()[1]
                 .get_methods()
                 .get_call()[1]
+                .get_methods()
+                .get_call()[0]
                 .get_arguments()
             ),
             1,
         )
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
+            .get_methods()
+            .get_call()[0]
             .get_arguments()[0]
             .get_name(),
             "isbn",
@@ -364,77 +403,73 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
         self.assertEqual(
             parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
+            .get_methods()
             .get_call()[0]
+            .get_methods()
+            .get_calls()[1]
+            .get_methods()
+            .get_name(),
+            "isBorrowed",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
             .get_methods()
             .get_name(),
-            "showNotifikasiGagalPinjam",
+            "showNotifikasiBerhasilPinjam",
         )
+
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[2]
             .get_methods()
             .get_name(),
+            "showNotifikasiGagalPinjam",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[2]
+            .get_condition(),
             "hasTanggungan",
         )
 
         self.assertEqual(
-            parsed_value_controller[4].get_call()[1].get_methods().get_name(),
+            len(
+                parsed_value_controller[4]
+                .get_call()[1]
+                .get_methods()
+                .get_call()[2]
+                .get_arguments()
+            ),
+            0,
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4].get_call()[2].get_methods().get_name(),
             "showNotifikasiDataTidakValid",
         )
+
         self.assertEqual(
-            len(parsed_value_controller[4].get_call()[1].get_arguments()), 0
-        )
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[1].get_methods().get_call()), 0
+            parsed_value_controller[4].get_call()[2].get_condition(),
+            "not isValid",
         )
 
         self.assertEqual(
-            parsed_value_controller[4].get_call()[2].get_methods().get_name(), "isValid"
-        )
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[2].get_arguments()), 1
-        )
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[2].get_methods().get_calls()), 0
-        )
-        self.assertEqual(
-            parsed_value_controller[4].get_call()[2].get_arguments()[0].get_name(),
-            "dataAnggota",
-        )
-
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[0].get_methods().get_call()), 3
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_name(),
-            "prosesPeminjamanTidakMemilikiTanggungan",
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[1]
-            .get_methods()
-            .get_name(),
-            "showNotifikasiGagalPinjam",
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[2]
-            .get_methods()
-            .get_name(),
-            "hasTanggungan",
+            len(parsed_value_controller[4].get_call()[2].get_arguments()),
+            0,
         )
 
         self.assertEqual(
