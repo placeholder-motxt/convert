@@ -95,7 +95,6 @@ class TestModelsElements(unittest.TestCase):
         self.assertEqual(classes[1].get_name(), "DuplicateClass")
 
 
-
 class TestViewsElements(unittest.TestCase):
     def setUp(self):
         self.views_elements = ViewsElements("view_file.py")
