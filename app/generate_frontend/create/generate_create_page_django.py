@@ -15,7 +15,7 @@ def generate_html_create_page_django(class_object: ClassObject) -> str:
     return render_template("create_page_django.html.j2", context)
 
 
-def generate_forms_create_page_django(models_elements: ModelsElements) -> list[str]:
+def generate_forms_create_page_django(models_elements: ModelsElements) -> str:
     classes = []
     for class_object in models_elements.get_classes():
         class_context = {"name": class_object.get_name(), "fields": []}

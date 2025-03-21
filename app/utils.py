@@ -17,11 +17,17 @@ def is_valid_python_identifier(identifier: str) -> bool:
 
 
 def render_template(template_name: str, context: dict[str, Any]) -> str:
-    template = env.get_template(template_name)
-    return template.render(context)
+    try:
+        template = env.get_template(template_name)
+        return template.render(context)
+    except Exception as e:
+        print(f"Error rendering template {template_name}: {e}")
+        return ""
 
 
 def camel_to_snake(camel_case_str: str) -> str:
+    if not isinstance(camel_case_str, str):
+        raise TypeError("Input must be a string")
     # Adjust regex to handle acronyms properly (uppercase letters in the middle of the string)
     snake_case_str = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", camel_case_str)
     # Special handling for acronyms: Make sure that sequences of uppercase letters are also split
