@@ -44,6 +44,12 @@ class TestClassObject(unittest.TestCase):
         self.class_object.add_relationship(relationship)
         self.assertIn(relationship, self.class_object._ClassObject__relationships)
 
+    def test_set_is_public(self):
+        self.class_object.set_is_public(True)
+        self.assertTrue(self.class_object._ClassObject__is_public)
+        self.class_object.set_is_public(False)
+        self.assertFalse(self.class_object._ClassObject__is_public)
+
     def test_str_representation(self):
         self.class_object.set_name("TestClass")
         expected_output = (
@@ -132,6 +138,12 @@ listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCA
 
         assert self.class_object.get_methods() == [method]
 
+    def test_get_is_public(self):
+        model = ClassObject()
+        model.set_is_public(True)
+        self.assertTrue(model.get_is_public())
+        model.set_is_public(False)
+        self.assertFalse(model.get_is_public())
 
 class TestAbstractRelationshipObject(unittest.TestCase):
     def setUp(self):
