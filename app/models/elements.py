@@ -32,6 +32,15 @@ class FileElements(ABC):
     def print_django_style(self) -> str:  # pragma: no cover
         pass
 
+    async def write_to_file(self, path: str) -> None:
+        file = path + "/" + self.__name
+        to_be_print = self.print_django_style()
+
+        async with await anyio.open_file(file, "w") as f:
+            await f.write(to_be_print)
+        print("done writing", file)
+        return file
+
 
 class ModelsElements(FileElements):
     """An intermediate representation of information inside a models file
@@ -144,33 +153,19 @@ class RequirementsElements(FileElements):
         """
         super().__init__(file_name)
 
-    """
-    CALL THIS FUNCTION
-    """
-
-    async def write_to_file(self, path: str) -> None:
-        file = path + "/requirements.txt"
-
-        to_be_print = self.print_django_style()
-
-        async with await anyio.open_file(file, "w") as f:
-            await f.write(to_be_print)
-        print("done writing", file)
-        return file
-
     def print_django_style(self) -> str:
         """
         Returns a list of django requirements as string for requirements.tx to run
         """
         result = StringIO()
         requirements = [
-            "django==4.1.4",
-            "gunicorn==20.1.0",
-            "whitenoise==6.9.0",
-            "psycopg2==2.9.5",
-            "pytest==7.2.2",
-            "pytest-django==4.5.2",
-            "pytest-cov==4.0.0",
+            "Django",
+            "gunicorn",
+            "whitenoise",
+            "psycopg2",
+            "pytest",
+            "pytest-django",
+            "pytest-cov",
         ]
 
         for requirement in requirements:
