@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 
+from app.models.diagram import ClassObject
 from app.models.elements import ModelsElements, ViewsElements
 
 
@@ -33,6 +34,65 @@ class TestModelsElements(unittest.TestCase):
         res = obj.print_django_style()
         f = open("tests/test_result.txt", "r")
         assert res == f.read()
+
+    def test_add_class_positive_case(self):
+        """Test: Positive case where a valid ClassObject is added."""
+        self.models = ModelsElements("test_file")
+        class_obj = ClassObject()
+        class_obj.set_name("TestClass")
+        self.models.add_class(class_obj)
+
+        # Assert that the class has been added correctly
+        classes = self.models.get_classes()
+        self.assertEqual(len(classes), 1)
+        self.assertEqual(classes[0].get_name(), "TestClass")
+
+    def test_add_class_negative_case_invalid_type(self):
+        """Test: Negative case where a non-ClassObject is added."""
+        self.models = ModelsElements("test_file")
+        with self.assertRaises(ValueError):
+            self.models.add_class("InvalidClassObject")
+
+    def test_add_class_corner_case_empty_class(self):
+        """Test: Corner case where an empty ClassObject (no name or minimal attributes) is added."""
+        self.models = ModelsElements("test_file")
+        empty_class_obj = ClassObject()
+        self.models.add_class(empty_class_obj)
+
+        # Assert that the empty class object has been added correctly
+        classes = self.models.get_classes()
+        self.assertEqual(len(classes), 1)
+        self.assertEqual(classes[0].get_name(), "")
+
+    def test_add_class_corner_case_multiple_classes(self):
+        """Test: Corner case where multiple valid ClassObjects are added."""
+        self.models = ModelsElements("test_file")
+        class_obj_1 = ClassObject()
+        class_obj_1.set_name("Class1")
+        class_obj_2 = ClassObject()
+        class_obj_2.set_name("Class2")
+        self.models.add_class(class_obj_1)
+        self.models.add_class(class_obj_2)
+
+        # Assert that multiple classes can be added and accessed
+        classes = self.models.get_classes()
+        self.assertEqual(len(classes), 2)
+        self.assertEqual(classes[0].get_name(), "Class1")
+        self.assertEqual(classes[1].get_name(), "Class2")
+
+    def test_add_class_corner_case_same_class_multiple_times(self):
+        """Test: Corner case where the same ClassObject is added multiple times."""
+        self.models = ModelsElements("test_file")
+        class_obj = ClassObject()
+        class_obj.set_name("DuplicateClass")
+        self.models.add_class(class_obj)
+        self.models.add_class(class_obj)
+
+        # Assert that the class object can be added multiple times (no restrictions on duplicates)
+        classes = self.models.get_classes()
+        self.assertEqual(len(classes), 2)
+        self.assertEqual(classes[0].get_name(), "DuplicateClass")
+        self.assertEqual(classes[1].get_name(), "DuplicateClass")
 
 
 class TestViewsElements(unittest.TestCase):
