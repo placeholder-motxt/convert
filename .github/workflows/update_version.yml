@@ -12,6 +12,8 @@ on:
 jobs:
   update-version:
     if: github.event.pull_request.merged == true
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
 
     steps:
