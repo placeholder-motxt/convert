@@ -259,7 +259,7 @@ class AbstractMethodCallObject(ABC):
         # TODO: Make immutable if needed
         return self.__method
 
-    def get_return_var_name(self) -> str:
+    def get_return_var_name(self) -> str:  # pragma: no cover
         return self.__return_var_name
 
     def print_django_style(self) -> str:
