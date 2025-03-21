@@ -1,14 +1,1 @@
-{
-    "diagram": "ClassDiagram",
-    "nodes": [
-        {
-        "methods": "",
-        "name": "Pengelola",
-        "x": 330,
-        "y": 10,
-        "attributes": "",
-        "id": 0,
-        "type": "ClassNode"
-        }
-    ]
-}
+{"diagram":"ClassDiagram","nodes":[{"methods":"","name":"Pengelola","x":330,"y":10,"attributes":"","id":0,"type":"ClassNode"}]}

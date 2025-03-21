@@ -45,6 +45,22 @@ class FieldObject:
     string representation of the datatype according to a specific framework."
     """
 
+    TYPE_MAPPING = {
+        "boolean": "models.BooleanField()",
+        "String": "models.CharField(max_length=255)",
+        "integer": "models.IntegerField()",
+        "float": "models.FloatField()",
+        "double": "models.FloatField()",
+        "Date": "models.DateField()",
+        "DateTime": "models.DateTimeField()",
+        "Time": "models.TimeField()",
+        "Text": "models.TextField()",
+        "Email": "models.EmailField()",
+        "URL": "models.URLField()",
+        "UUID": "models.UUIDField()",
+        "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
+    }
+
     def __init__(self):
         self.__name: str = ""
         self.__type: Optional[TypeObject] = None
@@ -59,29 +75,25 @@ class FieldObject:
         self.__type = type
 
     def to_models_code(self) -> str:
-        type_mapping = {
-            "boolean": "models.BooleanField()",
-            "String": "models.CharField(max_length=255)",
-            "integer": "models.IntegerField()",
-            "float": "models.FloatField()",
-            "double": "models.FloatField()",
-            "Date": "models.DateField()",
-            "DateTime": "models.DateTimeField()",
-            "Time": "models.TimeField()",
-            "Text": "models.TextField()",
-            "Email": "models.EmailField()",
-            "URL": "models.URLField()",
-            "UUID": "models.UUIDField()",
-            "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
-        }
-
         field_type = self.__type.to_models_code().lower()
 
-        for key, value in type_mapping.items():
+        for key, value in self.TYPE_MAPPING.items():
             if key.lower() in field_type:
                 return f"{self.__name} = {value}"
 
         return f"{self.__name} = models.CharField(max_length=255)"  # Default fallback
+
+    def to_models_code_template(self) -> dict[str, str]:
+        field_type = self.__type.to_models_code().lower()
+
+        for key, value in self.TYPE_MAPPING.items():
+            if key.lower() in field_type:
+                return {"name": self.__name, "type": value}
+
+        return {
+            "name": self.__name,
+            "type": "models.CharField(max_length=255)",
+        }  # Default fallback
 
 
 class ParameterObject:

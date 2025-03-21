@@ -1,12 +1,15 @@
 import json
 import os
 import zipfile
+from contextlib import asynccontextmanager
 
 import anyio
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
+from app.config import APP_CONFIG
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
@@ -15,9 +18,21 @@ from app.models.elements import (
 )
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
-from app.utils import remove_file
+from app.utils import (
+    is_valid_python_identifier,
+    remove_file,
+    render_project_django_template,
+)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    instrumentator.expose(app)
+    yield
+
+
+app = FastAPI(**APP_CONFIG, lifespan=lifespan)
+instrumentator = Instrumentator().instrument(app)
 
 
 @app.get("/")
@@ -122,8 +137,9 @@ async def convert(
         # await writer_requirements.write_to_file(
         #     "path_to_project_zip"
         # )
-
+        
         # Write previous files into a .zip
+        # project_path: list[str]= create_django_project(request.filename[0])
         zip_filename = request.filename[0] + ".zip"
         with zipfile.ZipFile(zip_filename, "w") as zipf:
             zipf.write(request.filename[0] + "_models.py")
@@ -165,3 +181,29 @@ def check_duplicate(
                 f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
             )
     return duplicate_class_method_checker
+
+
+def create_django_project(project_name: str) -> list[str]:
+    files = []
+    if not is_valid_python_identifier(project_name):
+        raise ValueError("Project name must not contain whitespace or number!")
+    zipfile_path = f"{project_name}.zip"
+    if os.path.exists(zipfile_path):
+        raise FileExistsError(f"File {zipfile_path} already exists")
+    zipf = zipfile.ZipFile(zipfile_path, "w")
+    # write django project template to a folder
+    files = render_project_django_template(
+        os.path.join("app", "templates", "django_project"),
+        {"project_name": project_name},
+    )
+
+    # write folder to zip
+    root = os.path.abspath(f"project_{project_name}")
+    for file in files:
+        file_path = os.path.join(root, file)
+        if file == "manage.py":
+            zipf.write(file_path, arcname=f"{file}")
+        else:
+            zipf.write(file_path, arcname=f"{project_name}/{file}")
+    zipf.close()
+    return files

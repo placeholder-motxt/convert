@@ -1,0 +1,5 @@
+from django.db import models
+
+
+class AdminUser(User):
+    is_admin = models.BooleanField()

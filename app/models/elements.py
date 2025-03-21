@@ -143,7 +143,6 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
-
 class RequirementsElements(FileElements):
     def __init__(self, file_name: str):
         """

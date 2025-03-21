@@ -4,7 +4,7 @@ from abc import ABC
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier
+from app.utils import is_valid_python_identifier, render_template
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
@@ -48,6 +48,21 @@ class ClassObject:
             res += method.to_views_code()
 
         return res
+
+    def to_models_code_template(self, template_name: str) -> str:
+        ctx = {
+            "name": self.get_name(),
+            "parent": self.__parent.get_name() if self.__parent else "models.Model",
+            "fields": [],
+        }
+
+        for field in self.__fields:
+            ctx["fields"].append(field.to_models_code_template())
+
+        for relationship in self.__relationships:
+            ctx["fields"].append(relationship.to_models_code_template())
+
+        return render_template(template_name, {"classes": [ctx]})
 
     def __str__(self) -> str:
         """__str__ method for debugging purposes."""
@@ -119,10 +134,10 @@ class AbstractRelationshipObject(ABC):
             )
         self.__target_class = target_class
 
-    def setSourceClassOwnAmount(self, amount: str):
+    def set_source_class_own_amount(self, amount: str):
         self.__sourceClassOwnAmount = amount
 
-    def setTargetClassOwnAmount(self, amount: str):
+    def set_target_class_own_amount(self, amount: str):
         self.__targetClassOwnAmount = amount
 
     def get_source_class(self) -> ClassObject:
@@ -145,6 +160,11 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             + " on_delete = models.CASCADE)"
         )
 
+    def to_models_code_template(self) -> dict[str, str]:
+        name = self.get_target_class().get_name()
+        rel_type = f"models.OneToOneField({name}, on_delete=models.CASCADE)"
+        return {"name": name.lower(), "type": rel_type}
+
 
 class ManyToOneRelationshipObject(AbstractRelationshipObject):
     """
@@ -165,6 +185,11 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
             + "on_delete = models.CASCADE)"
         )
 
+    def to_models_code_template(self) -> dict[str, str]:
+        name = self.get_target_class().get_name()
+        rel_type = f"models.ForeignKey({name}, on_delete=models.CASCADE)"
+        return {"name": f"{name.lower()}FK", "type": rel_type}
+
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where both startLabel and endLabel are '*'"""
@@ -178,3 +203,8 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
             + f" = models.ManyToManyField({self.get_target_class().get_name()},"
             + " on_delete = models.CASCADE)"
         )
+
+    def to_models_code_template(self) -> dict[str, str]:
+        name = self.get_target_class().get_name()
+        rel_type = f"models.ManyToManyField({name}, on_delete=models.CASCADE)"
+        return {"name": f"listOf{name.title()}", "type": rel_type}
