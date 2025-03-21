@@ -132,13 +132,13 @@ class TestRequirementsElements:
         self.requirements_elements = RequirementsElements("requirements.txt")
         res = self.requirements_elements.print_django_style()
         assert (
-            res == "django==4.1.4\n"
-            "gunicorn==20.1.0\n"
-            "whitenoise==6.9.0\n"
-            "psycopg2==2.9.5\n"
-            "pytest==7.2.2\n"
-            "pytest-django==4.5.2\n"
-            "pytest-cov==4.0.0\n"
+            res == "Django\n"
+            "gunicorn\n"
+            "whitenoise\n"
+            "psycopg2\n"
+            "pytest\n"
+            "pytest-django\n"
+            "pytest-cov\n"
         )
 
     @pytest.mark.asyncio
