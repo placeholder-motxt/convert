@@ -45,6 +45,16 @@ class ParseJsonToObjectClass:
 
             object_name = object["name"]
 
+            print("zczczc", object_name, object_name[0])
+            if bool(re.match(r"([\+\-]) ?(?P<class_name>\w*)", object_name)):
+                if object_name[0] == "+":
+                    class_obj.set_is_public(True)
+                else:
+                    class_obj.set_is_public(False)
+                object_name = object_name[1:].strip()
+            else:
+                class_obj.set_is_public(False)
+
             if self.check_name(object_name):
                 class_obj.set_name(object_name)
             else:
