@@ -144,8 +144,9 @@ async def convert(
         )
 
     except ValueError as ex:
-        logger.warning("Error occured at parsing: " + str(ex).replace("\n", " "))
-        raise HTTPException(status_code=422, detail=str(ex))
+        ex_str = str(ex)
+        logger.warning("Error occured at parsing: " + ex_str.replace("\n", " "))
+        raise HTTPException(status_code=422, detail=ex_str)
 
 
 def check_duplicate(
@@ -157,13 +158,9 @@ def check_duplicate(
     if not class_object:
         return duplicate_class_method_checker
     for class_method_object in class_objects[class_object_name].get_methods():
-        if (
-            class_object_name,
-            class_method_object.get_name(),
-        ) in duplicate_class_method_checker:
-            duplicate_class_method_checker[
-                (class_object_name, class_method_object.get_name())
-            ] = class_method_object
+        key = (class_object_name, class_method_object.get_name())
+        if key in duplicate_class_method_checker:
+            duplicate_class_method_checker[key] = class_method_object
         else:
             raise ValueError(
                 f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
