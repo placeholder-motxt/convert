@@ -1,8 +1,8 @@
 from django.urls import path
 from .views import (
     {% for class in classes -%}
-    create_{{ class.get_name() }},
-    get_{{ class.get_name() }},
+    create_{{ class.snake_name }},
+    get_{{ class.snake_name }},
     {% endfor -%}
 )
 
@@ -10,7 +10,7 @@ app_name = "main"
 
 urlpatterns = [
     {%- for class in classes %}
-    path('create-{{ class.get_name().lower() }}/', create_{{ class.get_name().lower() }}, name="create_{{ class.get_name().lower() }}"),
-    path('get-all-{{ class.get_name().lower() }}/', get_{{ class.get_name().lower() }}, name="get_{{ class.get_name().lower() }}"),
+    path('create-{{ class.snake_name }}/', create_{{ class.snake_name }}, name="create_{{ class.snake_name }}"),
+    path('get-all-{{ class.snake_name }}/', get_{{ class.snake_name }}, name="get_{{ class.snake_name }}"),
     {%- endfor %}
 ]

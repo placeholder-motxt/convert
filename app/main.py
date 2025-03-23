@@ -80,7 +80,7 @@ async def convert(
 
                 # # Uncomment this to write urls.py
                 # writer_url = UrlsElement("urls.py")
-                # await writer_url.write_file(classes=classes, path='./app')
+                # await writer_url.write_to_file(path='./app')
 
                 for model_class in classes:
                     for method in model_class.get_methods():

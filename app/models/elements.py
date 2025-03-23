@@ -5,6 +5,7 @@ import anyio
 from jinja2 import Template
 
 from app.parse_json_to_object_class import ParseJsonToObjectClass
+from app.utils import camel_to_snake
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
@@ -32,6 +33,15 @@ class FileElements(ABC):
     @abstractmethod
     def print_django_style(self) -> str:  # pragma: no cover
         pass
+
+    async def write_to_file(self, path: str) -> None:
+        file = path + "/" + self.__name
+        to_be_print = self.print_django_style()
+
+        async with await anyio.open_file(file, "w") as f:
+            await f.write(to_be_print)
+        print("done writing", file)
+        return file
 
 
 class ModelsElements(FileElements):
@@ -147,17 +157,21 @@ class ViewsElements(FileElements):
 
 
 class UrlsElement(FileElements):
-    async def write_file(self, classes: list, path: str) -> str:
-        file = path + "/urls.py"
+    def __init__(self, file_name: str):
+        super().__init__(file_name)
+        self.__classes: list[ClassObject] = []
 
-        to_be_print = self.print_django_style(classes)
+    def set_classes(self, classes: list[ClassObject]) -> None:  # pragma: no cover
+        self.__classes = classes
 
-        async with await anyio.open_file(file, "w") as f:
-            await f.write(to_be_print)
-
-        return file
-
-    def print_django_style(self, classes: list = []) -> str:
+    def print_django_style(self) -> str:
         template = Template(open("./app/templates/urls.py.j2").read())
+        classes = []
+        for kelas in self.__classes:
+            class_context = {
+                "name": kelas.get_name(),
+                "snake_name": camel_to_snake(kelas.get_name()),
+            }
+            classes.append(class_context)
         rendered_yaml = template.render(classes=classes)
         return rendered_yaml
