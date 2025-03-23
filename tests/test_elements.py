@@ -191,12 +191,13 @@ class TestUrlsElements:
         self.requirements_elements = UrlsElement("urls.py")
         mock_class = mock.Mock()
         mock_class.get_name.return_value = "Class1"
-        res = self.requirements_elements.print_django_style(classes=[mock_class])
+        self.requirements_elements.set_classes(classes=[mock_class])
+        res = self.requirements_elements.print_django_style()
         assert (
             res == "from django.urls import path\n"
             "from .views import (\n    "
-            "create_Class1,\n    "
-            "get_Class1,\n    )\n\n"
+            "create_class1,\n    "
+            "get_class1,\n    )\n\n"
             'app_name = "main"\n\n'
             "urlpatterns = [\n    "
             "path('create-class1/', create_class1, name=\"create_class1\"),\n    "
@@ -209,11 +210,11 @@ class TestUrlsElements:
         self.requirements_elements = UrlsElement("urls.py")
         mock_class = mock.Mock()
         mock_class.get_name.return_value = "Class1"
-        await self.requirements_elements.write_file(classes=[mock_class], path="./app")
-        print(Path("./app/urls.py").is_file())
-        assert Path("./app/urls.py").is_file()
-        if Path("./app/urls.py").is_file():
-            os.remove("./app/urls.py")
+        await self.requirements_elements.write_to_file(path="./tests")
+        print(Path("./tests/urls.py").is_file())
+        assert Path("./tests/urls.py").is_file()
+        if Path("./tests/urls.py").is_file():
+            os.remove("./tests/urls.py")
 
 
 if __name__ == "__main__":
