@@ -14,7 +14,7 @@ from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import ClassObject, ModelsElements, ViewsElements
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
-from app.utils import remove_file
+from app.utils import logger, remove_file
 
 
 @asynccontextmanager
@@ -36,14 +36,18 @@ async def download_file(request: DownloadRequest) -> FileResponse:
     file = request.filename + request.type + ".py"
 
     if "/" in request.filename or "\\" in request.filename:
+        logger.warning(f"Bad filename: {request.filename}")
         raise HTTPException(status_code=400, detail="/ not allowed in file name")
 
     if os.path.exists(file):
+        logger.warning(f"File already exists: {file}")
+        # TODO: Add to metrics so we can know how many request actually face this problem
         raise HTTPException(status_code=400, detail="Please try again later")
 
     async with await anyio.open_file(file, "w") as f:
         await f.write(request.content)
-    print("done writing", file)
+
+    logger.info(f"Finished writing: {file}")
     return file
 
 
@@ -140,6 +144,7 @@ async def convert(
         )
 
     except ValueError as ex:
+        logger.warning("Error occured at parsing: " + str(ex).replace("\n", " "))
         raise HTTPException(status_code=422, detail=str(ex))
 
 
