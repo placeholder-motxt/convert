@@ -2,9 +2,10 @@ import os
 import shutil
 import unittest
 import zipfile
+from unittest.mock import patch
 
 from app.main import create_django_app, create_django_project
-from app.utils import render_project_django_template
+from app.utils import get_random_secret_key, render_project_django_template
 
 
 class TestGenerateDjangoProjectTemplate(unittest.TestCase):
@@ -17,19 +18,41 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
 
     # generate django project
     def test_generate_django_project_positive(self):
-        result = create_django_project(self.project_name)
-        zipfile_path = f"{self.project_name}.zip"
-        folder_path = f"project_{self.project_name}"
-        try:
-            self.assertTrue(os.path.exists(folder_path))
-            self.assertTrue(os.path.exists(zipfile_path))
-            for file in os.listdir(folder_path):
-                self.assertIn(file, result)
-        finally:
-            if os.path.exists(zipfile_path):
-                os.remove(zipfile_path)
-            if os.path.exists(folder_path):
-                shutil.rmtree(folder_path)
+        mocked_secret_key = get_random_secret_key()
+        print(mocked_secret_key)
+        with open("tests/testdata/settings.py.txt", "r") as file_to_read:
+            settings = file_to_read.read()
+        settings_mock = settings.replace(
+            "SECRET_KEY = ''", f"SECRET_KEY = '{mocked_secret_key}'"
+        )
+        with open("tests/testdata/settings.py.txt", "w") as file_to_edit:
+            file_to_edit.write(settings_mock)
+
+        # Mock get_random_secret_key to return a predictable value
+        with patch("app.utils.get_random_secret_key", return_value=mocked_secret_key):
+            result = create_django_project(self.project_name)
+            zipfile_path = f"{self.project_name}.zip"
+            folder_path = f"project_{self.project_name}"
+            try:
+                self.assertTrue(os.path.exists(folder_path))
+                self.assertTrue(os.path.exists(zipfile_path))
+                for file in os.listdir(folder_path):
+                    self.assertIn(file, result)
+                    print(file)
+                    with (
+                        open(os.path.join(folder_path, file), "r") as f1,
+                        open(
+                            os.path.join("tests", "testdata", f"{file}.txt"), "r"
+                        ) as f2,
+                    ):
+                        self.assertEqual(f1.read(), f2.read())
+            finally:
+                with open("tests/testdata/settings.py.txt", "w") as file_to_edit:
+                    file_to_edit.write(settings)
+                if os.path.exists(zipfile_path):
+                    os.remove(zipfile_path)
+                if os.path.exists(folder_path):
+                    shutil.rmtree(folder_path)
 
     def test_generate_django_project_negative_with_whitespace(self):
         with self.assertRaises(ValueError) as context:
@@ -57,8 +80,8 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
         finally:
             if os.path.exists(zipfile_path):
                 os.remove(zipfile_path)
-            if os.path.exists("project_test_project"):
-                shutil.rmtree("project_test_project")
+        if os.path.exists("project_test_project"):
+            shutil.rmtree("project_test_project")
 
     # render django project from template
     def test_render_project_django_template_positive(self):
