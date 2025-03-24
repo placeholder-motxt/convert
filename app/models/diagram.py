@@ -107,7 +107,6 @@ class ClassObject:
         res = StringIO()
         for attribute in self.__fields:
             res.write("\t" + attribute.to_models_code() + "\n")
-        res.write(f"\tis_public={self.__is_public}\n")
         return res.getvalue()
 
     def __get_relationships_to_code(self) -> str:
