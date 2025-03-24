@@ -22,6 +22,7 @@ from app.utils import (
     is_valid_python_identifier,
     remove_file,
     render_project_django_template,
+    render_template,
 )
 
 
@@ -217,22 +218,33 @@ def create_django_project(project_name: str) -> list[str]:
 def create_django_app(project_name: str, app_name: str) -> list[str]:
     file_names = []
     if not is_valid_python_identifier(app_name):
-        raise ValueError("App name must not contain whitespace or number!")
+        raise ValueError("App name must not contain whitespace!")
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace or number!")
+        raise ValueError("Project name must not contain whitespace!")
+    if not os.path.exists(f"{project_name}.zip"):
+        raise FileNotFoundError(f"File {project_name}.zip does not exist")
 
-    for file in os.listdir("app/templates/django_app"):
-        # read content of django app
-        with open(os.path.join("app", "templates", "django_app", file), "r") as f:
-            content = f.read()
-        # [TODO] place to add stuff in the file
-
-        # check if project zip file exist
-        if not os.path.exists(f"{project_name}.zip"):
-            raise FileNotFoundError(f"File {project_name}.zip does not exist")
-        with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
-            if file == "__init__.py":
-                zipf.writestr(f"{app_name}/migrations/__init__.py", content)
-            zipf.writestr(f"{app_name}/{file}", content)
-        file_names.append(file)
+    with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
+        for file in os.listdir("app/templates/django_app"):
+            # file that use jinja2 template
+            if file == "apps.py.j2":
+                file_name = file.replace(".j2", "")
+                template = render_template(
+                    f"django_app/{file}",
+                    {"app_name": app_name},  # This is where the app name is passed
+                )
+                zipf.writestr(f"{app_name}/{file_name}", template)
+                file_names.append("apps.py")
+            else:  # file that use txt file
+                if file == "__init__.txt":
+                    zipf.writestr(f"{app_name}/migrations/__init__.py", "")
+                    zipf.writestr(f"{app_name}/__init__.py", "")
+                else:
+                    with open(
+                        os.path.join("app", "templates", "django_app", file), "r"
+                    ) as f:
+                        content = f.read()
+                        file_name = file.replace(".txt", ".py")
+                        zipf.writestr(f"{app_name}/{file_name}", content)
+            file_names.append(file)
     return file_names
