@@ -145,7 +145,9 @@ async def convert(
 
     except ValueError as ex:
         ex_str = str(ex)
-        logger.warning("Error occured at parsing: " + ex_str.replace("\n", " "))
+        logger.warning(
+            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
+        )
         raise HTTPException(status_code=422, detail=ex_str)
 
 

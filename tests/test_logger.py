@@ -32,7 +32,7 @@ def test_uvicorn_error_logger_warning_when_convert_raises_value_err(
         assert (
             "uvicorn.error",
             logging.WARNING,
-            "Error occured at parsing: some error",
+            "Error occurred at parsing: some error",
         ) in caplog.record_tuples
 
 
