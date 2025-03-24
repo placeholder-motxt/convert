@@ -5,7 +5,6 @@ class Buku(models.Model):
 	judul = models.CharField(max_length=255)
 	penulis = models.CharField(max_length=255)
 	penerbit = models.CharField(max_length=255)
-	is_public=False
 
 	pass
 
@@ -17,7 +16,6 @@ class Peminjaman(models.Model):
 	tglKembali = models.DateField()
 	isLunasDenda = models.BooleanField()
 	besaranDenda = models.IntegerField()
-	is_public=False
 
 	pass
 
@@ -29,7 +27,6 @@ class CopyBuku(models.Model):
 	isAvailable = models.BooleanField()
 	edisi = models.IntegerField()
 	tahunTerbit = models.IntegerField()
-	is_public=False
 
 	bukuFK = models.ForeignKey(Buku, on_delete = models.CASCADE)
 	pass

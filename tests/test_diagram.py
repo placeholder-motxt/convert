@@ -94,7 +94,7 @@ class TestClassObject(unittest.TestCase):
         assert (
             self.class_object.to_models_code()
             == "class ClassTest(models.Model):\n\t\
-field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\tis_public=False\n\n\t\
+field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
 targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
 targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
 listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\tpass\n\n\n"
@@ -116,7 +116,7 @@ listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCA
         model.add_field(field1)
         assert (
             model._ClassObject__get_attributes_to_code()
-            == "\tfield1 = models.IntegerField()\n\tis_public=False\n"
+            == "\tfield1 = models.IntegerField()\n"
         )
 
     def test_get_relationships_to_code(self):
