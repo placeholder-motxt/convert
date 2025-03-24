@@ -435,3 +435,17 @@ def test_check_duplicate_empty_duplicate_class_method_checker():
         check_duplicate(
             class_objects, class_object.get_name(), duplicate_class_method_checker
         )
+
+
+def test_raise_value_error_on_main():
+    payload = {
+        "filename": ["file1.sequence,jet"],
+        "content": [['{"diagram": "SequenceDiagram"}']],
+    }
+    response = client.post("/convert", json=payload)
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": "The .sequence.jet is not valid. \n"
+        "Please make sure the file submitted is not corrupt"
+    }
+    app.dependency_overrides.clear()  # Reset overrides after test

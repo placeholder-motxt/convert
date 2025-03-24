@@ -1,4 +1,5 @@
 import os
+import secrets
 from keyword import iskeyword
 from typing import Any
 
@@ -39,12 +40,41 @@ def render_project_django_template(
             if template_name == "settings.py.j2":
                 context = {
                     "project_name": context["project_name"],
-                    "SECRET_KEY": "",
+                    "SECRET_KEY": get_random_secret_key(),
                 }
             template_name = template_name.replace(".j2", "")
             with open(os.path.join(folder_path, template_name), "w") as file:
                 file.write(template.render(context))
+                file.write("\n")  # add newline at the end of file for linter
             files.append(template_name)
         else:
             raise ValueError(f"Template {template_name} is not a file")
     return files
+
+
+# method to generate random secret key taken from Django
+RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+
+def get_random_secret_key() -> str:  # pragma: no cover
+    """
+    Return a 50 character random string usable as a SECRET_KEY setting value.
+    """
+    chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
+    return get_random_string(50, chars)
+
+
+def get_random_string(
+    length: int, allowed_chars: str = RANDOM_STRING_CHARS
+) -> str:  # pragma: no cover
+    """
+    Return a securely generated random string.
+
+    The bit length of the returned value can be calculated with the formula:
+        log_2(len(allowed_chars)^length)
+
+    For example, with default `allowed_chars` (26+26+10), this gives:
+      * length: 12, bit length =~ 71 bits
+      * length: 22, bit length =~ 131 bits
+    """
+    return "".join(secrets.choice(allowed_chars) for i in range(length))

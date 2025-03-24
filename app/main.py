@@ -11,7 +11,11 @@ from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG
 from app.model import ConvertRequest, DownloadRequest
-from app.models.elements import ClassObject, ModelsElements, ViewsElements
+from app.models.elements import (
+    ClassObject,
+    ModelsElements,
+    ViewsElements,
+)
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
@@ -71,6 +75,9 @@ async def convert(
         writer_models = ModelsElements("models.py")
         writer_views = ViewsElements("views.py")
 
+        # # Uncomment this to write requirements.txt
+        # writer_requirements = RequirementsElements('requirements.txt')
+
         for file_name, content in zip(request.filename, request.content):
             json_content = content[0]
             if isinstance(json_content, str):
@@ -125,6 +132,12 @@ async def convert(
                 type="_views",
             ),
         )
+
+        # # Uncomment this to write requirements.txt
+        # await writer_requirements.write_to_file(
+        #     "path_to_project_zip"
+        # )
+
         # Write previous files into a .zip
         # [TODO] replace the exisiting zip files into zip with django project
         # create_django_project(request.filename[0])
@@ -181,7 +194,7 @@ def create_django_project(project_name: str) -> list[str]:
         raise ValueError("Project name must not contain whitespace or number!")
     zipfile_path = f"{project_name}.zip"
     if os.path.exists(zipfile_path):
-        raise ValueError(f"File {zipfile_path} already exists")
+        raise FileExistsError(f"File {zipfile_path} already exists")
     zipf = zipfile.ZipFile(zipfile_path, "w")
     # write django project template to a folder
     files = render_project_django_template(

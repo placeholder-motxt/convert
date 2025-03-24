@@ -449,22 +449,20 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             0,
         )
 
-    def test_invalid_edge_label_format(self):
-        # Invalid label format should throw exceptions, examples:
-        # `doA()` -> have to be `doA ()`
-        # `[] doB ()->bval` -> have to be `[] doB () -> bval`
+    def test_valid_edge_label_format(self):
         parser = ParseJsonToObjectSeq()
-        with open(os.path.join(TEST_DIR, "seq_invalid_label_format1.json")) as f:
+        with open(os.path.join(TEST_DIR, "seq_valid_label_format1.json")) as f:
             parser.set_json(f.read())
 
-        with self.assertRaises(ValueError) as ctx:
-            parser.parse()
+        parser.parse()
 
         self.assertEqual(
-            str(ctx.exception),
-            "Wrong label format 'doA()' on sequence diagram \n"
-            "please consult the user manual document on how to name parameters",
+            parser.get_class_objects()["ABC"].get_methods()[0].get_name(), "doA"
         )
+
+    def test_invalid_edge_label_format(self):
+        # Invalid label format should throw exceptions, examples:
+        # `[] doB ()->bval` -> have to be `[] doB () -> bval`
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_label_format2.json")) as f:
