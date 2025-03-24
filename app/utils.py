@@ -35,20 +35,17 @@ def render_project_django_template(
     for template_name in os.listdir(template_path):
         file_path = os.path.join(template_path, template_name)
         file_path = file_path.replace("\\", "/")
-        if os.path.isfile(file_path):
-            template = env.get_template(f"django_project/{template_name}")
-            if template_name == "settings.py.j2":
-                context = {
-                    "project_name": context["project_name"],
-                    "SECRET_KEY": get_random_secret_key(),
-                }
-            template_name = template_name.replace(".j2", "")
-            with open(os.path.join(folder_path, template_name), "w") as file:
-                file.write(template.render(context))
-                file.write("\n")  # add newline at the end of file for linter
-            files.append(template_name)
-        else:
-            raise ValueError(f"Template {template_name} is not a file")
+        template = env.get_template(f"django_project/{template_name}")
+        if template_name == "settings.py.j2":
+            context = {
+                "project_name": context["project_name"],
+                "SECRET_KEY": get_random_secret_key(),
+            }
+        template_name = template_name.replace(".j2", "")
+        with open(os.path.join(folder_path, template_name), "w") as file:
+            file.write(template.render(context))
+            file.write("\n")  # add newline at the end of file for linter
+        files.append(template_name)
     return files
 
 

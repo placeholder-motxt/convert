@@ -4,7 +4,7 @@ import unittest
 import zipfile
 from unittest.mock import patch
 
-from app.main import create_django_project
+from app.main import create_django_app, create_django_project
 from app.utils import get_random_secret_key, render_project_django_template
 
 
@@ -19,7 +19,6 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
     # generate django project
     def test_generate_django_project_positive(self):
         mocked_secret_key = get_random_secret_key()
-        print(mocked_secret_key)
         with open("tests/testdata/settings.py.txt", "r") as file_to_read:
             settings = file_to_read.read()
         settings_mock = settings.replace(
@@ -38,7 +37,6 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
                 self.assertTrue(os.path.exists(zipfile_path))
                 for file in os.listdir(folder_path):
                     self.assertIn(file, result)
-                    print(file)
                     with (
                         open(os.path.join(folder_path, file), "r") as f1,
                         open(
@@ -124,3 +122,81 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
         finally:
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
+
+
+class TestGenerateDjangoMain(unittest.TestCase):
+    def setUp(self):
+        self.project_name = "test_main"
+        if os.path.exists(f"{self.project_name}.zip"):
+            os.remove(f"{self.project_name}.zip")
+        if os.path.exists(f"project_{self.project_name}"):
+            shutil.rmtree(f"project_{self.project_name}")
+
+    def test_generate_django_app_positive(self):
+        folder_path = "project_test_main"
+        create_django_project("test_main")
+        create_django_app("test_main", "main")
+
+        zipfile_path = "test_main.zip"
+        open_zip = zipfile.ZipFile(zipfile_path, "r")
+        files = open_zip.namelist()
+
+        for file in files:
+            filename = file.split("/")[-1]
+            django_app = os.listdir("app/templates/django_app")
+            django_app.remove("apps.py.j2")
+            if filename.replace(".py", ".txt") in django_app:
+                if "migrations" in file:
+                    continue
+                with (
+                    open_zip.open(file, "r") as f1,
+                    open(
+                        os.path.join(
+                            "app",
+                            "templates",
+                            "django_app",
+                            f"{filename.replace('.py', '.txt')}",
+                        ),
+                        "r",
+                    ) as f2,
+                ):
+                    self.assertEqual(
+                        f1.read().decode("utf-8").strip(), f2.read().strip()
+                    )
+            elif filename == "apps.py":
+                with (
+                    open_zip.open(file) as f1,
+                    open(os.path.join("tests", "testdata", "apps.py.txt"), "r") as f2,
+                ):
+                    self.assertEqual(
+                        f1.read().decode("utf-8").strip(), f2.read().strip()
+                    )
+        open_zip.close()
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+        if os.path.exists(zipfile_path):
+            os.remove(zipfile_path)
+
+    def test_generate_django_app_negative_invalid_name(self):
+        with self.assertRaises(ValueError) as context:
+            create_django_app("test_main", "buku pin")
+        self.assertEqual(
+            str(context.exception),
+            "App name must not contain whitespace!",
+        )
+
+    def test_generate_django_app_negative_invalid_project_name(self):
+        with self.assertRaises(ValueError) as context:
+            create_django_app("test main", "main")
+        self.assertEqual(
+            str(context.exception),
+            "Project name must not contain whitespace!",
+        )
+
+    def test_generate_django_app_negative_zip_not_exist(self):
+        with self.assertRaises(FileNotFoundError) as context:
+            create_django_app("test_main", "main")
+        self.assertEqual(
+            str(context.exception),
+            "File test_main.zip does not exist",
+        )
