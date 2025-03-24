@@ -229,7 +229,7 @@ def create_django_app(project_name: str, app_name: str) -> list[str]:
 
         # check if project zip file exist
         if not os.path.exists(f"{project_name}.zip"):
-            raise ValueError(f"File {project_name}.zip does not exist")
+            raise FileNotFoundError(f"File {project_name}.zip does not exist")
         with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
             if file == "__init__.py":
                 zipf.writestr(f"{app_name}/migrations/__init__.py", content)
