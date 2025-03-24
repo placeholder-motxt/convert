@@ -56,7 +56,7 @@ def test_file_already_exists():
                 json={"filename": ["file1"], "content": [['{"Some content":"a"}']]},
             )
             assert response.status_code == 400
-            assert response.json()["detail"] == "The file already exists."
+            assert response.json()["detail"] == "Please try again later"
     finally:
         # Clean up: remove the file created for the test
         if os.path.exists("file1_models.py"):
@@ -83,7 +83,7 @@ def test_slash_on_filename():
             "/convert/", json={"filename": ["app/main2"], "content": [["Some content"]]}
         )
         assert response.status_code == 400
-        assert response.json()["detail"] == "/ not allowed"
+        assert response.json()["detail"] == "/ not allowed in file name"
 
 
 @pytest.mark.asyncio
@@ -123,7 +123,7 @@ async def test_convert_endpoint_valid_content_class_diagram():
 async def test_convert_endpoint_inconsistent_filename_content_length():
     payload = {
         "filename": ["file1", "file2"],  # Two filenames
-        "content": [['{"diagram": "ClassDiagram"}']]  # Only one content
+        "content": [['{"diagram": "ClassDiagram"}']],  # Only one content
     }
 
     # Assuming `client` is initialized somewhere like this:
@@ -132,7 +132,9 @@ async def test_convert_endpoint_inconsistent_filename_content_length():
     response = client.post("/convert", json=payload)
 
     assert response.status_code == 400
-    assert response.json() == {"detail": "number of Filename and Content is incosistent"}
+    assert response.json() == {
+        "detail": "number of Filename and Content is incosistent"
+    }
 
 
 @pytest.mark.asyncio
@@ -162,7 +164,9 @@ async def test_convert_endpoint_class_diagram():
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
-        assert response.content.startswith(b"PK")  # Check that the response is a zip file
+        assert response.content.startswith(
+            b"PK"
+        )  # Check that the response is a zip file
 
 
 @pytest.mark.asyncio
@@ -172,7 +176,9 @@ async def test_convert_endpoint_sequence_diagram():
         patch("app.main.ParseJsonToObjectSeq") as mock_seq_parser,
         patch("app.main.ModelsElements") as mock_models,
         patch("app.main.ViewsElements") as mock_views,
-        patch("app.main.check_duplicate") as mock_check_duplicate,  # Mock check_duplicate
+        patch(
+            "app.main.check_duplicate"
+        ) as mock_check_duplicate,  # Mock check_duplicate
     ):
         # Set up mock for sequence diagram parsing
         mock_seq_instance = mock_seq_parser.return_value
@@ -198,7 +204,10 @@ async def test_convert_endpoint_sequence_diagram():
         mock_instance_views.print_django_style.return_value = "ini views write"
 
         # Prepare the payload
-        payload = {"filename": ["file1"], "content": [['{"diagram": "SequenceDiagram"}']]}
+        payload = {
+            "filename": ["file1"],
+            "content": [['{"diagram": "SequenceDiagram"}']],
+        }
 
         # Send the request to the endpoint
         client = TestClient(app)
@@ -211,9 +220,9 @@ async def test_convert_endpoint_sequence_diagram():
         # Validate the response
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
-        assert response.content.startswith(b"PK")  # Check that the response is a zip file
-
-
+        assert response.content.startswith(
+            b"PK"
+        )  # Check that the response is a zip file
 
 
 @pytest.mark.asyncio
@@ -232,14 +241,19 @@ async def test_convert_endpoint_invalid_diagram_type():
         mock_instance_views = mock_views.return_value
         mock_instance_views.print_django_style.return_value = "ini views write"
 
-        payload = {"filename": ["file1"], "content": [['{"diagram": "InvalidDiagram"}']]}
+        payload = {
+            "filename": ["file1"],
+            "content": [['{"diagram": "InvalidDiagram"}']],
+        }
 
         # Assuming `client` is initialized somewhere like this:
         client = TestClient(app)
 
         response = client.post("/convert", json=payload)
 
-        assert response.status_code == 200  # assuming it doesn't throw an error and just skips
+        assert (
+            response.status_code == 200
+        )  # assuming it doesn't throw an error and just skips
         # invalid diagrams
 
 
@@ -254,15 +268,16 @@ async def test_convert_endpoint_valid_sequence_diagram():
             ],
             [
                 '{"diagram":"SequenceDiagram", "nodes":[{"children":[1], "name":":UI", "x":80,'
-                ' "y":58, "id":0, "type":"ImplicitParameterNode"}], "edges":[{"middleLabel":"doA ()"'
+                ' "y":5, "id":0, "type":"ImplicitParameterNode"}], "edges":[{"middleLabel":"doA ()"'
                 ', "start":1, "end":3, "type":"CallEdge"}]}'
-            ]
-        ]
+            ],
+        ],
     }
 
-    with (patch("app.main.ParseJsonToObjectSeq") as mockseq,
-          patch("app.main.ViewsElements") as mockparser2,
-          patch("app.main.json") as mockjson,
+    with (
+        patch("app.main.ParseJsonToObjectSeq") as mockseq,
+        patch("app.main.ViewsElements") as mockparser2,
+        patch("app.main.json") as mockjson,
         patch("app.main.check_duplicate") as mock_check_duplicate,
     ):
         mockjson.loads.return_value = {"diagram": "SequenceDiagram"}
@@ -279,7 +294,6 @@ async def test_convert_endpoint_valid_sequence_diagram():
         mock_check_duplicate.assert_called()
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
-
 
 
 @pytest.mark.asyncio
@@ -319,6 +333,7 @@ async def test_convert_endpoint_invalid_incosistent_filename_content_amount():
     assert response.status_code == 400
     assert response.json()["detail"] == "number of Filename and Content is incosistent"
 
+
 def test_check_duplicate_class_object_not_in_class_objects():
     # Mocking class objects and class method objects
     class_objects = {}  # Empty class_objects dictionary
@@ -326,10 +341,13 @@ def test_check_duplicate_class_object_not_in_class_objects():
     class_object.get_name.return_value = "class1"
     duplicate_class_method_checker = {}
 
-    result = check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
+    result = check_duplicate(
+        class_objects, class_object.get_name(), duplicate_class_method_checker
+    )
 
     # Assert that duplicate_class_method_checker remains unchanged
     assert result == duplicate_class_method_checker
+
 
 def test_check_duplicate_no_matching_method():
     # class_objects with a class_object and methods, but empty duplicate_class_method_checker
@@ -340,13 +358,16 @@ def test_check_duplicate_no_matching_method():
     class_object.add_method(class_method_object)
     class_object.set_name("class1")
 
-
     # Creating a mock for class_objects to behave like a dictionary with the right behavior
     class_objects = {class_object.get_name(): class_object}
     duplicate_class_method_checker = {"hello": ClassObject()}
-    with pytest.raises(ValueError, match="Cannot call class objects not defined in Class Diagram!"):
-        check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
-
+    with pytest.raises(
+        ValueError,
+        match="Cannot call class 'class1' objects not defined in Class Diagram!",
+    ):
+        check_duplicate(
+            class_objects, class_object.get_name(), duplicate_class_method_checker
+        )
 
 
 def test_check_duplicate_with_matching_method():
@@ -363,18 +384,21 @@ def test_check_duplicate_with_matching_method():
     # Create class_objects dictionary that returns a mock object for class_object
     class_objects = {class_object.get_name(): class_object}
 
-
     # Initialize duplicate_class_method_checker with a method already present
-    duplicate_class_method_checker = {(class_object.get_name(),
-                                       class_method_object.get_name()): class_method_object}
+    duplicate_class_method_checker = {
+        (class_object.get_name(), class_method_object.get_name()): class_method_object
+    }
 
     # Run the check_duplicate function
-    result = check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
+    result = check_duplicate(
+        class_objects, class_object.get_name(), duplicate_class_method_checker
+    )
 
     # Assert that the method `method2` has been added/updated in duplicate_class_method_checker
-    assert (len(result) == 1)
+    assert len(result) == 1
     assert (class_object.get_name(), "method1") in result
     assert result[(class_object.get_name(), "method1")] == class_method_object_copy
+
 
 def test_check_duplicate_empty_class_objects_and_methods():
     # Empty class_objects and duplicate_class_method_checker
@@ -383,10 +407,13 @@ def test_check_duplicate_empty_class_objects_and_methods():
     class_object.set_name("class1")
     duplicate_class_method_checker = {}
 
-    result = check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
+    result = check_duplicate(
+        class_objects, class_object.get_name(), duplicate_class_method_checker
+    )
 
     # Assert that the result remains the same since there are no class objects or methods to check
     assert result == duplicate_class_method_checker
+
 
 def test_check_duplicate_empty_duplicate_class_method_checker():
     # class_objects with a class_object and methods, but empty duplicate_class_method_checker
@@ -401,6 +428,10 @@ def test_check_duplicate_empty_duplicate_class_method_checker():
     class_objects = {class_object.get_name(): class_object}
     duplicate_class_method_checker = {}
 
-
-    with pytest.raises(ValueError, match="Cannot call class objects not defined in Class Diagram!"):
-        check_duplicate(class_objects, class_object.get_name(), duplicate_class_method_checker)
+    with pytest.raises(
+        ValueError,
+        match="Cannot call class 'class1' objects not defined in Class Diagram!",
+    ):
+        check_duplicate(
+            class_objects, class_object.get_name(), duplicate_class_method_checker
+        )

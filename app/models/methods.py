@@ -85,7 +85,10 @@ class ClassMethodObject(AbstractMethodObject):
 
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
         if class_method_call is None:
-            raise ValueError("Cannot add None to ClassMethodCallObject!")
+            raise ValueError(
+                "Cannot add None to ClassMethodCallObject! "
+                "please consult the user manual document"
+            )
         self.__calls.append(class_method_call)
 
     def to_views_code(self) -> str:
@@ -122,7 +125,10 @@ class ClassMethodObject(AbstractMethodObject):
         res = StringIO()
         name = self.get_name()
         if name is None or not is_valid_python_identifier(name):
-            raise ValueError(f"Invalid method name: {name}")
+            raise ValueError(
+                f"Invalid method name '{name}'\n"
+                "please consult the user manual document on how to name methods"
+            )
 
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
         res.write(f"def {name}(request, instance_name")
@@ -137,7 +143,10 @@ class ClassMethodObject(AbstractMethodObject):
             if not is_valid_python_identifier(rettype) and not bool(
                 re.match(r"list\[.*\]", rettype.lower())
             ):
-                raise ValueError(f"Invalid return type: {rettype}")
+                raise ValueError(
+                    f"Invalid return type: '{rettype}'\n "
+                    "please consult the user manual document on how to name return variables"
+                )
             res.write(f" -> {rettype}")
         res.write(":")
         for method_call in self.__calls:
@@ -174,7 +183,9 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style(self) -> str:
         if not self.get_name():
-            raise TypeError("method cannot be empty")
+            raise ValueError(
+                "method cannot be empty\nplease consult the user manual document"
+            )
         result = StringIO()
         result.write(f"def {self.get_name()}(request")
         for parameter in self.get_parameters():
@@ -309,12 +320,18 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 
     def set_caller(self, method_object: ClassMethodObject):
         if method_object is None:
-            raise ValueError("ClassMethodObject cannot be SET to be None!")
+            raise ValueError(
+                "ClassMethodObject cannot be SET to be None!\n"
+                "please consult the user manual document"
+            )
         self.__caller = method_object
 
     def set_instance_name(self, instance_name: str):
         if instance_name == "" or instance_name is None:
-            raise ValueError("instance_name cannot be empty!")
+            raise ValueError(
+                "instance_name cannot be empty!\n"
+                "please consult the user manual document"
+            )
         self.__instance_name = instance_name
 
     def get_instance_name(self) -> str:

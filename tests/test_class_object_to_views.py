@@ -28,9 +28,8 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import Empty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
+        result += "pass\n"
         self.assertEqual(result, self.empty_class.to_views_code())
 
     def test_to_views_code_multiple_methods(self):
@@ -39,14 +38,12 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
+        result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
+        result += "pass\n"
         self.assertIn("method1", code)
         self.assertIn("method2", code)
         self.assertEqual(result, code)
@@ -58,14 +55,12 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
+        result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
+        result += "pass\n"
         self.assertEqual(result, self.empty_class.to_views_code())
 
     def test_to_views_code_class_obj_has_parent_with_own_methods(self):
@@ -78,19 +73,16 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import Empty\nfrom .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
+        result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
+        result += "pass\n"
         result += "def method3(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method3 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method3 function is not yet implemented')\n    "
+        result += "pass\n"
         self.assertEqual(result, self.empty_class.to_views_code())
 
     def test_to_views_code_class_obj_has_parent_but_no_methods(self):
@@ -100,14 +92,12 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method1 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
+        result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
-        result += (
-            "    raise NotImplementedError('method2 function is not yet implemented')\n    pass\n"
-        )
+        result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
+        result += "pass\n"
         self.assertEqual(result, self.class_with_methods.to_views_code())
 
     def test_to_views_code_invalid_class_name(self):
@@ -118,17 +108,29 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         self.empty_class.set_name(" ")
         with self.assertRaises(ValueError) as ctx:
             self.empty_class.to_views_code()
-        self.assertEqual(str(ctx.exception), "Invalid class name:  ")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid class name ' '\nplease consult "
+            "the user manual document on how to name classes",
+        )
 
         self.empty_class.set_name("123")
         with self.assertRaises(ValueError) as ctx:
             self.empty_class.to_views_code()
-        self.assertEqual(str(ctx.exception), "Invalid class name: 123")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid class name '123'\nplease consult "
+            "the user manual document on how to name classes",
+        )
 
         self.empty_class.set_name("abcd!^&@")
         with self.assertRaises(ValueError) as ctx:
             self.empty_class.to_views_code()
-        self.assertEqual(str(ctx.exception), "Invalid class name: abcd!^&@")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid class name 'abcd!^&@'\nplease consult the "
+            "user manual document on how to name classes",
+        )
 
 
 if __name__ == "__main__":

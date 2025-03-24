@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from io import StringIO
 
+import anyio
+from jinja2 import Template
+
 from app.parse_json_to_object_class import ParseJsonToObjectClass
+from app.utils import camel_to_snake
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
@@ -30,6 +34,15 @@ class FileElements(ABC):
     def print_django_style(self) -> str:  # pragma: no cover
         pass
 
+    async def write_to_file(self, path: str) -> None:
+        file = path + "/" + self.__name
+        to_be_print = self.print_django_style()
+
+        async with await anyio.open_file(file, "w") as f:
+            await f.write(to_be_print)
+        print("done writing", file)
+        return file
+
 
 class ModelsElements(FileElements):
     """An intermediate representation of information inside a models file
@@ -40,6 +53,16 @@ class ModelsElements(FileElements):
     def __init__(self, file_name: str):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
+
+    def get_classes(self) -> list[ClassObject]:  # pragma: no cover
+        return self.__classes
+
+    def add_class(self, class_object: ClassObject):
+        if not isinstance(class_object, ClassObject):
+            raise ValueError(
+                "only ClassObjects can be added to ModelsElements' Class Field!"
+            )
+        self.__classes.append(class_object)
 
     """
     Parses ClassDiagram to classes
@@ -132,3 +155,23 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
+
+class UrlsElement(FileElements):
+    def __init__(self, file_name: str):
+        super().__init__(file_name)
+        self.__classes: list[ClassObject] = []
+
+    def set_classes(self, classes: list[ClassObject]) -> None:  # pragma: no cover
+        self.__classes = classes
+
+    def print_django_style(self) -> str:
+        template = Template(open("./app/templates/urls.py.j2").read())
+        classes = []
+        for kelas in self.__classes:
+            class_context = {
+                "name": kelas.get_name(),
+                "snake_name": camel_to_snake(kelas.get_name()),
+            }
+            classes.append(class_context)
+        rendered_yaml = template.render(classes=classes)
+        return rendered_yaml

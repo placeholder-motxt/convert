@@ -2,6 +2,6 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "fastapi-app"
+  - job_name: "motxt-convert"
     static_configs:
-      - targets: ["fastapi-app:8000"]
+      - targets: ["motxt-convert:8000"]
