@@ -4,6 +4,7 @@ from io import StringIO
 import anyio
 
 from app.parse_json_to_object_class import ParseJsonToObjectClass
+from app.utils import render_template
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
@@ -176,15 +177,25 @@ class RequirementsElements(FileElements):
 
 class RunBashScriptElements(FileElements):
     def __init__(self, file_name: str):
-        pass
+        """
+        Object initialization
+        This class is only for writing script for user to run the project in format
+        of .sh (Linux & MacOS)
+        """
+        super().__init__(file_name)
 
     def print_django_style(self) -> str:
-        pass
+        return render_template("scripts/run.sh.j2", {})
 
 
 class RunBatScriptElements(FileElements):
     def __init__(self, file_name: str):
-        pass
+        """
+        Object initialization
+        This class is only for writing script for user to run the project in format
+        of .bat (Windows)
+        """
+        super().__init__(file_name)
 
     def print_django_style(self) -> str:
-        pass
+        return render_template("scripts/run.bat.j2", {})

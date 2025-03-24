@@ -1,0 +1,30 @@
+@echo off
+
+REM Check if env folder exists
+if exist env (
+    echo Activating existing Django environment...
+    call env\Scripts\activate
+) else (
+    echo Creating a new Django environment...
+    python -m venv env
+    call env\Scripts\activate
+    echo Virtual environment created and activated.
+)
+
+REM Install dependencies
+if exist requirements.txt (
+    echo Installing dependencies...
+    pip install -r requirements.txt
+) else (
+    echo requirements.txt not found!
+    exit /b 1
+)
+
+REM Run Django migrations
+echo Running migrations...
+python manage.py makemigrations
+python manage.py migrate
+
+REM Start Django server
+echo Starting Django server...
+python manage.py runserver

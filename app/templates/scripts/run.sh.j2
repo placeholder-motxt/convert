@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Check if env folder exists
+if [ -d "env" ]; then
+    echo "Activating existing Django environment..."
+    source env/bin/activate
+else
+    echo "Creating a new Django environment..."
+    python3 -m venv env
+    source env/bin/activate
+    echo "Virtual environment created and activated."
+fi
+
+# Install dependencies
+if [ -f "requirements.txt" ]; then
+    echo "Installing dependencies..."
+    pip install -r requirements.txt
+else
+    echo "requirements.txt not found!"
+    exit 1
+fi
+
+# Run Django migrations
+echo "Running migrations..."
+python manage.py makemigrations
+python manage.py migrate
+
+# Start Django server
+echo "Starting Django server..."
+python manage.py runserver
