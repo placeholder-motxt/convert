@@ -1,4 +1,4 @@
-from app.models.diagram import ClassObject, FieldObject
+from app.models.diagram import ClassObject
 from app.models.elements import ModelsElements
 from app.utils import camel_to_snake, render_template
 
@@ -20,20 +20,3 @@ def generate_html_read_page_django(class_object: ClassObject) -> str:
         fields.append({"name": field.get_name()})
     context["fields"] = fields
     return render_template("read_page_django.html.j2", context)
-
-
-if __name__ == "__main__":
-    model = ClassObject()
-    model.set_name("Person")
-    field1 = FieldObject()
-    field1.set_name("name")
-    field2 = FieldObject()
-    field2.set_name("age")
-    field3 = FieldObject()
-    field3.set_name("is_alive")
-
-    model.add_field(field1)
-    model.add_field(field2)
-    model.add_field(field3)
-
-    print(generate_html_read_page_django(model))
