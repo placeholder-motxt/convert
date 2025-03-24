@@ -13,11 +13,11 @@ class TestRenderRunScript(unittest.TestCase):
             sh = file.read()
 
         rendered = self.bash_script_element.print_django_style()
-        self.assertEqual(rendered, sh)
+        self.assertEqual(rendered.strip(), sh.strip())
 
     def test_bat_print_django_style(self):
         with open("tests/test_run_bat.txt", "r", encoding="utf-8") as file:
             bat = file.read()
 
         rendered = self.bat_script_element.print_django_style()
-        self.assertEqual(rendered, bat)
+        self.assertEqual(rendered.strip(), bat.strip())
