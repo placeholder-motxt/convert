@@ -1,14 +1,21 @@
 @echo off
 
+REM Ask for environment folder name
+set /p ENV_FOLDER="Enter the environment folder name (default: env): "
+
+if "%ENV_FOLDER%"=="" (
+    set ENV_FOLDER=env
+)
+
 REM Check if env folder exists
-if exist env (
+if exist %ENV_FOLDER% (
     echo Activating existing Django environment...
-    call env\Scripts\activate
+    call %ENV_FOLDER%\Scripts\activate
 ) else (
     echo Creating a new Django environment...
-    python -m venv env
-    call env\Scripts\activate
-    echo Virtual environment created and activated.
+    python -m venv %ENV_FOLDER%
+    call %ENV_FOLDER%\Scripts\activate
+    echo Virtual environment with name %ENV_FOLDER% created and activated.
 )
 
 REM Install dependencies
