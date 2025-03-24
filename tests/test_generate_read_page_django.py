@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from app.generate_frontend.read.generate_read_page_django import (
     generate_html_read_page_django,
     generate_html_read_pages_django,
@@ -42,6 +44,10 @@ class TestGenerateHTMLReadPageDjango(unittest.TestCase):
             "read_page_django.html.j2", expected_context
         )
         self.assertEqual(result, "Rendered Person Page")
+
+    def test_generate_html_read_pages_django_negative_type_error(self):
+        with pytest.raises(TypeError):
+            generate_html_read_pages_django("test")
 
     @patch("app.generate_frontend.read.generate_read_page_django.render_template")
     def test_generate_html_read_page_django_negative_template_failure(
@@ -171,6 +177,10 @@ class TestGenerateHTMLReadPagesDjango(unittest.TestCase):
         result = generate_html_read_pages_django(models_elements)
         self.assertEqual(result, ["Rendered Person Page", "Rendered Vehicle Page"])
         self.assertEqual(mock_generate_page.call_count, 2)
+
+    def test_generate_html_read_page_django_negative_type_error(self):
+        with pytest.raises(TypeError):
+            generate_html_read_page_django("test")
 
     def test_generate_html_read_pages_django_negative_no_classes(self):
         """Negative case: When no classes exist, an empty list should be returned."""
