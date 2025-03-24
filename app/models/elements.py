@@ -4,7 +4,6 @@ from io import StringIO
 import anyio
 
 from app.parse_json_to_object_class import ParseJsonToObjectClass
-from app.utils import render_template
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
@@ -182,7 +181,9 @@ class RunBashScriptElements(FileElements):
     """
 
     def print_django_style(self) -> str:
-        return render_template("scripts/run.sh.j2", {})
+        with open("app/templates/scripts/run.sh.txt", "r", encoding="utf-8") as file:
+            bash = file.read()
+        return bash
 
 
 class RunBatScriptElements(FileElements):
@@ -192,4 +193,6 @@ class RunBatScriptElements(FileElements):
     """
 
     def print_django_style(self) -> str:
-        return render_template("scripts/run.bat.j2", {})
+        with open("app/templates/scripts/run.bat.txt", "r", encoding="utf-8") as file:
+            bat = file.read()
+        return bat
