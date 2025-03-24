@@ -1,11 +1,13 @@
+import logging
 import os
 import re
 from keyword import iskeyword
 from typing import Any
 
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader, TemplateNotFound
 
 env = Environment(loader=PackageLoader("app"))
+logger = logging.getLogger("uvicorn.error")
 
 
 def remove_file(path: str) -> None:
@@ -20,8 +22,12 @@ def render_template(template_name: str, context: dict[str, Any]) -> str:
     try:
         template = env.get_template(template_name)
         return template.render(context)
-    except Exception as e:
-        print(f"Error rendering template {template_name}: {e}")
+    except TemplateNotFound as e:  # Somehow the template can't be found
+        logger.error(f"Template not found: {e}")
+        # TODO: Maybe send alert to us
+        return ""
+    except Exception as e:  # All other cases
+        logger.warning(f"An error occured: {e}")
         return ""
 
 

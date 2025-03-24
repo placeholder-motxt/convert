@@ -14,7 +14,7 @@ from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import ClassObject, ModelsElements, ViewsElements
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
-from app.utils import remove_file
+from app.utils import logger, remove_file
 
 
 @asynccontextmanager
@@ -36,14 +36,18 @@ async def download_file(request: DownloadRequest) -> FileResponse:
     file = request.filename + request.type + ".py"
 
     if "/" in request.filename or "\\" in request.filename:
+        logger.warning(f"Bad filename: {request.filename}")
         raise HTTPException(status_code=400, detail="/ not allowed in file name")
 
     if os.path.exists(file):
+        logger.warning(f"File already exists: {file}")
+        # TODO: Add to metrics so we can know how many request actually face this problem
         raise HTTPException(status_code=400, detail="Please try again later")
 
     async with await anyio.open_file(file, "w") as f:
         await f.write(request.content)
-    print("done writing", file)
+
+    logger.info(f"Finished writing: {file}")
     return file
 
 
@@ -140,7 +144,11 @@ async def convert(
         )
 
     except ValueError as ex:
-        raise HTTPException(status_code=422, detail=str(ex))
+        ex_str = str(ex)
+        logger.warning(
+            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(status_code=422, detail=ex_str)
 
 
 def check_duplicate(
@@ -152,13 +160,9 @@ def check_duplicate(
     if not class_object:
         return duplicate_class_method_checker
     for class_method_object in class_objects[class_object_name].get_methods():
-        if (
-            class_object_name,
-            class_method_object.get_name(),
-        ) in duplicate_class_method_checker:
-            duplicate_class_method_checker[
-                (class_object_name, class_method_object.get_name())
-            ] = class_method_object
+        key = (class_object_name, class_method_object.get_name())
+        if key in duplicate_class_method_checker:
+            duplicate_class_method_checker[key] = class_method_object
         else:
             raise ValueError(
                 f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
