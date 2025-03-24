@@ -48,7 +48,7 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
         with zipfile.ZipFile(zipfile_path, "w") as zipf:
             zipf.writestr(self.project_name, data="")  # create empty file
         try:
-            with self.assertRaises(ValueError) as context:
+            with self.assertRaises(FileExistsError) as context:
                 create_django_project(self.project_name)
             self.assertEqual(
                 str(context.exception),
@@ -57,8 +57,8 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
         finally:
             if os.path.exists(zipfile_path):
                 os.remove(zipfile_path)
-        if os.path.exists("project_test_project"):
-            shutil.rmtree("project_test_project")
+            if os.path.exists("project_test_project"):
+                shutil.rmtree("project_test_project")
 
     # render django project from template
     def test_render_project_django_template_positive(self):
@@ -104,27 +104,43 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
 
 
 class TestGenerateDjangoMain(unittest.TestCase):
+    def setUp(self):
+        self.project_name = "test_main"
+        if os.path.exists(f"{self.project_name}.zip"):
+            os.remove(f"{self.project_name}.zip")
+        if os.path.exists(f"project_{self.project_name}"):
+            shutil.rmtree(f"project_{self.project_name}")
+
     def test_generate_django_app_positive(self):
         folder_path = "project_test_main"
         create_django_project("test_main")
-        try:
-            result = create_django_app("test_main", "main")
-            self.assertIn(
-                result,
-                [
-                    "admin.py",
-                    "apps.py",
-                    "models.py",
-                    "tests.py",
-                    "views.py",
-                    "__init__.py",
-                ],
-            )
-        finally:
-            if os.path.exists(folder_path):
-                shutil.rmtree(folder_path)
-            if os.path.exists("test_main.zip"):
-                os.remove("test_main.zip")
+        create_django_app("test_main", "main")
+
+        zipfile_path = "test_main.zip"
+        open_zip = zipfile.ZipFile(zipfile_path, "r")
+        files = open_zip.namelist()
+
+        for file in files:
+            filename = file.split("/")[-1]
+            if filename in os.listdir("app/templates/django_app"):
+                if "migrations" in file:
+                    continue
+                print(open_zip.extract(file, os.path.join("tests", "testdata")))
+                with (
+                    open(
+                        os.path.join("app", "templates", "django_app", filename), "r"
+                    ) as f1,
+                    open(
+                        os.path.join("tests", "testdata", "main", filename), "r"
+                    ) as f2,
+                ):
+                    self.assertEqual(f1.read(), f2.read())
+        open_zip.close()
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+            shutil.rmtree(os.path.join("tests", "testdata", "main"))
+        if os.path.exists(zipfile_path):
+            os.remove(zipfile_path)
 
     def test_generate_django_app_negative_invalid_name(self):
         with self.assertRaises(ValueError) as context:
@@ -143,7 +159,7 @@ class TestGenerateDjangoMain(unittest.TestCase):
         )
 
     def test_generate_django_app_negative_zip_not_exist(self):
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(FileNotFoundError) as context:
             create_django_app("test_main", "main")
         self.assertEqual(
             str(context.exception),
