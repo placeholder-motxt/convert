@@ -215,7 +215,9 @@ def create_django_project(project_name: str) -> list[str]:
     return files
 
 
-def create_django_app(project_name: str, app_name: str) -> list[str]:
+def create_django_app(
+    project_name: str, app_name: str, models: str = None
+) -> list[str]:
     file_names = []
     if not is_valid_python_identifier(app_name):
         raise ValueError("App name must not contain whitespace!")
@@ -236,7 +238,22 @@ def create_django_app(project_name: str, app_name: str) -> list[str]:
                 zipf.writestr(f"{app_name}/{file_name}", template)
                 file_names.append("apps.py")
             else:  # file that use txt file
-                if file == "__init__.txt":
+                """
+                Check if the current file is models.txt and if yes, render based on
+                the parsed value in the parameter 'models'
+                """
+                if file == "models.txt" and models is not None:
+                    if models != "":
+                        zipf.writestr(f"{app_name}/models.py", models)
+                    else:
+                        with open(
+                            os.path.join("app", "templates", "django_app", file), "r"
+                        ) as f:
+                            content = f.read()
+                            file_name = file.replace(".txt", ".py")
+                            zipf.writestr(f"{app_name}/{file_name}", content)
+
+                elif file == "__init__.txt":
                     zipf.writestr(f"{app_name}/migrations/__init__.py", "")
                     zipf.writestr(f"{app_name}/__init__.py", "")
                 else:
@@ -251,4 +268,24 @@ def create_django_app(project_name: str, app_name: str) -> list[str]:
 
 
 def render_model(json_content: dict) -> str:
-    pass
+    """
+    Function to get the models.py content. Must be called before
+    create_django_app and pass the return value to the parameter
+    in create_django_app
+    """
+    writer_models = ModelsElements("models.py")
+    response_content_models = ""
+    duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = dict()
+
+    if json_content["diagram"] == "ClassDiagram":
+        classes = writer_models.parse(json_content)
+
+        for model_class in classes:
+            for method in model_class.get_methods():
+                duplicate_class_method_checker[
+                    (model_class.get_name(), method.get_name())
+                ] = method
+
+        response_content_models += writer_models.print_django_style()
+
+        return response_content_models
