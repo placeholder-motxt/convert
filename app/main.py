@@ -215,16 +215,21 @@ def create_django_project(project_name: str) -> list[str]:
     return files
 
 
-def create_django_app(
-    project_name: str, app_name: str, models: str = None
-) -> list[str]:
-    file_names = []
+def validate_django_app(project_name: str, app_name: str):
     if not is_valid_python_identifier(app_name):
         raise ValueError("App name must not contain whitespace!")
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace!")
     if not os.path.exists(f"{project_name}.zip"):
         raise FileNotFoundError(f"File {project_name}.zip does not exist")
+
+
+def create_django_app(
+    project_name: str, app_name: str, models: str = None
+) -> list[str]:
+    file_names = []
+
+    validate_django_app(project_name, app_name)
 
     with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
         for file in os.listdir("app/templates/django_app"):
