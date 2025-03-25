@@ -143,6 +143,7 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
+
 class RequirementsElements(FileElements):
     def __init__(self, file_name: str):
         """
@@ -171,3 +172,27 @@ class RequirementsElements(FileElements):
             result.write(requirement + "\n")
 
         return result.getvalue()
+
+
+class RunBashScriptElements(FileElements):
+    """
+    This class is only for writing script for user to run the project in format
+    of .sh (Linux & MacOS)
+    """
+
+    def print_django_style(self) -> str:
+        with open("app/templates/scripts/run.sh.txt", "r", encoding="utf-8") as file:
+            bash = file.read()
+        return bash
+
+
+class RunBatScriptElements(FileElements):
+    """
+    This class is only for writing script for user to run the project in format
+    of .bat (Windows)
+    """
+
+    def print_django_style(self) -> str:
+        with open("app/templates/scripts/run.bat.txt", "r", encoding="utf-8") as file:
+            bat = file.read()
+        return bat
