@@ -1,7 +1,3 @@
-from django.shortcuts import render, redirect
-from .forms import *
-from .models import *
-
 {% for class in classes %}
 def create_{{ class.name_snake }}(request):
     if request.method == 'POST':
