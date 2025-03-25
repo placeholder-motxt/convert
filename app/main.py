@@ -248,3 +248,7 @@ def create_django_app(project_name: str, app_name: str) -> list[str]:
                         zipf.writestr(f"{app_name}/{file_name}", content)
             file_names.append(file)
     return file_names
+
+
+def render_model(json_content: dict) -> str:
+    pass
