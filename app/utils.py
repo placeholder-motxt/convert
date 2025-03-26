@@ -5,7 +5,7 @@ from typing import Any
 
 from jinja2 import Environment, PackageLoader
 
-env = Environment(loader=PackageLoader("app"))  # nosec B701
+env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 
 
 def remove_file(path: str) -> None:
