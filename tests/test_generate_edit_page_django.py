@@ -60,9 +60,9 @@ class TestGenerateHtmlEditPageDjango(unittest.TestCase):
         # empty means no name nor fields
         empty_class_object = ClassObject()
         result = generate_html_edit_page_django(empty_class_object)
-        self.assertNotIn(result, "<title>Edit </title>")
-        self.assertNotIn(result, "<h1>Edit </h1>")
-        self.assertNotIn(result, '<button type="submit">Save</button>')
+        self.assertNotIn("<title>Edit </title>", result)
+        self.assertNotIn("<h1>Edit </h1>", result)
+        self.assertNotIn('<button type="submit">Save</button>', result)
         self.assertEqual(result, "")
 
     def test_generate_html_create_pages_django_normal(self):
@@ -89,7 +89,7 @@ class TestGenerateHtmlEditPageDjango(unittest.TestCase):
         # Edge case when some class in the ModelsElement somehow have the same
         # name, just return both HTML
         # It's an edge case because it is *supposed* to already be handled
-        models_obj = ModelsElements()
+        models_obj = ModelsElements("ModelTest")
         models_obj.add_class(self.class_object1)
         models_obj.add_class(self.class_object1)
         result = generate_html_edit_pages_django(models_obj)
