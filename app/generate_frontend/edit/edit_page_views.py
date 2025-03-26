@@ -11,9 +11,11 @@ def generate_edit_page_views(models_elements: ModelsElements) -> str:
     for class_object in class_objects:
         if len(class_object.get_fields()) == 0:
             continue
+
+        cls_name = class_object.get_name()
         class_context = {
-            "name": class_object.get_name(),
-            "snake_name": camel_to_snake(class_object.get_name()),
+            "name": cls_name,
+            "snake_name": camel_to_snake(cls_name),
         }
         classes.append(class_context)
     context = {"classes": classes}
