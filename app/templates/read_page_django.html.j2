@@ -23,9 +23,11 @@
                 <td>{% raw %}{{{% endraw %} {{ class_snake }}.{{ field.name }} {% raw %}}}{% endraw %}</td>
             {% endfor -%}
                 <td>
-                    <a href="{% raw %}{%{% endraw %} url 'delete_{{ class_snake }}' {{ class_snake }}.id {% raw %}%}{% endraw %}">
-                        <button type="button">Delete</button>
-                    </a>
+                    <form action="{% raw %}{%{% endraw %} url 'delete_{{class_snake}}' {% raw %}%}{% endraw %}" method="POST">
+                        {% raw %}{% csrf_token %}{% endraw %}
+                        <input type="hidden" name="object_id" value="{% raw %}{{{% endraw %} {{ class_snake }}.id {% raw %}}}{% endraw %}">
+                        <button type="submit">Delete</button>
+                    </form>
                 </td>
             </tr>
             {% raw %}{% empty %}{% endraw %}
