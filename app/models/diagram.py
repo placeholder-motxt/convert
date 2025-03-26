@@ -22,7 +22,7 @@ class ClassObject:
 
         self.__id: int
 
-    def get_fields(self) -> list[FieldObject]: # pragma: no cover
+    def get_fields(self) -> list[FieldObject]:  # pragma: no cover
         return self.__fields
 
     def to_models_code(self) -> str:
