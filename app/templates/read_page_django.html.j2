@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ class_name }} List</title>
-</head>
-<body>
+{% raw %}{% extends 'base.html' %}
+{% block content %}{% endraw %}
     <h1>{{ class_name }} List</h1>
     <table border="1">
         <thead>
@@ -40,5 +34,4 @@
     </table>
     <br>
     <a href="{% raw %}{%{% endraw %} url 'create_{{ class_snake }}' {% raw %}%}{% endraw %}">Create New {{ class_name }}</a>
-</body>
-</html>
+{% raw %}{% endblock content %}{% endraw %}
