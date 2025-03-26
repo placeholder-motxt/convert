@@ -62,7 +62,7 @@ class TestReplaceModelAndViews(unittest.TestCase):
 
             models_content = zipf.read("testRender/models.py").decode("utf-8")
             self.assertEqual(
-                models_content.strip().replace("\t", "    "), expected_result
+                models_content.strip().replace("\t", "    "), expected_result.strip()
             )
 
     def test_render_empty_model(self):
@@ -117,7 +117,7 @@ class TestReplaceModelAndViews(unittest.TestCase):
 
             models_content = zipf.read("testRender/views.py").decode("utf-8")
             self.assertEqual(
-                models_content.strip().replace("\t", "    "), expected_result
+                models_content.strip().replace("\t", "    "), expected_result.strip()
             )
 
     def tearDown(self):
