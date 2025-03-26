@@ -41,7 +41,7 @@ class TestEditPageViews(unittest.TestCase):
         self.assertIn("def edit_product(request, id)", result)
         self.assertIn("item_obj = Item.objects.get(pk=id)", result)
         self.assertIn("ItemForm(request.POST or None, instance=item_obj)", result)
-        self.assertIn("product_obj = Product.objects.get(pk=id)")
+        self.assertIn("product_obj = Product.objects.get(pk=id)", result)
         self.assertIn("ProductForm(request.POST or None, instance=product_obj)", result)
 
     @patch("app.generate_frontend.edit.edit_page_views.render_template")
@@ -65,7 +65,7 @@ class TestEditPageViews(unittest.TestCase):
         empty_models_elements = ModelsElements("EmptyModel")
         with self.assertRaises(ValueError) as ctx:
             generate_edit_page_views(empty_models_elements)
-        self.assertEqual(str(ctx), "Can't create edit views with no class")
+        self.assertEqual(str(ctx.exception), "Can't create edit views with no class")
 
     def test_generate_edit_page_views_some_class_empty_fields(self):
         # When there are classes but some of them have no fields,
