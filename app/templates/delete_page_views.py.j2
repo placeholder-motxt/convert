@@ -1,14 +1,13 @@
 {% for class in classes %}
 def delete_{{ class.name_snake }}(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        object_id = data.get("id")
+        person_id = request.POST.get('object_id')
 
         if object_id is None:
             return JsonResponse({"error": "ID is required"}, status=400)
 
         obj = {{class.name}}.objects.get(pk=object_id)
         obj.delete()
-        return JsonResponse({"message": f"Object with ID {object_id} deleted successfully."})
+        return redirect('get_{{ class.name_snake }}')
     return JsonResponse({"error": "Invalid request method"}, status=405)
 {% endfor %}
