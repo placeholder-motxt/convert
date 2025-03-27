@@ -13,6 +13,8 @@ class TestLandingPageFunctions(unittest.TestCase):
 
         # Assert render_template was called with the correct template and context
         self.assertIn("model", result)
+        self.assertIn("<h1>Landing Page</h1>", result)
+        self.assertIn("<h2>Models Available</h2>", result)
 
     def test_generate_landing_page_views(self):
         # Call the function
@@ -20,3 +22,5 @@ class TestLandingPageFunctions(unittest.TestCase):
 
         # Assert render_template was called with the correct template and context
         self.assertIn("model", result)
+        self.assertIn("def landing_page(request):", result)
+        self.assertIn("model_info", result)
