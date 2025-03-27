@@ -5,7 +5,7 @@ from typing import Any
 
 from jinja2 import Environment, PackageLoader
 
-env = Environment(loader=PackageLoader("app"), autoescape=True)
+env = Environment(loader=PackageLoader("app"))
 
 
 def remove_file(path: str) -> None:
