@@ -294,7 +294,7 @@ class AbstractMethodCallObject(ABC):
 
         """
         result = StringIO()
-        print(self.get_return_var_name() + " HEHE " + self.__method.get_name())
+
         if self.__condition:
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:

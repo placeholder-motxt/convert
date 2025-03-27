@@ -319,7 +319,6 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
                     writer_views.add_controller_method(controller_method_object)
 
                 for class_object in class_objects:
-                    print(class_object)
                     duplicate_class_method_checker = check_duplicate(
                         class_objects, class_object, duplicate_class_method_checker
                     )
