@@ -1,0 +1,31 @@
+#-----method from class getId------
+
+def getId(request, instance_name) -> string:
+    # TODO: Auto generated function stub
+    raise NotImplementedError('getId function is not yet implemented')
+    pass
+
+
+
+#-----method from class setRadius------
+
+def setRadius(request, instance_name, radius):
+    # TODO: Auto generated function stub
+    raise NotImplementedError('setRadius function is not yet implemented')
+    pass
+
+
+
+#-----method from class findCircle------
+
+def findCircle(request, instance_name, circleId):
+    # TODO: Auto generated function stub
+    raise NotImplementedError('findCircle function is not yet implemented')
+    pass
+
+
+
+def editRadius(request, circleId, radius):
+    circle = findCircle(request, circleId)
+    setRadius(request, radius)
+    pass
