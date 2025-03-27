@@ -8,6 +8,10 @@ services:
       - "8000:8000"
     networks:
       - monitoring
+    logging:
+      options:
+        max-size: "50mb"
+        max-file: "4"
     deploy:
       resources:
         limits:
