@@ -246,7 +246,7 @@ class AbstractMethodCallObject(ABC):
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
 
-    # Method yang dibuat akibat kejadian ghaib
+    # Method created since set_return_var_name somehow is broken
     def set_ret_var(self, name: str):  # pragma: no cover
         self.__return_var_name = name
 
