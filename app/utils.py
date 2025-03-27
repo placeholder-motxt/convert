@@ -6,7 +6,7 @@ from typing import Any
 
 from jinja2 import Environment, PackageLoader, TemplateNotFound
 
-env = Environment(loader=PackageLoader("app"))
+env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 logger = logging.getLogger("uvicorn.error")
 
 
