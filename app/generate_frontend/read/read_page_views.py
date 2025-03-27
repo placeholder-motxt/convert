@@ -10,11 +10,12 @@ def generate_read_page_views(models_elements: ModelsElements) -> str:
     # Consider modifying the for loop below to avoid memory explosion
     class_list = []
     for class_object in models_elements.get_classes():
-        class_list.append(
-            {
-                "class_name": class_object.get_name(),
-                "class_snake": camel_to_snake(class_object.get_name()),
-            }
-        )
+        if class_object.get_is_public():
+            class_list.append(
+                {
+                    "class_name": class_object.get_name(),
+                    "class_snake": camel_to_snake(class_object.get_name()),
+                }
+            )
     context = {"classes": class_list}
     return render_template("read_page_views.py.j2", context)

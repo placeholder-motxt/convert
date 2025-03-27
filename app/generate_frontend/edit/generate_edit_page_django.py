@@ -15,9 +15,10 @@ def generate_html_edit_pages_django(models_elements: ModelsElements) -> list[str
 
     result = []
     for class_object in models_elements.get_classes():
-        html = generate_html_edit_page_django(class_object)
-        if html != "":
-            result.append(html)
+        if class_object.get_is_public():
+            html = generate_html_edit_page_django(class_object)
+            if html != "":
+                result.append(html)
 
     return result
 
