@@ -1,7 +1,7 @@
 {% for class in classes %}
 def delete_{{ class.name_snake }}(request):
     if request.method == 'POST':
-        person_id = request.POST.get('object_id')
+        object_id = request.POST.get('object_id')
 
         if object_id is None:
             return JsonResponse({"error": "ID is required"}, status=400)
