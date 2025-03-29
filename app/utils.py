@@ -6,7 +6,7 @@ from typing import Any
 
 from jinja2 import Environment, PackageLoader, TemplateNotFound
 
-env = Environment(loader=PackageLoader("app"))
+env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -18,7 +18,10 @@ def is_valid_python_identifier(identifier: str) -> bool:
     return identifier.isidentifier() and not iskeyword(identifier)
 
 
-def render_template(template_name: str, context: dict[str, Any]) -> str:
+def render_template(
+    template_name: str, context: dict[str, Any] = {}, **kwargs: dict[str, Any]
+) -> str:
+    context |= kwargs
     try:
         template = env.get_template(template_name)
         return template.render(context)

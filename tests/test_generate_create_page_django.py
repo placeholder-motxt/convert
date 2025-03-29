@@ -11,7 +11,6 @@ from app.models.elements import ModelsElements
 
 
 class TestGenerateHtmlCreatePageDjango(unittest.TestCase):
-
     def setUp(self):
         # Setup a basic mock for the class object and fields.
         self.class_object = MagicMock(spec=ClassObject)
@@ -27,7 +26,9 @@ class TestGenerateHtmlCreatePageDjango(unittest.TestCase):
     def test_generate_html_create_page_django(self):
         # Test positive case for HTML page generation
         result = generate_html_create_page_django(self.class_object)
-        self.assertIn("Create Person", result)  # Checking if class name is correctly rendered
+        self.assertIn(
+            "Create Person", result
+        )  # Checking if class name is correctly rendered
 
     def test_generate_html_create_page_django_empty_class(self):
         # Test negative case where the class is empty
@@ -38,7 +39,6 @@ class TestGenerateHtmlCreatePageDjango(unittest.TestCase):
 
 
 class TestGenerateHtmlCreatePagesDjango(unittest.TestCase):
-
     def setUp(self):
         # Setup a basic mock for the class object and fields.
         self.class_object = MagicMock(spec=ClassObject)
@@ -54,7 +54,11 @@ class TestGenerateHtmlCreatePagesDjango(unittest.TestCase):
         # Create ModelsElements object with one class object
         self.models_elements = MagicMock(spec=ModelsElements)
         self.models_elements.get_classes.return_value = [self.class_object]
-        self.class_object.get_fields.return_value = [self.field1, self.field2, self.field3]
+        self.class_object.get_fields.return_value = [
+            self.field1,
+            self.field2,
+            self.field3,
+        ]
 
     def test_generate_html_create_pages_django(self):
         # Test positive case for generating HTML pages for models elements
@@ -64,7 +68,10 @@ class TestGenerateHtmlCreatePagesDjango(unittest.TestCase):
 
     def test_generate_html_create_pages_django_multiple_classes(self):
         # Test for multiple classes with same name
-        self.models_elements.get_classes.return_value = [self.class_object, self.class_object]
+        self.models_elements.get_classes.return_value = [
+            self.class_object,
+            self.class_object,
+        ]
         result = generate_html_create_pages_django(self.models_elements)
         self.assertEqual(len(result), 2)  # Two pages should be generated
         self.assertIn("Create Person", result[0])
@@ -72,7 +79,6 @@ class TestGenerateHtmlCreatePagesDjango(unittest.TestCase):
 
 
 class TestGenerateFormsCreatePageDjango(unittest.TestCase):
-
     def setUp(self):
         # Setup a basic mock for the class object and fields.
         self.class_object = MagicMock(spec=ClassObject)
@@ -88,20 +94,26 @@ class TestGenerateFormsCreatePageDjango(unittest.TestCase):
         # Create ModelsElements object with one class object
         self.models_elements = MagicMock(spec=ModelsElements)
         self.models_elements.get_classes.return_value = [self.class_object]
-        self.class_object.get_fields.return_value = [self.field1, self.field2, self.field3]
+        self.class_object.get_fields.return_value = [
+            self.field1,
+            self.field2,
+            self.field3,
+        ]
 
     def test_generate_forms_create_page_django(self):
         # Test positive case for form generation
         result = generate_forms_create_page_django(self.models_elements)
-        self.assertIn('class PersonForm(forms.ModelForm):', result)  # Checking the generated form class
-        self.assertIn('name', result)  # Field names should appear in the form
+        self.assertIn(
+            "class PersonForm(forms.ModelForm):", result
+        )  # Checking the generated form class
+        self.assertIn("name", result)  # Field names should appear in the form
 
     def test_generate_forms_create_page_django_no_fields(self):
         # Test case where the class has no fields
         self.class_object.get_fields.return_value = []  # Empty fields
         result = generate_forms_create_page_django(self.models_elements)
-        self.assertIn('class PersonForm(forms.ModelForm):', result)
-        self.assertIn('fields = []', result)  # No fields in the form
+        self.assertIn("class PersonForm(forms.ModelForm):", result)
+        self.assertIn("fields = []", result)  # No fields in the form
 
     def test_generate_forms_create_page_django_empty_class(self):
         # Test negative case where the class has no fields
@@ -111,7 +123,9 @@ class TestGenerateFormsCreatePageDjango(unittest.TestCase):
         empty_models_elements = MagicMock(spec=ModelsElements)
         empty_models_elements.get_classes.return_value = [empty_class_object]
         result = generate_forms_create_page_django(empty_models_elements)
-        self.assertIn('class EmptyClassForm(forms.ModelForm):', result)  # Form with no fields
+        self.assertIn(
+            "class EmptyClassForm(forms.ModelForm):", result
+        )  # Form with no fields
 
     def test_generate_forms_create_page_django_no_class(self):
         # Test case with no classes in ModelsElements
