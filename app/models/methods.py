@@ -246,7 +246,7 @@ class AbstractMethodCallObject(ABC):
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
 
-    # Method yang dibuat akibat kejadian ghaib
+    # Method created since set_return_var_name somehow is broken
     def set_ret_var(self, name: str):  # pragma: no cover
         self.__return_var_name = name
 
@@ -294,7 +294,7 @@ class AbstractMethodCallObject(ABC):
 
         """
         result = StringIO()
-        print(self.get_return_var_name() + " HEHE " + self.__method.get_name())
+
         if self.__condition:
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:

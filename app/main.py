@@ -279,6 +279,21 @@ def create_django_app(
     return file_names
 
 
+def process_parsed_class(
+    classes: list,
+    duplicate_checker: dict[tuple[str, str], ClassMethodObject],
+):
+    for model_class in classes:
+        for method in model_class.get_methods():
+            duplicate_checker[(model_class.get_name(), method.get_name())] = method
+
+
+def validate_instance(json_content: str) -> dict:
+    if isinstance(json_content, str):
+        json_content = json.loads(json_content)
+        return json_content
+
+
 def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     """
     This is the logic from convert() method to process the requested
@@ -296,9 +311,7 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
         writer_views = ViewsElements("views.py")
 
         for file_name, content in zip(filename, content):
-            json_content = content[0]
-            if isinstance(json_content, str):
-                json_content = json.loads(json_content)
+            json_content = validate_instance(content[0])
 
             if (
                 json_content["diagram"] is not None
@@ -306,11 +319,7 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
             ):
                 classes = writer_models.parse(json_content)
 
-                for model_class in classes:
-                    for method in model_class.get_methods():
-                        duplicate_class_method_checker[
-                            (model_class.get_name(), method.get_name())
-                        ] = method
+                process_parsed_class(classes, duplicate_class_method_checker)
 
             elif (
                 json_content["diagram"] is not None
@@ -328,7 +337,6 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
                     writer_views.add_controller_method(controller_method_object)
 
                 for class_object in class_objects:
-                    print(class_object)
                     duplicate_class_method_checker = check_duplicate(
                         class_objects, class_object, duplicate_class_method_checker
                     )
