@@ -16,6 +16,14 @@ from .utils import is_valid_python_identifier
 class ParseJsonToObjectClass:
     def __init__(self, data: str):
         self.__json = data
+
+        """
+        This regex will match anything that starts with + or -
+        and then followed by any string imaginable seperated
+        with or without space
+        """
+        self.__public_regex = r"(^[\+\-]) ?(?P<class_name>\w*)"
+
         if isinstance(data, str):
             try:
                 self.__json = json.loads(data)
@@ -44,6 +52,15 @@ class ParseJsonToObjectClass:
             class_obj = ClassObject()
 
             object_name = object["name"]
+
+            if bool(re.match(self.__public_regex, object_name)):
+                if object_name[0] == "+":
+                    class_obj.set_is_public(True)
+                else:
+                    class_obj.set_is_public(False)
+                object_name = object_name[1:].strip()
+            else:
+                class_obj.set_is_public(False)
 
             if self.check_name(object_name):
                 class_obj.set_name(object_name)

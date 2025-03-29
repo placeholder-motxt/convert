@@ -35,6 +35,33 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             parser._ParseJsonToObjectClass__json["nodes"][1]["type"], "ClassNode"
         )
 
+    def test_parse_public_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_public_class.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertTrue(kelas.get_is_public())
+
+    def test_parse_private_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_private_class.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertFalse(kelas.get_is_public())
+
+    def test_parse_default_private_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_1.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertFalse(kelas.get_is_public())
+
     def test_empty_nodes(self):
         data = ""
         with open("tests/testdata/parse_class_2.json") as file:
