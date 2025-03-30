@@ -19,8 +19,12 @@ class ClassObject:
         self.__fields: list[FieldObject] = []
         self.__methods: list[ClassMethodObject] = []
         self.__relationships: list[AbstractRelationshipObject] = []
+        self.__is_public: bool = False
 
         self.__id: int
+
+    def get_fields(self) -> list[FieldObject]:  # pragma: no cover
+        return self.__fields
 
     def to_models_code(self) -> str:
         return (
@@ -90,6 +94,9 @@ class ClassObject:
     def set_id(self, id: int):
         self.__id = id
 
+    def set_is_public(self, is_public: bool):
+        self.__is_public = is_public
+
     def get_name(self) -> str:
         return self.__name
 
@@ -107,6 +114,9 @@ class ClassObject:
         for relation in self.__relationships:
             res.write("\t" + relation.to_models_code() + "\n")
         return res.getvalue()
+
+    def get_is_public(self) -> bool:
+        return self.__is_public
 
 
 class AbstractRelationshipObject(ABC):

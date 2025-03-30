@@ -55,11 +55,9 @@ class TestParseMisc(unittest.TestCase):
             self.parser.set_json(json_data)
             self.parser.parse()
             result = self.parser.get_method_call()
-            print(result)
             for edge in self.parser.get_edges():
                 start = edge["start"]
                 end = edge["end"]
                 key = (start, end)
-                print(result[key]["condition"])
                 if result[key]["condition"] is not None and key == (25, 14):
                     self.assertEqual(result[key]["condition"], "POST")
