@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create {{ class_name }}</title>
-</head>
-<body>
+{% raw %}{% extends 'base.html' %}
+{% block content %}{% endraw %}
     <h1>Create {{class_name}} </h1>
     <form method="POST">
         {% raw %}{% csrf_token %}
         {{ form.as_p }} {% endraw %}
         <button type="submit">Create {{ class_name }}</button>
     </form>
-</body>
-</html>
+{% raw %}{% endblock content %}{% endraw %}

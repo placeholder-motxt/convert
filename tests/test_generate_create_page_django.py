@@ -103,9 +103,9 @@ class TestGenerateFormsCreatePageDjango(unittest.TestCase):
     def test_generate_forms_create_page_django(self):
         # Test positive case for form generation
         result = generate_forms_create_page_django(self.models_elements)
-
-        # Checking the generated form class
-        self.assertIn("class PersonForm(forms.ModelForm):", result)
+        self.assertIn(
+            "class PersonForm(forms.ModelForm):", result
+        )  # Checking the generated form class
         self.assertIn("name", result)  # Field names should appear in the form
 
     def test_generate_forms_create_page_django_no_fields(self):
