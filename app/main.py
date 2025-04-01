@@ -101,6 +101,10 @@ async def convert(
             ):
                 classes = writer_models.parse(json_content)
 
+                # # Uncomment this to write urls.py
+                # writer_url = UrlsElement("urls.py")
+                # await writer_url.write_to_file(path='./app')
+
                 for model_class in classes:
                     for method in model_class.get_methods():
                         duplicate_class_method_checker[
