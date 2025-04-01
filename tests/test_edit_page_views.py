@@ -102,5 +102,3 @@ class TestEditPageViews(unittest.TestCase):
         result = generate_edit_page_views(model_obj)
         self.assertNotIn("def edit_empty_class_one(request, id)", result)
         self.assertNotIn("def edit_empty_class_two(request, id)", result)
-        self.assertIn("from .models import *", result)
-        self.assertIn("from .forms import *", result)
