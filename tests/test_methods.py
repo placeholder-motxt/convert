@@ -173,7 +173,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
     def test_return_var_name(self):
         self.method_call_object.set_return_var_name("TestVarName")
         self.assertEqual(
-            self.method_call_object._AbstractMethodCallObject__return_var_name,
+            self.method_call_object.get_return_var_name(),
             "TestVarName",
         )
 
