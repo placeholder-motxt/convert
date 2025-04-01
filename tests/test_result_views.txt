@@ -1,0 +1,153 @@
+from django.shortcuts import render, redirect
+from .forms import *
+from .models import *
+from django.apps import apps
+
+#-----method from class getId------
+
+def getId(request, instance_name) -> string:
+    # TODO: Auto generated function stub
+    raise NotImplementedError('getId function is not yet implemented')
+    pass
+
+
+
+#-----method from class setRadius------
+
+def setRadius(request, instance_name, radius):
+    # TODO: Auto generated function stub
+    raise NotImplementedError('setRadius function is not yet implemented')
+    pass
+
+
+
+#-----method from class findCircle------
+
+def findCircle(request, instance_name, circleId):
+    # TODO: Auto generated function stub
+    raise NotImplementedError('findCircle function is not yet implemented')
+    pass
+
+
+
+def editRadius(request, circleId, radius):
+    circle = findCircle(request, circleId)
+    setRadius(request, radius)
+    pass
+
+def landing_page(request):
+    # Get all models in the current app
+    app_models = apps.get_app_config('main').get_models()
+
+    # Create a dictionary with model names and corresponding view names
+    model_info = {}
+    for model in app_models:
+        model_info[model._meta.model_name] = model._meta.verbose_name.title()
+
+    return render(request, 'main/landing_page.html', {'model_info': model_info})
+
+def create_shape(request):
+    if request.method == 'POST':
+        form = ShapeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('view_shape')
+    else:
+        form = ShapeForm()
+    return render(request, 'main/create_shape.html', {'form': form})
+
+
+def create_circle(request):
+    if request.method == 'POST':
+        form = CircleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('view_circle')
+    else:
+        form = CircleForm()
+    return render(request, 'main/create_circle.html', {'form': form})
+
+
+def create_circles(request):
+    if request.method == 'POST':
+        form = CirclesForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('view_circles')
+    else:
+        form = CirclesForm()
+    return render(request, 'main/create_circles.html', {'form': form})
+
+
+def get_shape(request):
+    shapes = Shape.objects.all()
+    return render(request, 'main/shape_list.html', {'shapes': shapes})
+
+
+
+def get_circle(request):
+    circles = Circle.objects.all()
+    return render(request, 'main/circle_list.html', {'circles': circles})
+
+
+
+def get_circles(request):
+    circless = Circles.objects.all()
+    return render(request, 'main/circles_list.html', {'circless': circless})
+
+
+
+def delete_shape(request):
+    if request.method == 'POST':
+        object_id = request.POST.get('object_id')
+
+        if object_id is None:
+            return JsonResponse({"error": "ID is required"}, status=400)
+
+        obj = Shape.objects.get(pk=object_id)
+        obj.delete()
+        return redirect('get_shape')
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def delete_circle(request):
+    if request.method == 'POST':
+        object_id = request.POST.get('object_id')
+
+        if object_id is None:
+            return JsonResponse({"error": "ID is required"}, status=400)
+
+        obj = Circle.objects.get(pk=object_id)
+        obj.delete()
+        return redirect('get_circle')
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def delete_circles(request):
+    if request.method == 'POST':
+        object_id = request.POST.get('object_id')
+
+        if object_id is None:
+            return JsonResponse({"error": "ID is required"}, status=400)
+
+        obj = Circles.objects.get(pk=object_id)
+        obj.delete()
+        return redirect('get_circles')
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def edit_shape(request, id):
+    shape_obj = Shape.objects.get(pk=id)
+    shape_form = ShapeForm(request.POST or None, instance=shape_obj)
+    if shape_form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('view_shape')
+
+    return render(request, 'main/edit_shape.html', {'form': form})
+
+
+def edit_circle(request, id):
+    circle_obj = Circle.objects.get(pk=id)
+    circle_form = CircleForm(request.POST or None, instance=circle_obj)
+    if circle_form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('view_circle')
+
+    return render(request, 'main/edit_circle.html', {'form': form})

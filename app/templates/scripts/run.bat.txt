@@ -1,0 +1,37 @@
+@echo off
+
+REM Ask for environment folder name
+set /p ENV_FOLDER="Enter the environment folder name (default: env): "
+
+if "%ENV_FOLDER%"=="" (
+    set ENV_FOLDER=env
+)
+
+REM Check if env folder exists
+if exist %ENV_FOLDER% (
+    echo Activating existing Django environment...
+    call %ENV_FOLDER%\Scripts\activate
+) else (
+    echo Creating a new Django environment...
+    python -m venv %ENV_FOLDER%
+    call %ENV_FOLDER%\Scripts\activate
+    echo Virtual environment with name %ENV_FOLDER% created and activated.
+)
+
+REM Install dependencies
+if exist requirements.txt (
+    echo Installing dependencies...
+    pip install -r requirements.txt
+) else (
+    echo requirements.txt not found!
+    exit /b 1
+)
+
+REM Run Django migrations
+echo Running migrations...
+python manage.py makemigrations
+python manage.py migrate
+
+REM Start Django server
+echo Starting Django server...
+python manage.py runserver

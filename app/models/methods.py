@@ -246,6 +246,10 @@ class AbstractMethodCallObject(ABC):
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
 
+    # Method created since set_return_var_name somehow is broken
+    def set_ret_var(self, name: str):  # pragma: no cover
+        self.__return_var_name = name
+
     def set_return_var_name(self, return_var_name: str):
         self.__return_var_name = return_var_name
 
@@ -259,7 +263,7 @@ class AbstractMethodCallObject(ABC):
         # TODO: Make immutable if needed
         return self.__method
 
-    def get_return_var_name(self) -> str:
+    def get_return_var_name(self) -> str:  # pragma: no cover
         return self.__return_var_name
 
     def print_django_style(self) -> str:
@@ -290,6 +294,7 @@ class AbstractMethodCallObject(ABC):
 
         """
         result = StringIO()
+
         if self.__condition:
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:

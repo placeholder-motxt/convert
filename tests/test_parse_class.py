@@ -35,6 +35,33 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             parser._ParseJsonToObjectClass__json["nodes"][1]["type"], "ClassNode"
         )
 
+    def test_parse_public_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_public_class.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertTrue(kelas.get_is_public())
+
+    def test_parse_private_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_private_class.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertFalse(kelas.get_is_public())
+
+    def test_parse_default_private_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_1.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertFalse(kelas.get_is_public())
+
     def test_empty_nodes(self):
         data = ""
         with open("tests/testdata/parse_class_2.json") as file:
@@ -314,6 +341,14 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         # Ensure the parent is set as expected
         self.assertEqual(class_from_id.set_parent.call_args[0][0], class_to_id)
 
+    def test_invalid_parse_relationships_fails_validate_amount(self):
+        uml_json = {
+            "edges": [{"start": 1, "end": 2, "startLabel": "..1", "endLabel": "*1"}]
+        }
+        self.parser = ParseJsonToObjectClass(uml_json)
+        with self.assertRaises(ValueError):
+            self.parser.parse_relationships(self.classes)
+
     def test_validate_amount_valid_cases(self):
         # Test valid multiplicities
         uml_json = {
@@ -337,16 +372,34 @@ class TestParseJsonToObjectClass(unittest.TestCase):
                 )
 
     def test_validate_amount_empty(self):
-        with self.assertRaises(Exception):
-            self.parser._ParseJsonToObjectClass__validate_amount("")
+        with open("tests/testdata/parse_class_1.json") as file:
+            data = file.read()
+        parser = ParseJsonToObjectClass(data)
+        with self.assertRaises(ValueError):
+            parser._ParseJsonToObjectClass__validate_amount("")
 
     def test_validate_amount_no_max(self):
-        with self.assertRaises(Exception):
-            self.parser._ParseJsonToObjectClass__validate_amount("1..")
+        with open("tests/testdata/parse_class_1.json") as file:
+            data = file.read()
+        parser = ParseJsonToObjectClass(data)
+        with self.assertRaises(ValueError):
+            parser._ParseJsonToObjectClass__validate_amount("1..")
 
     def test_validate_amount_no_min(self):
-        with self.assertRaises(Exception):
-            self.parser._ParseJsonToObjectClass__validate_amount("..1")
+        with open("tests/testdata/parse_class_1.json") as file:
+            data = file.read()
+        parser = ParseJsonToObjectClass(data)
+        with self.assertRaises(ValueError):
+            parser._ParseJsonToObjectClass__validate_amount("..1")
+
+    def test_validate_amount_star_not_at_the_end(self):
+        with open("tests/testdata/parse_class_1.json") as file:
+            data = file.read()
+        parser = ParseJsonToObjectClass(data)
+        with self.assertRaises(ValueError):
+            parser._ParseJsonToObjectClass__validate_amount(".*.")
+        with self.assertRaises(ValueError):
+            parser._ParseJsonToObjectClass__validate_amount("*.")
 
     def test_validate_amount_invalid_star_placement(self):
         invalid_multiplicities = [

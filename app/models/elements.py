@@ -175,3 +175,57 @@ class UrlsElement(FileElements):
             classes.append(class_context)
         rendered_yaml = template.render(classes=classes)
         return rendered_yaml
+
+
+class RequirementsElements(FileElements):
+    def __init__(self, file_name: str):
+        """
+        Object initialization
+
+        This class is only for writing requirements.txt,
+        """
+        super().__init__(file_name)
+
+    def print_django_style(self) -> str:
+        """
+        Returns a list of django requirements as string for requirements.tx to run
+        """
+        result = StringIO()
+        requirements = [
+            "Django",
+            "gunicorn",
+            "whitenoise",
+            "psycopg2",
+            "pytest",
+            "pytest-django",
+            "pytest-cov",
+        ]
+
+        for requirement in requirements:
+            result.write(requirement + "\n")
+
+        return result.getvalue()
+
+
+class RunBashScriptElements(FileElements):
+    """
+    This class is only for writing script for user to run the project in format
+    of .sh (Linux & MacOS)
+    """
+
+    def print_django_style(self) -> str:
+        with open("app/templates/scripts/run.sh.txt", "r", encoding="utf-8") as file:
+            bash = file.read()
+        return bash
+
+
+class RunBatScriptElements(FileElements):
+    """
+    This class is only for writing script for user to run the project in format
+    of .bat (Windows)
+    """
+
+    def print_django_style(self) -> str:
+        with open("app/templates/scripts/run.bat.txt", "r", encoding="utf-8") as file:
+            bat = file.read()
+        return bat

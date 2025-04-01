@@ -3,6 +3,7 @@ import re
 from typing import TypedDict
 
 from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 
 from app.models.diagram import ClassObject
 from app.models.methods import (
@@ -38,9 +39,9 @@ class ParseJsonToObjectSeq:
         self.__edges: list = []
         self.__implicit_parameter_nodes: dict[str, str | int | list[int]] = dict()
         self.__method_call: dict[tuple, dict] = dict()
-        self.__label_pattern: re.Pattern = re.compile(
-            r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*) "
-            r"\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
+        self.__label_pattern = re.compile(
+            r"^(\[(?P<cond>.*)\] )?(?P<method_name>.*?)"
+            r"[ ]?\((?P<params>.*)?\)( -> (?P<ret_var>.*))?$"
         )
 
     def set_json(self, data: str) -> str | None:
@@ -111,7 +112,7 @@ class ParseJsonToObjectSeq:
             validate(instance=data, schema=schema)
             return True
 
-        except Exception:
+        except ValidationError:
             return False
 
     def get_method_call(self) -> dict:  # pragma: no cover
@@ -353,34 +354,37 @@ please consult the user manual document on how to name return variables"
         self.process_edge_into_classobject()
 
         rev_call_tree = {}
-        for callee_id, call_node in self.__call_nodes.items():
-            caller_id = call_node.get("caller", None)
-            if caller_id not in valid_caller:
-                continue
+        for edge in self.__edges:
+            if edge["type"] == "CallEdge":
+                callee_id = edge["end"]
+                call_node = self.__call_nodes[callee_id]
+                caller_id = call_node.get("caller", None)
+                if caller_id not in valid_caller:
+                    continue
 
-            self.process_self_call(caller_id, callee_id, rev_call_tree, call_node)
+                self.process_self_call(caller_id, callee_id, rev_call_tree, call_node)
 
-            caller_method = self.__call_nodes[caller_id]["method"]
-            callee_method = call_node["method"]
-            ret_var = call_node.get("ret_var", None)
+                caller_method = self.__call_nodes[caller_id]["method"]
+                callee_method = call_node["method"]
+                ret_var = call_node.get("ret_var", None)
 
-            method_call_dictionary = self.__method_call[(caller_id, callee_id)]
+                method_call_dictionary = self.__method_call[(caller_id, callee_id)]
 
-            call_obj = self.process_call_obj(
-                caller_method, callee_method, method_call_dictionary, callee_id
-            )
+                call_obj = self.process_call_obj(
+                    caller_method, callee_method, method_call_dictionary, callee_id
+                )
 
-            method_call_dictionary["method_call"] = call_obj
+                method_call_dictionary["method_call"] = call_obj
 
-            self.add_argument_object(callee_method, call_obj)
+                self.add_argument_object(callee_method, call_obj)
 
-            if ret_var is not None:
-                call_obj.set_return_var_name(ret_var)
+                if ret_var is not None:
+                    call_obj.set_return_var_name(ret_var)
 
-            if isinstance(caller_method, ClassMethodObject):
-                caller_method.add_class_method_call(call_obj)
-            else:
-                caller_method.add_call(call_obj)
+                if isinstance(caller_method, ClassMethodObject):
+                    caller_method.add_class_method_call(call_obj)
+                else:
+                    caller_method.add_call(call_obj)
 
     def check_call_depth(
         self, rev_call_tree: dict[int, int], callee: int
@@ -417,7 +421,7 @@ on sequence diagram please consult the user manual document on how to name metho
                 method_call_info["end"] == edge["start"]
                 and method_call_info["method_call"]
             ):
-                method_call_info["method_call"].set_return_var_name(label)
+                method_call_info["method_call"].set_ret_var(label)
                 return_vars.append(label)
 
         return return_vars
