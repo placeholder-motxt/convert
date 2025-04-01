@@ -364,15 +364,21 @@ class TestParseJsonToObjectClass(unittest.TestCase):
                 )
 
     def test_validate_amount_empty(self):
-        with self.assertRaises(Exception):
+        uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
+        with self.assertRaises(ValueError):
+            self.parser = ParseJsonToObjectClass(uml_json)
             self.parser._ParseJsonToObjectClass__validate_amount("")
 
     def test_validate_amount_no_max(self):
-        with self.assertRaises(Exception):
+        uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
+        with self.assertRaises(ValueError):
+            self.parser = ParseJsonToObjectClass(uml_json)
             self.parser._ParseJsonToObjectClass__validate_amount("1..")
 
     def test_validate_amount_no_min(self):
-        with self.assertRaises(Exception):
+        uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
+        with self.assertRaises(ValueError):
+            self.parser = ParseJsonToObjectClass(uml_json)
             self.parser._ParseJsonToObjectClass__validate_amount("..1")
 
     def test_validate_amount_invalid_star_placement(self):
