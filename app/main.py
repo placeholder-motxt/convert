@@ -13,6 +13,7 @@ from app.config import APP_CONFIG
 from app.generate_frontend.create.create_page_views import generate_create_page_views
 from app.generate_frontend.delete.delete_page_views import generate_delete_page_views
 from app.generate_frontend.edit.edit_page_views import generate_edit_page_views
+from app.generate_frontend.generate_landing_page import generate_landing_page_views
 from app.generate_frontend.read.read_page_views import generate_read_page_views
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
@@ -355,6 +356,10 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
         # Render the UML Diagrams method
         response_content_views += writer_views.print_django_style()
         response_content_models += writer_models.print_django_style()
+
+        # Render the landing page
+        response_content_views += generate_landing_page_views()
+        response_content_views += "\n"
 
         # Render the create views
         response_content_views += generate_create_page_views(writer_models)
