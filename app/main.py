@@ -2,6 +2,7 @@ import json
 import os
 import zipfile
 from contextlib import asynccontextmanager
+from io import StringIO
 
 import anyio
 from fastapi import FastAPI, HTTPException, Response
@@ -306,8 +307,8 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     to the parameter of the method fetch_data()
     """
     try:
-        response_content_models = ""
-        response_content_views = ""
+        response_content_models = StringIO()
+        response_content_views = StringIO()
         duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
             dict()
         )
@@ -349,31 +350,34 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
             writer_views.add_class_method(class_method_object)
 
         # Render the base import
-        response_content_views += render_template("base_views.py.j2", {})
+        response_content_views.write(render_template("base_views.py.j2", {}))
 
-        response_content_views += "\n\n"
+        response_content_views.write("\n\n")
 
         # Render the UML Diagrams method
-        response_content_views += writer_views.print_django_style()
-        response_content_models += writer_models.print_django_style()
+        response_content_views.write(writer_views.print_django_style())
+        response_content_models.write(writer_models.print_django_style())
 
         # Render the landing page
-        response_content_views += generate_landing_page_views()
-        response_content_views += "\n"
+        response_content_views.write(generate_landing_page_views())
+        response_content_views.write("\n")
 
         # Render the create views
-        response_content_views += generate_create_page_views(writer_models)
+        response_content_views.write(generate_create_page_views(writer_models))
 
         # Render the read views
-        response_content_views += generate_read_page_views(writer_models)
+        response_content_views.write(generate_read_page_views(writer_models))
 
         # Render the delete views
-        response_content_views += generate_delete_page_views(writer_models)
+        response_content_views.write(generate_delete_page_views(writer_models))
 
         # Render the edit views
-        response_content_views += generate_edit_page_views(writer_models)
+        response_content_views.write(generate_edit_page_views(writer_models))
 
-        return {"models": response_content_models, "views": response_content_views}
+        return {
+            "models": response_content_models.getvalue(),
+            "views": response_content_views.getvalue(),
+        }
 
     except ValueError as ex:
         raise HTTPException(status_code=422, detail=str(ex))
