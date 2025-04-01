@@ -2,6 +2,7 @@ import json
 import os
 import zipfile
 from contextlib import asynccontextmanager
+from io import StringIO
 
 import anyio
 from fastapi import FastAPI, HTTPException, Response
@@ -10,6 +11,11 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG
+from app.generate_frontend.create.create_page_views import generate_create_page_views
+from app.generate_frontend.delete.delete_page_views import generate_delete_page_views
+from app.generate_frontend.edit.edit_page_views import generate_edit_page_views
+from app.generate_frontend.generate_landing_page import generate_landing_page_views
+from app.generate_frontend.read.read_page_views import generate_read_page_views
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
@@ -301,8 +307,8 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     to the parameter of the method fetch_data()
     """
     try:
-        response_content_models = ""
-        response_content_views = ""
+        response_content_models = StringIO()
+        response_content_views = StringIO()
         duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
             dict()
         )
@@ -342,10 +348,36 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
                     )
         for class_method_object in duplicate_class_method_checker.values():
             writer_views.add_class_method(class_method_object)
-        response_content_views += writer_views.print_django_style()
-        response_content_models += writer_models.print_django_style()
 
-        return {"models": response_content_models, "views": response_content_views}
+        # Render the base import
+        response_content_views.write(render_template("base_views.py.j2", {}))
+
+        response_content_views.write("\n\n")
+
+        # Render the UML Diagrams method
+        response_content_views.write(writer_views.print_django_style())
+        response_content_models.write(writer_models.print_django_style())
+
+        # Render the landing page
+        response_content_views.write(generate_landing_page_views())
+        response_content_views.write("\n")
+
+        # Render the create views
+        response_content_views.write(generate_create_page_views(writer_models))
+
+        # Render the read views
+        response_content_views.write(generate_read_page_views(writer_models))
+
+        # Render the delete views
+        response_content_views.write(generate_delete_page_views(writer_models))
+
+        # Render the edit views
+        response_content_views.write(generate_edit_page_views(writer_models))
+
+        return {
+            "models": response_content_models.getvalue(),
+            "views": response_content_views.getvalue(),
+        }
 
     except ValueError as ex:
         raise HTTPException(status_code=422, detail=str(ex))
