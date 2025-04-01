@@ -102,5 +102,9 @@ class TestEditPageViews(unittest.TestCase):
         result = generate_edit_page_views(model_obj)
         self.assertNotIn("def edit_empty_class_one(request, id)", result)
         self.assertNotIn("def edit_empty_class_two(request, id)", result)
-        self.assertIn("from .models import *", result)
-        self.assertIn("from .forms import *", result)
+
+        # Remove assertIn tests since there exists base_views template for
+        # the import & there is no need to import directly from the edit template
+
+        # self.assertIn("from .models import *", result)
+        # self.assertIn("from .forms import *", result)

@@ -1,7 +1,3 @@
-from django.shortcuts import render, redirect
-from .forms import *
-from .models import *
-
 {% for class in classes %}
 def edit_{{ class.snake_name }}(request, id):
     {{ class.snake_name }}_obj = {{ class.name }}.objects.get(pk=id)
