@@ -341,6 +341,14 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         # Ensure the parent is set as expected
         self.assertEqual(class_from_id.set_parent.call_args[0][0], class_to_id)
 
+    def test_invalid_parse_relationships_fails_validate_amount(self):
+        uml_json = {
+            "edges": [{"start": 1, "end": 2, "startLabel": "..1", "endLabel": "*1"}]
+        }
+        self.parser = ParseJsonToObjectClass(uml_json)
+        with self.assertRaises(ValueError):
+            self.parser.parse_relationships(self.classes)
+
     def test_validate_amount_valid_cases(self):
         # Test valid multiplicities
         uml_json = {

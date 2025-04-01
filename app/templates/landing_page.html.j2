@@ -1,0 +1,23 @@
+{% raw %}{% extends 'base.html' %}
+{% block content %}
+    <h1>Landing Page</h1>
+    <h2>Models Available</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Model Name</th>
+                <th>View</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for model_name, model_label in model_info.items %}
+            <tr>
+                <td>{{ model_label }}</td>
+                {% with url_name="get_"|add:model_name %}
+                    <td><a href="{% url url_name %}">View {{ model_label }}</a></td>
+                {% endwith %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}{% endraw %}

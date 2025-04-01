@@ -421,7 +421,7 @@ on sequence diagram please consult the user manual document on how to name metho
                 method_call_info["end"] == edge["start"]
                 and method_call_info["method_call"]
             ):
-                method_call_info["method_call"].set_return_var_name(label)
+                method_call_info["method_call"].set_ret_var(label)
                 return_vars.append(label)
 
         return return_vars
