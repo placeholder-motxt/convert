@@ -10,6 +10,10 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG
+from app.generate_frontend.create.create_page_views import generate_create_page_views
+from app.generate_frontend.delete.delete_page_views import generate_delete_page_views
+from app.generate_frontend.edit.edit_page_views import generate_edit_page_views
+from app.generate_frontend.read.read_page_views import generate_read_page_views
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
@@ -342,8 +346,27 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
                     )
         for class_method_object in duplicate_class_method_checker.values():
             writer_views.add_class_method(class_method_object)
+
+        # Render the base import
+        response_content_views += render_template("base_views.py.j2", {})
+
+        response_content_views += "\n\n"
+
+        # Render the UML Diagrams method
         response_content_views += writer_views.print_django_style()
         response_content_models += writer_models.print_django_style()
+
+        # Render the create views
+        response_content_views += generate_create_page_views(writer_models)
+
+        # Render the read views
+        response_content_views += generate_read_page_views(writer_models)
+
+        # Render the delete views
+        response_content_views += generate_delete_page_views(writer_models)
+
+        # Render the edit views
+        response_content_views += generate_edit_page_views(writer_models)
 
         return {"models": response_content_models, "views": response_content_views}
 
