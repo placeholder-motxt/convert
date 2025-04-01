@@ -5,12 +5,13 @@ from unittest import mock
 
 import pytest
 
+from app.models.diagram import ClassObject
 from app.models.elements import (
     ModelsElements,
     UrlsElement,
     ViewsElements,
 )
-from app.models.diagram import ClassObject
+
 
 class TestModelsElements(unittest.TestCase):
     def test_models_elements_valid_filename(self):
@@ -197,12 +198,17 @@ class TestUrlsElements:
             res == "from django.urls import path\n"
             "from .views import (\n    "
             "create_class1,\n    "
-            "get_class1,\n    )\n\n"
+            "get_class1,\n    "
+            "edit_class1,\n    "
+            "delete_class1,\n    "
+            ")\n\n"
             'app_name = "main"\n\n'
             "urlpatterns = [\n    "
+            "path('', landing_page , name=\"landing_page\"),\n    "
             "path('create-class1/', create_class1, name=\"create_class1\"),\n    "
-            "path('get-all-class1/', get_class1, name=\"get_class1\"),\n"
-            "]"
+            "path('get-all-class1/', get_class1, name=\"get_class1\"),\n    "
+            "path('edit-class1/', edit_class1, name=\"edit_class1\"),\n    "
+            "path('delete-class1/', delete_class1, name=\"delete_class1\"),\n]"
         )
 
     @pytest.mark.asyncio
