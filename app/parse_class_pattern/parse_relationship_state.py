@@ -14,7 +14,9 @@ class MultiplicityValidator:
         for i, char in enumerate(self.amount_str):
             self.state.handle(self, char, i)
 
-        if not (self.has_min_number and self.titik_count == 2):
+        if not (self.has_min_number and self.titik_count == 2) or isinstance(
+            self.state, DotState
+        ):
             raise ValueError(INVALID)
 
 
