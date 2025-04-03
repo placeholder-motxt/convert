@@ -8,6 +8,7 @@ from app.main import (
     fetch_data,
     generate_file_to_be_downloaded,
 )
+from app.models.elements import RequirementsElements, UrlsElement
 
 
 class TestGenerateFileToBeDownloaded(unittest.TestCase):
@@ -18,36 +19,21 @@ class TestGenerateFileToBeDownloaded(unittest.TestCase):
         self.filename = json_data["filename"]
         self.content = json_data["content"]
         data = fetch_data(self.filename, self.content)
-        self.models_content = data["models_content"]
-        self.views_content = data["views_content"]
-        self.writer_models = data["writer_models"]
-        self.writer_views = data["writer_views"]
-        self.project_name = self.filename.split[0]
+        writer_requirements = RequirementsElements("requirements.txt")
+        writer_urls = UrlsElement("urls.py")
+        # simulate the creation of requirements.txt and urls.py instead of using write_to_file()
+        with open(os.path.join(os.getcwd(), "app", "requirements.txt"), "w") as f:
+            f.write(writer_requirements.print_django_style())
+        with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
+            f.write(writer_urls.print_django_style())
 
-    def tearDown(self):
-        if os.path.exists("requirements.txt"):
-            os.remove("requirements.txt")
-        if os.path.exists("urls.py"):
-            os.remove("urls.py")
-        # Remove any created zip file or project folder.
-        if os.path.exists("file1.zip"):
-            os.remove("file1.zip")
-        if os.path.exists("project_file1"):
-            shutil.rmtree("project_file1")
-
-        if os.path.exists(f"project_{self.project_name}"):
-            shutil.rmtree(f"project_{self.project_name}")
-        if os.path.exists(f"{self.project_name}_models.py"):
-            os.remove(f"{self.project_name}_models.py")
-        if os.path.exists(f"{self.project_name}_views.py"):
-            os.remove(f"{self.project_name}_views.py")
-        if os.path.exists("requirements.txt"):
-            os.remove("requirements.txt")
-        if os.path.exists("urls.py"):
-            os.remove("urls.py")
+        self.models_content = data["models"]
+        self.views_content = data["views"]
+        self.writer_models = data["models_elements"]
+        self.writer_views = data["views_elements"]
+        self.project_name = self.filename[0]
 
     def test_generate_file_to_be_downloaded(self):
-        # Act: Call the function to generate the downloadable file.
         result = generate_file_to_be_downloaded(
             self.project_name,
             self.models_content,
@@ -86,7 +72,56 @@ class TestGenerateFileToBeDownloaded(unittest.TestCase):
             "main/templates/landing_page.html",
             "templates/base.html",
         ]
+        for path in result:
+            self.assertIn(path, expected_output)
         with zipfile.ZipFile(f"{self.project_name}.zip", "r") as zipf:
             for file in zipf.namelist():
                 self.assertIn(file, expected_output)
-                self.assertIn(result, expected_output)
+
+    def test_generate_file_to_be_downloaded_without_requirements(self):
+        if os.path.exists(os.path.join(os.getcwd(), "app", "requirements.txt")):
+            os.remove(os.path.join(os.getcwd(), "app", "requirements.txt"))
+        with self.assertRaises(FileNotFoundError) as ctx:
+            generate_file_to_be_downloaded(
+                self.project_name,
+                self.models_content,
+                self.views_content,
+                self.writer_models,
+            )
+        self.assertEqual(
+            str(ctx.exception),
+            "File requirements.txt does not exist",
+        )
+
+    def test_generate_file_to_be_downloaded_without_urls(self):
+        if os.path.exists(os.path.join(os.getcwd(), "app", "urls.py")):
+            os.remove(os.path.join(os.getcwd(), "app", "urls.py"))
+        with self.assertRaises(FileNotFoundError) as ctx:
+            generate_file_to_be_downloaded(
+                self.project_name,
+                self.models_content,
+                self.views_content,
+                self.writer_models,
+            )
+        self.assertEqual(
+            str(ctx.exception),
+            "File urls.py does not exist",
+        )
+
+    def tearDown(self):
+        # Remove any created zip file or project folder.
+        if os.path.exists("file1.zip"):
+            os.remove("file1.zip")
+        if os.path.exists("project_file1"):
+            shutil.rmtree("project_file1")
+
+        if os.path.exists(f"project_{self.project_name}"):
+            shutil.rmtree(f"project_{self.project_name}")
+        if os.path.exists(f"{self.project_name}_models.py"):
+            os.remove(f"{self.project_name}_models.py")
+        if os.path.exists(f"{self.project_name}_views.py"):
+            os.remove(f"{self.project_name}_views.py")
+        if os.path.exists(os.path.join(os.getcwd(), "app", "requirements.txt")):
+            os.remove(os.path.join(os.getcwd(), "app", "requirements.txt"))
+        if os.path.exists(os.path.join(os.getcwd(), "app", "urls.py")):
+            os.remove(os.path.join(os.getcwd(), "app", "urls.py"))
