@@ -43,6 +43,7 @@ from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
     is_valid_python_identifier,
     logger,
+    remove_file,
     render_project_django_template,
     render_template,
 )
@@ -103,7 +104,7 @@ async def convert(
         writer_views = ViewsElements("views.py")
 
         # # Uncomment this to write requirements.txt
-        # writer_requirements = RequirementsElements('requirements.txt')
+        writer_requirements = RequirementsElements("requirements.txt")
 
         for file_name, content in zip(request.filename, request.content):
             json_content = content[0]
@@ -170,31 +171,15 @@ async def convert(
         writer_requirements = RequirementsElements("requirements.txt")
         writer_url = UrlsElement("urls.py")
 
-        # [TODO] change project_name to match FE request value
-        project_name = request.filename[0]
-        await download_file(
-            request=DownloadRequest(
-                filename=request.filename[0],
-                content=response_content_models,
-                type="_models",
-            ),
-        )
-
-        await download_file(
-            request=DownloadRequest(
-                filename=request.filename[0],
-                content=response_content_views,
-                type="_views",
-            ),
-        )
+        project_name = request.project_name
 
         await writer_requirements.write_to_file("./app")
         await writer_url.write_to_file("./app")
         generate_file_to_be_downloaded(
-            project_name,
-            response_content_models,
-            response_content_views,
-            writer_models,
+            project_name=project_name,
+            models=response_content_models,
+            views=response_content_views,
+            writer_models=writer_models,
         )
         if os.path.exists(f"project_{project_name}"):
             shutil.rmtree(f"project_{project_name}")
@@ -206,10 +191,12 @@ async def convert(
             os.remove("requirements.txt")
         if os.path.exists("urls.py"):
             os.remove("urls.py")
-        # background_tasks.add_task(remove_file, zip_filename)
+        background_tasks.add_task(remove_file, f"{project_name}.zip")
+        background_tasks.add_task(remove_file, os.path.join("app", "urls.py"))
+        background_tasks.add_task(remove_file, os.path.join("app", "requirements.txt"))
 
         return FileResponse(
-            path=request.filename[0] + ".zip",
+            path=project_name + ".zip",
             filename=f"{request.filename[0]}.zip",
             media_type="application/zip",
         )
