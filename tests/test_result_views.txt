@@ -136,8 +136,8 @@ def delete_circles(request):
 
 def edit_shape(request, id):
     shape_obj = Shape.objects.get(pk=id)
-    shape_form = ShapeForm(request.POST or None, instance=shape_obj)
-    if shape_form.is_valid() and request.method == 'POST':
+    form = ShapeForm(request.POST or None, instance=shape_obj)
+    if form.is_valid() and request.method == 'POST':
         form.save()
         return redirect('view_shape')
 
@@ -146,8 +146,8 @@ def edit_shape(request, id):
 
 def edit_circle(request, id):
     circle_obj = Circle.objects.get(pk=id)
-    circle_form = CircleForm(request.POST or None, instance=circle_obj)
-    if circle_form.is_valid() and request.method == 'POST':
+    form = CircleForm(request.POST or None, instance=circle_obj)
+    if form.is_valid() and request.method == 'POST':
         form.save()
         return redirect('view_circle')
 

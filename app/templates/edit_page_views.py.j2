@@ -1,8 +1,8 @@
 {% for class in classes %}
 def edit_{{ class.snake_name }}(request, id):
     {{ class.snake_name }}_obj = {{ class.name }}.objects.get(pk=id)
-    {{ class.snake_name }}_form = {{ class.name }}Form(request.POST or None, instance={{ class.snake_name }}_obj)
-    if {{ class.snake_name }}_form.is_valid() and request.method == 'POST':
+    form = {{ class.name }}Form(request.POST or None, instance={{ class.snake_name }}_obj)
+    if form.is_valid() and request.method == 'POST':
         form.save()
         return redirect('view_{{ class.snake_name }}')
 
