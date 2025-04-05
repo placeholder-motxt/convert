@@ -52,7 +52,7 @@ def create_shape(request):
         form = ShapeForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('view_shape')
+            return redirect('get_shape')
     else:
         form = ShapeForm()
     return render(request, 'main/create_shape.html', {'form': form})
@@ -63,7 +63,7 @@ def create_circle(request):
         form = CircleForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('view_circle')
+            return redirect('get_circle')
     else:
         form = CircleForm()
     return render(request, 'main/create_circle.html', {'form': form})
@@ -74,7 +74,7 @@ def create_circles(request):
         form = CirclesForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('view_circles')
+            return redirect('get_circles')
     else:
         form = CirclesForm()
     return render(request, 'main/create_circles.html', {'form': form})
@@ -139,7 +139,7 @@ def edit_shape(request, id):
     form = ShapeForm(request.POST or None, instance=shape_obj)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('view_shape')
+        return redirect('get_shape')
 
     return render(request, 'main/edit_shape.html', {'form': form})
 
@@ -149,6 +149,6 @@ def edit_circle(request, id):
     form = CircleForm(request.POST or None, instance=circle_obj)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('view_circle')
+        return redirect('get_circle')
 
     return render(request, 'main/edit_circle.html', {'form': form})
