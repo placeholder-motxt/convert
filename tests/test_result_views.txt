@@ -6,7 +6,7 @@ from django.apps import apps
 
 #-----method from class getId------
 
-def getId(request, instance_name) -> string:
+def getId(request, instance_name) -> str:
     # TODO: Auto generated function stub
     raise NotImplementedError('getId function is not yet implemented')
     pass
