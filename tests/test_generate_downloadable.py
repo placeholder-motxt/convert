@@ -24,14 +24,15 @@ class TestGenerateFileToBeDownloaded(unittest.TestCase):
         # simulate the creation of requirements.txt and urls.py instead of using write_to_file()
         with open(os.path.join(os.getcwd(), "app", "requirements.txt"), "w") as f:
             f.write(writer_requirements.print_django_style())
-        with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
-            f.write(writer_urls.print_django_style())
 
         self.models_content = data["models"]
         self.views_content = data["views"]
         self.writer_models = data["models_elements"]
         self.writer_views = data["views_elements"]
         self.project_name = self.filename[0]
+        writer_urls.set_classes(self.writer_models.get_classes())
+        with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
+            f.write(writer_urls.print_django_style())
 
     def test_generate_file_to_be_downloaded(self):
         result = generate_file_to_be_downloaded(
@@ -110,11 +111,8 @@ class TestGenerateFileToBeDownloaded(unittest.TestCase):
 
     def tearDown(self):
         # Remove any created zip file or project folder.
-        if os.path.exists("file1.zip"):
-            os.remove("file1.zip")
-        if os.path.exists("project_file1"):
-            shutil.rmtree("project_file1")
-
+        if os.path.exists(f"{self.project_name}.zip"):
+            os.remove(f"{self.project_name}.zip")
         if os.path.exists(f"project_{self.project_name}"):
             shutil.rmtree(f"project_{self.project_name}")
         if os.path.exists(f"{self.project_name}_models.py"):

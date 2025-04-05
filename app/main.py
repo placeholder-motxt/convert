@@ -170,6 +170,7 @@ async def convert(
         response_content_views = response_content_views.getvalue()
         writer_requirements = RequirementsElements("requirements.txt")
         writer_url = UrlsElement("urls.py")
+        writer_url.set_classes(writer_models.get_classes())
 
         project_name = request.project_name
 
@@ -187,10 +188,10 @@ async def convert(
             os.remove(f"{project_name}_models.py")
         if os.path.exists(f"{project_name}_views.py"):
             os.remove(f"{project_name}_views.py")
-        if os.path.exists("requirements.txt"):
-            os.remove("requirements.txt")
-        if os.path.exists("urls.py"):
-            os.remove("urls.py")
+        if os.path.exists(os.path.join("app", "requirements.txt")):
+            os.remove(os.path.join("app", "requirements.txt"))
+        if os.path.exists(os.path.join("app", "urls.py")):
+            os.remove(os.path.join("app", "urls.py"))
         background_tasks.add_task(remove_file, f"{project_name}.zip")
         background_tasks.add_task(remove_file, os.path.join("app", "urls.py"))
         background_tasks.add_task(remove_file, os.path.join("app", "requirements.txt"))
