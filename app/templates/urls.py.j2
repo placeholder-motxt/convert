@@ -1,0 +1,21 @@
+from django.urls import path
+from .views import (
+    {% for class in classes -%}
+    create_{{ class.snake_name }},
+    get_{{ class.snake_name }},
+    edit_{{ class.snake_name }},
+    delete_{{ class.snake_name }},
+    {% endfor -%}
+)
+
+app_name = "main"
+
+urlpatterns = [
+    path('', landing_page , name="landing_page"),
+    {%- for class in classes %}
+    path('create-{{ class.snake_name }}/', create_{{ class.snake_name }}, name="create_{{ class.snake_name }}"),
+    path('get-all-{{ class.snake_name }}/', get_{{ class.snake_name }}, name="get_{{ class.snake_name }}"),
+    path('edit-{{ class.snake_name }}/', edit_{{ class.snake_name }}, name="edit_{{ class.snake_name }}"),
+    path('delete-{{ class.snake_name }}/', delete_{{ class.snake_name }}, name="delete_{{ class.snake_name }}"),
+    {%- endfor %}
+]

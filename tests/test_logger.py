@@ -19,7 +19,11 @@ def test_uvicorn_error_logger_warning_when_convert_raises_value_err(
 ):
     # Positive case
     client = TestClient(app)
-    payload = {"filename": ["test"], "content": [['{"diagram": "ClassDiagram"}']]}
+    payload = {
+        "filename": ["test"],
+        "content": [['{"diagram": "ClassDiagram"}']],
+        "project_name": "test",
+    }
 
     with caplog.at_level(logging.WARNING, "uvicorn.error"):
         with patch("app.main.ModelsElements") as mock_models:
@@ -44,7 +48,7 @@ def test_uvicorn_error_logger_no_warning_when_convert_success(
     client = TestClient(app)
     with open(os.path.join(CUR_DIR, "test_input.txt")) as f:
         content = f.read().strip()
-    payload = {"filename": ["test"], "content": [[content]]}
+    payload = {"filename": ["test"], "content": [[content]], "project_name": "test"}
 
     with caplog.at_level(logging.WARNING, "uvicorn.error"):
         client.post("/convert", json=payload)
@@ -56,7 +60,11 @@ def test_uvicorn_error_logger_no_warning_convert_unexpected_error(
 ):
     # Edge case
     client = TestClient(app)
-    payload = {"filename": ["test"], "content": [['{"diagram": "ClassDiagram"}']]}
+    payload = {
+        "filename": ["test"],
+        "content": [['{"diagram": "ClassDiagram"}']],
+        "project_name": "test",
+    }
 
     with caplog.at_level(logging.WARNING, "uvicorn.error"):
         with patch("app.main.ModelsElements") as mock_models:

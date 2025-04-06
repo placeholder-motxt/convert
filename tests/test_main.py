@@ -60,7 +60,11 @@ def test_file_already_exists():
             # Try to upload a file
             response = client.post(
                 "/convert/",
-                json={"filename": ["file1"], "content": [['{"Some content":"a"}']]},
+                json={
+                    "filename": ["file1"],
+                    "content": [['{"Some content":"a"}']],
+                    "project_name": "file1",
+                },
             )
             assert response.status_code == 400
             assert response.json()["detail"] == "Please try again later"
@@ -94,7 +98,12 @@ def test_slash_on_filename():
         }
 
         response = client.post(
-            "/convert/", json={"filename": ["app/main2"], "content": [["Some content"]]}
+            "/convert/",
+            json={
+                "filename": ["app/main2"],
+                "content": [["Some content"]],
+                "project_name": "file1",
+            },
         )
         assert response.status_code == 400
         assert response.json()["detail"] == "/ not allowed in file name"
@@ -127,7 +136,11 @@ async def test_convert_endpoint_valid_content_class_diagram():
         }
 
         # Prepare the request payload with the necessary 'nodes' key
-        payload = {"filename": ["file1"], "content": [['{"content"}']]}
+        payload = {
+            "filename": ["file1"],
+            "content": [['{"content"}']],
+            "project_name": "file1",
+        }
 
         async with await anyio.open_file("file1.zip", "w") as f:
             await f.write("")
@@ -145,6 +158,7 @@ async def test_convert_endpoint_inconsistent_filename_content_length():
     payload = {
         "filename": ["file1", "file2"],  # Two filenames
         "content": [['{"diagram": "ClassDiagram"}']],  # Only one content
+        "project_name": "file1",
     }
 
     # Assuming `client` is initialized somewhere like this:
@@ -184,7 +198,11 @@ async def test_convert_endpoint_class_diagram():
             "model_element": ModelsElements("filename"),
         }
 
-        payload = {"filename": ["file1"], "content": [['{"diagram": "ClassDiagram"}']]}
+        payload = {
+            "filename": ["file1"],
+            "content": [['{"diagram": "ClassDiagram"}']],
+            "project_name": "file1",
+        }
 
         client = TestClient(app)
 
@@ -239,6 +257,7 @@ async def test_convert_endpoint_sequence_diagram():
         payload = {
             "filename": ["file1"],
             "content": [['{"diagram": "SequenceDiagram"}']],
+            "project_name": "file1",
         }
 
         # Send the request to the endpoint
@@ -283,6 +302,7 @@ async def test_convert_endpoint_invalid_diagram_type():
         payload = {
             "filename": ["file1"],
             "content": [['{"diagram": "InvalidDiagram"}']],
+            "project_name": "file1",
         }
 
         # Assuming `client` is initialized somewhere like this:
@@ -311,6 +331,7 @@ async def test_convert_endpoint_valid_sequence_diagram():
                 ', "start":1, "end":3, "type":"CallEdge"}]}'
             ],
         ],
+        "project_name": "file1",
     }
 
     with (
@@ -370,6 +391,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
         payload = {
             "filename": ["file1", "file2"],
             "content": [['{"content"}'], ['{"content"}']],
+            "project_name": "file1",
         }
         response = client.post("/convert", json=payload)
 
@@ -379,7 +401,11 @@ async def test_convert_endpoint_valid_multiple_file_content():
 
 @pytest.mark.asyncio
 async def test_convert_endpoint_invalid_incosistent_filename_content_amount():
-    payload = {"filename": ["file1"], "content": [['{"content"}'], ['{"content"}']]}
+    payload = {
+        "filename": ["file1"],
+        "content": [['{"content"}'], ['{"content"}']],
+        "project_name": "file1",
+    }
     response = client.post("/convert", json=payload)
 
     assert response.status_code == 400
@@ -493,6 +519,7 @@ def test_raise_value_error_on_main():
     payload = {
         "filename": ["file1.sequence,jet"],
         "content": [['{"diagram": "SequenceDiagram"}']],
+        "project_name": "file1",
     }
     response = client.post("/convert", json=payload)
     assert response.status_code == 422

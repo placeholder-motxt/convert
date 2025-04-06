@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import zipfile
 from contextlib import asynccontextmanager
 from io import StringIO
@@ -12,14 +13,29 @@ from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG
 from app.generate_frontend.create.create_page_views import generate_create_page_views
+from app.generate_frontend.create.generate_create_page_django import (
+    generate_forms_create_page_django,
+    generate_html_create_pages_django,
+)
 from app.generate_frontend.delete.delete_page_views import generate_delete_page_views
 from app.generate_frontend.edit.edit_page_views import generate_edit_page_views
-from app.generate_frontend.generate_landing_page import generate_landing_page_views
+from app.generate_frontend.edit.generate_edit_page_django import (
+    generate_html_edit_pages_django,
+)
+from app.generate_frontend.generate_landing_page import (
+    generate_landing_page_html,
+    generate_landing_page_views,
+)
+from app.generate_frontend.read.generate_read_page_django import (
+    generate_html_read_pages_django,
+)
 from app.generate_frontend.read.read_page_views import generate_read_page_views
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
     ModelsElements,
+    RequirementsElements,
+    UrlsElement,
     ViewsElements,
 )
 from app.models.methods import ClassMethodObject
@@ -79,6 +95,13 @@ async def convert(
 
     try:
         fetched = fetch_data(request.filename, request.content)
+        response_content_models = fetched["models"]
+        response_content_views = fetched["views"]
+        writer_models = fetched["model_element"]
+        writer_requirements = RequirementsElements("requirements.txt")
+
+        writer_url = UrlsElement("urls.py")
+        writer_url.set_classes(writer_models.get_classes())
 
         await download_file(
             request=DownloadRequest(
@@ -96,30 +119,34 @@ async def convert(
             ),
         )
 
-        # # Uncomment this to write requirements.txt
-        # await writer_requirements.write_to_file(
-        #     "path_to_project_zip"
-        # )
+        project_name = request.project_name
 
-        # Write previous files into a .zip
-        # [TODO] replace the exisiting zip files into zip with django project
-        # create_django_project(request.filename[0])
-        # create_django_app(request.filename[0], "main")
-        # os.remove(request.filename[0] + ".zip")
-        # [TODO] remove project_{project_name} folder (probably use shutil.rmtree)
-        # [TODO] add try catch zipfile.BadZipFile
-        zip_filename = request.filename[0] + ".zip"
-        with zipfile.ZipFile(zip_filename, "w") as zipf:
-            zipf.write(request.filename[0] + "_models.py")
-            zipf.write(request.filename[0] + "_views.py")
-
-            os.remove(request.filename[0] + "_models.py")
-            os.remove(request.filename[0] + "_views.py")
-
-        background_tasks.add_task(remove_file, zip_filename)
+        await writer_requirements.write_to_file("./app")
+        await writer_url.write_to_file("./app")
+        generate_file_to_be_downloaded(
+            project_name=project_name,
+            models=response_content_models,
+            views=response_content_views,
+            writer_models=writer_models,
+        )
+        if os.path.exists(f"project_{project_name}"):
+            shutil.rmtree(f"project_{project_name}")
+        if os.path.exists(f"{project_name}_models.py"):
+            os.remove(f"{project_name}_models.py")
+        if os.path.exists(f"{project_name}_views.py"):
+            os.remove(f"{project_name}_views.py")
+        if os.path.exists(os.path.join("app", "requirements.txt")):
+            os.remove(os.path.join("app", "requirements.txt"))
+        if os.path.exists(os.path.join("app", "urls.py")):
+            os.remove(os.path.join("app", "urls.py"))
+        if os.path.exists(f"{request.filename[0]}_models.py"):
+            os.remove(f"{request.filename[0]}_models.py")
+        if os.path.exists(f"{request.filename[0]}_views.py"):
+            os.remove(f"{request.filename[0]}_views.py")
+        background_tasks.add_task(remove_file, f"{project_name}.zip")
 
         return FileResponse(
-            path=request.filename[0] + ".zip",
+            path=project_name + ".zip",
             filename=f"{request.filename[0]}.zip",
             media_type="application/zip",
         )
@@ -234,6 +261,103 @@ def create_django_app(
                         zipf.writestr(f"{app_name}/{file_name}", content)
             file_names.append(file)
     return file_names
+
+
+def generate_file_to_be_downloaded(
+    project_name: str,
+    models: str,
+    views: str,
+    writer_models: ModelsElements,
+) -> list[str]:
+    """
+    Function to generate the file to be downloaded. This function will create a zip file
+    with the name of the project and add all the files to it.
+    """
+    # TODO: make app_name dynamic in the future
+    if os.path.exists(f"project_{project_name}"):
+        shutil.rmtree(f"project_{project_name}", ignore_errors=True)
+    if os.path.exists(f"{project_name}.zip"):
+        os.remove(f"{project_name}.zip")
+    app_name = "main"
+    create_django_project(project_name)
+    create_django_app(project_name, app_name, models, views)
+
+    with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
+        # requirements.txt
+        if not os.path.exists("app/requirements.txt"):
+            raise FileNotFoundError("File requirements.txt does not exist")
+        zipf.write(
+            os.path.join("app", "requirements.txt"),
+            arcname="requirements.txt",
+        )
+        # urls.py
+        if not os.path.exists("app/urls.py"):
+            raise FileNotFoundError("File urls.py does not exist")
+        zipf.write(
+            os.path.join("app", "urls.py"),
+            arcname=f"{app_name}/urls.py",
+        )
+        # script files
+        zipf.write(
+            "app/templates/scripts/run.sh.txt",
+            arcname="run.sh",
+        )
+        zipf.write(
+            "app/templates/scripts/run.bat.txt",
+            arcname="run.bat",
+        )
+        # write frontend files to zip
+
+        # CREATE
+        create_pages = generate_html_create_pages_django(writer_models)
+        for i in range(len(create_pages)):
+            if writer_models.get_classes()[i].get_name() in create_pages[i]:
+                page = create_pages[i]
+                name = (
+                    f"create_{writer_models.get_classes()[i].get_name().lower()}.html"
+                )
+                zipf.writestr(
+                    f"{app_name}/templates/{name}",
+                    data=page,
+                )
+        # CREATE FORMS
+        forms_create = generate_forms_create_page_django(models_elements=writer_models)
+        zipf.writestr(
+            f"{app_name}/forms.py",
+            data=forms_create,
+        )
+        # READ
+        read_page = generate_html_read_pages_django(models_elements=writer_models)
+        for i in range(len(read_page)):
+            if writer_models.get_classes()[i].get_name() in read_page[i]:
+                page = read_page[i]
+                name = f"read_{writer_models.get_classes()[i].get_name().lower()}.html"
+                zipf.writestr(
+                    f"{app_name}/templates/{name}",
+                    data=page,
+                )
+
+        # UPDATE
+        edit_page = generate_html_edit_pages_django(models_elements=writer_models)
+        for i in range(len(edit_page)):
+            if writer_models.get_classes()[i].get_name() in edit_page[i]:
+                page = edit_page[i]
+                name = f"edit_{writer_models.get_classes()[i].get_name().lower()}.html"
+                zipf.writestr(
+                    f"{app_name}/templates/{name}",
+                    data=page,
+                )
+
+        # landing page
+        landing_page = generate_landing_page_html()
+        zipf.writestr(f"{app_name}/templates/landing_page.html", data=landing_page)
+        # base.html
+        zipf.write(
+            os.path.join("app", "templates", "base.html.txt"),
+            arcname="templates/base.html",
+        )
+        files = zipf.namelist()
+    return files
 
 
 def process_parsed_class(

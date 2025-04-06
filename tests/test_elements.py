@@ -3,12 +3,11 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import pytest
-
 from app.models.diagram import ClassObject
 from app.models.elements import (
     ModelsElements,
     RequirementsElements,
+    UrlsElement,
     ViewsElements,
 )
 
@@ -41,7 +40,7 @@ class TestModelsElements(unittest.TestCase):
         obj.parse(open("tests/test_input.txt", "r").read())
         res = obj.print_django_style()
         f = open("tests/test_result.txt", "r")
-        assert res == f.read()
+        self.assertEqual(res, f.read())
 
     def test_add_class_positive_case(self):
         """Test: Positive case where a valid ClassObject is added."""
@@ -187,25 +186,61 @@ class TestViewsElements(unittest.TestCase):
         )
 
 
-class TestRequirementsElements:
+class TestUrlsElements(unittest.IsolatedAsyncioTestCase):
+    def test_print_django_style(self):
+        self.requirements_elements = UrlsElement("urls.py")
+        mock_class = mock.Mock()
+        mock_class.get_name.return_value = "Class1"
+        self.requirements_elements.set_classes(classes=[mock_class])
+        res = self.requirements_elements.print_django_style()
+        self.assertEqual(
+            res,
+            "from django.urls import path\n"
+            "from .views import (\n    "
+            "create_class1,\n    "
+            "get_class1,\n    "
+            "edit_class1,\n    "
+            "delete_class1,\n    "
+            ")\n\n"
+            'app_name = "main"\n\n'
+            "urlpatterns = [\n    "
+            "path('', landing_page , name=\"landing_page\"),\n    "
+            "path('create-class1/', create_class1, name=\"create_class1\"),\n    "
+            "path('get-all-class1/', get_class1, name=\"get_class1\"),\n    "
+            "path('edit-class1/', edit_class1, name=\"edit_class1\"),\n    "
+            "path('delete-class1/', delete_class1, name=\"delete_class1\"),\n]",
+        )
+
+    async def test_write_to_file(self):
+        self.requirements_elements = UrlsElement("urls.py")
+        mock_class = mock.Mock()
+        mock_class.get_name.return_value = "Class1"
+        await self.requirements_elements.write_to_file(path="./tests")
+        print(Path("./tests/urls.py").is_file())
+        self.assertTrue(Path("./tests/urls.py").is_file())
+        if Path("./tests/urls.py").is_file():
+            os.remove("./tests/urls.py")
+
+
+class TestRequirementsElements(unittest.IsolatedAsyncioTestCase):
     def test_print_django_style(self):
         self.requirements_elements = RequirementsElements("requirements.txt")
         res = self.requirements_elements.print_django_style()
-        assert (
-            res == "Django\n"
+        self.assertEqual(
+            res,
+            "Django\n"
             "gunicorn\n"
             "whitenoise\n"
             "psycopg2\n"
             "pytest\n"
             "pytest-django\n"
-            "pytest-cov\n"
+            "pytest-cov\n",
         )
 
-    @pytest.mark.asyncio
     async def test_write_to_file(self):
         self.requirements_elements = RequirementsElements("requirements.txt")
         await self.requirements_elements.write_to_file("./app")
-        assert Path("./app/requirements.txt").is_file()
+        self.assertTrue(Path("./app/requirements.txt").is_file())
         if Path("./app/requirements.txt").is_file():
             os.remove("./app/requirements.txt")
 
