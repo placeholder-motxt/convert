@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app, check_duplicate
-from app.models.elements import ClassObject
+from app.models.elements import ClassObject, ModelsElements
 from app.models.methods import ClassMethodObject
 
 client = TestClient(app)
@@ -33,6 +33,7 @@ def test_file_already_exists():
             patch("app.main.ModelsElements") as mockparser,
             patch("app.main.ViewsElements") as mockparser2,
             patch("app.main.json") as mockjson,
+            patch("app.main.fetch_data") as mock_fetch_data,
         ):
             mockjson.loads.return_value = {"diagram": "ClassDiagram"}
             mock_instance = mockparser.return_value
@@ -49,6 +50,12 @@ def test_file_already_exists():
                 MagicMock(to_views_code=MagicMock(return_value="view Test {}"))
             ]
             mock_instance2.print_django_style.return_value = "ini views write"
+
+            mock_fetch_data.return_value = {
+                "models": "class Test {}",
+                "views": "view Test {}",
+                "model_element": ModelsElements("filename"),
+            }
 
             # Try to upload a file
             response = client.post(
@@ -69,6 +76,7 @@ def test_slash_on_filename():
         patch("app.main.ModelsElements") as mockparser,
         patch("app.main.ViewsElements") as mockparser2,
         patch("app.main.json") as mockjson,
+        patch("app.main.fetch_data") as mock_fetch_data,
     ):
         mockjson.loads.return_value = {"diagram": "ClassDiagram"}
 
@@ -78,6 +86,12 @@ def test_slash_on_filename():
 
         mock_instance2 = mockparser2.return_value
         mock_instance2.add_class_method.return_value = [MagicMock()]
+
+        mock_fetch_data.return_value = {
+            "models": "class Test {}",
+            "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
+        }
 
         response = client.post(
             "/convert/", json={"filename": ["app/main2"], "content": [["Some content"]]}
@@ -93,6 +107,7 @@ async def test_convert_endpoint_valid_content_class_diagram():
         patch("app.main.ModelsElements") as mockparser,
         patch("app.main.ViewsElements") as mockparser2,
         patch("app.main.json") as mockjson,
+        patch("app.main.fetch_data") as mock_fetch_data,
     ):
         mockjson.loads.return_value = {"diagram": "ClassDiagram"}
         mock_instance = mockparser.return_value
@@ -104,6 +119,12 @@ async def test_convert_endpoint_valid_content_class_diagram():
         mock_instance2 = mockparser2.return_value
         mock_instance2.add_class_method.return_value = [MagicMock()]
         mock_instance2.print_django_style.return_value = "ini views write"
+
+        mock_fetch_data.return_value = {
+            "models": "class Test {}",
+            "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
+        }
 
         # Prepare the request payload with the necessary 'nodes' key
         payload = {"filename": ["file1"], "content": [['{"content"}']]}
@@ -144,6 +165,7 @@ async def test_convert_endpoint_class_diagram():
         patch("app.main.ModelsElements") as mock_models,
         patch("app.main.ViewsElements") as mock_views,
         patch("app.main.json") as mock_json,
+        patch("app.main.fetch_data") as mock_fetch_data,
     ):
         mock_json.loads.return_value = {"diagram": "ClassDiagram"}
         mock_instance_models = mock_models.return_value
@@ -155,6 +177,12 @@ async def test_convert_endpoint_class_diagram():
         mock_instance_views = mock_views.return_value
         mock_instance_views.add_class_method.return_value = MagicMock()
         mock_instance_views.print_django_style.return_value = "ini views write"
+
+        mock_fetch_data.return_value = {
+            "models": "class Test {}",
+            "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
+        }
 
         payload = {"filename": ["file1"], "content": [['{"diagram": "ClassDiagram"}']]}
 
@@ -176,9 +204,7 @@ async def test_convert_endpoint_sequence_diagram():
         patch("app.main.ParseJsonToObjectSeq") as mock_seq_parser,
         patch("app.main.ModelsElements") as mock_models,
         patch("app.main.ViewsElements") as mock_views,
-        patch(
-            "app.main.check_duplicate"
-        ) as mock_check_duplicate,  # Mock check_duplicate
+        patch("app.main.fetch_data") as mock_fetch_data,  # Mock fetch data
     ):
         # Set up mock for sequence diagram parsing
         mock_seq_instance = mock_seq_parser.return_value
@@ -203,6 +229,12 @@ async def test_convert_endpoint_sequence_diagram():
         mock_instance_views = mock_views.return_value
         mock_instance_views.print_django_style.return_value = "ini views write"
 
+        mock_fetch_data.return_value = {
+            "models": "class Test {}",
+            "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
+        }
+
         # Prepare the payload
         payload = {
             "filename": ["file1"],
@@ -214,8 +246,8 @@ async def test_convert_endpoint_sequence_diagram():
 
         response = client.post("/convert", json=payload)
 
-        # Validate that check_duplicate was called
-        mock_check_duplicate.assert_called()  # Check that the function was called
+        # Validate that fetch_data was called
+        mock_fetch_data.assert_called()  # Check that the function was called
 
         # Validate the response
         assert response.status_code == 200
@@ -232,6 +264,7 @@ async def test_convert_endpoint_invalid_diagram_type():
         patch("app.main.ModelsElements") as mock_models,
         patch("app.main.ViewsElements") as mock_views,
         patch("app.main.json") as mock_json,
+        patch("app.main.fetch_data") as mock_fetch_data,
     ):
         mock_json.loads.return_value = {"diagram": "InvalidDiagram"}
         mock_instance_models = mock_models.return_value
@@ -240,6 +273,12 @@ async def test_convert_endpoint_invalid_diagram_type():
 
         mock_instance_views = mock_views.return_value
         mock_instance_views.print_django_style.return_value = "ini views write"
+
+        mock_fetch_data.return_value = {
+            "models": "class Test {}",
+            "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
+        }
 
         payload = {
             "filename": ["file1"],
@@ -279,6 +318,13 @@ async def test_convert_endpoint_valid_sequence_diagram():
         patch("app.main.ViewsElements") as mockparser2,
         patch("app.main.json") as mockjson,
         patch("app.main.check_duplicate") as mock_check_duplicate,
+        patch("app.main.generate_create_page_views", return_value="create views code"),
+        patch("app.main.generate_edit_page_views", return_value="edit views code"),
+        patch("app.main.generate_delete_page_views", return_value="delete views code"),
+        patch("app.main.generate_read_page_views", return_value="read views code"),
+        patch(
+            "app.main.generate_landing_page_views", return_value="landing views code"
+        ),
     ):
         mockjson.loads.return_value = {"diagram": "SequenceDiagram"}
 
@@ -303,6 +349,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
         patch("app.main.ModelsElements") as mockparser,
         patch("app.main.ViewsElements") as mockparser2,
         patch("app.main.json") as mockjson,
+        patch("app.main.fetch_data") as mock_fetch_data,
     ):
         mockjson.loads.return_value = {"diagram": "ClassDiagram"}
         mock_instance = mockparser.return_value
@@ -314,6 +361,11 @@ async def test_convert_endpoint_valid_multiple_file_content():
         mock_instance2 = mockparser2.return_value
         mock_instance2.add_class_method.return_value = None
         mock_instance2.print_django_style.return_value = "ini views write"
+        mock_fetch_data.return_value = {
+            "models": "class Test {}",
+            "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
+        }
 
         payload = {
             "filename": ["file1", "file2"],
