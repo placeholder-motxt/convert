@@ -340,13 +340,14 @@ def generate_file_to_be_downloaded(
         # UPDATE
         edit_page = generate_html_edit_pages_django(models_elements=writer_models)
         for i in range(len(edit_page)):
-            if writer_models.get_classes()[i].get_name() in edit_page[i]:
-                page = edit_page[i]
-                name = f"edit_{writer_models.get_classes()[i].get_name().lower()}.html"
-                zipf.writestr(
-                    f"{app_name}/templates/{name}",
-                    data=page,
-                )
+            for class_obj in writer_models.get_classes():
+                if class_obj.get_name() in edit_page[i]:
+                    page = edit_page[i]
+                    name = f"edit_{class_obj.get_name().lower()}.html"
+                    zipf.writestr(
+                        f"{app_name}/templates/{name}",
+                        data=page,
+                    )
 
         # landing page
         landing_page = generate_landing_page_html()
