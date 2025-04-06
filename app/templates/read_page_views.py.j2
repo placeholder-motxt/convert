@@ -1,7 +1,7 @@
 {% for class in classes %}
 def get_{{class.class_snake}}(request):
     {{ class.class_snake }}s = {{ class.class_name }}.objects.all()
-    return render(request, 'main/{{ class.class_snake }}_list.html', {'{{ class.class_snake }}s': {{ class.class_snake }}s})
+    return render(request, '{{ class.class_snake }}_list.html', {'{{ class.class_snake }}s': {{ class.class_snake }}s})
 
 
 {% endfor %}

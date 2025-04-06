@@ -7,4 +7,4 @@
     for model in app_models:
         model_info[model._meta.model_name] = model._meta.verbose_name.title()
 
-    return render(request, 'main/landing_page.html', {'model_info': model_info}){% endraw %}
+    return render(request, 'landing_page.html', {'model_info': model_info}){% endraw %}

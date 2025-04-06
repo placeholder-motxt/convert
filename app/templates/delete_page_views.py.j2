@@ -8,6 +8,6 @@ def delete_{{ class.name_snake }}(request):
 
         obj = {{class.name}}.objects.get(pk=object_id)
         obj.delete()
-        return redirect('get_{{ class.name_snake }}')
+        return redirect('main:get_{{ class.name_snake }}')
     return JsonResponse({"error": "Invalid request method"}, status=405)
 {% endfor %}
