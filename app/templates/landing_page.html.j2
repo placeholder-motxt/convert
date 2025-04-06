@@ -13,7 +13,7 @@
             {% for model_name, model_label in model_info.items %}
             <tr>
                 <td>{{ model_label }}</td>
-                {% with url_name="get_"|add:model_name %}
+                {% with url_name="main:get_"|add:model_name %}
                     <td><a href="{% url url_name %}">View {{ model_label }}</a></td>
                 {% endwith %}
             </tr>

@@ -146,7 +146,7 @@ async def convert(
 
         return FileResponse(
             path=project_name + ".zip",
-            filename=f"{request.filename[0]}.zip",
+            filename=f"{project_name}.zip",
             media_type="application/zip",
         )
 
