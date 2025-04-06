@@ -21,13 +21,13 @@
             {% endfor -%}
             {% if has_edit %}
                 <td>
-                    <a href="{% raw %}{%{% endraw %} url 'edit_{{class_snake}}' {{ class_snake }}.pk {% raw %}%}{% endraw %}">
+                    <a href="{% raw %}{%{% endraw %} url 'main:edit_{{class_snake}}' {{ class_snake }}.pk {% raw %}%}{% endraw %}">
                         <button>Edit</button>
                     </a>
                 </td>
             {% endif %}
                 <td>
-                    <form action="{% raw %}{%{% endraw %} url 'delete_{{class_snake}}' {% raw %}%}{% endraw %}" method="POST">
+                    <form action="{% raw %}{%{% endraw %} url 'main:delete_{{class_snake}}' {% raw %}%}{% endraw %}" method="POST">
                         {% raw %}{% csrf_token %}{% endraw %}
                         <input type="hidden" name="object_id" value="{% raw %}{{{% endraw %} {{ class_snake }}.id {% raw %}}}{% endraw %}">
                         <button type="submit">Delete</button>
@@ -43,5 +43,5 @@
         </tbody>
     </table>
     <br>
-    <a href="{% raw %}{%{% endraw %} url 'create_{{ class_snake }}' {% raw %}%}{% endraw %}">Create New {{ class_name }}</a>
+    <a href="{% raw %}{%{% endraw %} url 'main:create_{{ class_snake }}' {% raw %}%}{% endraw %}">Create New {{ class_name }}</a>
 {% raw %}{% endblock content %}{% endraw %}
