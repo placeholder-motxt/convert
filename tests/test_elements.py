@@ -207,7 +207,7 @@ class TestUrlsElements(unittest.IsolatedAsyncioTestCase):
             "path('', landing_page , name=\"landing_page\"),\n    "
             "path('create-class1/', create_class1, name=\"create_class1\"),\n    "
             "path('get-all-class1/', get_class1, name=\"get_class1\"),\n    "
-            "path('edit-class1/', edit_class1, name=\"edit_class1\"),\n    "
+            "path('edit-class1/<int:id>/', edit_class1, name=\"edit_class1\"),\n    "
             "path('delete-class1/', delete_class1, name=\"delete_class1\"),\n]",
         )
 
