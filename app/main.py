@@ -364,7 +364,9 @@ def generate_file_to_be_downloaded(
         for i in range(len(create_pages)):
             if writer_models.get_classes()[i].get_name() in create_pages[i]:
                 page = create_pages[i]
-                name = f"create_{writer_models.get_classes()[i].get_name()}_page_django.html"
+                name = (
+                    f"create_{writer_models.get_classes()[i].get_name().lower()}.html"
+                )
                 zipf.writestr(
                     f"{app_name}/templates/{name}",
                     data=page,
@@ -380,9 +382,7 @@ def generate_file_to_be_downloaded(
         for i in range(len(read_page)):
             if writer_models.get_classes()[i].get_name() in read_page[i]:
                 page = read_page[i]
-                name = (
-                    f"read_{writer_models.get_classes()[i].get_name()}_page_django.html"
-                )
+                name = f"read_{writer_models.get_classes()[i].get_name().lower()}.html"
                 zipf.writestr(
                     f"{app_name}/templates/{name}",
                     data=page,
@@ -393,9 +393,7 @@ def generate_file_to_be_downloaded(
         for i in range(len(edit_page)):
             if writer_models.get_classes()[i].get_name() in edit_page[i]:
                 page = edit_page[i]
-                name = (
-                    f"edit_{writer_models.get_classes()[i].get_name()}_page_django.html"
-                )
+                name = f"edit_{writer_models.get_classes()[i].get_name().lower()}.html"
                 zipf.writestr(
                     f"{app_name}/templates/{name}",
                     data=page,
