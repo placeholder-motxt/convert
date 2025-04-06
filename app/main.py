@@ -98,9 +98,9 @@ async def convert(
         response_content_models = fetched["models"]
         response_content_views = fetched["views"]
         writer_models = fetched["model_element"]
-        writer_requirements = RequirementsElements("requirements.txt")
+        writer_requirements = RequirementsElements()
 
-        writer_url = UrlsElement("urls.py")
+        writer_url = UrlsElement()
         writer_url.set_classes(writer_models.get_classes())
 
         await download_file(
@@ -129,20 +129,19 @@ async def convert(
             views=response_content_views,
             writer_models=writer_models,
         )
+        files = [
+            f"{project_name}_models.py",
+            f"{project_name}_views.py",
+            os.path.join("app", "requirements.txt"),
+            os.path.join("app", "urls.py"),
+            f"{request.filename[0]}_models.py",
+            f"{request.filename[0]}_views.py",
+        ]
         if os.path.exists(f"project_{project_name}"):
             shutil.rmtree(f"project_{project_name}")
-        if os.path.exists(f"{project_name}_models.py"):
-            os.remove(f"{project_name}_models.py")
-        if os.path.exists(f"{project_name}_views.py"):
-            os.remove(f"{project_name}_views.py")
-        if os.path.exists(os.path.join("app", "requirements.txt")):
-            os.remove(os.path.join("app", "requirements.txt"))
-        if os.path.exists(os.path.join("app", "urls.py")):
-            os.remove(os.path.join("app", "urls.py"))
-        if os.path.exists(f"{request.filename[0]}_models.py"):
-            os.remove(f"{request.filename[0]}_models.py")
-        if os.path.exists(f"{request.filename[0]}_views.py"):
-            os.remove(f"{request.filename[0]}_views.py")
+        for file in files:
+            if os.path.exists(file):
+                os.remove(file)
         background_tasks.add_task(remove_file, f"{project_name}.zip")
 
         return FileResponse(
@@ -370,12 +369,6 @@ def process_parsed_class(
             duplicate_checker[(model_class.get_name(), method.get_name())] = method
 
 
-def validate_instance(json_content: str) -> dict:
-    if isinstance(json_content, str):
-        json_content = json.loads(json_content)
-        return json_content
-
-
 def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     """
     This is the logic from convert() method to process the requested
@@ -390,7 +383,7 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     writer_views = ViewsElements("views.py")
 
     for file_name, content in zip(filename, content):
-        json_content = validate_instance(content[0])
+        json_content = json.loads(content[0])
 
         if (
             json_content["diagram"] is not None

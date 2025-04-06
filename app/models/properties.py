@@ -45,7 +45,7 @@ class FieldObject:
     string representation of the datatype according to a specific framework."
     """
 
-    TYPE_MAPPING = {
+    DJANGO_TYPE_MAPPING = {
         "boolean": "models.BooleanField()",
         "String": "models.CharField(max_length=255)",
         "integer": "models.IntegerField()",
@@ -80,7 +80,7 @@ class FieldObject:
     def to_models_code(self) -> str:
         field_type = self.__type.to_models_code().lower()
 
-        for key, value in self.TYPE_MAPPING.items():
+        for key, value in self.DJANGO_TYPE_MAPPING.items():
             if key.lower() in field_type:
                 return f"{self.__name} = {value}"
 
@@ -89,7 +89,7 @@ class FieldObject:
     def to_models_code_template(self) -> dict[str, str]:
         field_type = self.__type.to_models_code().lower()
 
-        for key, value in self.TYPE_MAPPING.items():
+        for key, value in self.DJANGO_TYPE_MAPPING.items():
             if key.lower() in field_type:
                 return {"name": self.__name, "type": value}
 
