@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app, check_duplicate
-from app.models.elements import ClassObject
+from app.models.elements import ClassObject, ModelsElements
 from app.models.methods import ClassMethodObject
 
 client = TestClient(app)
@@ -54,6 +54,7 @@ def test_file_already_exists():
             mock_fetch_data.return_value = {
                 "models": "class Test {}",
                 "views": "view Test {}",
+                "model_element": ModelsElements("filename"),
             }
 
             # Try to upload a file
@@ -89,6 +90,7 @@ def test_slash_on_filename():
         mock_fetch_data.return_value = {
             "models": "class Test {}",
             "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
         }
 
         response = client.post(
@@ -121,6 +123,7 @@ async def test_convert_endpoint_valid_content_class_diagram():
         mock_fetch_data.return_value = {
             "models": "class Test {}",
             "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
         }
 
         # Prepare the request payload with the necessary 'nodes' key
@@ -178,6 +181,7 @@ async def test_convert_endpoint_class_diagram():
         mock_fetch_data.return_value = {
             "models": "class Test {}",
             "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
         }
 
         payload = {"filename": ["file1"], "content": [['{"diagram": "ClassDiagram"}']]}
@@ -228,6 +232,7 @@ async def test_convert_endpoint_sequence_diagram():
         mock_fetch_data.return_value = {
             "models": "class Test {}",
             "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
         }
 
         # Prepare the payload
@@ -272,6 +277,7 @@ async def test_convert_endpoint_invalid_diagram_type():
         mock_fetch_data.return_value = {
             "models": "class Test {}",
             "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
         }
 
         payload = {
@@ -358,6 +364,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
         mock_fetch_data.return_value = {
             "models": "class Test {}",
             "views": "view Test {}",
+            "model_element": ModelsElements("filename"),
         }
 
         payload = {
