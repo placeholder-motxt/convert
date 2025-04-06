@@ -7,6 +7,9 @@
             {% for field in fields -%}
                 <th>{{ field.name }}</th>
             {% endfor -%}
+            {% if has_edit -%}
+                <th>Edit</th>
+            {% endif -%}
                 <th>Delete</th>
             </tr>
         </thead>
@@ -16,6 +19,13 @@
             {% for field in fields -%}
                 <td>{% raw %}{{{% endraw %} {{ class_snake }}.{{ field.name }} {% raw %}}}{% endraw %}</td>
             {% endfor -%}
+            {% if has_edit %}
+                <td>
+                    <a href="{% raw %}{%{% endraw %} url 'edit_{{class_snake}}' {{ class_snake }}.pk {% raw %}%}{% endraw %}">
+                        <button>Edit</button>
+                    </a>
+                </td>
+            {% endif %}
                 <td>
                     <form action="{% raw %}{%{% endraw %} url 'delete_{{class_snake}}' {% raw %}%}{% endraw %}" method="POST">
                         {% raw %}{% csrf_token %}{% endraw %}

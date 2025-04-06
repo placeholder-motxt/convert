@@ -24,4 +24,5 @@ def generate_html_read_page_django(class_object: ClassObject) -> str:
     }
     fields = [{"name": f.get_name()} for f in class_object.get_fields()]
     context["fields"] = fields
+    context["has_edit"] = len(fields) > 0
     return render_template("read_page_django.html.j2", context)
