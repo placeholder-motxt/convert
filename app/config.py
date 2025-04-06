@@ -1,7 +1,7 @@
 import os
 
 DEBUG = not os.getenv("PRODUCTION", False)
-VERSION = "0.1.10"
+VERSION = "0.1.11"
 APP_CONFIG = {
     "debug": DEBUG,
     "openapi_url": "/openapi.json" if DEBUG else None,
