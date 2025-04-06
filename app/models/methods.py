@@ -74,6 +74,13 @@ class ClassMethodObject(AbstractMethodObject):
     Its counterpart is the ControllerMethodObject class
     """
 
+    PYTHON_TYPE_MAPPING = {
+        "boolean": "bool",
+        "string": "str",
+        "integer": "int",
+    }
+    LIST_REGEX = re.compile(r"^list\[(?P<list_type>\w*)\]", re.IGNORECASE)
+
     def __init__(self):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
@@ -140,28 +147,23 @@ class ClassMethodObject(AbstractMethodObject):
         ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
-            if not is_valid_python_identifier(rettype) and not bool(
-                re.match(r"list\[.*\]", rettype.lower())
-            ):
+            list_match = self.LIST_REGEX.match(rettype)
+            if not is_valid_python_identifier(rettype) and list_match is None:
                 raise ValueError(
                     f"Invalid return type: '{rettype}'\n "
                     "please consult the user manual document on how to name return variables"
                 )
             if rettype != "void":
-                if rettype.lower() == "string":
-                    res.write(" -> str")
-                elif rettype.lower() == "boolean":
-                    res.write(" -> bool")
-                elif rettype.lower() == "integer":
-                    res.write(" -> int")
-                elif rettype.lower() == "list[string]":
-                    res.write(" -> list[str]")
-                elif rettype.lower() == "list[boolean]":
-                    res.write(" -> list[bool]")
-                elif rettype.lower() == "list[integer]":
-                    res.write(" -> list[int]")
+                if list_match:
+                    # Assuming it is already valid when it comes here
+                    list_type = list_match.group("list_type")
+                    python_type = self.PYTHON_TYPE_MAPPING.get(
+                        list_type.lower(), list_type
+                    )
+                    res.write(f" -> list[{python_type}]")
                 else:
-                    res.write(f" -> {rettype}")
+                    python_type = self.PYTHON_TYPE_MAPPING.get(rettype.lower(), rettype)
+                    res.write(f" -> {python_type}")
 
         res.write(":")
         for method_call in self.__calls:
