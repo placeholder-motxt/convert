@@ -4,8 +4,8 @@ def edit_{{ class.snake_name }}(request, id):
     form = {{ class.name }}Form(request.POST or None, instance={{ class.snake_name }}_obj)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('get_{{ class.snake_name }}')
+        return redirect('main:get_{{ class.snake_name }}')
 
-    return render(request, 'main/edit_{{ class.snake_name }}.html', {'form': form})
+    return render(request, 'edit_{{ class.snake_name }}.html', {'form': form})
 
 {% endfor %}
