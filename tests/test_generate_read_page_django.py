@@ -33,6 +33,7 @@ class TestGenerateHTMLReadPageDjango(unittest.TestCase):
             "class_name": "Person",
             "class_snake": "person",
             "fields": [{"name": "name"}, {"name": "age"}],
+            "has_edit": True,
         }
 
         # Set up the mock to return a dummy rendered string.
@@ -75,6 +76,7 @@ class TestGenerateHTMLReadPageDjango(unittest.TestCase):
             "class_name": "EmptyClass",
             "class_snake": "empty_class",
             "fields": [],
+            "has_edit": False,
         }
         mock_render_template.return_value = "Rendered EmptyClass Page"
         result = generate_html_read_page_django(class_obj)
@@ -95,6 +97,7 @@ class TestGenerateHTMLReadPageDjango(unittest.TestCase):
             "class_name": "",
             "class_snake": "",
             "fields": [],
+            "has_edit": False,
         }
         mock_render_template.return_value = "Rendered Empty Name Page"
         result = generate_html_read_page_django(class_obj)
@@ -118,6 +121,7 @@ class TestGenerateHTMLReadPageDjango(unittest.TestCase):
             "class_name": "Person",
             "class_snake": "person",
             "fields": [{"name": ""}],
+            "has_edit": True,
         }
         mock_render_template.return_value = "Rendered with empty field name"
         result = generate_html_read_page_django(class_obj)
@@ -142,6 +146,7 @@ class TestGenerateHTMLReadPageDjango(unittest.TestCase):
             "class_name": "Test-Class",
             "class_snake": "test-class",
             "fields": [{"name": "field name"}],
+            "has_edit": True,
         }
         mock_render_template.return_value = "Rendered Special Characters Page"
         result = generate_html_read_page_django(class_obj)
