@@ -4,15 +4,16 @@ import unittest
 import zipfile
 
 import pytest
-from fastapi import HTTPException
 
 from app.main import (
     create_django_app,
     create_django_project,
     fetch_data,
+    get_model_element,
     render_model,
     render_views,
 )
+from app.models.elements import ModelsElements
 
 
 class TestReplaceModelAndViews(unittest.TestCase):
@@ -66,10 +67,13 @@ class TestReplaceModelAndViews(unittest.TestCase):
             )
 
     def test_render_empty_model(self):
-        with pytest.raises(HTTPException) as excinfo:
-            fetch_data(["tes.class.jet"], [["{diagram: 'ClassDiagram'}"]])
+        with pytest.raises(ValueError) as excinfo:
+            fetch_data(["tes.class.jet"], [['{"diagram": "ClassDiagram"}']])
 
-        assert excinfo.value.status_code == 422
+        self.assertEqual(
+            "Nodes not found in the json, \nplease make sure the file isn't corrupt".strip(),
+            str(excinfo.value).strip(),
+        )
 
     def test_render_views(self):
         with open("tests/test_render_model.txt", "r", encoding="utf-8") as file:
@@ -119,6 +123,16 @@ class TestReplaceModelAndViews(unittest.TestCase):
             self.assertEqual(
                 models_content.strip().replace("\t", "    "), expected_result.strip()
             )
+
+    def test_get_model_element(self):
+        with open("tests/test_render_model.txt", "r", encoding="utf-8") as file:
+            json_data = file.read()
+
+        processed_data = fetch_data(["tes.class.jet"], [[json_data]])
+
+        models = get_model_element(processed_data)
+
+        self.assertIsInstance(models, ModelsElements)
 
     def tearDown(self):
         self.remove_used_project()

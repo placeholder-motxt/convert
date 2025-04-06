@@ -64,11 +64,13 @@ def test_valid_convert_request():
     data = {
         "filename": ["example1", "example2"],
         "content": [["Hello, world!"], ["Hello, world!2"]],
+        "project_name": "test_project",
     }
     request = ConvertRequest(**data)
 
     assert request.filename == ["example1", "example2"]
     assert request.content == [["Hello, world!"], ["Hello, world!2"]]
+    assert request.project_name == "test_project"
 
 
 def test_empty_content_convert():

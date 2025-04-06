@@ -147,7 +147,22 @@ class ClassMethodObject(AbstractMethodObject):
                     f"Invalid return type: '{rettype}'\n "
                     "please consult the user manual document on how to name return variables"
                 )
-            res.write(f" -> {rettype}")
+            if rettype != "void":
+                if rettype.lower() == "string":
+                    res.write(" -> str")
+                elif rettype.lower() == "boolean":
+                    res.write(" -> bool")
+                elif rettype.lower() == "integer":
+                    res.write(" -> int")
+                elif rettype.lower() == "list[string]":
+                    res.write(" -> list[str]")
+                elif rettype.lower() == "list[boolean]":
+                    res.write(" -> list[bool]")
+                elif rettype.lower() == "list[integer]":
+                    res.write(" -> list[int]")
+                else:
+                    res.write(f" -> {rettype}")
+
         res.write(":")
         for method_call in self.__calls:
             res.write("\n    ")
