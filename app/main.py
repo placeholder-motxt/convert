@@ -376,6 +376,7 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     return {
         "models": response_content_models.getvalue(),
         "views": response_content_views.getvalue(),
+        "model_element": writer_models,
     }
 
 
@@ -401,3 +402,11 @@ def render_views(fetched_data: dict[str]) -> str:
     render_views method!
     """
     return fetched_data["views"]
+
+
+def get_model_element(fetched_data: dict[str]) -> ModelsElements:
+    """
+    Function to get ModelElements from the fetch_data method. Behavior
+    similiar to render_model and render_views
+    """
+    return fetched_data["model_element"]
