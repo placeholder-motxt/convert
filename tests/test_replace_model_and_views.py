@@ -4,7 +4,6 @@ import unittest
 import zipfile
 
 import pytest
-from fastapi import HTTPException
 
 from app.main import (
     create_django_app,
@@ -66,10 +65,13 @@ class TestReplaceModelAndViews(unittest.TestCase):
             )
 
     def test_render_empty_model(self):
-        with pytest.raises(HTTPException) as excinfo:
-            fetch_data(["tes.class.jet"], [["{diagram: 'ClassDiagram'}"]])
+        with pytest.raises(ValueError) as excinfo:
+            fetch_data(["tes.class.jet"], [['{"diagram": "ClassDiagram"}']])
 
-        assert excinfo.value.status_code == 422
+        self.assertEqual(
+            "Nodes not found in the json, \nplease make sure the file isn't corrupt".strip(),
+            str(excinfo.value).strip(),
+        )
 
     def test_render_views(self):
         with open("tests/test_render_model.txt", "r", encoding="utf-8") as file:

@@ -94,83 +94,79 @@ async def convert(
         )
 
     try:
-        response_content_models = StringIO()
-        response_content_views = StringIO()
-        duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
-            dict()
-        )
+        fetched = fetch_data(request.filename, request.content)
+        response_content_models = fetched["models"]
+        response_content_views = fetched["views"]
+        writer_models = fetched["models_elements"]
+        # response_content_models = ""
+        # response_content_views = ""
+        # duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
+        #     dict()
+        # )
 
-        writer_models = ModelsElements("models.py")
-        writer_views = ViewsElements("views.py")
+        # writer_models = ModelsElements("models.py")
+        # writer_views = ViewsElements("views.py")
 
         # # Uncomment this to write requirements.txt
         writer_requirements = RequirementsElements("requirements.txt")
 
-        for file_name, content in zip(request.filename, request.content):
-            json_content = content[0]
-            if isinstance(json_content, str):
-                json_content = json.loads(json_content)
-
-            if (
-                json_content["diagram"] is not None
-                and json_content["diagram"] == "ClassDiagram"
-            ):
-                classes = writer_models.parse(json_content)
-
-                process_parsed_class(classes, duplicate_class_method_checker)
-
-            elif (
-                json_content["diagram"] is not None
-                and json_content["diagram"] == "SequenceDiagram"
-            ):
-                seq_parser = ParseJsonToObjectSeq()
-                seq_parser.set_json(content[0])
-                seq_parser.parse()
-                seq_parser.parse_return_edge()
-
-                controller_method_objects = seq_parser.get_controller_method()
-                class_objects = seq_parser.get_class_objects()
-
-                for controller_method_object in controller_method_objects:
-                    writer_views.add_controller_method(controller_method_object)
-
-                for class_object in class_objects:
-                    duplicate_class_method_checker = check_duplicate(
-                        class_objects, class_object, duplicate_class_method_checker
-                    )
-        for class_method_object in duplicate_class_method_checker.values():
-            writer_views.add_class_method(class_method_object)
-
-        # Render the base import
-        response_content_views.write(render_template("base_views.py.j2", {}))
-
-        response_content_views.write("\n\n")
-
-        # Render the UML Diagrams method
-        response_content_views.write(writer_views.print_django_style())
-        response_content_models.write(writer_models.print_django_style())
-
-        # Render the landing page
-        response_content_views.write(generate_landing_page_views())
-        response_content_views.write("\n")
-
-        # Render the create views
-        response_content_views.write(generate_create_page_views(writer_models))
-
-        # Render the read views
-        response_content_views.write(generate_read_page_views(writer_models))
-
-        # Render the delete views
-        response_content_views.write(generate_delete_page_views(writer_models))
-
-        # Render the edit views
-        response_content_views.write(generate_edit_page_views(writer_models))
-
-        response_content_models = response_content_models.getvalue()
-        response_content_views = response_content_views.getvalue()
-        writer_requirements = RequirementsElements("requirements.txt")
         writer_url = UrlsElement("urls.py")
         writer_url.set_classes(writer_models.get_classes())
+
+        # for file_name, content in zip(request.filename, request.content):
+        #     json_content = content[0]
+        #     if isinstance(json_content, str):
+        #         json_content = json.loads(json_content)
+
+        #     if (
+        #         json_content["diagram"] is not None
+        #         and json_content["diagram"] == "ClassDiagram"
+        #     ):
+        #         classes = writer_models.parse(json_content)
+
+        #         for model_class in classes:
+        #             for method in model_class.get_methods():
+        #                 duplicate_class_method_checker[
+        #                     (model_class.get_name(), method.get_name())
+        #                 ] = method
+        #     elif (
+        #         json_content["diagram"] is not None
+        #         and json_content["diagram"] == "SequenceDiagram"
+        #     ):
+        #         seq_parser = ParseJsonToObjectSeq()
+        #         seq_parser.set_json(content[0])
+        #         seq_parser.parse()
+        #         seq_parser.parse_return_edge()
+
+        #         controller_method_objects = seq_parser.get_controller_method()
+        #         class_objects = seq_parser.get_class_objects()
+
+        #         for controller_method_object in controller_method_objects:
+        #             writer_views.add_controller_method(controller_method_object)
+        #         for class_object in class_objects:
+        #             duplicate_class_method_checker = check_duplicate(
+        #                 class_objects, class_object, duplicate_class_method_checker
+        #             )
+        # for class_method_object in duplicate_class_method_checker.values():
+        #     writer_views.add_class_method(class_method_object)
+        # response_content_views += writer_views.print_django_style()
+        # response_content_models += writer_models.print_django_style()
+
+        await download_file(
+            request=DownloadRequest(
+                filename=request.filename[0],
+                content=render_model(fetched),
+                type="_models",
+            ),
+        )
+
+        await download_file(
+            request=DownloadRequest(
+                filename=request.filename[0],
+                content=render_views(fetched),
+                type="_views",
+            ),
+        )
 
         project_name = request.project_name
 
@@ -193,8 +189,8 @@ async def convert(
         if os.path.exists(os.path.join("app", "urls.py")):
             os.remove(os.path.join("app", "urls.py"))
         background_tasks.add_task(remove_file, f"{project_name}.zip")
-        background_tasks.add_task(remove_file, os.path.join("app", "urls.py"))
-        background_tasks.add_task(remove_file, os.path.join("app", "requirements.txt"))
+        background_tasks.add_task(remove_file, f"{request.filename[0]}_models.py")
+        background_tasks.add_task(remove_file, f"{request.filename[0]}_views.py")
 
         return FileResponse(
             path=project_name + ".zip",
@@ -432,83 +428,78 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     files. To use this method, pass the request.filename and request.content
     to the parameter of the method fetch_data()
     """
-    try:
-        response_content_models = StringIO()
-        response_content_views = StringIO()
-        duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
-            dict()
-        )
+    response_content_models = StringIO()
+    response_content_views = StringIO()
+    duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = dict()
 
-        writer_models = ModelsElements("models.py")
-        writer_views = ViewsElements("views.py")
+    writer_models = ModelsElements("models.py")
+    writer_views = ViewsElements("views.py")
 
-        for file_name, content in zip(filename, content):
-            json_content = validate_instance(content[0])
+    for file_name, content in zip(filename, content):
+        json_content = validate_instance(content[0])
 
-            if (
-                json_content["diagram"] is not None
-                and json_content["diagram"] == "ClassDiagram"
-            ):
-                classes = writer_models.parse(json_content)
+        if (
+            json_content["diagram"] is not None
+            and json_content["diagram"] == "ClassDiagram"
+        ):
+            classes = writer_models.parse(json_content)
 
-                process_parsed_class(classes, duplicate_class_method_checker)
+            process_parsed_class(classes, duplicate_class_method_checker)
 
-            elif (
-                json_content["diagram"] is not None
-                and json_content["diagram"] == "SequenceDiagram"
-            ):
-                seq_parser = ParseJsonToObjectSeq()
-                seq_parser.set_json(content[0])
-                seq_parser.parse()
-                seq_parser.parse_return_edge()
+        elif (
+            json_content["diagram"] is not None
+            and json_content["diagram"] == "SequenceDiagram"
+        ):
+            seq_parser = ParseJsonToObjectSeq()
+            seq_parser.set_json(content[0])
+            seq_parser.parse()
+            seq_parser.parse_return_edge()
 
-                controller_method_objects = seq_parser.get_controller_method()
-                class_objects = seq_parser.get_class_objects()
+            controller_method_objects = seq_parser.get_controller_method()
+            class_objects = seq_parser.get_class_objects()
 
-                for controller_method_object in controller_method_objects:
-                    writer_views.add_controller_method(controller_method_object)
+            for controller_method_object in controller_method_objects:
+                writer_views.add_controller_method(controller_method_object)
 
-                for class_object in class_objects:
-                    duplicate_class_method_checker = check_duplicate(
-                        class_objects, class_object, duplicate_class_method_checker
-                    )
-        for class_method_object in duplicate_class_method_checker.values():
-            writer_views.add_class_method(class_method_object)
+            for class_object in class_objects:
+                duplicate_class_method_checker = check_duplicate(
+                    class_objects, class_object, duplicate_class_method_checker
+                )
 
-        # Render the base import
-        response_content_views.write(render_template("base_views.py.j2", {}))
+    for class_method_object in duplicate_class_method_checker.values():
+        writer_views.add_class_method(class_method_object)
 
-        response_content_views.write("\n\n")
+    # Render the base import
+    response_content_views.write(render_template("base_views.py.j2", {}))
 
-        # Render the UML Diagrams method
-        response_content_views.write(writer_views.print_django_style())
-        response_content_models.write(writer_models.print_django_style())
+    response_content_views.write("\n\n")
 
-        # Render the landing page
-        response_content_views.write(generate_landing_page_views())
-        response_content_views.write("\n")
+    # Render the UML Diagrams method
+    response_content_views.write(writer_views.print_django_style())
+    response_content_models.write(writer_models.print_django_style())
 
-        # Render the create views
-        response_content_views.write(generate_create_page_views(writer_models))
+    # Render the landing page
+    response_content_views.write(generate_landing_page_views())
+    response_content_views.write("\n")
 
-        # Render the read views
-        response_content_views.write(generate_read_page_views(writer_models))
+    # Render the create views
+    response_content_views.write(generate_create_page_views(writer_models))
 
-        # Render the delete views
-        response_content_views.write(generate_delete_page_views(writer_models))
+    # Render the read views
+    response_content_views.write(generate_read_page_views(writer_models))
 
-        # Render the edit views
-        response_content_views.write(generate_edit_page_views(writer_models))
+    # Render the delete views
+    response_content_views.write(generate_delete_page_views(writer_models))
 
-        return {
-            "models": response_content_models.getvalue(),
-            "views": response_content_views.getvalue(),
-            "models_elements": writer_models,
-            "views_elements": writer_views,
-        }
+    # Render the edit views
+    response_content_views.write(generate_edit_page_views(writer_models))
 
-    except ValueError as ex:
-        raise HTTPException(status_code=422, detail=str(ex))
+    return {
+        "models": response_content_models.getvalue(),
+        "views": response_content_views.getvalue(),
+        "models_elements": writer_models,
+        "views_elements": writer_views,
+    }
 
 
 def render_model(fetched_data: dict[str]) -> str:
