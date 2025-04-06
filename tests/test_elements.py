@@ -197,6 +197,7 @@ class TestUrlsElements(unittest.IsolatedAsyncioTestCase):
             res,
             "from django.urls import path\n"
             "from .views import (\n    "
+            "landing_page,\n    "
             "create_class1,\n    "
             "get_class1,\n    "
             "edit_class1,\n    "

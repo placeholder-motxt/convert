@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    landing_page,
     {% for class in classes -%}
     create_{{ class.snake_name }},
     get_{{ class.snake_name }},
