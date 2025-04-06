@@ -18,15 +18,15 @@ from .utils import is_valid_python_identifier
 
 
 class ParseJsonToObjectClass:
+    # This regex will match anything that starts with + or -
+    # and then followed by any string imaginable seperated
+    # with or without space
+    PUBLIC_REGEX = re.compile(r"^(?P<visibility>[\+\-]) *(?P<class_name>\w*)")
+
+    LIST_TYPE_REGEX = re.compile(r"^List\[\w*\]")
+
     def __init__(self, data: str):
         self.__json = data
-
-        """
-        This regex will match anything that starts with + or -
-        and then followed by any string imaginable seperated
-        with or without space
-        """
-        self.__public_regex = r"(^[\+\-]) ?(?P<class_name>\w*)"
 
         if isinstance(data, str):
             try:
@@ -88,12 +88,14 @@ class ParseJsonToObjectClass:
 
         object_name = object["name"]
 
-        if bool(re.match(self.__public_regex, object_name)):
-            if object_name[0] == "+":
+        match = self.PUBLIC_REGEX.match(object_name)
+        if match is not None:
+            visibility = match.group("visibility")
+            if visibility == "+":
                 class_obj.set_is_public(True)
             else:
                 class_obj.set_is_public(False)
-            object_name = object_name[1:].strip()
+            object_name = match.group("class_name")
         else:
             class_obj.set_is_public(False)
 
@@ -142,7 +144,7 @@ class ParseJsonToObjectClass:
         if (
             self.__check_name(class_method_name)
             and self.__check_name(class_method_rettype_name)
-            or bool(re.match(r"List\[.*\]", class_method_rettype_name))
+            or self.LIST_TYPE_REGEX.match(class_method_rettype_name) is not None
         ):
             class_method_obj.set_name(class_method_name)
 
@@ -161,8 +163,10 @@ class ParseJsonToObjectClass:
 
         return class_method_obj
 
-    def __add_attributes_to_class(self, object: str, class_obj: ClassObject) -> None:
-        if "attributes" in object.keys() and object["attributes"] != "":
+    def __add_attributes_to_class(
+        self, object: dict[str, str], class_obj: ClassObject
+    ) -> None:
+        if "attributes" in object and object["attributes"] != "":
             attributes = object["attributes"].split("\n")
             for attribute in attributes:
                 if attribute != "":
@@ -198,7 +202,7 @@ class ParseJsonToObjectClass:
         if (
             self.__check_name(attr_name)
             and self.__check_name(attr_type_name)
-            or bool(re.match(r"List\[.*\]", attr_type_name))
+            or self.LIST_TYPE_REGEX.match(attr_type_name)
         ):
             attr.set_name(attr_name)
             attr_type.set_name(attr_type_name)
