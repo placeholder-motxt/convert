@@ -27,8 +27,7 @@ class TestGenerateFileToBeDownloaded(unittest.TestCase):
 
         self.models_content = data["models"]
         self.views_content = data["views"]
-        self.writer_models = data["models_elements"]
-        self.writer_views = data["views_elements"]
+        self.writer_models = data["model_element"]
         self.project_name = self.filename[0]
         writer_urls.set_classes(self.writer_models.get_classes())
         with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:

@@ -9,9 +9,11 @@ from app.main import (
     create_django_app,
     create_django_project,
     fetch_data,
+    get_model_element,
     render_model,
     render_views,
 )
+from app.models.elements import ModelsElements
 
 
 class TestReplaceModelAndViews(unittest.TestCase):
@@ -121,6 +123,16 @@ class TestReplaceModelAndViews(unittest.TestCase):
             self.assertEqual(
                 models_content.strip().replace("\t", "    "), expected_result.strip()
             )
+
+    def test_get_model_element(self):
+        with open("tests/test_render_model.txt", "r", encoding="utf-8") as file:
+            json_data = file.read()
+
+        processed_data = fetch_data(["tes.class.jet"], [[json_data]])
+
+        models = get_model_element(processed_data)
+
+        self.assertIsInstance(models, ModelsElements)
 
     def tearDown(self):
         self.remove_used_project()

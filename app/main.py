@@ -97,7 +97,7 @@ async def convert(
         fetched = fetch_data(request.filename, request.content)
         response_content_models = fetched["models"]
         response_content_views = fetched["views"]
-        writer_models = fetched["models_elements"]
+        writer_models = fetched["model_element"]
         # response_content_models = ""
         # response_content_views = ""
         # duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
@@ -188,9 +188,11 @@ async def convert(
             os.remove(os.path.join("app", "requirements.txt"))
         if os.path.exists(os.path.join("app", "urls.py")):
             os.remove(os.path.join("app", "urls.py"))
+        if os.path.exists(f"{request.filename[0]}_models.py"):
+            os.remove(f"{request.filename[0]}_models.py")
+        if os.path.exists(f"{request.filename[0]}_views.py"):
+            os.remove(f"{request.filename[0]}_views.py")
         background_tasks.add_task(remove_file, f"{project_name}.zip")
-        background_tasks.add_task(remove_file, f"{request.filename[0]}_models.py")
-        background_tasks.add_task(remove_file, f"{request.filename[0]}_views.py")
 
         return FileResponse(
             path=project_name + ".zip",
@@ -497,8 +499,7 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     return {
         "models": response_content_models.getvalue(),
         "views": response_content_views.getvalue(),
-        "models_elements": writer_models,
-        "views_elements": writer_views,
+        "model_element": writer_models,
     }
 
 
@@ -524,3 +525,11 @@ def render_views(fetched_data: dict[str]) -> str:
     render_views method!
     """
     return fetched_data["views"]
+
+
+def get_model_element(fetched_data: dict[str]) -> ModelsElements:
+    """
+    Function to get ModelElements from the fetch_data method. Behavior
+    similiar to render_model and render_views
+    """
+    return fetched_data["model_element"]
