@@ -45,17 +45,17 @@ def landing_page(request):
     for model in app_models:
         model_info[model._meta.model_name] = model._meta.verbose_name.title()
 
-    return render(request, 'main/landing_page.html', {'model_info': model_info})
+    return render(request, 'landing_page.html', {'model_info': model_info})
 
 def create_shape(request):
     if request.method == 'POST':
         form = ShapeForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('get_shape')
+            return redirect('main:get_shape')
     else:
         form = ShapeForm()
-    return render(request, 'main/create_shape.html', {'form': form})
+    return render(request, 'create_shape.html', {'form': form})
 
 
 def create_circle(request):
@@ -63,10 +63,10 @@ def create_circle(request):
         form = CircleForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('get_circle')
+            return redirect('main:get_circle')
     else:
         form = CircleForm()
-    return render(request, 'main/create_circle.html', {'form': form})
+    return render(request, 'create_circle.html', {'form': form})
 
 
 def create_circles(request):
@@ -74,27 +74,27 @@ def create_circles(request):
         form = CirclesForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('get_circles')
+            return redirect('main:get_circles')
     else:
         form = CirclesForm()
-    return render(request, 'main/create_circles.html', {'form': form})
+    return render(request, 'create_circles.html', {'form': form})
 
 
 def get_shape(request):
     shapes = Shape.objects.all()
-    return render(request, 'main/shape_list.html', {'shapes': shapes})
+    return render(request, 'shape_list.html', {'shapes': shapes})
 
 
 
 def get_circle(request):
     circles = Circle.objects.all()
-    return render(request, 'main/circle_list.html', {'circles': circles})
+    return render(request, 'circle_list.html', {'circles': circles})
 
 
 
 def get_circles(request):
     circless = Circles.objects.all()
-    return render(request, 'main/circles_list.html', {'circless': circless})
+    return render(request, 'circles_list.html', {'circless': circless})
 
 
 
@@ -107,7 +107,7 @@ def delete_shape(request):
 
         obj = Shape.objects.get(pk=object_id)
         obj.delete()
-        return redirect('get_shape')
+        return redirect('main:get_shape')
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 def delete_circle(request):
@@ -119,7 +119,7 @@ def delete_circle(request):
 
         obj = Circle.objects.get(pk=object_id)
         obj.delete()
-        return redirect('get_circle')
+        return redirect('main:get_circle')
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 def delete_circles(request):
@@ -131,7 +131,7 @@ def delete_circles(request):
 
         obj = Circles.objects.get(pk=object_id)
         obj.delete()
-        return redirect('get_circles')
+        return redirect('main:get_circles')
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 def edit_shape(request, id):
@@ -139,9 +139,9 @@ def edit_shape(request, id):
     form = ShapeForm(request.POST or None, instance=shape_obj)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('get_shape')
+        return redirect('main:get_shape')
 
-    return render(request, 'main/edit_shape.html', {'form': form})
+    return render(request, 'edit_shape.html', {'form': form})
 
 
 def edit_circle(request, id):
@@ -149,6 +149,6 @@ def edit_circle(request, id):
     form = CircleForm(request.POST or None, instance=circle_obj)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('get_circle')
+        return redirect('main:get_circle')
 
-    return render(request, 'main/edit_circle.html', {'form': form})
+    return render(request, 'edit_circle.html', {'form': form})
