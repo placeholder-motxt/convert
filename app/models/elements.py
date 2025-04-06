@@ -2,10 +2,9 @@ from abc import ABC, abstractmethod
 from io import StringIO
 
 import anyio
-from jinja2 import Template
 
 from app.parse_json_to_object_class import ParseJsonToObjectClass
-from app.utils import camel_to_snake
+from app.utils import camel_to_snake, render_template
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
@@ -157,7 +156,7 @@ class ViewsElements(FileElements):
 
 
 class UrlsElement(FileElements):
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str = "urls.py"):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
 
@@ -165,7 +164,6 @@ class UrlsElement(FileElements):
         self.__classes = classes
 
     def print_django_style(self) -> str:
-        template = Template(open("./app/templates/urls.py.j2").read())
         classes = []
         for kelas in self.__classes:
             class_context = {
@@ -173,12 +171,11 @@ class UrlsElement(FileElements):
                 "snake_name": camel_to_snake(kelas.get_name()),
             }
             classes.append(class_context)
-        rendered_yaml = template.render(classes=classes)
-        return rendered_yaml
+        return render_template("urls.py.j2", classes=classes)
 
 
 class RequirementsElements(FileElements):
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str = "requirements.txt"):
         """
         Object initialization
 
