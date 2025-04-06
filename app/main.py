@@ -330,7 +330,7 @@ def generate_file_to_be_downloaded(
         for i in range(len(read_page)):
             if writer_models.get_classes()[i].get_name() in read_page[i]:
                 page = read_page[i]
-                name = f"read_{writer_models.get_classes()[i].get_name().lower()}.html"
+                name = f"{writer_models.get_classes()[i].get_name().lower()}_list.html"
                 zipf.writestr(
                     f"{app_name}/templates/{name}",
                     data=page,
