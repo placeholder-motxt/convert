@@ -154,6 +154,12 @@ class ClassMethodObject(AbstractMethodObject):
                     res.write(" -> bool")
                 elif rettype.lower() == "integer":
                     res.write(" -> int")
+                elif rettype.lower() == "list[string]":
+                    res.write(" -> list[str]")
+                elif rettype.lower() == "list[boolean]":
+                    res.write(" -> list[bool]")
+                elif rettype.lower() == "list[integer]":
+                    res.write(" -> list[int]")
                 else:
                     res.write(f" -> {rettype}")
 
