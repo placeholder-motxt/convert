@@ -210,11 +210,11 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_models_code(self) -> str:
         return (
             f"listOf{self.get_target_class().get_name().title()}"
-            + f" = models.ManyToManyField({self.get_target_class().get_name()},"
-            + " on_delete = models.CASCADE)"
+            + f" = models.ManyToManyField({self.get_target_class().get_name()}"
+            + ")"
         )
 
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
-        rel_type = f"models.ManyToManyField({name}, on_delete=models.CASCADE)"
+        rel_type = f"models.ManyToManyField({name})"
         return {"name": f"listOf{name.title()}", "type": rel_type}

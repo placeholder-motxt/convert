@@ -97,7 +97,7 @@ class TestClassObject(unittest.TestCase):
 field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
 targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
 targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
-listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)\n\tpass\n\n\n"
+listOfTargetclass = models.ManyToManyField(TargetClass)\n\tpass\n\n\n"
         )
 
     def test_get_name(self):
@@ -280,7 +280,7 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.many_to_many_relationship.set_target_class(self.target_class)
         assert (
             self.many_to_many_relationship.to_models_code()
-            == "listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCADE)"
+            == "listOfTargetclass = models.ManyToManyField(TargetClass)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):

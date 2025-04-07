@@ -3,4 +3,4 @@ from django.db import models
 
 class Course(models.Model):
     title = models.CharField(max_length=255)
-    listOfStudent = models.ManyToManyField(Student, on_delete=models.CASCADE)
+    listOfStudent = models.ManyToManyField(Student)
