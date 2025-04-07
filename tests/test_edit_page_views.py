@@ -21,6 +21,7 @@ class TestEditPageViews(unittest.TestCase):
         self.class_object1.add_field(field1)
         self.class_object1.add_field(field2)
         self.class_object1.add_field(field3)
+        self.class_object1.set_is_public(True)
 
         self.class_object2 = ClassObject()
         self.class_object2.set_name("Product")
@@ -30,9 +31,26 @@ class TestEditPageViews(unittest.TestCase):
         field22.set_name("model")
         self.class_object2.add_field(field21)
         self.class_object2.add_field(field22)
+        self.class_object2.set_is_public(True)
+
+        # Objek privat gk bakal ke write sehingga
+        # gk bakal mempengaruhi test yang udh ada
+        # tapi hanya dengan instansiasi
+        # harusnya cukup untuk menguji fungsionalitas
+        # write ketika ada private class
+        self.class_object3 = ClassObject()
+        self.class_object3.set_name("Benda")
+        field31 = FieldObject()
+        field31.set_name("name")
+        field32 = FieldObject()
+        field32.set_name("model")
+        self.class_object3.add_field(field31)
+        self.class_object3.add_field(field32)
+        self.class_object3.set_is_public(False)
 
         self.models_elements.add_class(self.class_object1)
         self.models_elements.add_class(self.class_object2)
+        self.models_elements.add_class(self.class_object3)
 
     def test_generate_edit_page_views_valid(self):
         # Positive case when all fields are valid
@@ -73,6 +91,7 @@ class TestEditPageViews(unittest.TestCase):
         # edge case
         class_object_no_fields = ClassObject()
         class_object_no_fields.set_name("EmptyClass")
+        class_object_no_fields.set_is_public(True)
         empty_models_elements = ModelsElements("EmptyClassModel")
         empty_models_elements.add_class(class_object_no_fields)
         empty_models_elements.add_class(self.class_object1)
@@ -96,9 +115,13 @@ class TestEditPageViews(unittest.TestCase):
         cls_obj1.set_name("EmptyClassOne")
         cls_obj2 = ClassObject()
         cls_obj2.set_name("EmptyClassTwo")
+        cls_obj1.set_is_public(True)
+        cls_obj2.set_is_public(True)
         model_obj.add_class(cls_obj1)
         model_obj.add_class(cls_obj2)
 
         result = generate_edit_page_views(model_obj)
         self.assertNotIn("def edit_empty_class_one(request, id)", result)
         self.assertNotIn("def edit_empty_class_two(request, id)", result)
+        self.assertNotIn("from .models import *", result)
+        self.assertNotIn("from .forms import *", result)
