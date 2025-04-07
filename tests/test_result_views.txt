@@ -39,9 +39,9 @@ def editRadius(request, circleId, radius):
 def landing_page(request):
 
     model_info = {}
-    model_info[Shape] = Shape
-    model_info[Circle] = Circle
-    model_info[Circles] = Circles
+    model_info["shape"] = "Shape"
+    model_info["circle"] = "Circle"
+    model_info["circles"] = "Circles"
     
 
     return render(request, 'landing_page.html', {'model_info': model_info})

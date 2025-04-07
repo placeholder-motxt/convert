@@ -310,15 +310,17 @@ def generate_file_to_be_downloaded(
         # CREATE
         create_pages = generate_html_create_pages_django(writer_models)
         for i in range(len(create_pages)):
-            if writer_models.get_classes()[i].get_name() in create_pages[i]:
-                page = create_pages[i]
-                name = (
-                    f"create_{writer_models.get_classes()[i].get_name().lower()}.html"
-                )
-                zipf.writestr(
-                    f"{app_name}/templates/{name}",
-                    data=page,
-                )
+            for class_obj in writer_models.get_classes():
+                if class_obj.get_name() in create_pages[i]:
+                    page = create_pages[i]
+                    name = (
+                        f"create_{class_obj.get_name().lower()}.html"
+                    )
+                    zipf.writestr(
+                        f"{app_name}/templates/{name}",
+                        data=page,
+                    )
+
         # CREATE FORMS
         forms_create = generate_forms_create_page_django(models_elements=writer_models)
         zipf.writestr(

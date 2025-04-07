@@ -3,7 +3,7 @@ def landing_page(request):
     model_info = {}
     {% for kelas in classes -%}
     {% if kelas.get_is_public() -%}
-    model_info[{{ kelas.get_name() }}] = {{ kelas.get_name().title() }}
+    model_info["{{ kelas.get_name().lower() }}"] = "{{ kelas.get_name().title() }}"
     {%- endif %}
     {% endfor%}
 
