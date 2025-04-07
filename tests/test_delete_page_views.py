@@ -22,6 +22,7 @@ class TestGeneratedeletePageViews(unittest.TestCase):
         field2.set_name("age")
         self.class_object1.add_field(field1)
         self.class_object1.add_field(field2)
+        self.class_object1.set_is_public(True)
         self.models_elements.add_class(self.class_object1)
 
         # Second class with fields
@@ -33,7 +34,24 @@ class TestGeneratedeletePageViews(unittest.TestCase):
         field22.set_name("model")
         self.class_object2.add_field(field21)
         self.class_object2.add_field(field22)
+        self.class_object2.set_is_public(True)
         self.models_elements.add_class(self.class_object2)
+
+        # Objek privat gk bakal ke write sehingga
+        # gk bakal mempengaruhi test yang udh ada
+        # tapi hanya dengan instansiasi
+        # harusnya cukup untuk menguji fungsionalitas
+        # write ketika ada private class
+        self.class_object3 = ClassObject()
+        self.class_object3.set_name("Benda")
+        field31 = FieldObject()
+        field31.set_name("name")
+        field32 = FieldObject()
+        field32.set_name("model")
+        self.class_object3.add_field(field31)
+        self.class_object3.add_field(field32)
+        self.class_object3.set_is_public(False)
+        self.models_elements.add_class(self.class_object3)
 
     def test_generate_delete_page_views_positive(self):
         """Test case for valid models_elements"""
@@ -53,6 +71,7 @@ class TestGeneratedeletePageViews(unittest.TestCase):
         class_object_no_fields.set_name("EmptyClass")
         empty_models_elements = ModelsElements("EmptyClassModel")
         empty_models_elements.add_class(class_object_no_fields)
+        class_object_no_fields.set_is_public(True)
         result = generate_delete_page_views(empty_models_elements)
         self.assertIn("EmptyClass", result)
 
@@ -65,6 +84,7 @@ class TestGeneratedeletePageViews(unittest.TestCase):
             field = FieldObject()
             field.set_name(f"field{i}")
             class_object.add_field(field)
+            class_object.set_is_public(True)
             large_models_elements.add_class(class_object)
 
         result = generate_delete_page_views(large_models_elements)
@@ -77,6 +97,7 @@ class TestGeneratedeletePageViews(unittest.TestCase):
         class_object_upper.set_name("Person")
         class_object_lower = ClassObject()
         class_object_lower.set_name("person")
+        class_object_lower.set_is_public(True)
 
         field1 = FieldObject()
         field1.set_name("name")

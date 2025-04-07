@@ -24,6 +24,7 @@ class TestGenerateHtmlEditPageDjango(unittest.TestCase):
         self.class_object1.add_field(field1)
         self.class_object1.add_field(field2)
         self.class_object1.add_field(field3)
+        self.class_object1.set_is_public(True)
 
         self.class_object2 = ClassObject()
         self.class_object2.set_name("Product")
@@ -33,9 +34,26 @@ class TestGenerateHtmlEditPageDjango(unittest.TestCase):
         field22.set_name("model")
         self.class_object2.add_field(field21)
         self.class_object2.add_field(field22)
+        self.class_object2.set_is_public(True)
+
+        # Objek privat gk bakal ke write sehingga
+        # gk bakal mempengaruhi test yang udh ada
+        # tapi hanya dengan instansiasi
+        # harusnya cukup untuk menguji fungsionalitas
+        # write ketika ada private class
+        self.class_object3 = ClassObject()
+        self.class_object3.set_name("Benda")
+        field31 = FieldObject()
+        field31.set_name("name")
+        field32 = FieldObject()
+        field32.set_name("model")
+        self.class_object3.add_field(field31)
+        self.class_object3.add_field(field32)
+        self.class_object3.set_is_public(False)
 
         self.models_elements.add_class(self.class_object1)
         self.models_elements.add_class(self.class_object2)
+        self.models_elements.add_class(self.class_object3)
 
     def test_generate_html_edit_page_django_normal(self):
         # Normal (positive) case for HTML edit page generation
@@ -53,19 +71,20 @@ class TestGenerateHtmlEditPageDjango(unittest.TestCase):
         ctx = {"class_name": self.class_object2.get_name()}
         mock_render.assert_called_once_with("edit_page_django.html.j2", ctx)
 
-    def test_generate_html_create_page_django_empty_class(self):
+    def test_generate_html_edit_page_django_empty_class(self):
         # Edge case where the class is somehow empty
         # (edge because it shouldn't be possible, but maybe something could go wrong)
         # should return empty string (or maybe error? open for suggestions)
         # empty means no name nor fields
         empty_class_object = ClassObject()
+        empty_class_object.set_is_public(True)
         result = generate_html_edit_page_django(empty_class_object)
         self.assertNotIn("<title>Edit </title>", result)
         self.assertNotIn("<h1>Edit </h1>", result)
         self.assertNotIn('<button type="submit">Save</button>', result)
         self.assertEqual(result, "")
 
-    def test_generate_html_create_pages_django_normal(self):
+    def test_generate_html_edit_pages_django_normal(self):
         # Positive case for generating HTML pages for models elements
         result = generate_html_edit_pages_django(self.models_elements)
         self.assertEqual(len(result), 2)
@@ -76,16 +95,17 @@ class TestGenerateHtmlEditPageDjango(unittest.TestCase):
         self.assertIn("<h1>Edit Product</h1>", result[1])
         self.assertIn('<button type="submit">Save</button>', result[1])
 
-    def test_generate_html_create_pages_django_one_empty_class(self):
+    def test_generate_html_edit_pages_django_one_empty_class(self):
         # Edge case when one of the class in ModelsElement is somehow empty
         empty_class_object = ClassObject()
+        empty_class_object.set_is_public(True)
         self.models_elements.add_class(empty_class_object)
         result = generate_html_edit_pages_django(self.models_elements)
         self.assertEqual(len(result), 2)
         self.assertIn("<title>Edit Item</title>", result[0])
         self.assertIn("<title>Edit Product</title>", result[1])
 
-    def test_generate_html_create_pages_django_multiple_class_same_name(self):
+    def test_generate_html_edit_pages_django_multiple_class_same_name(self):
         # Edge case when some class in the ModelsElement somehow have the same
         # name, just return both HTML
         # It's an edge case because it is *supposed* to already be handled
