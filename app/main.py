@@ -313,9 +313,7 @@ def generate_file_to_be_downloaded(
             for class_obj in writer_models.get_classes():
                 if class_obj.get_name() in create_pages[i]:
                     page = create_pages[i]
-                    name = (
-                        f"create_{class_obj.get_name().lower()}.html"
-                    )
+                    name = f"create_{class_obj.get_name().lower()}.html"
                     zipf.writestr(
                         f"{app_name}/templates/{name}",
                         data=page,

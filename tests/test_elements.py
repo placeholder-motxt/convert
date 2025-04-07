@@ -233,7 +233,7 @@ class TestRequirementsElements(unittest.IsolatedAsyncioTestCase):
             "Django\n"
             "gunicorn\n"
             "whitenoise\n"
-            "psycopg2\n"
+            "psycopg2-binary\n"
             "pytest\n"
             "pytest-django\n"
             "pytest-cov\n",
