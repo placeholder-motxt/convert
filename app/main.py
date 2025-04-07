@@ -328,13 +328,14 @@ def generate_file_to_be_downloaded(
         # READ
         read_page = generate_html_read_pages_django(models_elements=writer_models)
         for i in range(len(read_page)):
-            if writer_models.get_classes()[i].get_name() in read_page[i]:
-                page = read_page[i]
-                name = f"{writer_models.get_classes()[i].get_name().lower()}_list.html"
-                zipf.writestr(
-                    f"{app_name}/templates/{name}",
-                    data=page,
-                )
+            for class_obj in writer_models.get_classes():
+                if class_obj.get_name() in read_page[i]:
+                    page = read_page[i]
+                    name = f"{class_obj.get_name().lower()}_list.html"
+                    zipf.writestr(
+                        f"{app_name}/templates/{name}",
+                        data=page,
+                    )
 
         # UPDATE
         edit_page = generate_html_edit_pages_django(models_elements=writer_models)
