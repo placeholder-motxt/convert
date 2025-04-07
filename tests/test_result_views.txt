@@ -37,13 +37,12 @@ def editRadius(request, circleId, radius):
     pass
 
 def landing_page(request):
-    # Get all models in the current app
-    app_models = apps.get_app_config('main').get_models()
 
-    # Create a dictionary with model names and corresponding view names
     model_info = {}
-    for model in app_models:
-        model_info[model._meta.model_name] = model._meta.verbose_name.title()
+    model_info[Shape] = Shape
+    model_info[Circle] = Circle
+    model_info[Circles] = Circles
+    
 
     return render(request, 'landing_page.html', {'model_info': model_info})
 
