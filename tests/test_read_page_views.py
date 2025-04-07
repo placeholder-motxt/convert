@@ -13,8 +13,10 @@ class TestGenerateReadPageViews(unittest.TestCase):
         models_elements = ModelsElements("test_file")
         class_obj1 = ClassObject()
         class_obj1.set_name("Person")
+        class_obj1.set_is_public(True)
         class_obj2 = ClassObject()
         class_obj2.set_name("Vehicle")
+        class_obj2.set_is_public(True)
         models_elements.add_class(class_obj1)
         models_elements.add_class(class_obj2)
 
@@ -69,6 +71,7 @@ class TestGenerateReadPageViews(unittest.TestCase):
         models_elements = ModelsElements("test_file")
         class_obj1 = ClassObject()
         class_obj1.set_name("")  # Empty class name
+        class_obj1.set_is_public(True)
 
         models_elements.add_class(class_obj1)
 
@@ -90,6 +93,7 @@ class TestGenerateReadPageViews(unittest.TestCase):
         models_elements = ModelsElements("test_file")
         class_obj1 = ClassObject()
         class_obj1.set_name("Test-Class")  # Class name with hyphen
+        class_obj1.set_is_public(True)
 
         models_elements.add_class(class_obj1)
 
@@ -120,6 +124,7 @@ class TestGenerateReadPageViews(unittest.TestCase):
         for i in range(num_classes):
             class_obj = ClassObject()
             class_obj.set_name(f"Class{i}")
+            class_obj.set_is_public(True)
             models_elements.add_class(class_obj)
             expected_context["classes"].append(
                 {"class_name": f"Class{i}", "class_snake": f"class{i}"}

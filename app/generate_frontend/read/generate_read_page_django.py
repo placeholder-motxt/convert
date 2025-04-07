@@ -11,7 +11,8 @@ def generate_html_read_pages_django(models_elements: ModelsElements) -> list[str
     # Consider changing the code below to avoid memory explosion
     result = []
     for class_object in models_elements.get_classes():
-        result.append(generate_html_read_page_django(class_object))
+        if class_object.get_is_public():
+            result.append(generate_html_read_page_django(class_object))
     return result
 
 
