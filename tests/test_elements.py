@@ -191,6 +191,7 @@ class TestUrlsElements(unittest.IsolatedAsyncioTestCase):
         self.requirements_elements = UrlsElement("urls.py")
         mock_class = mock.Mock()
         mock_class.get_name.return_value = "Class1"
+        mock_class.get_is_public.return_value = True
         self.requirements_elements.set_classes(classes=[mock_class])
         res = self.requirements_elements.print_django_style()
         self.assertEqual(
