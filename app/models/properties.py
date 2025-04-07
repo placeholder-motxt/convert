@@ -17,6 +17,12 @@ class TypeObject:
         self.__name = ""
 
     def set_name(self, name: str):
+        if name.lower() == 'string':
+            name = 'str'
+        elif name.lower() == 'integer':
+            name = 'int'
+        elif name.lower() == 'boolean':
+            name = 'bool'
         self.__name = name
 
     def to_models_code(self) -> str:
@@ -48,6 +54,9 @@ class FieldObject:
     DJANGO_TYPE_MAPPING = {
         "boolean": "models.BooleanField()",
         "String": "models.CharField(max_length=255)",
+        'str' : 'models.CharField(max_length=255)',
+        'int' : 'models.IntegerField()',
+        'bool' : 'models.BooleanField()',
         "integer": "models.IntegerField()",
         "float": "models.FloatField()",
         "double": "models.FloatField()",
