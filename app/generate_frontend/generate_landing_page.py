@@ -7,4 +7,4 @@ def generate_landing_page_html() -> str:
 
 
 def generate_landing_page_views(classes: list[ClassObject]) -> str:
-    return render_template("landing_page_views.py.j2", {"classes":classes})
+    return render_template("landing_page_views.py.j2", {"classes": classes})
