@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from io import StringIO
 
+import anyio
+
 from app.parse_json_to_object_class import ParseJsonToObjectClass
+from app.utils import camel_to_snake, render_template
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
@@ -20,13 +23,24 @@ class FileElements(ABC):
     """
 
     def __init__(self, file_name: str):
-        assert isinstance(file_name, str), "File name must be a string!"
-        assert file_name != "", "File name can't be empty!"
+        if not isinstance(file_name, str):
+            raise TypeError("File name must be a string!")
+        if file_name == "":
+            raise ValueError("File name can't be empty!")
         self.__name: str = file_name
 
     @abstractmethod
     def print_django_style(self) -> str:  # pragma: no cover
         pass
+
+    async def write_to_file(self, path: str) -> None:
+        file = path + "/" + self.__name
+        to_be_print = self.print_django_style()
+
+        async with await anyio.open_file(file, "w") as f:
+            await f.write(to_be_print)
+        print("done writing", file)
+        return file
 
 
 class ModelsElements(FileElements):
@@ -38,6 +52,16 @@ class ModelsElements(FileElements):
     def __init__(self, file_name: str):
         super().__init__(file_name)
         self.__classes: list[ClassObject] = []
+
+    def get_classes(self) -> list[ClassObject]:  # pragma: no cover
+        return self.__classes
+
+    def add_class(self, class_object: ClassObject):
+        if not isinstance(class_object, ClassObject):
+            raise ValueError(
+                "only ClassObjects can be added to ModelsElements' Class Field!"
+            )
+        self.__classes.append(class_object)
 
     """
     Parses ClassDiagram to classes
@@ -130,3 +154,75 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
+
+class UrlsElement(FileElements):
+    def __init__(self, file_name: str = "urls.py"):
+        super().__init__(file_name)
+        self.__classes: list[ClassObject] = []
+
+    def set_classes(self, classes: list[ClassObject]) -> None:  # pragma: no cover
+        self.__classes = classes
+
+    def print_django_style(self) -> str:
+        classes = []
+        for kelas in self.__classes:
+            class_context = {
+                "name": kelas.get_name(),
+                "snake_name": camel_to_snake(kelas.get_name()),
+            }
+            classes.append(class_context)
+        return render_template("urls.py.j2", classes=classes)
+
+
+class RequirementsElements(FileElements):
+    def __init__(self, file_name: str = "requirements.txt"):
+        """
+        Object initialization
+
+        This class is only for writing requirements.txt,
+        """
+        super().__init__(file_name)
+
+    def print_django_style(self) -> str:
+        """
+        Returns a list of django requirements as string for requirements.tx to run
+        """
+        result = StringIO()
+        requirements = [
+            "Django",
+            "gunicorn",
+            "whitenoise",
+            "psycopg2",
+            "pytest",
+            "pytest-django",
+            "pytest-cov",
+        ]
+
+        for requirement in requirements:
+            result.write(requirement + "\n")
+
+        return result.getvalue()
+
+
+class RunBashScriptElements(FileElements):
+    """
+    This class is only for writing script for user to run the project in format
+    of .sh (Linux & MacOS)
+    """
+
+    def print_django_style(self) -> str:
+        with open("app/templates/scripts/run.sh.txt", "r", encoding="utf-8") as file:
+            bash = file.read()
+        return bash
+
+
+class RunBatScriptElements(FileElements):
+    """
+    This class is only for writing script for user to run the project in format
+    of .bat (Windows)
+    """
+
+    def print_django_style(self) -> str:
+        with open("app/templates/scripts/run.bat.txt", "r", encoding="utf-8") as file:
+            bat = file.read()
+        return bat

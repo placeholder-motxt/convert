@@ -74,6 +74,13 @@ class ClassMethodObject(AbstractMethodObject):
     Its counterpart is the ControllerMethodObject class
     """
 
+    PYTHON_TYPE_MAPPING = {
+        "boolean": "bool",
+        "string": "str",
+        "integer": "int",
+    }
+    LIST_REGEX = re.compile(r"^list\[(?P<list_type>\w*)\]", re.IGNORECASE)
+
     def __init__(self):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
@@ -85,7 +92,10 @@ class ClassMethodObject(AbstractMethodObject):
 
     def add_class_method_call(self, class_method_call: ClassMethodCallObject):
         if class_method_call is None:
-            raise ValueError("Cannot add None to ClassMethodCallObject!")
+            raise ValueError(
+                "Cannot add None to ClassMethodCallObject! "
+                "please consult the user manual document"
+            )
         self.__calls.append(class_method_call)
 
     def to_views_code(self) -> str:
@@ -122,7 +132,10 @@ class ClassMethodObject(AbstractMethodObject):
         res = StringIO()
         name = self.get_name()
         if name is None or not is_valid_python_identifier(name):
-            raise ValueError(f"Invalid method name: {name}")
+            raise ValueError(
+                f"Invalid method name '{name}'\n"
+                "please consult the user manual document on how to name methods"
+            )
 
         params = ", ".join([param.to_views_code() for param in self.get_parameters()])
         res.write(f"def {name}(request, instance_name")
@@ -134,11 +147,24 @@ class ClassMethodObject(AbstractMethodObject):
         ret = self.get_return_type()
         if ret is not None:
             rettype = ret.get_name()
-            if not is_valid_python_identifier(rettype) and not bool(
-                re.match(r"list\[.*\]", rettype.lower())
-            ):
-                raise ValueError(f"Invalid return type: {rettype}")
-            res.write(f" -> {rettype}")
+            list_match = self.LIST_REGEX.match(rettype)
+            if not is_valid_python_identifier(rettype) and list_match is None:
+                raise ValueError(
+                    f"Invalid return type: '{rettype}'\n "
+                    "please consult the user manual document on how to name return variables"
+                )
+            if rettype != "void":
+                if list_match:
+                    # Assuming it is already valid when it comes here
+                    list_type = list_match.group("list_type")
+                    python_type = self.PYTHON_TYPE_MAPPING.get(
+                        list_type.lower(), list_type
+                    )
+                    res.write(f" -> list[{python_type}]")
+                else:
+                    python_type = self.PYTHON_TYPE_MAPPING.get(rettype.lower(), rettype)
+                    res.write(f" -> {python_type}")
+
         res.write(":")
         for method_call in self.__calls:
             res.write("\n    ")
@@ -174,7 +200,9 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style(self) -> str:
         if not self.get_name():
-            raise TypeError("method cannot be empty")
+            raise ValueError(
+                "method cannot be empty\nplease consult the user manual document"
+            )
         result = StringIO()
         result.write(f"def {self.get_name()}(request")
         for parameter in self.get_parameters():
@@ -235,6 +263,10 @@ class AbstractMethodCallObject(ABC):
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
 
+    # Method created since set_return_var_name somehow is broken
+    def set_ret_var(self, name: str):  # pragma: no cover
+        self.__return_var_name = name
+
     def set_return_var_name(self, return_var_name: str):
         self.__return_var_name = return_var_name
 
@@ -248,7 +280,7 @@ class AbstractMethodCallObject(ABC):
         # TODO: Make immutable if needed
         return self.__method
 
-    def get_return_var_name(self) -> str:
+    def get_return_var_name(self) -> str:  # pragma: no cover
         return self.__return_var_name
 
     def print_django_style(self) -> str:
@@ -279,6 +311,7 @@ class AbstractMethodCallObject(ABC):
 
         """
         result = StringIO()
+
         if self.__condition:
             result.write(f"if {self.__condition}:\n\t\t")
         if self.__return_var_name:
@@ -309,12 +342,18 @@ class ClassMethodCallObject(AbstractMethodCallObject):
 
     def set_caller(self, method_object: ClassMethodObject):
         if method_object is None:
-            raise ValueError("ClassMethodObject cannot be SET to be None!")
+            raise ValueError(
+                "ClassMethodObject cannot be SET to be None!\n"
+                "please consult the user manual document"
+            )
         self.__caller = method_object
 
     def set_instance_name(self, instance_name: str):
         if instance_name == "" or instance_name is None:
-            raise ValueError("instance_name cannot be empty!")
+            raise ValueError(
+                "instance_name cannot be empty!\n"
+                "please consult the user manual document"
+            )
         self.__instance_name = instance_name
 
     def get_instance_name(self) -> str:

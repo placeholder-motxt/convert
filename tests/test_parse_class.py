@@ -12,29 +12,9 @@ from app.parse_json_to_object_class import ParseJsonToObjectClass
 
 class TestParseJsonToObjectClass(unittest.TestCase):
     def test_parse(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "",
-                "name": "Pengelola",
-                "x": 330,
-                "y": 10,
-                "attributes": "- isAdmin: boolean",
-                "id": 0,
-                "type": "ClassNode"
-                },
-                {
-                "methods": "+ getBesaranDenda(): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-        }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_1.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         result = parser.parse_classes()
         self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
@@ -55,68 +35,71 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             parser._ParseJsonToObjectClass__json["nodes"][1]["type"], "ClassNode"
         )
 
+    def test_parse_public_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_public_class.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertTrue(kelas.get_is_public())
+
+    def test_parse_private_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_private_class.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertFalse(kelas.get_is_public())
+
+    def test_parse_default_private_class(self):
+        test_data = ""
+        with open("tests/testdata/parse_class_1.json") as file:
+            test_data = file.read()
+        parser = ParseJsonToObjectClass(test_data)
+        classes = parser.parse_classes()
+        for kelas in classes:
+            self.assertFalse(kelas.get_is_public())
+
     def test_empty_nodes(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": []
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_2.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(Exception) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: nodes not found in the json")
+        self.assertEqual(
+            str(context.exception),
+            "Nodes not found in the json, \nplease make sure the file isn't corrupt",
+        )
 
     def test_missing_nodes(self):
-        data = """{
-            "diagram": "ClassDiagram"
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_3.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: nodes not found in the json")
+
+        self.assertEqual(
+            str(context.exception),
+            "Nodes not found in the json, \nplease make sure the file isn't corrupt",
+        )
 
     def test_invalid_json(self):
-        data = """{
-        "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "",
-                "name": "Pengelola",
-                "x": 330,
-                "y": 10,
-                "attributes": "- isAdmin: boolean",
-                "id": 0,
-                "type": "ClassNode"
-                },
-                {
-                "methods": "+ getBesaranDenda(): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]"""  # noqa: E501
-
-        with self.assertRaises(json.JSONDecodeError) as context:
+        data = ""
+        with open("tests/testdata/parse_class_4.json") as file:
+            data = file.read()
+            print(data)
+        with self.assertRaises(ValueError) as context:
             ParseJsonToObjectClass(data)
-            self.assertEqual(context.exception, "Error: nodes not found in the json")
+        self.assertEqual(str(context.exception), "Error: Invalid JSON format")
 
     def test_missing_attributes(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "",
-                "name": "Pengelola",
-                "x": 330,
-                "y": 10,
-                "attributes": "",
-                "id": 0,
-                "type": "ClassNode"
-                }
-            ]
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_5.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         result = parser.parse_classes()
         self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
@@ -137,232 +120,138 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         )
 
     def test_missing_method_name(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "",
-                "name": "",
-                "x": 330,
-                "y": 10,
-                "attributes": "- isAdmin: boolean",
-                "id": 0,
-                "type": "ClassNode"
-                },
-                {
-                "methods": "+ getBesaranDenda(): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-            }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_6.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: class not found in the json")
+
+        self.assertEqual(
+            str(context.exception),
+            "Class not found in the json, \nplease make sure the file isn't corrupt",
+        )
 
     def test_missing_method_attributes(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "",
-                "name": "Pengelola",
-                "x": 330,
-                "y": 10,
-                "attributes": "- isAdmin: boolean",
-                "id": 0,
-                "type": "ClassNode"
-                },
-                {
-                "methods": "+ getBesaranDenda(int: 123): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-            }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_7.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'int' is not a valid!"
+            "Parameter name please consult the "
+            "user manual document on how to name parameters",
+        )
 
     def test_invalid_class_name(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "",
-                "name": "Pengelola123",
-                "x": 330,
-                "y": 10,
-                "attributes": "- isAdmin: boolean",
-                "id": 0,
-                "type": "ClassNode"
-                },
-                {
-                "methods": "+ getBesaranDenda(): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-            }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_8.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: class name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "Class name is not valid \n"
+            "please consult the user manual document on how to name classes",
+        )
 
     def test_invalid_method_name(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ getBesaranDenda123(): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-            }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_9.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "ValueError: method name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'getBesaranDenda@' or 'integer' is not a valid "
+            "method name or method return type name. \n"
+            "please consult the user manual document on "
+            "how to name methods and their return types",
+        )
 
     def test_invalid_parameter_name(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ getBesaranDenda(int: this is wrong): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-            }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_10.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'int' is not a valid!Parameter name please consult "
+            "the user manual document on how to name parameters",
+        )
 
     def test_invalid_attribute_name(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ getBesaranDenda(): integer\\n+ getTglPinjam(): Date\\n+ getTglKembali(): Date",
-                "name": "Peminjaman",
-                "x": 310,
-                "y": 270,
-                "attributes": "- ID_@: String\\n- isDikembalikan: boolean\\n- tglPinjam: Date\\n- tglKembali: Date\\n- isLunasDenda: boolean\\n- besaranDenda: integer",
-                "id": 1,
-                "type": "ClassNode"
-                }
-            ]
-            }"""  # noqa: E501
+        data = ""
+        with open("tests/testdata/parse_class_11.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(
-                context.exception, "Error: attribute name or type is not valid"
-            )
+        self.assertEqual(
+            str(context.exception),
+            "Error: attribute name or type is not valid: @ID, String",
+        )
 
     def test_valid_method_parameter(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ methodName(parama: type, paramx: int): bool",
-                "name": "ClassName",
-                "x": 330,
-                "y": 10,
-                "attributes": "- attribute: type",
-                "id": 0,
-                "type": "ClassNode"
-                }
-            ]
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_12.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         result = parser.parse_classes()
         self.assertEqual(result, parser._ParseJsonToObjectClass__classes)
 
     def test_invalid_method_parameter(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ methodName(param1: type1, param2: )",
-                "name": "ClassName",
-                "x": 330,
-                "y": 10,
-                "attributes": "- attribute: type",
-                "id": 0,
-                "type": "ClassNode"
-                }
-            ]
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_13.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: method parameter is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "Method return type not found, \n"
+            "please add a return type for method  methodName(param1: type1, param2: )",
+        )
 
     def test_invalid_method_parameter_name(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ methodName(param1: type1, param2: invalid name)",
-                "name": "ClassName",
-                "x": 330,
-                "y": 10,
-                "attributes": "- attribute: type",
-                "id": 0,
-                "type": "ClassNode"
-                }
-            ]
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_14.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'param@!' is not a valid!"
+            "Parameter name please consult the user manual document on how to name parameters",
+        )
 
     def test_invalid_method_parameter_type(self):
-        data = """{
-            "diagram": "ClassDiagram",
-            "nodes": [
-                {
-                "methods": "+ methodName(param1: type1, param2: invalid type)",
-                "name": "ClassName",
-                "x": 330,
-                "y": 10,
-                "attributes": "- attribute: type",
-                "id": 0,
-                "type": "ClassNode"
-                }
-            ]
-        }"""
+        data = ""
+        with open("tests/testdata/parse_class_15.json") as file:
+            data = file.read()
         parser = ParseJsonToObjectClass(data)
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
-            self.assertEqual(context.exception, "Error: parameter name is not valid")
+
+        self.assertEqual(
+            str(context.exception),
+            "'param2' is not a valid!"
+            "Parameter name please consult the user manual document on how to name parameters",
+        )
 
     def setUp(self):
         # Mocking the classes
@@ -452,6 +341,14 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         # Ensure the parent is set as expected
         self.assertEqual(class_from_id.set_parent.call_args[0][0], class_to_id)
 
+    def test_invalid_parse_relationships_fails_validate_amount(self):
+        uml_json = {
+            "edges": [{"start": 1, "end": 2, "startLabel": "..1", "endLabel": "*1"}]
+        }
+        self.parser = ParseJsonToObjectClass(uml_json)
+        with self.assertRaises(ValueError):
+            self.parser.parse_relationships(self.classes)
+
     def test_validate_amount_valid_cases(self):
         # Test valid multiplicities
         uml_json = {
@@ -475,15 +372,21 @@ class TestParseJsonToObjectClass(unittest.TestCase):
                 )
 
     def test_validate_amount_empty(self):
-        with self.assertRaises(Exception):
+        uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
+        with self.assertRaises(ValueError):
+            self.parser = ParseJsonToObjectClass(uml_json)
             self.parser._ParseJsonToObjectClass__validate_amount("")
 
     def test_validate_amount_no_max(self):
-        with self.assertRaises(Exception):
+        uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
+        with self.assertRaises(ValueError):
+            self.parser = ParseJsonToObjectClass(uml_json)
             self.parser._ParseJsonToObjectClass__validate_amount("1..")
 
     def test_validate_amount_no_min(self):
-        with self.assertRaises(Exception):
+        uml_json = {"edges": [{"start": 1, "end": 2, "type": "GeneralizationEdge"}]}
+        with self.assertRaises(ValueError):
+            self.parser = ParseJsonToObjectClass(uml_json)
             self.parser._ParseJsonToObjectClass__validate_amount("..1")
 
     def test_validate_amount_invalid_star_placement(self):

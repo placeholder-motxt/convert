@@ -44,6 +44,12 @@ class TestClassObject(unittest.TestCase):
         self.class_object.add_relationship(relationship)
         self.assertIn(relationship, self.class_object._ClassObject__relationships)
 
+    def test_set_is_public(self):
+        self.class_object.set_is_public(True)
+        self.assertTrue(self.class_object._ClassObject__is_public)
+        self.class_object.set_is_public(False)
+        self.assertFalse(self.class_object._ClassObject__is_public)
+
     def test_str_representation(self):
         self.class_object.set_name("TestClass")
         expected_output = (
@@ -132,6 +138,13 @@ listOfTargetclass = models.ManyToManyField(TargetClass, on_delete = models.CASCA
 
         assert self.class_object.get_methods() == [method]
 
+    def test_get_is_public(self):
+        model = ClassObject()
+        model.set_is_public(True)
+        self.assertTrue(model.get_is_public())
+        model.set_is_public(False)
+        self.assertFalse(model.get_is_public())
+
 
 class TestAbstractRelationshipObject(unittest.TestCase):
     def setUp(self):
@@ -159,20 +172,24 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             self.target_class,
         )
 
-    def test_negative_set_source_class_as_None(self):
+    def test_negative_set_source_class_as_None(self):  # noqa: N802
         with self.assertRaises(ValueError) as context:
             self.relationship_object.set_source_class(None)
 
         self.assertEqual(
-            str(context.exception), "Source Class cannot be SET to be None!"
+            str(context.exception),
+            "Source Class cannot be SET to be None!\n "
+            "Relationship in class diagram is wrong",
         )
 
-    def test_negative_set_target_class_as_None(self):
+    def test_negative_set_target_class_as_None(self):  # noqa: N802
         with self.assertRaises(ValueError) as context:
             self.relationship_object.set_target_class(None)
 
         self.assertEqual(
-            str(context.exception), "Target Class cannot be SET to be None!"
+            str(context.exception),
+            "Target Class cannot be SET to be None!\n "
+            "Relationship in class diagram is wrong",
         )
 
     def test_edge_source_equals_target(self):
@@ -187,15 +204,15 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             self.source_class,
         )
 
-    def test_set_Source_Class_Own_Amount(self):
-        self.relationship_object.setSourceClassOwnAmount("2")
+    def test_set_source_class_own_amount(self):
+        self.relationship_object.set_source_class_own_amount("2")
         self.assertEqual(
             self.relationship_object._AbstractRelationshipObject__sourceClassOwnAmount,
             "2",
         )
 
-    def test_set_Target_Class_Own_Amount(self):
-        self.relationship_object.setTargetClassOwnAmount("1")
+    def test_set_target_class_own_amount(self):
+        self.relationship_object.set_target_class_own_amount("1")
         self.assertEqual(
             self.relationship_object._AbstractRelationshipObject__targetClassOwnAmount,
             "1",

@@ -30,7 +30,9 @@ class TestParseMisc(unittest.TestCase):
                 self.parser.parse_return_edge()
             self.assertEqual(
                 str(context.exception),
-                "Return edge label must be a valid variable name! Given: @return",
+                "Return edge label must be a valid variable name! Given '@return' \n"
+                "on sequence diagram please consult the "
+                "user manual document on how to name methods",
             )
 
     def test_parse_return_edge_no_call_edge(self):
@@ -43,7 +45,8 @@ class TestParseMisc(unittest.TestCase):
                 self.parser.parse_return_edge()
             self.assertEqual(
                 str(context.exception),
-                f"Return edge must have a corresponding call edge! {6} -> {3}",
+                "Return edge must have a corresponding call edge on sequence diagram\n"
+                "6 -> 3",
             )
 
     def test_method_call_object_condition_positive(self):
@@ -52,11 +55,9 @@ class TestParseMisc(unittest.TestCase):
             self.parser.set_json(json_data)
             self.parser.parse()
             result = self.parser.get_method_call()
-            print(result)
             for edge in self.parser.get_edges():
                 start = edge["start"]
                 end = edge["end"]
                 key = (start, end)
-                print(result[key]["condition"])
                 if result[key]["condition"] is not None and key == (25, 14):
                     self.assertEqual(result[key]["condition"], "POST")

@@ -20,13 +20,21 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             ParseJsonToObjectSeq().set_json(json_data)
 
-        self.assertEqual(str(context.exception), "Given .jet is not valid!")
+        self.assertEqual(
+            str(context.exception),
+            "The .sequence.jet is not valid. \n"
+            "Please make sure the file submitted is not corrupt",
+        )
 
     def test_negative_set_empty_json(self):
         with self.assertRaises(ValueError) as context:
             ParseJsonToObjectSeq().set_json("")
 
-        self.assertEqual(str(context.exception), "Given .jet is not valid!")
+        self.assertEqual(
+            str(context.exception),
+            "The .sequence.jet is not valid. \n"
+            "Please make sure the file submitted is not corrupt",
+        )
 
     def test_positive_parse_views(self):
         with open("tests/test_valid_json_seq.txt", "r", encoding="utf-8") as file:
@@ -87,17 +95,9 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()
-        self.assertEqual(str(context.exception), "Duplicate class name!")
-
-    # def test_edge_duplicate_method_name(self):
-    #     with open("tests/test_duplicate_method_name_seq.txt", "r", encoding="utf-8") as file:
-    #         json_data = file.read()
-
-    #     with self.assertRaises(Exception) as context:
-    #         parser = ParseJsonToObjectSeq()
-    #         parser.set_json(json_data)
-    #         parser.parse()
-    #     self.assertEqual(str(context.exception), "Duplicate method!")
+        self.assertEqual(
+            str(context.exception), "Duplicate class name 'Buku' on sequence diagram"
+        )
 
     def test_edge_duplicate_attribute(self):
         with open(
@@ -108,7 +108,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             parser = ParseJsonToObjectSeq()
             parser.set_json(json_data)
             parser.parse()
-        self.assertEqual(str(context.exception), "Duplicate attribute!")
+        self.assertEqual(
+            str(context.exception),
+            "Duplicate attribute 'username' on sequence diagram \n"
+            "please remove one of the parameters",
+        )
 
     def test_positive_class_object(self):
         with open("tests/test_valid_json_seq.txt", "r", encoding="utf-8") as file:
@@ -184,103 +188,154 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(len(parsed_value_controller[2].get_call()), 2)
         self.assertEqual(
             parsed_value_controller[2].get_call()[0].get_methods().get_name(),
+            "getBuku",
+        )
+
+        self.assertEqual(
+            len(parsed_value_controller[2].get_call()[0].get_arguments()), 1
+        )
+        self.assertEqual(
+            parsed_value_controller[2].get_call()[0].get_arguments()[0].get_name(),
+            "isbn",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[2].get_call()[1].get_methods().get_name(),
             "getDetailBuku",
         )
+
         self.assertEqual(
-            len(parsed_value_controller[2].get_call()[0].get_arguments()), 0
-        )
-        self.assertEqual(
-            parsed_value_controller[2].get_call()[1].get_methods().get_name(), "getBuku"
-        )
-        self.assertEqual(
-            len(parsed_value_controller[2].get_call()[1].get_arguments()), 1
-        )
-        self.assertEqual(
-            parsed_value_controller[2].get_call()[1].get_arguments()[0].get_name(),
-            "isbn",
+            len(parsed_value_controller[2].get_call()[1].get_arguments()), 0
         )
 
         self.assertEqual(len(parsed_value_controller[3].get_call()), 0)
 
         self.assertEqual(len(parsed_value_controller[4].get_call()), 3)
+
         self.assertEqual(
-            parsed_value_controller[4].get_call()[0].get_methods().get_name(),
+            parsed_value_controller[4].get_call()[0].get_methods().get_name(), "isValid"
+        )
+        self.assertEqual(
+            len(parsed_value_controller[4].get_call()[0].get_arguments()), 1
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4].get_call()[0].get_arguments()[0].get_name(),
+            "dataAnggota",
+        )
+
+        self.assertEqual(
+            len(parsed_value_controller[4].get_call()[0].get_methods().get_calls()), 0
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4].get_call()[1].get_methods().get_name(),
             "prosesPeminjamanValidKeanggotaan",
         )
         self.assertEqual(
-            parsed_value_controller[4].get_call()[0].get_condition(),
+            parsed_value_controller[4].get_call()[1].get_condition(),
             "isValid",
         )
         self.assertEqual(
-            len(parsed_value_controller[4].get_call()[0].get_arguments()), 0
+            len(parsed_value_controller[4].get_call()[1].get_arguments()), 0
         )
         self.assertEqual(
-            len(parsed_value_controller[4].get_call()[0].get_methods().get_call()), 3
+            len(parsed_value_controller[4].get_call()[1].get_methods().get_call()), 3
         )
+
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[0]
             .get_methods()
             .get_name(),
-            "prosesPeminjamanTidakMemilikiTanggungan",
+            "hasTanggungan",
         )
+
         self.assertEqual(
             len(
                 parsed_value_controller[4]
-                .get_call()[0]
+                .get_call()[1]
                 .get_methods()
                 .get_call()[0]
+                .get_arguments()
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[0]
+            .get_arguments()[0]
+            .get_name(),
+            "peminjam",
+        )
+
+        self.assertEqual(
+            len(
+                parsed_value_controller[4]
+                .get_call()[1]
+                .get_methods()
+                .get_call()[0]
+                .get_methods()
+                .get_calls()
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[0]
+            .get_methods()
+            .get_calls()[0]
+            .get_method()
+            .get_name(),
+            "hasTanggungan",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
+            .get_methods()
+            .get_name(),
+            "prosesPeminjamanTidakMemilikiTanggungan",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
+            .get_condition(),
+            "not hasTanggunganResult",
+        )
+
+        self.assertEqual(
+            len(
+                parsed_value_controller[4]
+                .get_call()[1]
+                .get_methods()
+                .get_call()[1]
                 .get_methods()
                 .get_call()
             ),
             2,
         )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_name(),
-            "showNotifikasiBerhasilPinjam",
-        )
-        self.assertEqual(
-            len(
-                parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_methods()
-                .get_call()
-            ),
-            0,
-        )
-        self.assertEqual(
-            len(
-                parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
-                .get_arguments()
-            ),
-            0,
-        )
 
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
+            .get_methods()
+            .get_call()[0]
             .get_methods()
             .get_name(),
             "borrow",
@@ -288,38 +343,26 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(
             len(
                 parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
+                .get_call()[1]
                 .get_methods()
                 .get_call()[1]
+                .get_methods()
+                .get_call()[0]
                 .get_methods()
                 .get_calls()
             ),
             2,
         )
+
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
+            .get_methods()
+            .get_call()[0]
             .get_methods()
             .get_calls()[0]
-            .get_methods()
-            .get_name(),
-            "isBorrowed",
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_call()[1]
-            .get_methods()
-            .get_calls()[1]
             .get_methods()
             .get_name(),
             "findCopyBuku",
@@ -327,22 +370,22 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         self.assertEqual(
             len(
                 parsed_value_controller[4]
-                .get_call()[0]
-                .get_methods()
-                .get_call()[0]
+                .get_call()[1]
                 .get_methods()
                 .get_call()[1]
+                .get_methods()
+                .get_call()[0]
                 .get_arguments()
             ),
             1,
         )
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
+            .get_methods()
+            .get_call()[0]
             .get_arguments()[0]
             .get_name(),
             "isbn",
@@ -350,77 +393,73 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
         self.assertEqual(
             parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
+            .get_methods()
             .get_call()[0]
+            .get_methods()
+            .get_calls()[1]
+            .get_methods()
+            .get_name(),
+            "isBorrowed",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[1]
             .get_methods()
             .get_call()[1]
             .get_methods()
             .get_name(),
-            "showNotifikasiGagalPinjam",
+            "showNotifikasiBerhasilPinjam",
         )
+
         self.assertEqual(
             parsed_value_controller[4]
-            .get_call()[0]
+            .get_call()[1]
             .get_methods()
             .get_call()[2]
             .get_methods()
             .get_name(),
+            "showNotifikasiGagalPinjam",
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4]
+            .get_call()[1]
+            .get_methods()
+            .get_call()[2]
+            .get_condition(),
             "hasTanggungan",
         )
 
         self.assertEqual(
-            parsed_value_controller[4].get_call()[1].get_methods().get_name(),
+            len(
+                parsed_value_controller[4]
+                .get_call()[1]
+                .get_methods()
+                .get_call()[2]
+                .get_arguments()
+            ),
+            0,
+        )
+
+        self.assertEqual(
+            parsed_value_controller[4].get_call()[2].get_methods().get_name(),
             "showNotifikasiDataTidakValid",
         )
+
         self.assertEqual(
-            len(parsed_value_controller[4].get_call()[1].get_arguments()), 0
-        )
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[1].get_methods().get_call()), 0
+            parsed_value_controller[4].get_call()[2].get_condition(),
+            "not isValid",
         )
 
         self.assertEqual(
-            parsed_value_controller[4].get_call()[2].get_methods().get_name(), "isValid"
-        )
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[2].get_arguments()), 1
-        )
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[2].get_methods().get_calls()), 0
-        )
-        self.assertEqual(
-            parsed_value_controller[4].get_call()[2].get_arguments()[0].get_name(),
-            "dataAnggota",
-        )
-
-        self.assertEqual(
-            len(parsed_value_controller[4].get_call()[0].get_methods().get_call()), 3
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[0]
-            .get_methods()
-            .get_name(),
-            "prosesPeminjamanTidakMemilikiTanggungan",
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[1]
-            .get_methods()
-            .get_name(),
-            "showNotifikasiGagalPinjam",
-        )
-        self.assertEqual(
-            parsed_value_controller[4]
-            .get_call()[0]
-            .get_methods()
-            .get_call()[2]
-            .get_methods()
-            .get_name(),
-            "hasTanggungan",
+            len(parsed_value_controller[4].get_call()[2].get_arguments()),
+            0,
         )
 
         self.assertEqual(
@@ -435,22 +474,20 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             0,
         )
 
-    def test_invalid_edge_label_format(self):
-        # Invalid label format should throw exceptions, examples:
-        # `doA()` -> have to be `doA ()`
-        # `[] doB ()->bval` -> have to be `[] doB () -> bval`
+    def test_valid_edge_label_format(self):
         parser = ParseJsonToObjectSeq()
-        with open(os.path.join(TEST_DIR, "seq_invalid_label_format1.json")) as f:
+        with open(os.path.join(TEST_DIR, "seq_valid_label_format1.json")) as f:
             parser.set_json(f.read())
 
-        with self.assertRaises(ValueError) as ctx:
-            parser.parse()
+        parser.parse()
 
         self.assertEqual(
-            str(ctx.exception),
-            "Wrong label format: doA()\n"
-            "Check that the format is in compliance with the guide",
+            parser.get_class_objects()["ABC"].get_methods()[0].get_name(), "doA"
         )
+
+    def test_invalid_edge_label_format(self):
+        # Invalid label format should throw exceptions, examples:
+        # `[] doB ()->bval` -> have to be `[] doB () -> bval`
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_label_format2.json")) as f:
@@ -461,8 +498,8 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Wrong label format: [] doB ()->bval\n"
-            "Check that the format is in compliance with the guide",
+            "Wrong label format '[] doB ()->bval' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
         )
 
     def test_invalid_method_name(self):
@@ -477,7 +514,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid method name: abcd!")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name 'abcd!' on sequence diagram \n"
+            "please consult the user manual document on how to name methods",
+        )
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_method_name2.json")) as f:
@@ -486,7 +527,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid method name: class")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name 'class' on sequence diagram \n"
+            "please consult the user manual document on how to name methods",
+        )
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_method_name3.json")) as f:
@@ -495,7 +540,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid method name: []abcd")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name '[]abcd' on sequence diagram \n"
+            "please consult the user manual document on how to name methods",
+        )
 
     def test_invalid_param_name(self):
         # Invalid method name should throw exceptions, examples:
@@ -508,7 +557,11 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid param name: a!!!")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid param name 'a!!!' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
+        )
 
         parser = ParseJsonToObjectSeq()
         with open(os.path.join(TEST_DIR, "seq_invalid_param_name2.json")) as f:
@@ -517,4 +570,8 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             parser.parse()
 
-        self.assertEqual(str(ctx.exception), "Invalid param name: try")
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid param name 'try' on sequence diagram \n"
+            "please consult the user manual document on how to name parameters",
+        )

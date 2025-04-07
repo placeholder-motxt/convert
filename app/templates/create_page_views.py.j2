@@ -1,0 +1,12 @@
+{% for class in classes %}
+def create_{{ class.name_snake }}(request):
+    if request.method == 'POST':
+        form = {{ class.name }}Form(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('main:get_{{ class.name_snake }}')
+    else:
+        form = {{ class.name }}Form()
+    return render(request, 'create_{{ class.name_snake }}.html', {'form': form})
+
+{% endfor %}

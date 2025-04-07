@@ -1,0 +1,8 @@
+from django.db import models
+
+
+class Order(models.Model):
+    order_date = models.DateField()
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE)
+    productFK = models.ForeignKey(Product, on_delete=models.CASCADE)
+    listOfTag = models.ManyToManyField(Tag, on_delete=models.CASCADE)

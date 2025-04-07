@@ -141,7 +141,15 @@ GitHub.sublime-settings
 # Ruff
 .ruff_cache/
 
-
 # Cosmic Ray
 cosmic-ray.sqlite
 cosmic-ray-report.html
+
+# bandit
+bandit_report.html
+
+# profiling
+profile_stats.prof
+
+# Nektos's Act
+act.json
