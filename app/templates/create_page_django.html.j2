@@ -1,0 +1,9 @@
+{% raw %}{% extends 'base.html' %}
+{% block content %}{% endraw %}
+    <h1>Create {{class_name}} </h1>
+    <form method="POST">
+        {% raw %}{% csrf_token %}
+        {{ form.as_p }} {% endraw %}
+        <button type="submit">Create {{ class_name }}</button>
+    </form>
+{% raw %}{% endblock content %}{% endraw %}

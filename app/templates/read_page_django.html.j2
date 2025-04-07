@@ -1,0 +1,47 @@
+{% raw %}{% extends 'base.html' %}
+{% block content %}{% endraw %}
+    <h1>{{ class_name }} List</h1>
+    <table border="1">
+        <thead>
+            <tr>
+            {% for field in fields -%}
+                <th>{{ field.name }}</th>
+            {% endfor -%}
+            {% if has_edit -%}
+                <th>Edit</th>
+            {% endif -%}
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% raw %}{% for {% endraw %}{{ class_snake }} in {{ class_snake }}s{% raw %} %}{% endraw %}
+            <tr>
+            {% for field in fields -%}
+                <td>{% raw %}{{{% endraw %} {{ class_snake }}.{{ field.name }} {% raw %}}}{% endraw %}</td>
+            {% endfor -%}
+            {% if has_edit %}
+                <td>
+                    <a href="{% raw %}{%{% endraw %} url 'main:edit_{{class_snake}}' {{ class_snake }}.pk {% raw %}%}{% endraw %}">
+                        <button>Edit</button>
+                    </a>
+                </td>
+            {% endif %}
+                <td>
+                    <form action="{% raw %}{%{% endraw %} url 'main:delete_{{class_snake}}' {% raw %}%}{% endraw %}" method="POST">
+                        {% raw %}{% csrf_token %}{% endraw %}
+                        <input type="hidden" name="object_id" value="{% raw %}{{{% endraw %} {{ class_snake }}.id {% raw %}}}{% endraw %}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% raw %}{% empty %}{% endraw %}
+            <tr>
+
+                <td colspan="3">No {{ class_snake }}s to display.</td>
+            </tr>
+            {% raw %}{% endfor %}{% endraw %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{% raw %}{%{% endraw %} url 'main:create_{{ class_snake }}' {% raw %}%}{% endraw %}">Create New {{ class_name }}</a>
+{% raw %}{% endblock content %}{% endraw %}

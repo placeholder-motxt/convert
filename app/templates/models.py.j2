@@ -1,0 +1,12 @@
+from django.db import models
+
+
+{% for class in classes -%}
+class {{ class.name }}({{ class.parent }}):
+    {% for field in class.fields -%}
+    {{ field.name }} = {{ field.type }}
+    {% else -%}{#- this else block only happens if fields is empty -#}
+    pass
+    {%- endfor -%}
+
+{%- endfor -%}

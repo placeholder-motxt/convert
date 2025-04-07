@@ -1,0 +1,11 @@
+{% raw %}{% extends 'base.html' %}
+{% block meta %}{% endraw %}<title>Edit {{ class_name }}</title>
+{% raw %}{% endblock meta %}
+{% block content %}{% endraw %}
+    <h1>Edit {{ class_name }}</h1>
+    <form method="POST">
+        {% raw %}{% csrf_token %}
+        {{ form.as_p }} {% endraw %}
+        <button type="submit">Save</button>
+    </form>
+{% raw %}{% endblock content %}{% endraw %}
