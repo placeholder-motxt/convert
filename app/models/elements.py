@@ -169,6 +169,7 @@ class UrlsElement(FileElements):
             class_context = {
                 "name": kelas.get_name(),
                 "snake_name": camel_to_snake(kelas.get_name()),
+                "is_public": kelas.get_is_public(),
             }
             classes.append(class_context)
         return render_template("urls.py.j2", classes=classes)
