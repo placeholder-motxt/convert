@@ -383,6 +383,7 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     writer_models = ModelsElements("models.py")
     writer_views = ViewsElements("views.py")
 
+    classes = []
     for file_name, content in zip(filename, content):
         json_content = json.loads(content[0])
 
@@ -427,7 +428,8 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     response_content_models.write(writer_models.print_django_style())
 
     # Render the landing page
-    response_content_views.write(generate_landing_page_views())
+    if classes:
+        response_content_views.write(generate_landing_page_views(classes))
     response_content_views.write("\n")
 
     # Render the create views
