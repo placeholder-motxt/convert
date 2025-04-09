@@ -8,6 +8,11 @@ from django.apps import apps
 
 def getId(request, instance_name) -> str:
     # TODO: Auto generated function stub
+    """
+    This method is empty due to not having any implementation in the sequence diagram submited.
+    You can resubmit the files again with the function implemented
+    in the sequence diagram or implement it yourself
+    """
     raise NotImplementedError('getId function is not yet implemented')
     pass
 
@@ -17,6 +22,11 @@ def getId(request, instance_name) -> str:
 
 def setRadius(request, instance_name, radius):
     # TODO: Auto generated function stub
+    """
+    This method is empty due to not having any implementation in the sequence diagram submited.
+    You can resubmit the files again with the function implemented
+    in the sequence diagram or implement it yourself
+    """
     raise NotImplementedError('setRadius function is not yet implemented')
     pass
 
@@ -26,6 +36,11 @@ def setRadius(request, instance_name, radius):
 
 def findCircle(request, instance_name, circleId):
     # TODO: Auto generated function stub
+    """
+    This method is empty due to not having any implementation in the sequence diagram submited.
+    You can resubmit the files again with the function implemented
+    in the sequence diagram or implement it yourself
+    """
     raise NotImplementedError('findCircle function is not yet implemented')
     pass
 
