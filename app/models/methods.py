@@ -169,7 +169,14 @@ class ClassMethodObject(AbstractMethodObject):
         for method_call in self.__calls:
             res.write("\n    ")
             res.write(method_call.print_django_style())
+            
         res.write("\n    # TODO: Auto generated function stub\n")
+        if not len(self.__calls):
+            res.write('    """\n')
+            res.write('    This method is empty due to not having any implementation in the sequence diagram submited.\n')
+            res.write('    You can resubmit the files again with the function implemented\n')
+            res.write('    in the sequence diagram or implement it yourself\n')
+            res.write('    """\n')
         res.write(
             f"    raise NotImplementedError('{name} function is not yet implemented')\n    pass\n"
         )
