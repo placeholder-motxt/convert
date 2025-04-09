@@ -33,6 +33,7 @@ from app.generate_frontend.read.read_page_views import generate_read_page_views
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
+    FileElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -309,15 +310,7 @@ def generate_file_to_be_downloaded(
 
         # CREATE
         create_pages = generate_html_create_pages_django(writer_models)
-        for i in range(len(create_pages)):
-            for class_obj in writer_models.get_classes():
-                if class_obj.get_name() in create_pages[i]:
-                    page = create_pages[i]
-                    name = f"create_{class_obj.get_name().lower()}.html"
-                    zipf.writestr(
-                        f"{app_name}/templates/{name}",
-                        data=page,
-                    )
+        write_html_to_django_app(zipf, writer_models, app_name, create_pages)
 
         # CREATE FORMS
         forms_create = generate_forms_create_page_django(models_elements=writer_models)
@@ -327,27 +320,11 @@ def generate_file_to_be_downloaded(
         )
         # READ
         read_page = generate_html_read_pages_django(models_elements=writer_models)
-        for i in range(len(read_page)):
-            for class_obj in writer_models.get_classes():
-                if class_obj.get_name() in read_page[i]:
-                    page = read_page[i]
-                    name = f"{class_obj.get_name().lower()}_list.html"
-                    zipf.writestr(
-                        f"{app_name}/templates/{name}",
-                        data=page,
-                    )
+        write_html_to_django_app(zipf, writer_models, app_name, read_page)
 
         # UPDATE
         edit_page = generate_html_edit_pages_django(models_elements=writer_models)
-        for i in range(len(edit_page)):
-            for class_obj in writer_models.get_classes():
-                if class_obj.get_name() in edit_page[i]:
-                    page = edit_page[i]
-                    name = f"edit_{class_obj.get_name().lower()}.html"
-                    zipf.writestr(
-                        f"{app_name}/templates/{name}",
-                        data=page,
-                    )
+        write_html_to_django_app(zipf, writer_models, app_name, edit_page)
 
         # landing page
         landing_page = generate_landing_page_html()
@@ -359,6 +336,23 @@ def generate_file_to_be_downloaded(
         )
         files = zipf.namelist()
     return files
+
+
+def write_html_to_django_app(
+    zipf: zipfile.ZipFile,
+    writer: FileElements,
+    app_name: str,
+    html_pages_content: list[str],
+):
+    for i in range(len(html_pages_content)):
+        for class_obj in writer.get_classes():
+            if class_obj.get_name() in html_pages_content[i]:
+                page = html_pages_content[i]
+                name = f"edit_{class_obj.get_name().lower()}.html"
+                zipf.writestr(
+                    f"{app_name}/templates/{name}",
+                    data=page,
+                )
 
 
 def process_parsed_class(
