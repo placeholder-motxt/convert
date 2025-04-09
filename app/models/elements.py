@@ -193,7 +193,7 @@ class RequirementsElements(FileElements):
             "Django",
             "gunicorn",
             "whitenoise",
-            "psycopg2",
+            "psycopg2-binary",
             "pytest",
             "pytest-django",
             "pytest-cov",
