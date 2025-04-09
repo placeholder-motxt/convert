@@ -310,7 +310,14 @@ def generate_file_to_be_downloaded(
 
         # CREATE
         create_pages = generate_html_create_pages_django(writer_models)
-        write_html_to_django_app(zipf, writer_models, app_name, create_pages)
+        for name, page in get_names_from_classes(
+            writer_models=writer_models, pages=create_pages
+        ).items():
+            file_name = f"create_{name.lower()}.html"
+            zipf.writestr(
+                f"{app_name}/templates/{file_name}",
+                data=page,
+            )
 
         # CREATE FORMS
         forms_create = generate_forms_create_page_django(models_elements=writer_models)
@@ -319,16 +326,31 @@ def generate_file_to_be_downloaded(
             data=forms_create,
         )
         # READ
-        read_page = generate_html_read_pages_django(models_elements=writer_models)
-        write_html_to_django_app(zipf, writer_models, app_name, read_page)
+        read_pages = generate_html_read_pages_django(models_elements=writer_models)
+        for name, page in get_names_from_classes(
+            writer_models=writer_models, pages=read_pages
+        ).items():
+            file_name = f"read_{name.lower()}.html"
+            zipf.writestr(
+                f"{app_name}/templates/{file_name}",
+                data=page,
+            )
 
         # UPDATE
-        edit_page = generate_html_edit_pages_django(models_elements=writer_models)
-        write_html_to_django_app(zipf, writer_models, app_name, edit_page)
+        edit_pages = generate_html_edit_pages_django(models_elements=writer_models)
+        for name, page in get_names_from_classes(
+            writer_models=writer_models, pages=edit_pages
+        ).items():
+            file_name = f"edit_{name.lower()}.html"
+            zipf.writestr(
+                f"{app_name}/templates/{file_name}",
+                data=page,
+            )
 
         # landing page
         landing_page = generate_landing_page_html()
         zipf.writestr(f"{app_name}/templates/landing_page.html", data=landing_page)
+
         # base.html
         zipf.write(
             os.path.join("app", "templates", "base.html.txt"),
@@ -336,6 +358,24 @@ def generate_file_to_be_downloaded(
         )
         files = zipf.namelist()
     return files
+
+
+def get_names_from_classes(
+    writer_models: ModelsElements, pages: list[str]
+) -> dict[str, str]:
+    """
+    Function to get the names of the classes and the pages from the writer_models
+    """
+    classes_dict = {}
+    for page, class_obj in (
+        (page, class_obj)
+        for page in pages
+        for class_obj in writer_models.get_classes()
+        if class_obj.get_name() in page
+    ):
+        classes_dict[class_obj.get_name()] = page
+
+    return classes_dict
 
 
 def write_html_to_django_app(
