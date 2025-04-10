@@ -59,9 +59,7 @@ def render_project_django_template(
     except OSError:
         raise FileExistsError(f"Folder {folder_path} already exists")
     for template_name in os.listdir(template_path):
-        file_path = os.path.join(template_path, template_name)
-        file_path = file_path.replace("\\", "/")
-        template = env.get_template(f"django_project/{template_name}")
+        template = f"django_project/{template_name}"
         if template_name == "settings.py.j2":
             context = {
                 "project_name": context["project_name"],
@@ -69,7 +67,7 @@ def render_project_django_template(
             }
         template_name = template_name.replace(".j2", "")
         with open(os.path.join(folder_path, template_name), "w") as file:
-            file.write(template.render(context))
+            file.write(render_template(template, context))
             file.write("\n")  # add newline at the end of file for linter
         files.append(template_name)
     return files

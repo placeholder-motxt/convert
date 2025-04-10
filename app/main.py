@@ -69,7 +69,7 @@ async def download_file(request: DownloadRequest) -> FileResponse:
     raw_filename = request.filename
     file = raw_filename + request.type + ".py"
 
-    if "/" in raw_filename or "\\\\" in raw_filename:
+    if "/" in raw_filename or "\\" in raw_filename:
         logger.warning(f"Bad filename: {raw_filename}")
         raise HTTPException(status_code=400, detail="/ not allowed in file name")
 
