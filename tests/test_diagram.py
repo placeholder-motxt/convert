@@ -95,9 +95,9 @@ class TestClassObject(unittest.TestCase):
             self.class_object.to_models_code()
             == "class ClassTest(models.Model):\n\t\
 field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
-targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
-targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
-listOfTargetclass = models.ManyToManyField(TargetClass)\n\tpass\n\n\n"
+targetclass = models.OneToOneField('TargetClass', on_delete = models.CASCADE)\n\t\
+targetclassFK = models.ForeignKey('TargetClass', on_delete = models.CASCADE)\n\t\
+listOfTargetclass = models.ManyToManyField('TargetClass')\n\tpass\n\n\n"
         )
 
     def test_get_name(self):
@@ -129,7 +129,7 @@ listOfTargetclass = models.ManyToManyField(TargetClass)\n\tpass\n\n\n"
         model.add_relationship(relationship)
         assert (
             model._ClassObject__get_relationships_to_code()
-            == "\tuser = models.OneToOneField(User, on_delete = models.CASCADE)\n"
+            == "\tuser = models.OneToOneField('User', on_delete = models.CASCADE)\n"
         )
 
     def test_get_methods(self):
@@ -240,7 +240,7 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
         self.one_to_one_relationship.set_target_class(self.target_class)
         assert (
             self.one_to_one_relationship.to_models_code()
-            == "targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)"
+            == "targetclass = models.OneToOneField('TargetClass', on_delete = models.CASCADE)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
@@ -260,7 +260,7 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
         self.many_to_one_relationship.set_target_class(self.target_class)
         assert (
             self.many_to_one_relationship.to_models_code()
-            == "targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
+            == "targetclassFK = models.ForeignKey('TargetClass', on_delete = models.CASCADE)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
@@ -280,7 +280,7 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.many_to_many_relationship.set_target_class(self.target_class)
         assert (
             self.many_to_many_relationship.to_models_code()
-            == "listOfTargetclass = models.ManyToManyField(TargetClass)"
+            == "listOfTargetclass = models.ManyToManyField('TargetClass')"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
