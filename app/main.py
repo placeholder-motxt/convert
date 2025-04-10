@@ -357,6 +357,16 @@ def generate_file_to_be_downloaded(
             os.path.join("app", "templates", "base.html.txt"),
             arcname="templates/base.html",
         )
+
+        # Template tags
+        zipf.writestr("main/templatetags/__init__.py", "")
+
+        zipf.write(
+            "app/templates/templatetags/filter_tag.txt",
+            arcname="main/templatetags/filter_tag.py",
+        )
+
+
         files = zipf.namelist()
     return files
 
