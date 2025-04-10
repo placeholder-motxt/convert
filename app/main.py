@@ -406,19 +406,17 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
     classes = []
     for file_name, content in zip(filenames, contents):
         json_content = json.loads(content[0])
+        diagram_type = json_content.get("diagram", None)
 
-        if (
-            json_content["diagram"] is not None
-            and json_content["diagram"] == "ClassDiagram"
-        ):
+        if diagram_type is None:
+            raise ValueError("Diagram type not found on .jet file")
+
+        if diagram_type == "ClassDiagram":
             classes = writer_models.parse(json_content)
 
             process_parsed_class(classes, duplicate_class_method_checker)
 
-        elif (
-            json_content["diagram"] is not None
-            and json_content["diagram"] == "SequenceDiagram"
-        ):
+        elif diagram_type == "SequenceDiagram":
             seq_parser = ParseJsonToObjectSeq()
             seq_parser.set_json(content[0])
             seq_parser.parse()
@@ -434,6 +432,11 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
                 duplicate_class_method_checker = check_duplicate(
                     class_objects, class_object, duplicate_class_method_checker
                 )
+
+        else:
+            raise ValueError(
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
+            )
 
     for class_method_object in duplicate_class_method_checker.values():
         writer_views.add_class_method(class_method_object)
