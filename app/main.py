@@ -330,7 +330,7 @@ def generate_file_to_be_downloaded(
         for name, page in get_names_from_classes(
             writer_models=writer_models, pages=read_pages
         ).items():
-            file_name = f"read_{name.lower()}.html"
+            file_name = f"{name.lower()}_list.html"
             zipf.writestr(
                 f"{app_name}/templates/{file_name}",
                 data=page,
