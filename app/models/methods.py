@@ -169,12 +169,28 @@ class ClassMethodObject(AbstractMethodObject):
         for method_call in self.__calls:
             res.write("\n    ")
             res.write(method_call.print_django_style())
+
         res.write("\n    # TODO: Auto generated function stub\n")
+        self.__add_additional_comments(res)
         res.write(
             f"    raise NotImplementedError('{name} function is not yet implemented')\n    pass\n"
         )
 
         return res.getvalue()
+
+    def __add_additional_comments(self, sio: StringIO):
+        if len(self.__calls):
+            return
+        sio.write('    """\n')
+        sio.write(
+            "    This method is empty due to not having any implementation in the "
+            "sequence diagram submited.\n"
+        )
+        sio.write(
+            "    You can resubmit the files again with the function implemented\n"
+        )
+        sio.write("    in the sequence diagram or implement it yourself\n")
+        sio.write('    """\n')
 
     def get_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
         # TODO: Make immutable if needed
