@@ -23,7 +23,7 @@ class MultiplicityValidator:
 class MultiplicityState(ABC):
     @abstractmethod
     def handle(self, context: MultiplicityValidator, char: str, index: int):
-        pass
+        pass  # pragma: no cover
 
 
 class StartState(MultiplicityState):
@@ -69,4 +69,4 @@ class MaximumNumberState(MultiplicityState):
 
 class EndState(MultiplicityState):
     def handle(self, context: MultiplicityValidator, char: str, index: int):
-        return
+        return  # pragma: no cover

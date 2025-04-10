@@ -10,7 +10,9 @@ class RelationshipStrategy:
     def create_relationship(
         self, edge: dict, class_from_id: ClassObject, class_to_id: ClassObject
     ) -> None:
-        raise NotImplementedError
+        raise NotImplementedError(
+            "RelationshipStrategy does not implement create_relationship"
+        )
 
 
 class OneToOneStrategy(RelationshipStrategy):
