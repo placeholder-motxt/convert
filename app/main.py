@@ -130,6 +130,22 @@ async def convert(
             views=response_content_views,
             writer_models=writer_models,
         )
+
+        return FileResponse(
+            path=project_name + ".zip",
+            filename=f"{project_name}.zip",
+            media_type="application/zip",
+        )
+
+    except ValueError as ex:
+        ex_str = str(ex)
+        logger.warning(
+            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(status_code=422, detail=str(ex))
+
+    finally:
+        project_name = request.project_name
         files = [
             f"{project_name}_models.py",
             f"{project_name}_views.py",
@@ -144,19 +160,6 @@ async def convert(
             if os.path.exists(file):
                 os.remove(file)
         background_tasks.add_task(remove_file, f"{project_name}.zip")
-
-        return FileResponse(
-            path=project_name + ".zip",
-            filename=f"{project_name}.zip",
-            media_type="application/zip",
-        )
-
-    except ValueError as ex:
-        ex_str = str(ex)
-        logger.warning(
-            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
-        )
-        raise HTTPException(status_code=422, detail=str(ex))
 
 
 def check_duplicate(
