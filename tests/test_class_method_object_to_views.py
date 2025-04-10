@@ -42,6 +42,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Should have param and type annotations for it as well as return type
         result = "def method_full(request, instance_name, param1: int) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method_full function is not yet implemented')\n"
         result += "    pass\n"
         self.assertEqual(result, self.method_full.to_views_code())
@@ -50,6 +55,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Should have params and its type annotation but no return type
         result = "def method_params(request, instance_name, param1: int):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         result += "    pass\n"
         self.assertEqual(result, self.method_with_parameters.to_views_code())
@@ -58,6 +68,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Parameter doesn't have a type somehow
         result = "def method_params(request, instance_name, param1):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         result += "    pass\n"
         self.param.set_type(None)
@@ -67,6 +82,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Should have the return type annotation but no params
         result = "def method_rettype(request, instance_name) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method_rettype"
         result += " function is not yet implemented')\n"
         result += "    pass\n"
@@ -77,6 +97,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # and return type
         result = "def method(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += (
             "    raise NotImplementedError('method function is not yet implemented')\n"
         )
@@ -87,6 +112,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         # Should only have method name and body but no params and return type
         result = "def method_rettype(request, instance_name) -> list[ABC]:\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method_rettype function is not yet implemented')"
         result += "\n"
         result += "    pass\n"
@@ -111,6 +141,11 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result = "def method_params(request, instance_name, param1: int, param2: str,"
         result += " param3: float):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         result += "    pass\n"
         self.assertEqual(result, self.method_with_parameters.to_views_code())

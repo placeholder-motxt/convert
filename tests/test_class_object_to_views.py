@@ -28,6 +28,11 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import Empty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
         result += "pass\n"
         self.assertEqual(result, self.empty_class.to_views_code())
@@ -38,10 +43,20 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
         result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
         result += "pass\n"
         self.assertIn("method1", code)
@@ -55,10 +70,20 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
         result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
         result += "pass\n"
         self.assertEqual(result, self.empty_class.to_views_code())
@@ -73,14 +98,29 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import Empty\nfrom .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
         result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
         result += "pass\n"
         result += "def method3(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method3 function is not yet implemented')\n    "
         result += "pass\n"
         self.assertEqual(result, self.empty_class.to_views_code())
@@ -92,10 +132,20 @@ class TestClassObjectToViewsCode(unittest.TestCase):
         result = "from .models import NotEmpty\n"
         result += "def method1(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method1 function is not yet implemented')\n    "
         result += "pass\n"
         result += "def method2(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
+        result += '    """\n'
+        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
+        result += '    You can resubmit the files again with the function implemented\n'
+        result += '    in the sequence diagram or implement it yourself\n'
+        result += '    """\n'
         result += "    raise NotImplementedError('method2 function is not yet implemented')\n    "
         result += "pass\n"
         self.assertEqual(result, self.class_with_methods.to_views_code())

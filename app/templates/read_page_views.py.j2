@@ -1,7 +1,27 @@
 {% for class in classes %}
 def get_{{class.class_snake}}(request):
     {{ class.class_snake }}s = {{ class.class_name }}.objects.all()
-    return render(request, '{{ class.class_snake }}_list.html', {'{{ class.class_snake }}s': {{ class.class_snake }}s})
+    all_fields = [field.name for field in {{ class.class_name }}._meta.get_fields()]
+    {{ class.class_snake }}_data = []
+    
+    for {{ class.class_snake }} in {{ class.class_snake }}s:
+        {{ class.class_snake }}_dict = {}
+        for field_name in all_fields:
+            try:
+                field = {{ class.class_name }}._meta.get_field(field_name)
+                if field.is_relation and field.many_to_many:
+                    related_objects = getattr({{ class.class_snake }}, field_name).all()
+                    {{ class.class_snake }}_dict[field_name] = ", ".join([str(obj) for obj in related_objects]) or "None"
+                else:
+                    {{ class.class_snake }}_dict[field_name] = getattr({{ class.class_snake }}, field_name)
+            except:
+                {{ class.class_snake }}_dict[field_name] = "N/A"
+        {{ class.class_snake }}_data.append(({{ class.class_snake }}, {{ class.class_snake }}_dict))
+    
+    return render(request, '{{ class.class_snake }}_list.html', {
+        '{{ class.class_snake }}_data': {{ class.class_snake }}_data,
+        'fields': all_fields,
+    })
 
 
 {% endfor %}
