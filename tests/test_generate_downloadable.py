@@ -58,6 +58,8 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
             "main/tests.py",
             "main/views.py",
             "main/migrations/__init__.py",
+            "main/templatetags/__init__.py",
+            "main/templatetags/filter_tag.py",
             "main/__init__.py",
             "requirements.txt",
             "main/urls.py",
