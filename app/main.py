@@ -113,7 +113,7 @@ async def convert(
         await download_file(
             request=DownloadRequest(
                 filename=first_fname,
-                content=render_model(fetched),
+                content=fetched["models"],
                 type="_models",
             ),
         )
@@ -121,7 +121,7 @@ async def convert(
         await download_file(
             request=DownloadRequest(
                 filename=first_fname,
-                content=render_views(fetched),
+                content=fetched["views"],
                 type="_views",
             ),
         )
@@ -469,35 +469,3 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
     }
-
-
-def render_model(fetched_data: dict[str]) -> str:
-    """
-    Function to get the models.py content. Must be called before
-    create_django_app and pass the return value to the parameter
-    in create_django_app
-    """
-    return fetched_data["models"]
-
-
-def render_views(fetched_data: dict[str]) -> str:
-    """
-    Function to get the views.py content. Must be called before
-    create_django_app and pass the return value to the parameter
-    in create_django_app
-
-    IMPORTANT NOTE!
-    The parameter for render_views is list of JSON Content, so in the
-    loop for iterating request.content please make an array to store
-    all of the Sequence JSON Content and then pass the array to the
-    render_views method!
-    """
-    return fetched_data["views"]
-
-
-def get_model_element(fetched_data: dict[str]) -> ModelsElements:
-    """
-    Function to get ModelElements from the fetch_data method. Behavior
-    similiar to render_model and render_views
-    """
-    return fetched_data["model_element"]

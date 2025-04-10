@@ -9,9 +9,6 @@ from app.main import (
     create_django_app,
     create_django_project,
     fetch_data,
-    get_model_element,
-    render_model,
-    render_views,
 )
 from app.models.elements import ModelsElements
 
@@ -37,7 +34,7 @@ class TestReplaceModelAndViews(unittest.TestCase):
 
         processed_data = fetch_data(["tes.class.jet"], [[json_data]])
 
-        output = render_model(processed_data)
+        output = processed_data["models"]
 
         self.assertEqual(output.strip().replace("\t", "    "), expected_result.strip())
 
@@ -50,7 +47,7 @@ class TestReplaceModelAndViews(unittest.TestCase):
 
         processed_data = fetch_data(["tes.class.jet"], [[json_data]])
 
-        output = render_model(processed_data)
+        output = processed_data["models"]
 
         create_django_project("testRenderModel")
         create_django_app("testRenderModel", "testRender", output)
@@ -89,7 +86,7 @@ class TestReplaceModelAndViews(unittest.TestCase):
             ["tes.class.jet", "tes.sequence.jet"], [[model], [views]]
         )
 
-        output = render_views(processed_data)
+        output = processed_data["views"]
 
         self.assertEqual(output.strip().replace("\t", "    "), expected_result.strip())
 
@@ -107,8 +104,8 @@ class TestReplaceModelAndViews(unittest.TestCase):
             ["tes.class.jet", "tes.sequence.jet"], [[model], [views]]
         )
 
-        output_models = render_model(processed_data)
-        output_views = render_views(processed_data)
+        output_models = processed_data["models"]
+        output_views = processed_data["views"]
 
         create_django_project("testRenderModel")
         create_django_app("testRenderModel", "testRender", output_models, output_views)
@@ -130,7 +127,7 @@ class TestReplaceModelAndViews(unittest.TestCase):
 
         processed_data = fetch_data(["tes.class.jet"], [[json_data]])
 
-        models = get_model_element(processed_data)
+        models = processed_data["model_element"]
 
         self.assertIsInstance(models, ModelsElements)
 
