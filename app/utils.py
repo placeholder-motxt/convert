@@ -101,3 +101,69 @@ def get_random_string(
       * length: 22, bit length =~ 131 bits
     """
     return "".join(secrets.choice(allowed_chars) for i in range(length))
+
+
+def translate_to_cat(msg: str) -> str:
+    for category, patterns in ERROR_CATEGORY_PATTERNS:
+        for pattern in patterns:
+            if re.search(pattern, msg, re.IGNORECASE):
+                return category
+    return "other"
+
+
+ERROR_CATEGORY_PATTERNS = [
+    (
+        "invalid_project",
+        [r"Project name must not contain", r"App name must not contain"],
+    ),
+    ("missing_file", [r"File .+\.zip does not exist"]),
+    ("undefined_class", [r"Cannot call class .+ objects not defined"]),
+    (
+        "invalid_class_file",
+        [
+            r"Invalid JSON format",
+            r"Nodes not found",
+            r"Class not found",
+            r"ModelsElements does not contain",
+            r"Can't create edit views",
+        ],
+    ),
+    ("invalid_sequence_file", [r"The \.sequence\.jet is not valid"]),
+    ("invalid_class_name", [r"how to name classes"]),
+    (
+        "invalid_method_return",
+        [r"Method return type not found", r"method name or method return type name"],
+    ),
+    ("invalid_return_variable", [r"name return variables"]),
+    ("too_many_self_call", [r"Too deep self calls"]),
+    (
+        "invalid_param_name",
+        [
+            r"Invalid param name",
+            r"Parameter name please consult the user",
+            r"Parameter name .* name parameters",
+            r"please consult the user manual document on how to name parameters",
+        ],
+    ),
+    (
+        "invalid_attribute_name",
+        [r"attribute name or type is not valid", r"Return edge label must be a valid"],
+    ),
+    ("invalid_param_type", [r"name parameter types"]),
+    ("no_call_edge", [r"Return edge must have a corresponding call edge"]),
+    (
+        "invalid_relation",
+        [r"multiplicity.*relation", r"Invalid use of \*", r"relationship.*wrong"],
+    ),
+    (
+        "invalid_method_name",
+        [
+            r"name methods",
+            r"method cannot be empty",
+            r"ClassMethodObject cannot be SET",
+        ],
+    ),
+    ("duplicate_class", [r"Duplicate class name .+ on sequence diagram"]),
+    ("invalid_instance_name", [r"instance_name cannot be empty"]),
+    ("duplicate_attribute", [r"please remove one of the parameters"]),
+]
