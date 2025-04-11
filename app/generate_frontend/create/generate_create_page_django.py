@@ -19,10 +19,13 @@ def generate_html_create_page_django(class_object: ClassObject) -> str:
 def generate_forms_create_page_django(models_elements: ModelsElements) -> str:
     classes = []
     for class_object in models_elements.get_classes():
-        class_context = {"name": class_object.get_name(), "fields": []}
         if class_object.get_is_public():
-            for field in class_object.get_fields():
-                class_context["fields"].append({"name": field.get_name()})
+            class_context = {
+                "name": class_object.get_name(),
+                "fields": [
+                    {"name": field.get_name()} for field in class_object.get_fields()
+                ],
+            }
             classes.append(class_context)
     context = {"classes": classes}
     return render_template("forms.py.j2", context)
