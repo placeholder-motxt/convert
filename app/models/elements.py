@@ -89,11 +89,15 @@ class ModelsElements(FileElements):
         return response_content
 
     def print_django_style_template(self, template_name: str = "models.py.j2") -> str:
-        list_of_models_dict = []
-        for model_class in self.__classes:
-            list_of_models_dict.append(model_class.to_models_code_template())
-        # return list_of_models_dict
-        return render_template(template_name, {"classes": list_of_models_dict})
+        return render_template(
+            template_name,
+            {
+                "classes": [
+                    model_class.to_models_code_template()
+                    for model_class in self.__classes
+                ]
+            },
+        )
 
 
 class ViewsElements(FileElements):
