@@ -67,12 +67,12 @@ def read_root() -> dict:
 
 async def download_file(request: DownloadRequest) -> FileResponse:
     raw_filename = request.filename
-    file = raw_filename + request.type + ".py"
 
     if "/" in raw_filename or "\\" in raw_filename:
         logger.warning(f"Bad filename: {raw_filename}")
         raise HTTPException(status_code=400, detail="/ not allowed in file name")
 
+    file = raw_filename + request.type + ".py"
     if os.path.exists(file):
         logger.warning(f"File already exists: {file}")
         # TODO: Add to metrics so we can know how many request actually face this problem
@@ -92,13 +92,13 @@ async def convert(
 ) -> Response:
     filenames = request.filename
     contents = request.content
-    project_name = request.project_name
-    path = project_name + ".zip"
     if len(filenames) != len(contents):
         raise HTTPException(
             status_code=400, detail="number of Filename and Content is incosistent"
         )
 
+    project_name = request.project_name
+    path = project_name + ".zip"
     first_fname = filenames[0]
     try:
         fetched = fetch_data(filenames, contents)
