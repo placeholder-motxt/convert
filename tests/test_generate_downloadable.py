@@ -316,3 +316,22 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
         for name, page in result.items():
             self.assertIn(name, expected_class)
             self.assertIn(page, expected_pages)
+
+    def test_fetch_data_no_diagram_key_in_json(self):
+        filenames = ["testing"]
+        contents = [['{"nodes": []}']]
+        with self.assertRaises(ValueError) as ctx:
+            fetch_data(filenames, contents)
+
+        self.assertEqual(str(ctx.exception), "Diagram type not found on .jet file")
+
+    def test_fetch_data_unknown_diagram_type(self):
+        filenames = ["testing"]
+        contents = [['{"diagram": "ActivityDiagram"}']]
+        with self.assertRaises(ValueError) as ctx:
+            fetch_data(filenames, contents)
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram",
+        )

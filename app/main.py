@@ -34,7 +34,6 @@ from app.generate_frontend.read.read_page_views import generate_read_page_views
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
-    FileElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -60,6 +59,7 @@ async def lifespan(app: FastAPI):  # pragma: no cover
 
 app = FastAPI(**APP_CONFIG, lifespan=lifespan)
 instrumentator = Instrumentator().instrument(app)
+BASE_STATIC_TEMPLATES_DIR = os.path.join("app", "templates", "django_app")
 
 error_counter = Counter(
     "convert_errors_total", "Total number of errors by message", ["error_message"]
@@ -76,12 +76,13 @@ def read_root() -> dict:
 
 
 async def download_file(request: DownloadRequest) -> FileResponse:
-    file = request.filename + request.type + ".py"
+    raw_filename = request.filename
 
-    if "/" in request.filename or "\\" in request.filename:
-        logger.warning(f"Bad filename: {request.filename}")
+    if "/" in raw_filename or "\\" in raw_filename:
+        logger.warning(f"Bad filename: {raw_filename}")
         raise HTTPException(status_code=400, detail="/ not allowed in file name")
 
+    file = raw_filename + request.type + ".py"
     if os.path.exists(file):
         logger.warning(f"File already exists: {file}")
         # TODO: Add to metrics so we can know how many request actually face this problem
@@ -99,13 +100,18 @@ async def convert(
     request: ConvertRequest,
     background_tasks: BackgroundTasks,
 ) -> Response:
-    if len(request.filename) != len(request.content):
+    filenames = request.filename
+    contents = request.content
+    if len(filenames) != len(contents):
         raise HTTPException(
             status_code=400, detail="number of Filename and Content is incosistent"
         )
 
+    project_name = request.project_name
+    path = project_name + ".zip"
+    first_fname = filenames[0]
     try:
-        fetched = fetch_data(request.filename, request.content)
+        fetched = fetch_data(filenames, contents)
         response_content_models = fetched["models"]
         response_content_views = fetched["views"]
         writer_models = fetched["model_element"]
@@ -116,21 +122,19 @@ async def convert(
 
         await download_file(
             request=DownloadRequest(
-                filename=request.filename[0],
-                content=render_model(fetched),
+                filename=first_fname,
+                content=fetched["models"],
                 type="_models",
             ),
         )
 
         await download_file(
             request=DownloadRequest(
-                filename=request.filename[0],
-                content=render_views(fetched),
+                filename=first_fname,
+                content=fetched["views"],
                 type="_views",
             ),
         )
-
-        project_name = request.project_name
 
         await writer_requirements.write_to_file("./app")
         await writer_url.write_to_file("./app")
@@ -142,8 +146,8 @@ async def convert(
         )
 
         return FileResponse(
-            path=project_name + ".zip",
-            filename=f"{project_name}.zip",
+            path=path,
+            filename=path,
             media_type="application/zip",
         )
 
@@ -153,24 +157,24 @@ async def convert(
         logger.warning(
             "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
         )
-        raise HTTPException(status_code=422, detail=str(ex))
+        raise HTTPException(status_code=422, detail=ex_str)
 
     finally:
-        project_name = request.project_name
         files = [
             f"{project_name}_models.py",
             f"{project_name}_views.py",
             os.path.join("app", "requirements.txt"),
             os.path.join("app", "urls.py"),
-            f"{request.filename[0]}_models.py",
-            f"{request.filename[0]}_views.py",
+            f"{first_fname}_models.py",
+            f"{first_fname}_views.py",
         ]
-        if os.path.exists(f"project_{project_name}"):
-            shutil.rmtree(f"project_{project_name}")
+        folder = f"project_{project_name}"
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
-        background_tasks.add_task(remove_file, f"{project_name}.zip")
+        background_tasks.add_task(remove_file, path)
 
 
 def check_duplicate(
@@ -182,13 +186,9 @@ def check_duplicate(
     if not class_object:
         return duplicate_class_method_checker
     for class_method_object in class_objects[class_object_name].get_methods():
-        if (
-            class_object_name,
-            class_method_object.get_name(),
-        ) in duplicate_class_method_checker:
-            duplicate_class_method_checker[
-                (class_object_name, class_method_object.get_name())
-            ] = class_method_object
+        key = (class_object_name, class_method_object.get_name())
+        if key in duplicate_class_method_checker:
+            duplicate_class_method_checker[key] = class_method_object
         else:
             raise ValueError(
                 f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
@@ -197,7 +197,6 @@ def check_duplicate(
 
 
 def create_django_project(project_name: str) -> list[str]:
-    files = []
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
     zipfile_path = f"{project_name}.zip"
@@ -242,12 +241,11 @@ def create_django_app(
         for file in os.listdir("app/templates/django_app"):
             # file that use jinja2 template
             if file == "apps.py.j2":
-                file_name = file.replace(".j2", "")
                 template = render_template(
-                    f"django_app/{file}",
+                    "django_app/apps.py.j2",
                     {"app_name": app_name},  # This is where the app name is passed
                 )
-                zipf.writestr(f"{app_name}/{file_name}", template)
+                zipf.writestr(f"{app_name}/apps.py", template)
                 file_names.append("apps.py")
             else:  # file that use txt file
                 """
@@ -267,9 +265,7 @@ def create_django_app(
                     zipf.writestr(f"{app_name}/migrations/__init__.py", "")
                     zipf.writestr(f"{app_name}/__init__.py", "")
                 else:
-                    with open(
-                        os.path.join("app", "templates", "django_app", file), "r"
-                    ) as f:
+                    with open(os.path.join(BASE_STATIC_TEMPLATES_DIR, file), "r") as f:
                         content = f.read()
                         file_name = file.replace(".txt", ".py")
                         zipf.writestr(f"{app_name}/{file_name}", content)
@@ -288,27 +284,29 @@ def generate_file_to_be_downloaded(
     with the name of the project and add all the files to it.
     """
     # TODO: make app_name dynamic in the future
-    if os.path.exists(f"project_{project_name}"):
-        shutil.rmtree(f"project_{project_name}", ignore_errors=True)
-    if os.path.exists(f"{project_name}.zip"):
-        os.remove(f"{project_name}.zip")
+    folder_path = f"project_{project_name}"
+    zip_path = f"{project_name}.zip"
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path, ignore_errors=True)
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
     app_name = "main"
     create_django_project(project_name)
     create_django_app(project_name, app_name, models, views)
 
-    with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
+    with zipfile.ZipFile(zip_path, "a") as zipf:
         # requirements.txt
         if not os.path.exists("app/requirements.txt"):
             raise FileNotFoundError("File requirements.txt does not exist")
         zipf.write(
-            os.path.join("app", "requirements.txt"),
+            "app/requirements.txt",
             arcname="requirements.txt",
         )
         # urls.py
         if not os.path.exists("app/urls.py"):
             raise FileNotFoundError("File urls.py does not exist")
         zipf.write(
-            os.path.join("app", "urls.py"),
+            "app/urls.py",
             arcname=f"{app_name}/urls.py",
         )
         # script files
@@ -324,9 +322,7 @@ def generate_file_to_be_downloaded(
 
         # CREATE
         create_pages = generate_html_create_pages_django(writer_models)
-        for name, page in get_names_from_classes(
-            writer_models=writer_models, pages=create_pages
-        ).items():
+        for name, page in get_names_from_classes(writer_models, create_pages).items():
             file_name = f"create_{name.lower()}.html"
             zipf.writestr(
                 f"{app_name}/templates/{file_name}",
@@ -334,16 +330,14 @@ def generate_file_to_be_downloaded(
             )
 
         # CREATE FORMS
-        forms_create = generate_forms_create_page_django(models_elements=writer_models)
+        forms_create = generate_forms_create_page_django(writer_models)
         zipf.writestr(
             f"{app_name}/forms.py",
             data=forms_create,
         )
         # READ
-        read_pages = generate_html_read_pages_django(models_elements=writer_models)
-        for name, page in get_names_from_classes(
-            writer_models=writer_models, pages=read_pages
-        ).items():
+        read_pages = generate_html_read_pages_django(writer_models)
+        for name, page in get_names_from_classes(writer_models, read_pages).items():
             file_name = f"{name.lower()}_list.html"
             zipf.writestr(
                 f"{app_name}/templates/{file_name}",
@@ -351,10 +345,8 @@ def generate_file_to_be_downloaded(
             )
 
         # UPDATE
-        edit_pages = generate_html_edit_pages_django(models_elements=writer_models)
-        for name, page in get_names_from_classes(
-            writer_models=writer_models, pages=edit_pages
-        ).items():
+        edit_pages = generate_html_edit_pages_django(writer_models)
+        for name, page in get_names_from_classes(writer_models, edit_pages).items():
             file_name = f"edit_{name.lower()}.html"
             zipf.writestr(
                 f"{app_name}/templates/{file_name}",
@@ -367,7 +359,7 @@ def generate_file_to_be_downloaded(
 
         # base.html
         zipf.write(
-            os.path.join("app", "templates", "base.html.txt"),
+            "app/templates/base.html.txt",
             arcname="templates/base.html",
         )
 
@@ -379,8 +371,7 @@ def generate_file_to_be_downloaded(
             arcname="main/templatetags/filter_tag.py",
         )
 
-        files = zipf.namelist()
-    return files
+        return zipf.namelist()
 
 
 def get_names_from_classes(
@@ -401,23 +392,6 @@ def get_names_from_classes(
     return classes_dict
 
 
-def write_html_to_django_app(
-    zipf: zipfile.ZipFile,
-    writer: FileElements,
-    app_name: str,
-    html_pages_content: list[str],
-):
-    for i in range(len(html_pages_content)):
-        for class_obj in writer.get_classes():
-            if class_obj.get_name() in html_pages_content[i]:
-                page = html_pages_content[i]
-                name = f"edit_{class_obj.get_name().lower()}.html"
-                zipf.writestr(
-                    f"{app_name}/templates/{name}",
-                    data=page,
-                )
-
-
 def process_parsed_class(
     classes: list,
     duplicate_checker: dict[tuple[str, str], ClassMethodObject],
@@ -427,7 +401,7 @@ def process_parsed_class(
             duplicate_checker[(model_class.get_name(), method.get_name())] = method
 
 
-def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
+def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
     """
     This is the logic from convert() method to process the requested
     files. To use this method, pass the request.filename and request.content
@@ -441,21 +415,21 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
     writer_views = ViewsElements("views.py")
 
     classes = []
-    for file_name, content in zip(filename, content):
+    for file_name, content in zip(filenames, contents):
         json_content = json.loads(content[0])
+        diagram_type = json_content.get("diagram", None)
 
-        if (
-            json_content["diagram"] is not None
-            and json_content["diagram"] == "ClassDiagram"
-        ):
+        if diagram_type is None:
+            raise ValueError("Diagram type not found on .jet file")
+
+
+        if diagram_type == "ClassDiagram":
             with parse_latency.labels(diagram="UML class").time():
-                classes = writer_models.parse(json_content)
-                process_parsed_class(classes, duplicate_class_method_checker)
+                    classes = writer_models.parse(json_content)
 
-        elif (
-            json_content["diagram"] is not None
-            and json_content["diagram"] == "SequenceDiagram"
-        ):
+                    process_parsed_class(classes, duplicate_class_method_checker)
+
+        elif diagram_type == "SequenceDiagram":
             with parse_latency.labels(diagram="UML sequence").time():
                 seq_parser = ParseJsonToObjectSeq()
                 seq_parser.set_json(content[0])
@@ -473,11 +447,16 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
                         class_objects, class_object, duplicate_class_method_checker
                     )
 
+        else:
+            raise ValueError(
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
+            )
+
     for class_method_object in duplicate_class_method_checker.values():
         writer_views.add_class_method(class_method_object)
 
     # Render the base import
-    response_content_views.write(render_template("base_views.py.j2", {}))
+    response_content_views.write(render_template("base_views.py.j2"))
 
     response_content_views.write("\n\n")
 
@@ -507,35 +486,3 @@ def fetch_data(filename: list[str], content: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
     }
-
-
-def render_model(fetched_data: dict[str]) -> str:
-    """
-    Function to get the models.py content. Must be called before
-    create_django_app and pass the return value to the parameter
-    in create_django_app
-    """
-    return fetched_data["models"]
-
-
-def render_views(fetched_data: dict[str]) -> str:
-    """
-    Function to get the views.py content. Must be called before
-    create_django_app and pass the return value to the parameter
-    in create_django_app
-
-    IMPORTANT NOTE!
-    The parameter for render_views is list of JSON Content, so in the
-    loop for iterating request.content please make an array to store
-    all of the Sequence JSON Content and then pass the array to the
-    render_views method!
-    """
-    return fetched_data["views"]
-
-
-def get_model_element(fetched_data: dict[str]) -> ModelsElements:
-    """
-    Function to get ModelElements from the fetch_data method. Behavior
-    similiar to render_model and render_views
-    """
-    return fetched_data["model_element"]
