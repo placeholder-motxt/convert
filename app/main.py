@@ -8,6 +8,7 @@ from io import StringIO
 import anyio
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
+from prometheus_client import Counter, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
@@ -46,6 +47,7 @@ from app.utils import (
     remove_file,
     render_project_django_template,
     render_template,
+    translate_to_cat,
 )
 
 
@@ -58,6 +60,14 @@ async def lifespan(app: FastAPI):  # pragma: no cover
 app = FastAPI(**APP_CONFIG, lifespan=lifespan)
 instrumentator = Instrumentator().instrument(app)
 BASE_STATIC_TEMPLATES_DIR = os.path.join("app", "templates", "django_app")
+
+error_counter = Counter(
+    "convert_errors_total", "Total number of errors by message", ["error_message"]
+)
+
+parse_latency = Histogram(
+    "parse_latency_seconds", "Histogram of parsing durations in seconds", ["diagram"]
+)
 
 
 @app.get("/")
@@ -143,6 +153,7 @@ async def convert(
 
     except ValueError as ex:
         ex_str = str(ex)
+        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
         logger.warning(
             "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
         )
@@ -411,27 +422,30 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         if diagram_type is None:
             raise ValueError("Diagram type not found on .jet file")
 
-        if diagram_type == "ClassDiagram":
-            classes = writer_models.parse(json_content)
 
-            process_parsed_class(classes, duplicate_class_method_checker)
+        if diagram_type == "ClassDiagram":
+            with parse_latency.labels(diagram="UML class").time():
+                    classes = writer_models.parse(json_content)
+
+                    process_parsed_class(classes, duplicate_class_method_checker)
 
         elif diagram_type == "SequenceDiagram":
-            seq_parser = ParseJsonToObjectSeq()
-            seq_parser.set_json(content[0])
-            seq_parser.parse()
-            seq_parser.parse_return_edge()
+            with parse_latency.labels(diagram="UML sequence").time():
+                seq_parser = ParseJsonToObjectSeq()
+                seq_parser.set_json(content[0])
+                seq_parser.parse()
+                seq_parser.parse_return_edge()
 
-            controller_method_objects = seq_parser.get_controller_method()
-            class_objects = seq_parser.get_class_objects()
+                controller_method_objects = seq_parser.get_controller_method()
+                class_objects = seq_parser.get_class_objects()
 
-            for controller_method_object in controller_method_objects:
-                writer_views.add_controller_method(controller_method_object)
+                for controller_method_object in controller_method_objects:
+                    writer_views.add_controller_method(controller_method_object)
 
-            for class_object in class_objects:
-                duplicate_class_method_checker = check_duplicate(
-                    class_objects, class_object, duplicate_class_method_checker
-                )
+                for class_object in class_objects:
+                    duplicate_class_method_checker = check_duplicate(
+                        class_objects, class_object, duplicate_class_method_checker
+                    )
 
         else:
             raise ValueError(
