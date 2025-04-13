@@ -148,6 +148,221 @@ class TestSequenceViewsJinja2Template(unittest.TestCase):
         with pytest.raises(ValueError):
             views_elements.print_django_style_template()
 
+    def test_sequence_no_condition(self):
+        str_type = TypeObject()
+        str_type.set_name("string")
 
-if __name__ == "__main__":
-    pass
+        self.class_method_1 = ClassMethodObject()
+        self.class_method_1.set_name("class_method_1")
+        self.class_method_1.set_return_type(str_type)
+
+        self.parameter_1 = ParameterObject()
+        self.parameter_1.set_name("parameter_1")
+        self.parameter_1.set_type(str_type)
+
+        self.class_method_1.add_parameter(self.parameter_1)
+
+        self.class_method_call_1 = ClassMethodCallObject()
+        self.class_method_call_1.set_method(self.class_method_1)
+        self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_instance_name("instance_1")
+
+        self.argument_1 = ArgumentObject()
+        self.argument_1.set_method_object(self.class_method_call_1)
+        self.argument_1.set_name("argument_1")
+        self.argument_1.set_type(str_type)
+
+        self.class_method_call_1.add_argument(self.argument_1)
+
+        self.class_method_1.add_class_method_call(self.class_method_call_1)
+
+        self.views_elements = ViewsElements("views.py")
+        self.views_elements.add_class_method(self.class_method_1)
+
+        with open(os.path.join(TEST_DIR, "sequence_j2_no_condition.txt")) as f:
+            expected = f.read().strip()
+
+        result = self.views_elements.print_django_style_template().strip()
+        self.assertEqual(result, expected)
+
+    def test_sequence_no_return_var(self):
+        str_type = TypeObject()
+        str_type.set_name("string")
+
+        self.class_method_1 = ClassMethodObject()
+        self.class_method_1.set_name("class_method_1")
+        self.class_method_1.set_return_type(str_type)
+
+        self.parameter_1 = ParameterObject()
+        self.parameter_1.set_name("parameter_1")
+        self.parameter_1.set_type(str_type)
+
+        self.class_method_1.add_parameter(self.parameter_1)
+
+        self.class_method_call_1 = ClassMethodCallObject()
+        self.class_method_call_1.set_method(self.class_method_1)
+        self.class_method_call_1.set_condition("condition == True")
+        self.class_method_call_1.set_instance_name("instance_1")
+
+        self.argument_1 = ArgumentObject()
+        self.argument_1.set_method_object(self.class_method_call_1)
+        self.argument_1.set_name("argument_1")
+        self.argument_1.set_type(str_type)
+
+        self.class_method_call_1.add_argument(self.argument_1)
+
+        self.class_method_1.add_class_method_call(self.class_method_call_1)
+
+        self.views_elements = ViewsElements("views.py")
+        self.views_elements.add_class_method(self.class_method_1)
+
+        with open(os.path.join(TEST_DIR, "sequence_j2_no_return_var.txt")) as f:
+            expected = f.read().strip()
+
+        result = self.views_elements.print_django_style_template().strip()
+        self.assertEqual(result, expected)
+
+    def test_sequence_no_parameter(self):
+        str_type = TypeObject()
+        str_type.set_name("string")
+
+        self.class_method_1 = ClassMethodObject()
+        self.class_method_1.set_name("class_method_1")
+        self.class_method_1.set_return_type(str_type)
+
+        self.class_method_call_1 = ClassMethodCallObject()
+        self.class_method_call_1.set_method(self.class_method_1)
+        self.class_method_call_1.set_condition("condition == True")
+        self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_instance_name("instance_1")
+
+        self.argument_1 = ArgumentObject()
+        self.argument_1.set_method_object(self.class_method_call_1)
+        self.argument_1.set_name("argument_1")
+        self.argument_1.set_type(str_type)
+
+        self.class_method_call_1.add_argument(self.argument_1)
+
+        self.class_method_1.add_class_method_call(self.class_method_call_1)
+
+        self.controller_method_1 = ControllerMethodObject()
+        self.controller_method_1.set_name("controller_method_1")
+
+        self.views_elements = ViewsElements("views.py")
+        self.views_elements.add_class_method(self.class_method_1)
+        self.views_elements.add_controller_method(self.controller_method_1)
+
+        with open(os.path.join(TEST_DIR, "sequence_j2_no_param.txt")) as f:
+            expected = f.read().strip()
+
+        result = self.views_elements.print_django_style_template().strip()
+        self.assertEqual(result, expected)
+
+    def test_sequence_no_argument(self):
+        str_type = TypeObject()
+        str_type.set_name("string")
+
+        self.class_method_1 = ClassMethodObject()
+        self.class_method_1.set_name("class_method_1")
+        self.class_method_1.set_return_type(str_type)
+
+        self.class_method_call_1 = ClassMethodCallObject()
+        self.class_method_call_1.set_method(self.class_method_1)
+        self.class_method_call_1.set_condition("condition == True")
+        self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_instance_name("instance_1")
+
+        self.class_method_1.add_class_method_call(self.class_method_call_1)
+
+        self.controller_method_1 = ControllerMethodObject()
+        self.controller_method_1.set_name("controller_method_1")
+
+        self.views_elements = ViewsElements("views.py")
+        self.views_elements.add_class_method(self.class_method_1)
+        self.views_elements.add_controller_method(self.controller_method_1)
+
+        with open(os.path.join(TEST_DIR, "sequence_j2_no_args.txt")) as f:
+            expected = f.read().strip()
+
+        result = self.views_elements.print_django_style_template().strip()
+        self.assertEqual(result, expected)
+
+    def test_sequence_multiple_everything(self):
+        str_type = TypeObject()
+        str_type.set_name("string")
+
+        self.class_method_1 = ClassMethodObject()
+        self.class_method_1.set_name("class_method_1")
+        self.class_method_1.set_return_type(str_type)
+
+        self.parameter_1 = ParameterObject()
+        self.parameter_1.set_name("parameter_1")
+        self.parameter_1.set_type(str_type)
+
+        self.class_method_1.add_parameter(self.parameter_1)
+        self.class_method_1.add_parameter(self.parameter_1)
+        self.class_method_1.add_parameter(self.parameter_1)
+        self.class_method_1.add_parameter(self.parameter_1)
+        self.class_method_1.add_parameter(self.parameter_1)
+
+        self.class_method_call_1 = ClassMethodCallObject()
+        self.class_method_call_1.set_method(self.class_method_1)
+        self.class_method_call_1.set_condition("condition == True")
+        self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_instance_name("instance_1")
+
+        self.class_method_call_2 = ClassMethodCallObject()
+        self.class_method_call_2.set_method(self.class_method_1)
+        self.class_method_call_2.set_ret_var("ret_var_1")
+        self.class_method_call_2.set_instance_name("instance_1")
+
+        self.class_method_call_3 = ClassMethodCallObject()
+        self.class_method_call_3.set_method(self.class_method_1)
+        self.class_method_call_3.set_condition("condition == True")
+        self.class_method_call_3.set_instance_name("instance_1")
+
+        self.class_method_call_4 = ClassMethodCallObject()
+        self.class_method_call_4.set_method(self.class_method_1)
+
+        self.argument_1 = ArgumentObject()
+        self.argument_1.set_method_object(self.class_method_call_1)
+        self.argument_1.set_name("argument_1")
+        self.argument_1.set_type(str_type)
+
+        self.class_method_call_1.add_argument(self.argument_1)
+        self.class_method_call_1.add_argument(self.argument_1)
+        self.class_method_call_1.add_argument(self.argument_1)
+        self.class_method_call_1.add_argument(self.argument_1)
+        self.class_method_call_1.add_argument(self.argument_1)
+
+        self.class_method_1.add_class_method_call(self.class_method_call_1)
+        self.class_method_1.add_class_method_call(self.class_method_call_2)
+        self.class_method_1.add_class_method_call(self.class_method_call_3)
+        self.class_method_1.add_class_method_call(self.class_method_call_4)
+
+        self.controller_method_1 = ControllerMethodObject()
+        self.controller_method_1.set_name("controller_method_1")
+        self.controller_method_1.add_parameter(self.parameter_1)
+        self.controller_method_1.add_parameter(self.parameter_1)
+        self.controller_method_1.add_parameter(self.parameter_1)
+        self.controller_method_1.add_parameter(self.parameter_1)
+
+        self.controller_method_1.add_call(self.class_method_call_4)
+        self.controller_method_1.add_call(self.class_method_call_3)
+        self.controller_method_1.add_call(self.class_method_call_2)
+        self.controller_method_1.add_call(self.class_method_call_1)
+        self.controller_method_1.add_call(self.class_method_call_4)
+
+        self.views_elements = ViewsElements("views.py")
+        self.views_elements.add_class_method(self.class_method_1)
+        self.views_elements.add_class_method(self.class_method_1)
+        self.views_elements.add_class_method(self.class_method_1)
+        self.views_elements.add_controller_method(self.controller_method_1)
+        self.views_elements.add_controller_method(self.controller_method_1)
+        self.views_elements.add_controller_method(self.controller_method_1)
+
+        with open(os.path.join(TEST_DIR, "sequence_j2_multiple_everything.txt")) as f:
+            expected = f.read().strip()
+
+        result = self.views_elements.print_django_style_template().strip()
+        self.assertEqual(result, expected)
