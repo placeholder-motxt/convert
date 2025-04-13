@@ -4,5 +4,5 @@ from django.db import models
 class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
-    authorFK = models.ForeignKey(Author, on_delete=models.CASCADE)
-    listOfTag = models.ManyToManyField(Tag)
+    authorFK = models.ForeignKey('Author', on_delete=models.CASCADE)
+    listOfTag = models.ManyToManyField('Tag')

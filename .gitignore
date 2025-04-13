@@ -132,10 +132,10 @@ GitHub.sublime-settings
 
 # Visual Studio Code
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
 .history
 
 # Ruff
@@ -153,3 +153,6 @@ profile_stats.prof
 
 # Nektos's Act
 act.json
+
+# Local SonarQube
+.scannerwork/*

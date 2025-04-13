@@ -3,4 +3,4 @@ from django.db import models
 
 class Comment(models.Model):
     content = models.TextField()
-    postFK = models.ForeignKey(Post, on_delete=models.CASCADE)
+    postFK = models.ForeignKey('Post', on_delete=models.CASCADE)
