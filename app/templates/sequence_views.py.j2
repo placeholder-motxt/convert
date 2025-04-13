@@ -1,0 +1,19 @@
+{% for class_method in class_methods -%}
+#-----method from class {{ class_method.class_name }} ------
+
+def {{ class_method.method_name }}(request, instance_name{% for param in class_method.params %}, {{ param.param_name }}: {{ param.param_type }}{% endfor %}){% if class_method.return_type != "void" %} -> {{ class_method.return_type }}{% endif %}:
+    {% for method_call in class_method.method_calls %}{% if method_call.condition != "" %}if {{ method_call.condition }}:
+        {% endif %}{% if method_call.return_var_name != "" %}{{ method_call.return_var_name }} = {% endif %}{{ method_call.method_name }}(request, {{ method_call.instance_name }}{% for argument in method_call.arguments %}, {{ argument.argument_name }}{% endfor %})
+    {% endfor %}# TODO: Auto generated function stub
+    raise NotImplementedError('{name} function is not yet implemented')
+    pass
+
+
+{% endfor %}
+{%- for controller_method in controller_methods %}
+
+def {{ controller_method.method_name }}(request{% for param in controller_method.params %}, {{ param.param_name }}: {{ param.param_type }}{% endfor %}):
+    {% for method_call in controller_method.method_calls %}{% if method_call.condition != "" %}if {{ method_call.condition }}:
+        {% endif %}{% if method_call.return_var_name != "" %}{{ method_call.return_var_name }} = {% endif %}{{ method_call.method_name }}(request{% for argument in method_call.arguments %}, {{ argument.argument_name }}{% endfor %})
+    {% endfor %}pass
+{% endfor %}
