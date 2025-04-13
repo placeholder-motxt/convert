@@ -154,6 +154,22 @@ class ViewsElements(FileElements):
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
 
+    def print_django_style_template(self) -> str:
+        context = {}
+        class_method_context = [
+            class_method_object.to_views_code_template()
+            for class_method_object in self.__class_methods
+        ]
+        controller_method_context = [
+            controller_method_object.print_django_style_template()
+            for controller_method_object in self.__controller_methods
+        ]
+
+        context["class_methods"] = class_method_context
+        context["controller_methods"] = controller_method_context
+
+        return render_template("sequence_views.py.j2", context)
+
 
 class UrlsElement(FileElements):
     def __init__(self, file_name: str = "urls.py"):

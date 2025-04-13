@@ -176,6 +176,48 @@ class ClassMethodObject(AbstractMethodObject):
 
         return res.getvalue()
 
+    def to_views_code_template(self) -> dict[str]:
+        context = {}
+        name = self.get_name()
+        if name is None or not is_valid_python_identifier(name):
+            raise ValueError(
+                f"Invalid method name '{name}'\n"
+                "please consult the user manual document on how to name methods"
+            )
+        context["class_name"] = name
+        context["method_name"] = name
+        context["params"] = [
+            param.to_views_code_template() for param in self.get_parameters()
+        ]
+
+        context["return_type"] = "void"
+        ret = self.get_return_type()
+        if ret is not None:
+            rettype = ret.get_name()
+            list_match = self.LIST_REGEX.match(rettype)
+            if not is_valid_python_identifier(rettype) and list_match is None:
+                raise ValueError(
+                    f"Invalid return type: '{rettype}'\n "
+                    "please consult the user manual document on how to name return variables"
+                )
+            if rettype != "void":
+                if list_match:
+                    # Assuming it is already valid when it comes here
+                    list_type = list_match.group("list_type")
+                    python_type = self.PYTHON_TYPE_MAPPING.get(
+                        list_type.lower(), list_type
+                    )
+                    context["return_type"] = f"list[{python_type}]"
+                else:
+                    python_type = self.PYTHON_TYPE_MAPPING.get(rettype.lower(), rettype)
+                    context["return_type"] = python_type
+
+        context["method_calls"] = [
+            method_call.print_django_style_template() for method_call in self.__calls
+        ]
+
+        return context
+
     def get_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
         # TODO: Make immutable if needed
         return self.__calls
@@ -213,6 +255,22 @@ class ControllerMethodObject(AbstractMethodObject):
             result.write("\n\t")
         result.write("pass\n\n")
         return result.getvalue()
+
+    def print_django_style_template(self) -> dict[str]:
+        if not self.get_name():
+            raise ValueError(
+                "method cannot be empty\nplease consult the user manual document"
+            )
+        context = {}
+        context["method_name"] = self.get_name()
+        context["params"] = [
+            param.to_views_code_template() for param in self.get_parameters()
+        ]
+
+        context["method_calls"] = [
+            method_call.print_django_style_template() for method_call in self.__calls
+        ]
+        return context
 
 
 class AbstractMethodCallObject(ABC):
@@ -328,6 +386,27 @@ class AbstractMethodCallObject(ABC):
         result.write(")")
         return result.getvalue()
 
+    def print_django_style_template(self) -> dict[str]:
+        context = {}
+
+        context["condition"] = ""
+        if self.__condition:
+            context["condition"] = self.__condition
+        context["return_var_name"] = ""
+        if self.__return_var_name:
+            context["return_var_name"] = self.__return_var_name
+        context["method_name"] = self.__method.get_name()
+        if isinstance(self, ClassMethodCallObject):
+            context["instance_name"] = self.get_instance_name()
+
+        context["arguments"] = []
+
+        if self.__arguments:
+            context["arguments"] = [
+                arg.print_django_style_template() for arg in self.__arguments
+            ]
+        return context
+
 
 class ClassMethodCallObject(AbstractMethodCallObject):
     """Represents a method call of a ClassMethod"""
@@ -408,3 +487,6 @@ class ArgumentObject:
     def print_django_style(self) -> str:
         """Returns Django representation of the argument in string"""
         return self.__name
+
+    def print_django_style_template(self) -> dict[str]:
+        return {"argument_name": self.__name}
