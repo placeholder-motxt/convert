@@ -5,6 +5,7 @@ from app.parse_class_pattern.parse_relationship_strategy import (
     ManyToManyStrategy,
     ManyToOneStrategy,
     OneToOneStrategy,
+    RelationshipStrategy,
 )
 
 
@@ -35,6 +36,16 @@ class TestRelationshipStrategy(unittest.TestCase):
 
         strategy.create_relationship(edge, class_from, class_to)
         self.assertEqual(len(class_from._ClassObject__relationships), 1)
+
+    def test_base_strategy_class_not_implemented_method(self):
+        strategy = RelationshipStrategy()
+        with self.assertRaises(NotImplementedError) as ctx:
+            strategy.create_relationship({}, ClassObject(), ClassObject())
+
+        self.assertEqual(
+            str(ctx.exception),
+            "RelationshipStrategy does not implement create_relationship",
+        )
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ class Circle(Shape):
     radius = models.IntegerField()
     id = models.CharField(max_length=255)
 
-    circlesFK = models.ForeignKey(Circles, on_delete = models.CASCADE)
+    circlesFK = models.ForeignKey('Circles', on_delete = models.CASCADE)
     pass
 
 

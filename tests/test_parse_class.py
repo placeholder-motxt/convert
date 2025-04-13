@@ -394,8 +394,9 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             "1..*1",  # Invalid range format
             "*1",  # Invalid range with "*" in the middle
         ]
+        self.parser = ParseJsonToObjectClass('{"test": "test"}')
         for im in invalid_multiplicities:
-            with self.assertRaises(Exception):
+            with self.assertRaises(ValueError):
                 self.parser._ParseJsonToObjectClass__validate_amount(im)
 
     def test_validate_amount_invalid_titik_count(self):
@@ -404,8 +405,9 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             "1.....*",  # Invalid range with "*" in the middle
             "1.*",  # Invalid use of "*"
         ]
+        self.parser = ParseJsonToObjectClass('{"test": "test"}')
         for im in invalid_multiplicities:
-            with self.assertRaises(Exception):
+            with self.assertRaises(ValueError):
                 self.parser._ParseJsonToObjectClass__validate_amount(im)
 
     def test_validate_amount_invalid_size(self):
@@ -414,8 +416,9 @@ class TestParseJsonToObjectClass(unittest.TestCase):
             "10..1",  # Invalid range with "*" in the middle
             "*..1",  # Invalid use of "*"
         ]
+        self.parser = ParseJsonToObjectClass('{"test": "test"}')
         for im in invalid_multiplicities:
-            with self.assertRaises(Exception):
+            with self.assertRaises(ValueError):
                 self.parser._ParseJsonToObjectClass__validate_amount(im)
 
 
