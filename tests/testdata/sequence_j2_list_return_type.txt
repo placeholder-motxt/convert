@@ -1,0 +1,7 @@
+#-----method from class class_method_1 ------
+
+def class_method_1(request, instance_name) -> list[str]:
+
+    # TODO: Auto generated function stub
+    raise NotImplementedError('{name} function is not yet implemented')
+    pass
