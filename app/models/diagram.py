@@ -4,7 +4,7 @@ from abc import ABC
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier, render_template
+from app.utils import is_valid_python_identifier
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
@@ -53,7 +53,7 @@ class ClassObject:
 
         return res
 
-    def to_models_code_template(self, template_name: str) -> str:
+    def to_models_code_template(self) -> dict[str]:
         ctx = {
             "name": self.get_name(),
             "parent": self.__parent.get_name() if self.__parent else "models.Model",
@@ -66,7 +66,7 @@ class ClassObject:
         for relationship in self.__relationships:
             ctx["fields"].append(relationship.to_models_code_template())
 
-        return render_template(template_name, {"classes": [ctx]})
+        return ctx
 
     def __str__(self) -> str:
         """__str__ method for debugging purposes."""
