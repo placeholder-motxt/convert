@@ -89,15 +89,19 @@ class ModelsElements(FileElements):
         return response_content
 
     def print_django_style_template(self, template_name: str = "models.py.j2") -> str:
-        return render_template(
-            template_name,
-            {
-                "classes": [
-                    model_class.to_models_code_template()
-                    for model_class in self.__classes
-                ]
-            },
-        )
+        try:
+            return render_template(
+                template_name,
+                {
+                    "classes": [
+                        model_class.to_models_code_template()
+                        for model_class in self.__classes
+                    ]
+                },
+            )
+        except Exception as e:
+            print(f"Error rendering template: {e}")  # Or use proper logging
+            return ""
 
 
 class ViewsElements(FileElements):
