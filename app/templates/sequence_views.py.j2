@@ -5,7 +5,7 @@ def {{ class_method.method_name }}(request, instance_name{% for param in class_m
     {% for method_call in class_method.method_calls %}{% if method_call.condition != "" %}if {{ method_call.condition }}:
         {% endif %}{% if method_call.return_var_name != "" %}{{ method_call.return_var_name }} = {% endif %}{{ method_call.method_name }}(request, {{ method_call.instance_name }}{% for argument in method_call.arguments %}, {{ argument.argument_name }}{% endfor %})
     {% endfor %}# TODO: Auto generated function stub
-    raise NotImplementedError('{name} function is not yet implemented')
+    raise NotImplementedError('{{ class_method.method_name }} function is not yet implemented')
     pass
 
 
