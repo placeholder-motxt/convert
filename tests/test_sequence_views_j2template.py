@@ -368,7 +368,7 @@ class TestSequenceViewsJinja2Template(unittest.TestCase):
         result = self.views_elements.print_django_style_template().strip()
         self.assertEqual(result, expected)
 
-    @patch("app.utils.render_template")
+    @patch("app.models.elements.render_template")
     def test_print_django_style_template_exception(
         self, mock_render_template: MagicMock
     ):
