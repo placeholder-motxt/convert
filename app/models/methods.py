@@ -405,10 +405,8 @@ class AbstractMethodCallObject(ABC):
     def print_django_style_template(self) -> dict[str]:
         context = {}
 
-        context["condition"] = ""
         if self.__condition:
             context["condition"] = self.__condition
-        context["return_var_name"] = ""
         if self.__return_var_name:
             context["return_var_name"] = self.__return_var_name
         context["method_name"] = self.__method.get_name()
