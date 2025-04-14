@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from io import StringIO
 
@@ -8,6 +9,8 @@ from app.utils import camel_to_snake, render_template
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
+
+logger = logging.getLogger("uvicorn.error")
 
 
 class FileElements(ABC):
@@ -100,7 +103,7 @@ class ModelsElements(FileElements):
                 },
             )
         except Exception as e:
-            print(f"Error rendering template: {e}")  # Or use proper logging
+            logger.error(f"Error rendering template: {e}")
             return ""
 
 
@@ -186,7 +189,7 @@ class ViewsElements(FileElements):
         try:
             return render_template("sequence_views.py.j2", context)
         except Exception as e:
-            print(f"Error rendering template: {e}")
+            logger.error(f"Error rendering template: {e}")
             return ""
 
 
