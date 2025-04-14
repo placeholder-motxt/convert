@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import unittest
 import zipfile
 
@@ -17,12 +18,16 @@ class TestReplaceModelAndViews(unittest.TestCase):
     maxDiff = None
 
     def remove_used_project(self):
-        if os.path.exists("testRenderModel.zip"):
-            os.remove("testRenderModel.zip")
+        if os.path.exists(self.tmp_zip.name):
+            os.remove(self.tmp_zip.name)
         if os.path.exists("project_testRenderModel"):
             shutil.rmtree("project_testRenderModel")
 
     def setUp(self):
+        self.tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
+    def tearDown(self):
+        self.tmp_zip.close()
         self.remove_used_project()
 
     def test_render_model(self):
@@ -49,9 +54,9 @@ class TestReplaceModelAndViews(unittest.TestCase):
 
         output = processed_data["models"]
 
-        create_django_project("testRenderModel")
-        create_django_app("testRenderModel", "testRender", output)
-        with zipfile.ZipFile("testRenderModel.zip", "r") as zipf:
+        create_django_project("testRenderModel", self.tmp_zip.name)
+        create_django_app("testRenderModel", "testRender", self.tmp_zip.name, output)
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
             self.assertIn(
                 "testRender/models.py",
                 zipf.namelist(),
@@ -107,9 +112,15 @@ class TestReplaceModelAndViews(unittest.TestCase):
         output_models = processed_data["models"]
         output_views = processed_data["views"]
 
-        create_django_project("testRenderModel")
-        create_django_app("testRenderModel", "testRender", output_models, output_views)
-        with zipfile.ZipFile("testRenderModel.zip", "r") as zipf:
+        create_django_project("testRenderModel", self.tmp_zip.name)
+        create_django_app(
+            "testRenderModel",
+            "testRender",
+            self.tmp_zip.name,
+            output_models,
+            output_views,
+        )
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
             self.assertIn(
                 "testRender/views.py",
                 zipf.namelist(),
@@ -130,6 +141,3 @@ class TestReplaceModelAndViews(unittest.TestCase):
         models = processed_data["model_element"]
 
         self.assertIsInstance(models, ModelsElements)
-
-    def tearDown(self):
-        self.remove_used_project()

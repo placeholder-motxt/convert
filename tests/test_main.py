@@ -1,7 +1,6 @@
 import os
 from unittest.mock import MagicMock, Mock, patch
 
-import anyio
 import pytest
 from fastapi.testclient import TestClient
 
@@ -141,9 +140,6 @@ async def test_convert_endpoint_valid_content_class_diagram():
             "content": [['{"content"}']],
             "project_name": "file1",
         }
-
-        async with await anyio.open_file("file1.zip", "w") as f:
-            await f.write("")
 
         # Send the request to the endpoint
         response = client.post("/convert", json=payload)
