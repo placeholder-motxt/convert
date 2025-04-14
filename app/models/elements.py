@@ -94,7 +94,7 @@ class ModelsElements(FileElements):
                 template_name,
                 {
                     "classes": [
-                        model_class.to_models_code_template()
+                        model_class.to_models_code_template_context()
                         for model_class in self.__classes
                     ]
                 },

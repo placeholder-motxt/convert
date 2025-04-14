@@ -53,7 +53,7 @@ class ClassObject:
 
         return res
 
-    def to_models_code_template(self) -> dict[str]:
+    def to_models_code_template_context(self) -> dict[str]:
         ctx = {
             "name": self.get_name(),
             "parent": self.__parent.get_name() if self.__parent else "models.Model",
