@@ -4,7 +4,7 @@ def class_method_1(request, instance_name, parameter_1: str) -> str:
     if condition == True:
         ret_var_1 = class_method_1(request, instance_1, argument_1)
     # TODO: Auto generated function stub
-    raise NotImplementedError('{name} function is not yet implemented')
+    raise NotImplementedError('class_method_1 function is not yet implemented')
     pass
 
 
