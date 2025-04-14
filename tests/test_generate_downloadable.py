@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tempfile
 import unittest
 import zipfile
 
@@ -37,12 +38,32 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
         with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
             f.write(writer_urls.print_django_style())
 
+        self.tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
+    def tearDown(self):
+        # Remove any created zip file or project folder.
+        if os.path.exists(f"{self.project_name}.zip"):
+            os.remove(f"{self.project_name}.zip")
+        if os.path.exists(f"project_{self.project_name}"):
+            shutil.rmtree(f"project_{self.project_name}")
+        if os.path.exists(f"{self.project_name}_models.py"):
+            os.remove(f"{self.project_name}_models.py")
+        if os.path.exists(f"{self.project_name}_views.py"):
+            os.remove(f"{self.project_name}_views.py")
+        if os.path.exists(os.path.join(os.getcwd(), "app", "requirements.txt")):
+            os.remove(os.path.join(os.getcwd(), "app", "requirements.txt"))
+        if os.path.exists(os.path.join(os.getcwd(), "app", "urls.py")):
+            os.remove(os.path.join(os.getcwd(), "app", "urls.py"))
+        self.tmp_zip.close()
+        os.remove(self.tmp_zip.name)
+
     def test_generate_file_to_be_downloaded(self):
         result = generate_file_to_be_downloaded(
             self.project_name,
             self.models_content,
             self.views_content,
             self.writer_models,
+            self.tmp_zip.name,
         )
 
         # Expected output in the zip file.
@@ -71,7 +92,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
         ]
         for path in expected_output:
             self.assertIn(path, result)
-        with zipfile.ZipFile(f"{self.project_name}.zip", "r") as zipf:
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
             for file in zipf.namelist():
                 self.assertIn(file, expected_output)
 
@@ -84,6 +105,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
                 self.models_content,
                 self.views_content,
                 self.writer_models,
+                self.tmp_zip.name,
             )
         self.assertEqual(
             str(ctx.exception),
@@ -99,6 +121,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
                 self.models_content,
                 self.views_content,
                 self.writer_models,
+                self.tmp_zip.name,
             )
         self.assertEqual(
             str(ctx.exception),
@@ -111,14 +134,16 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
         cleans up previous zip files and project directories properly.
         """
         # First call: generate the file
+        tmp_zipfile = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
         result_first = generate_file_to_be_downloaded(
             self.project_name,
             self.models_content,
             self.views_content,
             self.writer_models,
+            tmp_zipfile.name,
         )
-        self.assertTrue(os.path.exists(f"{self.project_name}.zip"))
-        with zipfile.ZipFile(f"{self.project_name}.zip", "r") as zipf:
+        self.assertTrue(os.path.exists(tmp_zipfile.name))
+        with zipfile.ZipFile(tmp_zipfile.name, "r") as zipf:
             content_first = zipf.namelist()
         # Store the file list from the first generation.
         expected_files_first = set(result_first)
@@ -129,29 +154,17 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
             self.models_content,
             self.views_content,
             self.writer_models,
+            self.tmp_zip.name,
         )
-        self.assertTrue(os.path.exists(f"{self.project_name}.zip"))
-        with zipfile.ZipFile(f"{self.project_name}.zip", "r") as zipf:
+        self.assertTrue(os.path.exists(self.tmp_zip.name))
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
             content_second = zipf.namelist()
         # Ensure that both generated outputs are the same.
         expected_files_second = set(result_second)
         self.assertEqual(set(content_first), expected_files_second)
         self.assertEqual(set(content_second), expected_files_first)
-
-    def tearDown(self):
-        # Remove any created zip file or project folder.
-        if os.path.exists(f"{self.project_name}.zip"):
-            os.remove(f"{self.project_name}.zip")
-        if os.path.exists(f"project_{self.project_name}"):
-            shutil.rmtree(f"project_{self.project_name}")
-        if os.path.exists(f"{self.project_name}_models.py"):
-            os.remove(f"{self.project_name}_models.py")
-        if os.path.exists(f"{self.project_name}_views.py"):
-            os.remove(f"{self.project_name}_views.py")
-        if os.path.exists(os.path.join(os.getcwd(), "app", "requirements.txt")):
-            os.remove(os.path.join(os.getcwd(), "app", "requirements.txt"))
-        if os.path.exists(os.path.join(os.getcwd(), "app", "urls.py")):
-            os.remove(os.path.join(os.getcwd(), "app", "urls.py"))
+        tmp_zipfile.close()
+        os.remove(tmp_zipfile.name)
 
 
 class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
@@ -178,6 +191,8 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
         with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
             f.write(writer_urls.print_django_style())
 
+        self.tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
     def tearDown(self):
         # Cleanup the generated files and directories.
         zip_file = f"{self.project_name}.zip"
@@ -193,6 +208,9 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
         ]:
             if os.path.exists(file):
                 os.remove(file)
+
+        self.tmp_zip.close()
+        os.remove(self.tmp_zip.name)
 
     def test_generate_file_to_be_downloaded_invalid_project_name(self):
         """
@@ -210,6 +228,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
                 self.models_content,
                 self.views_content,
                 self.writer_models,
+                self.tmp_zip.name,
             )
         self.assertIn(
             "Project name must not contain whitespace or number!",
@@ -226,6 +245,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
             self.models_content,
             self.views_content,
             self.writer_models,
+            self.tmp_zip.name,
         )
         expected_files = [
             "ini/asgi.py",
@@ -257,7 +277,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
             "templates/base.html",
         ]
 
-        with zipfile.ZipFile(f"{self.project_name}.zip", "r") as zipf:
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
             zip_contents = zipf.namelist()
         for file in expected_files:
             self.assertIn(file, zip_contents)
@@ -277,6 +297,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
             self.models_content,
             self.views_content,
             self.writer_models,
+            self.tmp_zip.name,
         )
 
         expected_html_files = [
@@ -291,7 +312,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
             "main/templates/landing_page.html",
         ]
 
-        with zipfile.ZipFile(f"{self.project_name}.zip", "r") as zipf:
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
             zip_contents = zipf.namelist()
             zip_contents = [
                 file for file in zip_contents if file.startswith("main/templates/")
