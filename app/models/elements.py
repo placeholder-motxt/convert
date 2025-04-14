@@ -168,7 +168,11 @@ class ViewsElements(FileElements):
         context["class_methods"] = class_method_context
         context["controller_methods"] = controller_method_context
 
-        return render_template("sequence_views.py.j2", context)
+        try:
+            return render_template("sequence_views.py.j2", context)
+        except Exception as e:
+            print(f"Error rendering template: {e}")
+            return ""
 
 
 class UrlsElement(FileElements):
