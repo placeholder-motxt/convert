@@ -149,6 +149,27 @@ class ParameterObject:
 
         return res
 
+    def to_views_code_template(self) -> dict[str]:
+        context = {}
+        context["param_name"] = ""
+        if self.__name is None or not is_valid_python_identifier(self.__name):
+            raise ValueError(
+                f"Invalid param name '{self.__name}'\n"
+                "please consult the user manual document on how to name parameters"
+            )
+
+        context["param_name"] = self.__name
+        if self.__type is not None:
+            param_type = self.__type.get_name()
+            if not is_valid_python_identifier(param_type):
+                raise ValueError(
+                    f"Invalid param type '{param_type}'\n"
+                    "please consult the user manual document on how to name parameter types"
+                )
+            context["param_type"] = param_type
+
+        return context
+
     def get_name(self) -> str:
         return self.__name
 

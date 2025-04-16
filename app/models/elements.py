@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from io import StringIO
 
@@ -8,6 +9,8 @@ from app.utils import camel_to_snake, render_template
 
 from .diagram import ClassObject
 from .methods import ClassMethodObject, ControllerMethodObject
+
+logger = logging.getLogger("uvicorn.error")
 
 
 class FileElements(ABC):
@@ -88,6 +91,21 @@ class ModelsElements(FileElements):
         response_content += "\n" if len(response_content) != 0 else ""
         return response_content
 
+    def print_django_style_template(self, template_name: str = "models.py.j2") -> str:
+        try:
+            return render_template(
+                template_name,
+                {
+                    "classes": [
+                        model_class.to_models_code_template_context()
+                        for model_class in self.__classes
+                    ]
+                },
+            )
+        except Exception as e:
+            logger.error(f"Error rendering template: {e}")
+            return ""
+
 
 class ViewsElements(FileElements):
     """
@@ -153,6 +171,26 @@ class ViewsElements(FileElements):
 
     def add_controller_method(self, controller_method_object: ControllerMethodObject):
         self.__controller_methods.append(controller_method_object)
+
+    def print_django_style_template(self) -> str:
+        context = {}
+        class_method_context = [
+            class_method_object.to_views_code_template()
+            for class_method_object in self.__class_methods
+        ]
+        controller_method_context = [
+            controller_method_object.print_django_style_template()
+            for controller_method_object in self.__controller_methods
+        ]
+
+        context["class_methods"] = class_method_context
+        context["controller_methods"] = controller_method_context
+
+        try:
+            return render_template("sequence_views.py.j2", context)
+        except Exception as e:
+            logger.error(f"Error rendering template: {e}")
+            return ""
 
 
 class UrlsElement(FileElements):

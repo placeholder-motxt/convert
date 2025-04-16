@@ -1,0 +1,8 @@
+#-----method from class class_method_1 ------
+
+def class_method_1(request, instance_name, parameter_1: str) -> str:
+    if condition == True:
+        class_method_1(request, instance_1, argument_1)
+    # TODO: Auto generated function stub
+    raise NotImplementedError('class_method_1 function is not yet implemented')
+    pass
