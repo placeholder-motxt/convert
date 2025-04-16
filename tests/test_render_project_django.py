@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import unittest
 import zipfile
 from unittest.mock import patch
@@ -16,6 +17,12 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
         if os.path.exists(f"project_{self.project_name}"):
             shutil.rmtree(f"project_{self.project_name}")
 
+        self.tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
+    def tearDown(self):
+        self.tmp_zip.close()
+        os.remove(self.tmp_zip.name)
+
     # generate django project
     def test_generate_django_project_positive(self):
         mocked_secret_key = get_random_secret_key()
@@ -29,8 +36,8 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
 
         # Mock get_random_secret_key to return a predictable value
         with patch("app.utils.get_random_secret_key", return_value=mocked_secret_key):
-            result = create_django_project(self.project_name)
-            zipfile_path = f"{self.project_name}.zip"
+            result = create_django_project(self.project_name, self.tmp_zip.name)
+            zipfile_path = self.tmp_zip.name
             folder_path = f"project_{self.project_name}"
             try:
                 self.assertTrue(os.path.exists(folder_path))
@@ -45,16 +52,16 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
                     ):
                         self.assertEqual(f1.read(), f2.read())
             finally:
-                with open("tests/testdata/settings.py.txt", "w") as file_to_edit:
+                with open(
+                    "tests/testdata/settings.py.txt", "w", newline="\n"
+                ) as file_to_edit:
                     file_to_edit.write(settings)
-                if os.path.exists(zipfile_path):
-                    os.remove(zipfile_path)
                 if os.path.exists(folder_path):
                     shutil.rmtree(folder_path)
 
     def test_generate_django_project_negative_with_whitespace(self):
         with self.assertRaises(ValueError) as context:
-            create_django_project("test project")
+            create_django_project("test project", self.tmp_zip.name)
         self.assertEqual(
             str(context.exception),
             "Project name must not contain whitespace or number!",
@@ -63,23 +70,6 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
             shutil.rmtree("project_test_project")
         if os.path.exists("test_project.zip"):
             os.remove("test_project.zip")
-
-    def test_generate_django_project_negative_with_existing_zipfile(self):
-        zipfile_path = f"{self.project_name}.zip"
-        with zipfile.ZipFile(zipfile_path, "w") as zipf:
-            zipf.writestr(self.project_name, data="")  # create empty file
-        try:
-            with self.assertRaises(FileExistsError) as context:
-                create_django_project(self.project_name)
-            self.assertEqual(
-                str(context.exception),
-                f"File {self.project_name}.zip already exists",
-            )
-        finally:
-            if os.path.exists(zipfile_path):
-                os.remove(zipfile_path)
-        if os.path.exists("project_test_project"):
-            shutil.rmtree("project_test_project")
 
     # render django project from template
     def test_render_project_django_template_positive(self):
@@ -132,12 +122,18 @@ class TestGenerateDjangoMain(unittest.TestCase):
         if os.path.exists(f"project_{self.project_name}"):
             shutil.rmtree(f"project_{self.project_name}")
 
+        self.tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
+    def tearDown(self):
+        self.tmp_zip.close()
+        os.remove(self.tmp_zip.name)
+
     def test_generate_django_app_positive(self):
         folder_path = "project_test_main"
-        create_django_project("test_main")
-        create_django_app("test_main", "main")
+        create_django_project("test_main", self.tmp_zip.name)
+        create_django_app("test_main", "main", self.tmp_zip.name)
 
-        zipfile_path = "test_main.zip"
+        zipfile_path = self.tmp_zip.name
         open_zip = zipfile.ZipFile(zipfile_path, "r")
         files = open_zip.namelist()
 
@@ -174,12 +170,10 @@ class TestGenerateDjangoMain(unittest.TestCase):
         open_zip.close()
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)
-        if os.path.exists(zipfile_path):
-            os.remove(zipfile_path)
 
     def test_generate_django_app_negative_invalid_name(self):
         with self.assertRaises(ValueError) as context:
-            create_django_app("test_main", "buku pin")
+            create_django_app("test_main", "buku pin", self.tmp_zip.name)
         self.assertEqual(
             str(context.exception),
             "App name must not contain whitespace!",
@@ -187,7 +181,7 @@ class TestGenerateDjangoMain(unittest.TestCase):
 
     def test_generate_django_app_negative_invalid_project_name(self):
         with self.assertRaises(ValueError) as context:
-            create_django_app("test main", "main")
+            create_django_app("test main", "main", self.tmp_zip.name)
         self.assertEqual(
             str(context.exception),
             "Project name must not contain whitespace!",
@@ -195,7 +189,7 @@ class TestGenerateDjangoMain(unittest.TestCase):
 
     def test_generate_django_app_negative_zip_not_exist(self):
         with self.assertRaises(FileNotFoundError) as context:
-            create_django_app("test_main", "main")
+            create_django_app("test_main", "main", "test_main.zip")
         self.assertEqual(
             str(context.exception),
             "File test_main.zip does not exist",

@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tempfile
 import zipfile
 from contextlib import asynccontextmanager
 from io import StringIO
@@ -110,6 +111,8 @@ async def convert(
     project_name = request.project_name
     path = project_name + ".zip"
     first_fname = filenames[0]
+    tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+    tmp_zip_path = tmp_zip.name
     try:
         fetched = fetch_data(filenames, contents)
         response_content_models = fetched["models"]
@@ -143,10 +146,12 @@ async def convert(
             models=response_content_models,
             views=response_content_views,
             writer_models=writer_models,
+            zipfile_path=tmp_zip_path,
         )
 
+        tmp_zip.close()
         return FileResponse(
-            path=path,
+            path=tmp_zip_path,
             filename=path,
             media_type="application/zip",
         )
@@ -157,7 +162,18 @@ async def convert(
         logger.warning(
             "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
         )
+        # When exception is encountered, background tasks are not run
+        # so we need to clean up ourselves
+        tmp_zip.close()
+        remove_file(tmp_zip_path)
         raise HTTPException(status_code=422, detail=ex_str)
+
+    except Exception:
+        # When exception is encountered, background tasks are not run
+        # so we need to clean up ourselves
+        tmp_zip.close()
+        remove_file(tmp_zip_path)
+        raise
 
     finally:
         files = [
@@ -174,7 +190,7 @@ async def convert(
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
-        background_tasks.add_task(remove_file, path)
+        background_tasks.add_task(remove_file, tmp_zip_path)
 
 
 def check_duplicate(
@@ -196,12 +212,10 @@ def check_duplicate(
     return duplicate_class_method_checker
 
 
-def create_django_project(project_name: str) -> list[str]:
+def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
-    zipfile_path = f"{project_name}.zip"
-    if os.path.exists(zipfile_path):
-        raise FileExistsError(f"File {zipfile_path} already exists")
+
     zipf = zipfile.ZipFile(zipfile_path, "w")
     # write django project template to a folder
     files = render_project_django_template(
@@ -221,23 +235,27 @@ def create_django_project(project_name: str) -> list[str]:
     return files
 
 
-def validate_django_app(project_name: str, app_name: str):
+def validate_django_app(project_name: str, app_name: str, zipfile_path: str):
     if not is_valid_python_identifier(app_name):
         raise ValueError("App name must not contain whitespace!")
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace!")
-    if not os.path.exists(f"{project_name}.zip"):
-        raise FileNotFoundError(f"File {project_name}.zip does not exist")
+    if not os.path.exists(zipfile_path):
+        raise FileNotFoundError(f"File {zipfile_path} does not exist")
 
 
 def create_django_app(
-    project_name: str, app_name: str, models: str = None, views: str = None
+    project_name: str,
+    app_name: str,
+    zipfile_path: str,
+    models: str = None,
+    views: str = None,
 ) -> list[str]:
     file_names = []
 
-    validate_django_app(project_name, app_name)
+    validate_django_app(project_name, app_name, zipfile_path)
 
-    with zipfile.ZipFile(f"{project_name}.zip", "a") as zipf:
+    with zipfile.ZipFile(zipfile_path, "a") as zipf:
         for file in os.listdir("app/templates/django_app"):
             # file that use jinja2 template
             if file == "apps.py.j2":
@@ -278,6 +296,7 @@ def generate_file_to_be_downloaded(
     models: str,
     views: str,
     writer_models: ModelsElements,
+    zipfile_path: str,
 ) -> list[str]:
     """
     Function to generate the file to be downloaded. This function will create a zip file
@@ -285,16 +304,13 @@ def generate_file_to_be_downloaded(
     """
     # TODO: make app_name dynamic in the future
     folder_path = f"project_{project_name}"
-    zip_path = f"{project_name}.zip"
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path, ignore_errors=True)
-    if os.path.exists(zip_path):
-        os.remove(zip_path)
     app_name = "main"
-    create_django_project(project_name)
-    create_django_app(project_name, app_name, models, views)
+    create_django_project(project_name, zipfile_path)
+    create_django_app(project_name, app_name, zipfile_path, models, views)
 
-    with zipfile.ZipFile(zip_path, "a") as zipf:
+    with zipfile.ZipFile(zipfile_path, "a") as zipf:
         # requirements.txt
         if not os.path.exists("app/requirements.txt"):
             raise FileNotFoundError("File requirements.txt does not exist")
@@ -422,12 +438,11 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         if diagram_type is None:
             raise ValueError("Diagram type not found on .jet file")
 
-
         if diagram_type == "ClassDiagram":
             with parse_latency.labels(diagram="UML class").time():
-                    classes = writer_models.parse(json_content)
+                classes = writer_models.parse(json_content)
 
-                    process_parsed_class(classes, duplicate_class_method_checker)
+                process_parsed_class(classes, duplicate_class_method_checker)
 
         elif diagram_type == "SequenceDiagram":
             with parse_latency.labels(diagram="UML sequence").time():

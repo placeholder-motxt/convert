@@ -1,7 +1,6 @@
 import os
 from unittest.mock import MagicMock, Mock, patch
 
-import anyio
 import pytest
 from fastapi.testclient import TestClient
 
@@ -142,15 +141,13 @@ async def test_convert_endpoint_valid_content_class_diagram():
             "project_name": "file1",
         }
 
-        async with await anyio.open_file("file1.zip", "w") as f:
-            await f.write("")
-
         # Send the request to the endpoint
         response = client.post("/convert", json=payload)
         # Validate the response
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
 
 
 @pytest.mark.asyncio
@@ -210,8 +207,9 @@ async def test_convert_endpoint_class_diagram():
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
         assert response.content.startswith(
-            b"PK"
+            b"PK\x03\x04"
         )  # Check that the response is a zip file
 
 
@@ -271,8 +269,9 @@ async def test_convert_endpoint_sequence_diagram():
         # Validate the response
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
         assert response.content.startswith(
-            b"PK"
+            b"PK\x03\x04"
         )  # Check that the response is a zip file
 
 
@@ -361,6 +360,7 @@ async def test_convert_endpoint_valid_sequence_diagram():
         mock_check_duplicate.assert_called()
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
 
 
 @pytest.mark.asyncio
@@ -397,6 +397,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
 
 
 @pytest.mark.asyncio
