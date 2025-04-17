@@ -47,6 +47,26 @@ def camel_to_snake(camel_case_str: str) -> str:
     return snake_case_str.lower()
 
 
+def to_pascal_case(s: str, acronyms: list[str] = None) -> str:
+    if acronyms is None:
+        acronyms = {"API", "HTTP", "XML", "ID", "URL", "JSON"}  # Add more as needed
+
+    # Normalize delimiters
+    s = re.sub(r"[-_]", " ", s)
+
+    words = s.split()
+    result = []
+
+    for word in words:
+        upper_word = word.upper()
+        if upper_word in acronyms:
+            result.append(upper_word)
+        else:
+            result.append(word.capitalize())
+
+    return "".join(result)
+
+
 def render_project_django_template(
     template_path: str, context: dict[str, Any]
 ) -> list[str]:
