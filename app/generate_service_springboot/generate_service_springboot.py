@@ -20,5 +20,5 @@ def generate_service_java(project_name: str, model: ClassObject) -> str:
     }
     return render_template("springboot/service.java.j2", context)
 
-def format_class_name(name: str):
+def format_class_name(name: str) -> tuple[str, str]:
     return name.capitalize(), name[0].lower() + name[1:]
