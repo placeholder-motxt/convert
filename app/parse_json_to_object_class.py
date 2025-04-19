@@ -55,7 +55,9 @@ class ParseJsonToObjectClass:
 
         return self.__classes
 
-    def parse_relationships(self, classes: list[ClassObject]) -> list[ClassObject]:
+    def parse_relationships(
+        self, classes: list[ClassObject], bidirectional: bool = False
+    ) -> list[ClassObject]:
         edges = self.__json["edges"]
 
         for edge in edges:
@@ -75,7 +77,9 @@ class ParseJsonToObjectClass:
                 )
 
             strategy = self.__determine_strategy(edge)
-            strategy.create_relationship(edge, class_from_id, class_to_id)
+            strategy.create_relationship(
+                edge, class_from_id, class_to_id, bidirectional
+            )
 
         return classes
 
