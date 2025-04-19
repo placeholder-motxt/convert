@@ -3,8 +3,9 @@ from app.utils import (
 )
 
 
-def generate_sqlitedialect(project_name: str) -> str:
+def generate_sqlitedialect(project_name: str, trailing_project_name: str) -> str:
     context = {
         "project_name": project_name,
+        "trailing_project_name": trailing_project_name,
     }
     return render_template("SQLiteDialect.java.j2", context)
