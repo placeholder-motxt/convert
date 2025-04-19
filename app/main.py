@@ -524,13 +524,15 @@ async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
                 detail="Unknown error occured. Initializr service might be down.",
             )
 
-        if resp.headers["content-type"] != "application/zip":
+        content_type = resp.headers["content-type"]
+        if content_type != "application/zip":
             raise HTTPException(
                 status_code=500,
-                detail=f"Unexpected content type from server: {resp.headers['content-type']}.",
+                detail=f"Unexpected content type from server: {content_type}.",
             )
 
-        if len(resp.content) == 0:
+        content = resp.content
+        if len(content) == 0:
             raise HTTPException(
                 status_code=500, detail="Failed to create zip, please try again later."
             )
@@ -548,5 +550,5 @@ async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
         )
 
     async with anyio.NamedTemporaryFile(suffix=".zip", delete=False) as f:
-        await f.write(resp.content)
+        await f.write(content)
         return f.name
