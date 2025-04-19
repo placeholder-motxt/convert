@@ -12,5 +12,5 @@ class TestRenderRunScript(unittest.TestCase):
         with open(os.path.join(TEST_DIR, "test_SQLiteDialect.txt")) as file:
             expected = file.read().strip()
 
-        rendered = generate_sqlitedialect("projek")
+        rendered = generate_sqlitedialect("projek", "com.example")
         self.assertEqual(rendered.strip(), expected)
