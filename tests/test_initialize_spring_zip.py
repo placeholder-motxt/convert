@@ -6,6 +6,7 @@ import anyio
 import httpx
 from fastapi import HTTPException
 
+from app.config import SPRING_DEPENDENCIES
 from app.main import initialize_springboot_zip
 
 
@@ -19,9 +20,18 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
         mock_response.content = b"PK\x03\x04"
 
         mock_get.return_value = mock_response
-        temp_file_path = await initialize_springboot_zip()
+        temp_file_path = await initialize_springboot_zip("testing", "com.motxt")
 
-        mock_get.assert_called_once_with("http://localhost:8080")
+        params = {
+            "javaVersion": "21",
+            "artifactId": "testing",
+            "groupId": "com.motxt",
+            "name": "testing",
+            "packaging": "jar",
+            "type": "gradle-kotlin-project",
+            "dependencies": SPRING_DEPENDENCIES,
+        }
+        mock_get.assert_called_once_with("http://localhost:8080", params)
         self.assertTrue(temp_file_path.endswith(".zip"))
         # Verify file exists and has content
         async with await anyio.open_file(temp_file_path, "rb") as f:
@@ -37,7 +47,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
 
         mock_get.return_value = mock_response
         with self.assertRaises(HTTPException) as ctx:
-            await initialize_springboot_zip()
+            await initialize_springboot_zip("testing", "com.motxt")
 
         self.assertEqual(
             str(ctx.exception),
@@ -54,7 +64,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
         mock_get.return_value = mock_response
 
         with self.assertRaises(HTTPException) as ctx:
-            await initialize_springboot_zip()
+            await initialize_springboot_zip("testing", "com.motxt")
 
         self.assertEqual(
             str(ctx.exception), "Unexpected content type from server: text/html."
@@ -65,7 +75,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
         """Test timeout raises HTTPException"""
         mock_get.side_effect = httpx.TimeoutException("Timeout")
         with self.assertRaises(HTTPException) as ctx:
-            await initialize_springboot_zip()
+            await initialize_springboot_zip("testing", "com.motxt")
 
         self.assertEqual(
             str(ctx.exception), "Initializr service timed out. Please try again later."
@@ -76,7 +86,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
         """Test connection error raises HTTPException"""
         mock_get.side_effect = httpx.ConnectError("Connection error")
         with self.assertRaises(HTTPException) as ctx:
-            await initialize_springboot_zip()
+            await initialize_springboot_zip("testing", "com.motxt")
 
         self.assertEqual(
             str(ctx.exception),
@@ -94,7 +104,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
         mock_get.return_value = mock_response
 
         with self.assertRaises(HTTPException) as ctx:
-            await initialize_springboot_zip()
+            await initialize_springboot_zip("testing", "com.motxt")
 
         self.assertEqual(
             str(ctx.exception), "Failed to create zip, please try again later."
@@ -112,7 +122,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
 
         mock_get.return_value = mock_response
 
-        temp_file_path = await initialize_springboot_zip()
+        temp_file_path = await initialize_springboot_zip("testing", "com.motxt")
 
         async with await anyio.open_file(temp_file_path, "rb") as f:
             self.assertEqual(len(await f.read()), len(large_content))
