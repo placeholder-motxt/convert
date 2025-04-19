@@ -3,7 +3,7 @@ import os
 import re
 import secrets
 from keyword import iskeyword
-from typing import Any
+from typing import Any, Optional
 
 from jinja2 import Environment, PackageLoader, TemplateNotFound
 
@@ -47,7 +47,7 @@ def camel_to_snake(camel_case_str: str) -> str:
     return snake_case_str.lower()
 
 
-def to_pascal_case(s: str, acronyms: list[str] = None) -> str:
+def to_pascal_case(s: str, acronyms: Optional[set[str]] = None) -> str:
     if acronyms is None:
         acronyms = {"API", "HTTP", "XML", "ID", "URL", "JSON"}  # Add more as needed
 
