@@ -70,6 +70,25 @@ class FieldObject:
         "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
     }
 
+    SPRING_TYPE_MAPPING = {
+        "boolean": "boolean",
+        "String": "String",
+        "str": "String",
+        "int": "Integer",
+        "bool": "boolean",
+        "integer": "Integer",
+        "float": "float",
+        "double": "double",
+        "Date": "LocalDate",
+        "DateTime": "LocalDateTime",
+        "Time": "LocalTime",
+        "Text": "String",
+        "Email": "String",
+        "URL": "String",
+        "UUID": "UUID",
+        "Decimal": "BigDecimal",
+    }
+
     def __init__(self):
         self.__name: str = ""
         self.__type: Optional[TypeObject] = None
@@ -106,6 +125,14 @@ class FieldObject:
             "name": self.__name,
             "type": "models.CharField(max_length=255)",
         }  # Default fallback
+
+    def to_springboot_models_template(self) -> str:
+        field_type = self.__type.to_models_code().lower()
+
+        for key, value in self.SPRING_TYPE_MAPPING.items():
+            if key.lower() in field_type:
+                return {"name": self.__name, "type": value}
+        return {"name": self.__name, "type": "String"}  # Default fallback
 
 
 class ParameterObject:

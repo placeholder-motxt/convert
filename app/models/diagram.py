@@ -68,12 +68,37 @@ class ClassObject:
 
         return ctx
 
+    def to_models_springboot_context(self) -> dict[str, dict[str]]:
+        """Returns a dictionary with the class name, parent class name, fields and relationships
+        for the Spring Boot template."""
+        ctx = {
+            "name": self.get_name(),
+            "parent": self.__parent.get_name() if self.__parent else None,
+            "fields": [],
+            "relationships": [],
+        }
+
+        for field in self.__fields:
+            ctx["fields"].append(field.to_springboot_models_template())
+
+        for relationship in self.__relationships:
+            ctx["relationships"].append(relationship.to_springboot_models_template())
+
+        return ctx
+
     def __str__(self) -> str:
         """__str__ method for debugging purposes."""
         return (
-            f"Class Object:\n\tname: {self.__name}\n\tparent: {self.__parent}"
-            f"\n\tfields:{self.__fields}\n\t methods: {self.__methods}"
-            f"\n\trelationships: {self.__relationships}"
+            f"Class Object:\n\tname: {self.__name}\n\tparent: "
+            f"{self.__parent.get_name() if self.__parent else None}"
+            f"\n\tfields: {[field.get_name() for field in self.__fields]}"
+            f"\n\tmethods: {[method.get_name() for method in self.__methods]}"
+            f"\n\trelationships: {
+                [
+                    relationship.get_target_class().get_name()
+                    for relationship in self.__relationships
+                ]
+            }"
         )
 
     def set_name(self, name: str):
@@ -156,6 +181,12 @@ class AbstractRelationshipObject(ABC):
     def get_target_class(self) -> ClassObject:
         return self.__target_class
 
+    def get_source_class_own_amount(self) -> str:
+        return self.__sourceClassOwnAmount
+
+    def get_target_class_own_amount(self) -> str:
+        return self.__targetClassOwnAmount
+
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where the the startLabel and endLabel are both '1'"""
@@ -174,6 +205,14 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
         name = self.get_target_class().get_name()
         rel_type = f"models.OneToOneField('{name}', on_delete=models.CASCADE)"
         return {"name": name.lower(), "type": rel_type}
+
+    def to_springboot_models_template(self) -> dict[str, str]:
+        source = self.get_source_class().get_name().lower()
+        name = self.get_target_class().get_name()
+        rel_type = f'@OneToOne(mappedBy="{source}")\n'
+        join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
+        var = f"private {name} {name.lower()};"
+        return {"name": var, "type": rel_type, "join": join}
 
 
 class ManyToOneRelationshipObject(AbstractRelationshipObject):
@@ -200,6 +239,17 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         rel_type = f"models.ForeignKey('{name}', on_delete=models.CASCADE)"
         return {"name": f"{name.lower()}FK", "type": rel_type}
 
+    def to_springboot_models_template(self) -> dict[str, str]:
+        source = self.get_source_class().get_name().lower()
+        name = self.get_target_class().get_name()
+        if self.get_source_class_own_amount == "1":
+            rel_type = f'@OneToMany(mappedBy="{source}")\n'
+        else:
+            rel_type = "@ManyToOne\n"
+            join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
+        var = f"private {name} {name.lower()};"
+        return {"name": var, "type": rel_type, "join": join}
+
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where both startLabel and endLabel are '*'"""
@@ -218,3 +268,14 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
         name = self.get_target_class().get_name()
         rel_type = f"models.ManyToManyField('{name}')"
         return {"name": f"listOf{name.title()}", "type": rel_type}
+
+    def to_springboot_models_template(self) -> dict[str, str]:
+        source = self.get_source_class().get_name().lower()
+        name = self.get_target_class().get_name()
+        rel_type = "@ManyToMany\n"
+        join = "@JoinTable(\n"
+        join += f'\tname = "{source}_{name.lower()}",\n'
+        join += f'\tjoinColumns = @JoinColumn(name = "{source}_id")\n'
+        join += f'\tinverseJoinColumn = @JoinColumn(name = "{name.lower()}_id")\n)\n'
+        var = f"private List<{name}> listOf{name.title()}s;"
+        return {"name": var, "type": rel_type, "join": join}

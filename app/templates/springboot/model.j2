@@ -1,0 +1,40 @@
+package {{ project_name }}.model;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Getter
+@Setter
+{%- if parent %}
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+{%- else %}
+{% endif -%}
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class {{ name }}{% if parent %} extends {{ parent }}{% endif %} {
+    {% if not parent %}
+    @Id
+    private String id = UUID.randomUUID().toString();
+    {% endif -%}
+
+    {%+ for field in fields %}
+    private {{field.type}} {{ field.name }};
+    {% endfor %}
+
+    {%- for relationship in relationships %}
+    {{ relationship.type }}
+    {%- if relationship.join -%}
+    {{ relationship.join }}
+    {%- else -%}
+    {%- endif -%}
+    {{ relationship.name }}
+    {% endfor -%}
+}
