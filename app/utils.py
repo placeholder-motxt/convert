@@ -52,14 +52,12 @@ def to_pascal_case(string_input: str) -> str:
 
 
 def to_camel_case(s: str) -> str:
-    # If the string is empty, return it as is
     if not s:
         return ""
 
     # Remove non-alphanumeric characters, replace with spaces, and split by spaces
     words = re.sub(r"[^a-zA-Z0-9]", " ", s).split()
 
-    # If there are no valid words after cleaning, return an empty string
     if not words:
         return ""
 
