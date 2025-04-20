@@ -6,6 +6,7 @@ import pytest
 from app.utils import (  # Import the function from the module
     camel_to_snake,
     render_template,
+    to_camel_case,
     translate_to_cat,
 )
 
@@ -142,6 +143,54 @@ class TestRenderTemplate(unittest.TestCase):
             result = render_template("empty_template.html", {})
             # Assert
             self.assertEqual(result, "")
+
+
+class TestToCamelCase(unittest.TestCase):
+    def test_regular_case(self):
+        self.assertEqual(
+            to_camel_case("hello world example string"), "helloWorldExampleString"
+        )
+
+    def test_case_with_underscores(self):
+        self.assertEqual(
+            to_camel_case("hello_world_example_string"), "helloWorldExampleString"
+        )
+
+    def test_case_with_hyphens(self):
+        self.assertEqual(
+            to_camel_case("hello-world-example-string"), "helloWorldExampleString"
+        )
+
+    def test_mixed_case_input(self):
+        self.assertEqual(
+            to_camel_case("HeLLo WoRLd ExaMplE String"), "helloWorldExampleString"
+        )
+
+    def test_no_special_characters(self):
+        self.assertEqual(to_camel_case("helloWorld"), "helloWorld")
+
+    def test_leading_trailing_spaces(self):
+        self.assertEqual(
+            to_camel_case("  hello world example string  "), "helloWorldExampleString"
+        )
+
+    def test_multiple_spaces_between_words(self):
+        self.assertEqual(
+            to_camel_case("hello    world      example    string"),
+            "helloWorldExampleString",
+        )
+
+    def test_empty_string(self):
+        self.assertEqual(to_camel_case(""), "")
+
+    def test_single_word(self):
+        self.assertEqual(to_camel_case("hello"), "hello")
+
+    def test_non_alphanumeric_characters(self):
+        self.assertEqual(to_camel_case("!@#$%^&*()_+"), "")
+
+    def test_random_non_alphanumeric_characters(self):
+        self.assertEqual(to_camel_case("$$$hello###world$$$"), "helloWorld")
 
 
 class TestErrorClassification(unittest.TestCase):
