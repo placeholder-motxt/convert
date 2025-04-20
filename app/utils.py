@@ -48,9 +48,6 @@ def camel_to_snake(camel_case_str: str) -> str:
 
 
 def to_camel_case(s: str) -> str:
-    if not s:
-        return ""
-
     # Remove non-alphanumeric characters, replace with spaces, and split by spaces
     words = re.sub(r"[^a-zA-Z0-9]", " ", s).split()
 
