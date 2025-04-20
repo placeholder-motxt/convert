@@ -47,6 +47,36 @@ def camel_to_snake(camel_case_str: str) -> str:
     return snake_case_str.lower()
 
 
+def to_pascal_case(string_input: str) -> str:
+    return ""
+
+
+def to_camel_case(s: str) -> str:
+    # If the string is empty, return it as is
+    if not s:
+        return ""
+
+    # Remove non-alphanumeric characters, replace with spaces, and split by spaces
+    words = re.sub(r"[^a-zA-Z0-9]", " ", s).split()
+
+    # If there are no valid words after cleaning, return an empty string
+    if not words:
+        return ""
+
+    # Check the first word and ensure it's lowercase if it's not already camelCase
+    first_word = words[0]
+    if first_word[
+        0
+    ].isupper():  # If the first character is uppercase, make it lowercase
+        camel_case_str = first_word.lower() + "".join(
+            word.capitalize() for word in words[1:]
+        )
+    else:
+        camel_case_str = first_word + "".join(word.capitalize() for word in words[1:])
+
+    return camel_case_str
+
+
 def render_project_django_template(
     template_path: str, context: dict[str, Any]
 ) -> list[str]:
