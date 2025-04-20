@@ -89,16 +89,9 @@ class ClassObject:
     def __str__(self) -> str:
         """__str__ method for debugging purposes."""
         return (
-            f"Class Object:\n\tname: {self.__name}\n\tparent: "
-            f"{self.__parent.get_name() if self.__parent else None}"
-            f"\n\tfields: {[field.get_name() for field in self.__fields]}"
-            f"\n\tmethods: {[method.get_name() for method in self.__methods]}"
-            f"\n\trelationships: {
-                [
-                    relationship.get_target_class().get_name()
-                    for relationship in self.__relationships
-                ]
-            }"
+            f"Class Object:\n\tname: {self.__name}\n\tparent: {self.__parent}"
+            f"\n\tfields:{self.__fields}\n\t methods: {self.__methods}"
+            f"\n\trelationships: {self.__relationships}"
         )
 
     def set_name(self, name: str):
