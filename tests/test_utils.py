@@ -7,6 +7,7 @@ from app.utils import (  # Import the function from the module
     camel_to_snake,
     render_template,
     to_camel_case,
+    to_pascal_case,
     translate_to_cat,
 )
 
@@ -271,3 +272,31 @@ class TestErrorClassification(unittest.TestCase):
             with self.subTest(msg=message):
                 category = translate_to_cat(message)
                 self.assertEqual(category, expected_category)
+
+
+class TestToPascalCase(unittest.TestCase):
+    def test_basic_cases(self):
+        self.assertEqual(to_pascal_case("hello_world"), "HelloWorld")
+        self.assertEqual(to_pascal_case("convert-to-pascal"), "ConvertToPascal")
+        self.assertEqual(
+            to_pascal_case("multiple words with spaces"), "MultipleWordsWithSpaces"
+        )
+
+    def test_acronym_handling(self):
+        self.assertEqual(to_pascal_case("api_response"), "APIResponse")
+        self.assertEqual(to_pascal_case("get_http_status"), "GetHTTPStatus")
+        self.assertEqual(to_pascal_case("parse_xml_data"), "ParseXMLData")
+        self.assertEqual(to_pascal_case("user_id"), "UserID")
+
+    def test_custom_acronym_set(self):
+        acronyms = {"DB", "SQL"}
+        self.assertEqual(to_pascal_case("connect_to_db", acronyms), "ConnectToDB")
+        self.assertEqual(to_pascal_case("run_sql_query", acronyms), "RunSQLQuery")
+
+    def test_edge_cases(self):
+        self.assertEqual(to_pascal_case(""), "")
+        self.assertEqual(to_pascal_case("    "), "")
+        self.assertEqual(
+            to_pascal_case("alreadyPascalCase"), "Alreadypascalcase"
+        )  # no detection of existing PascalCase
+        self.assertEqual(to_pascal_case("123number_test"), "123numberTest")

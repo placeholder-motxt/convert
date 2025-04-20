@@ -5,6 +5,8 @@ from typing import Optional
 
 from app.utils import is_valid_python_identifier
 
+MODELS_CHARFIELD = "models.CharField(max_length=255)"
+
 
 class TypeObject:
     """
@@ -53,8 +55,8 @@ class FieldObject:
 
     DJANGO_TYPE_MAPPING = {
         "boolean": "models.BooleanField()",
-        "String": "models.CharField(max_length=255)",
-        "str": "models.CharField(max_length=255)",
+        "String": MODELS_CHARFIELD,
+        "str": MODELS_CHARFIELD,
         "int": "models.IntegerField()",
         "bool": "models.BooleanField()",
         "integer": "models.IntegerField()",
@@ -93,7 +95,7 @@ class FieldObject:
             if key.lower() in field_type:
                 return f"{self.__name} = {value}"
 
-        return f"{self.__name} = models.CharField(max_length=255)"  # Default fallback
+        return f"{self.__name} = {MODELS_CHARFIELD}"  # Default fallback
 
     def to_models_code_template(self) -> dict[str, str]:
         field_type = self.__type.to_models_code().lower()
@@ -104,7 +106,7 @@ class FieldObject:
 
         return {
             "name": self.__name,
-            "type": "models.CharField(max_length=255)",
+            "type": MODELS_CHARFIELD,
         }  # Default fallback
 
 
