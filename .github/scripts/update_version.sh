@@ -20,7 +20,7 @@ if [[ "$BRANCH" == "main" ]]; then
 elif [[ "$BRANCH" == "staging" ]]; then
   MINOR=$((MINOR + 1))
   PATCH=0
-elif [[ "$BRANCH" == "dev" ]]; then
+elif [[ "$BRANCH" =~ ^BUG-FIX- ]] || [[ "$BRANCH" == "dev" ]]; then
   PATCH=$((PATCH + 1))
 else
   echo "Branch not recognized: $BRANCH. No version update performed."
