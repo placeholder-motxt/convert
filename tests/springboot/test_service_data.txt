@@ -26,7 +26,6 @@ public class CartService {
         Cart existingCart = cartRepository.findById(id).orElse(null);
 
         if (existingCart != null) {
-            existingCart.setFull(cart.isFull());
             return cartRepository.save(existingCart);
         } else {
             throw new RuntimeException("Cart not found for id: " + id);

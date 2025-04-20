@@ -26,7 +26,6 @@ public class {{class_name_capital}}Service {
         {{class_name_capital}} existing{{class_name_capital}} = {{class_name}}Repository.findById(id).orElse(null);
 
         if (existing{{class_name_capital}} != null) {
-            existing{{class_name_capital}}.setFull({{class_name}}.isFull());
             return {{class_name}}Repository.save(existing{{class_name_capital}});
         } else {
             throw new RuntimeException("{{class_name_capital}} not found for id: " + id);
