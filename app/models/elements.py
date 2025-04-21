@@ -272,9 +272,10 @@ class DependencyElements(FileElements):
     This class is only for writing script for dependency in springboot framework
     """
 
-    def print_django_style(  # change to print_springboot_style
-        self, project_name: str
-    ) -> str:
+    def print_django_style(self) -> str:
+        return super().print_django_style()
+
+    def print_springboot_style(self, project_name: str) -> str:
         context = {
             "project_name": project_name,
             "java": "21",
