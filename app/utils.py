@@ -9,7 +9,65 @@ from jinja2 import Environment, PackageLoader, TemplateNotFound
 
 env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 logger = logging.getLogger("uvicorn.error")
-JAVA_GROUP_ID_REGEX = re.compile(r"^([a-zA-Z_]{1}\w*(\.[a-zA-Z_]{1}\w*)*)?$")
+JAVA_IDENTIFIER_PATTERN = re.compile(r"^[a-zA-Z_]\w*$")
+JAVA_KEYWORDS = {
+    "abstract",
+    "assert",
+    "boolean",
+    "break",
+    "byte",
+    "case",
+    "catch",
+    "char",
+    "class",
+    "const",
+    "continue",
+    "default",
+    "do",
+    "double",
+    "else",
+    "enum",
+    "extends",
+    "final",
+    "finally",
+    "float",
+    "for",
+    "goto",
+    "if",
+    "implements",
+    "import",
+    "instanceof",
+    "int",
+    "interface",
+    "long",
+    "native",
+    "new",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "short",
+    "static",
+    "strictfp",
+    "super",
+    "switch",
+    "synchronized",
+    "this",
+    "throw",
+    "throws",
+    "transient",
+    "try",
+    "void",
+    "volatile",
+    "while",
+    "var",
+    "record",
+    "yield",
+    "sealed",
+    "permits",
+    "non-sealed",
+}
 
 
 def remove_file(path: str) -> None:
@@ -21,7 +79,20 @@ def is_valid_python_identifier(identifier: str) -> bool:
 
 
 def is_valid_java_group_id(group_id: str) -> bool:
-    return JAVA_GROUP_ID_REGEX.match(group_id) is not None
+    if not group_id:
+        return False
+
+    for component in group_id.split("."):
+        if not component:
+            return False
+
+        if component in JAVA_KEYWORDS:
+            return False
+
+        if not JAVA_IDENTIFIER_PATTERN.match(component):
+            return False
+
+    return True
 
 
 def render_template(
