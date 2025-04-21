@@ -47,6 +47,27 @@ def camel_to_snake(camel_case_str: str) -> str:
     return snake_case_str.lower()
 
 
+def to_camel_case(s: str) -> str:
+    # Remove non-alphanumeric characters, replace with spaces, and split by spaces
+    words = re.sub(r"[^a-zA-Z0-9]", " ", s).split()
+
+    if not words:
+        return ""
+
+    # Check the first word and ensure it's lowercase if it's not already camelCase
+    first_word = words[0]
+
+    # If the first character is uppercase, make it lowercase
+    if first_word[0].isupper():
+        camel_case_str = first_word.lower() + "".join(
+            word.capitalize() for word in words[1:]
+        )
+    else:
+        camel_case_str = first_word + "".join(word.capitalize() for word in words[1:])
+
+    return camel_case_str
+
+
 def to_pascal_case(s: str, acronyms: Optional[set[str]] = None) -> str:
     if acronyms is None:
         acronyms = {"API", "HTTP", "XML", "ID", "URL", "JSON"}  # Add more as needed
