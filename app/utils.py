@@ -56,9 +56,9 @@ def to_camel_case(s: str) -> str:
 
     # Check the first word and ensure it's lowercase if it's not already camelCase
     first_word = words[0]
-    if first_word[
-        0
-    ].isupper():  # If the first character is uppercase, make it lowercase
+
+    # If the first character is uppercase, make it lowercase
+    if first_word[0].isupper():
         camel_case_str = first_word.lower() + "".join(
             word.capitalize() for word in words[1:]
         )
