@@ -179,4 +179,4 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
             # Act
             result = generate_springboot_controller_files("hello", models_elements)
             # Assert
-            self.assertEqual(len(result), 1)  # No file generated due to rendering error
+            self.assertEqual(result, [""])
