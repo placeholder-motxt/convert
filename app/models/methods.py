@@ -23,6 +23,7 @@ class AbstractMethodObject(ABC):
         self.__name: str = ""
         self.__parameters: list[ParameterObject] = []
         self.__return_type: Optional[TypeObject] = None
+        self.__modifier: str = ""
 
     def __str__(self) -> str:
         return (
@@ -66,6 +67,12 @@ class AbstractMethodObject(ABC):
     def get_return_type(self) -> TypeObject:
         return deepcopy(self.__return_type)
 
+    def set_modifier(self, modifier: str):
+        self.__modifier = modifier
+
+    def get_modifier(self) -> str:
+        return self.__modifier
+
 
 class ClassMethodObject(AbstractMethodObject):
     """
@@ -73,6 +80,14 @@ class ClassMethodObject(AbstractMethodObject):
 
     Its counterpart is the ControllerMethodObject class
     """
+
+    JAVA_TYPE_MAPPING = {
+        "boolean": "boolean",
+        "bool": "boolean",
+        "string": "String",
+        "str": "String",
+        "integer": "int",
+    }
 
     PYTHON_TYPE_MAPPING = {
         "boolean": "bool",
@@ -174,6 +189,61 @@ class ClassMethodObject(AbstractMethodObject):
         self.__add_additional_comments(res)
         res.write(
             f"    raise NotImplementedError('{name} function is not yet implemented')\n    pass\n"
+        )
+
+        return res.getvalue()
+
+    def to_springboot_code(self) -> str:
+        """
+        Return Springboot representation of method in the UML Diagram
+
+        This implementation ignore method calls so only supports for Class Diagram
+        """
+        name = self.get_name()
+
+        if name is None or not is_valid_python_identifier(name):
+            raise ValueError(
+                f"Invalid method name '{name}'\n"
+                "please consult the user manual document on how to name methods"
+            )
+
+        res = StringIO()
+        return_type_str = "void"
+        ret = self.get_return_type()
+
+        if ret is not None:
+            rettype = ret.get_name()
+            list_match = self.LIST_REGEX.match(rettype)
+            if not is_valid_python_identifier(rettype) and list_match is None:
+                raise ValueError(
+                    f"Invalid return type: '{rettype}'\n "
+                    "please consult the user manual document on how to name return variables"
+                )
+
+            if rettype != "void":
+                if list_match:
+                    list_type = list_match.group("list_type")
+                    java_type = self.JAVA_TYPE_MAPPING.get(list_type.lower(), list_type)
+                    return_type_str = f"List<{java_type}>"
+                else:
+                    return_type_str = self.JAVA_TYPE_MAPPING.get(
+                        rettype.lower(), rettype
+                    )
+
+        parameters = self.get_parameters()
+        param_str_list = [param.to_springboot_code() for param in parameters]
+
+        param_str = ", ".join(param_str_list)
+        if self.get_modifier() == "":
+            res.write(f"{return_type_str} {name}({param_str}) {{\n")
+        else:
+            res.write(
+                f"{self.get_modifier()} {return_type_str} {name}({param_str}) {{\n"
+            )
+        res.write("    // TODO: Auto generated function stub\n")
+        res.write(
+            f'    throw new UnsupportedOperationException("{name} function is '
+            + 'not yet implemented");}\n'
         )
 
         return res.getvalue()
