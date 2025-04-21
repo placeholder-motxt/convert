@@ -1,0 +1,39 @@
+package com.example.{{project_name}}.service;
+
+import com.example.{{project_name}}.model.{{class_name_capital}};
+import com.example.{{project_name}}.repository.{{class_name_capital}}Repository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class {{class_name_capital}}Service {
+
+    private final {{class_name_capital}}Repository {{class_name}}Repository;
+
+    // Method for create {{class_name}} instance
+    public {{class_name_capital}} create{{class_name_capital}}({{class_name_capital}} {{class_name}}) {
+        return {{class_name}}Repository.save({{class_name}});
+    }
+
+    // Method to get {{class_name}} instance by id
+    public {{class_name_capital}} get{{class_name_capital}}(String id) {
+        return {{class_name}}Repository.findById(id).orElse(null);  // Return null if not found
+    }
+
+    // Method to update {{class_name}} instance by id
+    public {{class_name_capital}} update{{class_name_capital}}({{class_name_capital}} {{class_name}}, String id) {
+        {{class_name_capital}} existing{{class_name_capital}} = {{class_name}}Repository.findById(id).orElse(null);
+
+        if (existing{{class_name_capital}} != null) {
+            return {{class_name}}Repository.save(existing{{class_name_capital}});
+        } else {
+            throw new RuntimeException("{{class_name_capital}} not found for id: " + id);
+        }
+    }
+
+    // Method to delete {{class_name}} instance by id
+    public void delete{{class_name_capital}}(String id) {
+        {{class_name}}Repository.deleteById(id);
+    }
+}
