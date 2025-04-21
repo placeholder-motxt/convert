@@ -13,12 +13,20 @@ def generate_service_java(project_name: str, model: ClassObject) -> str:
     generate_service_java to create separate service based on the Class
     """
     class_name_capital, class_name = format_class_name(model.get_name())
+    method = []
+
+    for methods in model.get_methods():
+        method.append(methods.to_springboot_code())
+
     context = {
         "project_name": project_name,
         "class_name_capital": class_name_capital,
         "class_name": class_name,
+        "is_public": model.get_is_public(),
+        "method": method,
     }
     return render_template("springboot/service.java.j2", context)
+
 
 def format_class_name(name: str) -> tuple[str, str]:
     return name.capitalize(), name[0].lower() + name[1:]
