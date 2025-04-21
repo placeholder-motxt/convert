@@ -79,9 +79,6 @@ def is_valid_python_identifier(identifier: str) -> bool:
 
 
 def is_valid_java_group_id(group_id: str) -> bool:
-    if not group_id:
-        return False
-
     for component in group_id.split("."):
         if not component:
             return False
