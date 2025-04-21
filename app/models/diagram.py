@@ -201,10 +201,10 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
 
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
-        name = self.get_target_class().get_name()
+        target = self.get_target_class().get_name()
         rel_type = f'@OneToOne(mappedBy="{source}")\n'
         join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
-        var = f"private {name} {name.lower()};"
+        var = f"private {target} {target.lower()};"
         return {"name": var, "type": rel_type, "join": join}
 
 
@@ -234,13 +234,13 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
 
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
-        name = self.get_target_class().get_name()
+        target = self.get_target_class().get_name()
         if self.get_source_class_own_amount == "1":
             rel_type = f'@OneToMany(mappedBy="{source}")\n'
         else:
             rel_type = "@ManyToOne\n"
             join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
-        var = f"private {name} {name.lower()};"
+        var = f"private {target} {target.lower()};"
         return {"name": var, "type": rel_type, "join": join}
 
 
@@ -264,11 +264,11 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
 
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
-        name = self.get_target_class().get_name()
+        target = self.get_target_class().get_name()
         rel_type = "@ManyToMany\n"
         join = "@JoinTable(\n"
-        join += f'\tname = "{source}_{name.lower()}",\n'
+        join += f'\tname = "{source}_{target.lower()}",\n'
         join += f'\tjoinColumns = @JoinColumn(name = "{source}_id")\n'
-        join += f'\tinverseJoinColumn = @JoinColumn(name = "{name.lower()}_id")\n)\n'
-        var = f"private List<{name}> listOf{name.title()}s;"
+        join += f'\tinverseJoinColumn = @JoinColumn(name = "{target.lower()}_id")\n)\n'
+        var = f"private List<{target}> listOf{target.title()}s;"
         return {"name": var, "type": rel_type, "join": join}
