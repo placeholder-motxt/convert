@@ -72,11 +72,19 @@ def test_uvicorn_error_logger_no_warning_convert_unexpected_error(
             mock_instance_models.parse.side_effect = Mock(
                 side_effect=NotImplementedError("some unexpected error")
             )
-            with pytest.raises(NotImplementedError) as exc_info:
-                client.post("/convert", json=payload)
+            resp = client.post("/convert", json=payload)
 
-        assert len(caplog.records) == 0
-        assert str(exc_info.value) == "some unexpected error"
+        assert len(caplog.records) == 1
+        assert (
+            "uvicorn.error",
+            logging.WARNING,
+            "Unknown error occured: some unexpected error",
+        ) in caplog.record_tuples
+        assert (
+            resp.json()["detail"]
+            == "Unknown error occured: some unexpected error\nPlease try again later"
+        )
+        assert resp.status_code == 500
 
 
 @pytest.mark.asyncio
@@ -175,3 +183,23 @@ def test_uvicorn_error_logger_warning_when_unexpected_exception(
                 logging.WARNING,
                 "An error occured: 'somehow key error occured'",
             ) in caplog.record_tuples
+
+
+def test_uvicorn_error_logger_warning_when_invalid_group_id(caplog: LogCaptureFixture):
+    client = TestClient(app)
+    payload = {
+        "filename": ["test"],
+        "content": [['{"diagram": "ClassDiagram"}']],
+        "project_name": "test",
+        "project_type": "spring",
+        "group_id": ".abcd",
+    }
+    with caplog.at_level(logging.WARNING, "uvicorn.error"):
+        client.post("/convert", json=payload)
+
+        assert len(caplog.records) == 1
+        assert (
+            "uvicorn.error",
+            logging.WARNING,
+            "Invalid group id: .abcd",
+        ) in caplog.record_tuples
