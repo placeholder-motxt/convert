@@ -43,6 +43,7 @@ from app.models.elements import (
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
+    is_valid_java_group_id,
     is_valid_python_identifier,
     logger,
     remove_file,
@@ -109,7 +110,35 @@ async def convert(
         )
 
     project_name = request.project_name
-    path = project_name + ".zip"
+    try:
+        if request.project_type == "django":
+            tmp_zip_path = await convert_django(project_name, filenames, contents)
+        else:
+            print("convert spring")
+            tmp_zip_path = await convert_spring(
+                project_name, request.group_id, filenames, contents
+            )
+            print(f"{tmp_zip_path = }")
+        background_tasks.add_task(remove_file, tmp_zip_path)
+
+        return FileResponse(
+            path=tmp_zip_path,
+            filename=project_name + ".zip",
+            media_type="application/zip",
+        )
+
+    except ValueError as ex:
+        ex_str = str(ex)
+        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
+        logger.warning(
+            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(status_code=422, detail=ex_str)
+
+
+async def convert_django(
+    project_name: str, filenames: list[str], contents: list[list[str]]
+) -> str:
     first_fname = filenames[0]
     tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
     tmp_zip_path = tmp_zip.name
@@ -150,27 +179,14 @@ async def convert(
         )
 
         tmp_zip.close()
-        return FileResponse(
-            path=tmp_zip_path,
-            filename=path,
-            media_type="application/zip",
-        )
+        return tmp_zip_path
 
-    except ValueError as ex:
-        ex_str = str(ex)
-        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
-        logger.warning(
-            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
-        )
-        # When exception is encountered, background tasks are not run
-        # so we need to clean up ourselves
+    except ValueError:
         tmp_zip.close()
         remove_file(tmp_zip_path)
-        raise HTTPException(status_code=422, detail=ex_str)
+        raise
 
-    except Exception:
-        # When exception is encountered, background tasks are not run
-        # so we need to clean up ourselves
+    except Exception:  # Some other exception that might be missed
         tmp_zip.close()
         remove_file(tmp_zip_path)
         raise
@@ -190,7 +206,23 @@ async def convert(
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
-        background_tasks.add_task(remove_file, tmp_zip_path)
+
+
+async def convert_spring(
+    project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
+) -> str:
+    if not is_valid_java_group_id(group_id):
+        raise HTTPException(status_code=400, detail=f"Invalid group id: {group_id}")
+
+    # TODO: All other PBI 8 to integrate here
+    # This line is for quick integration when PBI 8: 3 gets merged
+    # tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
+
+    tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+    tmp_zip_path = tmp_zip.name
+
+    tmp_zip.close()
+    return tmp_zip_path
 
 
 def check_duplicate(

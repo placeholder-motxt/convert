@@ -9,6 +9,7 @@ from jinja2 import Environment, PackageLoader, TemplateNotFound
 
 env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 logger = logging.getLogger("uvicorn.error")
+JAVA_GROUP_ID_REGEX = re.compile(r"^([a-zA-Z_]{1}\w*(\.[a-zA-Z_]{1}\w*)*)?$")
 
 
 def remove_file(path: str) -> None:
@@ -17,6 +18,10 @@ def remove_file(path: str) -> None:
 
 def is_valid_python_identifier(identifier: str) -> bool:
     return identifier.isidentifier() and not iskeyword(identifier)
+
+
+def is_valid_java_group_id(group_id: str) -> bool:
+    return JAVA_GROUP_ID_REGEX.match(group_id) is not None
 
 
 def render_template(
