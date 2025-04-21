@@ -216,22 +216,16 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
 
-    zipf = zipfile.ZipFile(zipfile_path, "w")
     # write django project template to a folder
     files = render_project_django_template(
         os.path.join("app", "templates", "django_project"),
         {"project_name": project_name},
     )
-
-    # write folder to zip
-    root = os.path.abspath(f"project_{project_name}")
-    for file in files:
-        file_path = os.path.join(root, file)
-        if file == "manage.py":
-            zipf.write(file_path, arcname=f"{file}")
-        else:
-            zipf.write(file_path, arcname=f"{project_name}/{file}")
-    zipf.close()
+    with zipfile.ZipFile(zipfile_path, "w") as zipf:
+        for name, file in files.items():
+            # write django project template to a folder
+            arcname = name if name == "manage.py" else f"{project_name}/{name}"
+            zipf.writestr(arcname, file)
     return files
 
 
