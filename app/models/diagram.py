@@ -4,7 +4,7 @@ from abc import ABC
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier
+from app.utils import is_valid_python_identifier, to_camel_case, to_pascal_case
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
@@ -72,8 +72,10 @@ class ClassObject:
         """Returns a dictionary with the class name, parent class name, fields and relationships
         for the Spring Boot template."""
         ctx = {
-            "name": self.get_name(),
-            "parent": self.__parent.get_name() if self.__parent else None,
+            "name": to_pascal_case(self.get_name()),
+            "parent": to_pascal_case(self.__parent.get_name())
+            if self.__parent
+            else None,
             "fields": [],
             "relationships": [],
         }
@@ -204,7 +206,7 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
         target = self.get_target_class().get_name()
         rel_type = f'@OneToOne(mappedBy="{source}")\n'
         join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
-        var = f"private {target} {target.lower()};"
+        var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
 
@@ -240,7 +242,7 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         else:
             rel_type = "@ManyToOne\n"
             join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
-        var = f"private {target} {target.lower()};"
+        var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
 
@@ -270,5 +272,5 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
         join += f'\tname = "{source}_{target.lower()}",\n'
         join += f'\tjoinColumns = @JoinColumn(name = "{source}_id")\n'
         join += f'\tinverseJoinColumn = @JoinColumn(name = "{target.lower()}_id")\n)\n'
-        var = f"private List<{target}> listOf{target.title()}s;"
+        var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
