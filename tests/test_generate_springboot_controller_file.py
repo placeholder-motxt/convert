@@ -156,9 +156,7 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
         result = generate_springboot_controller_files("hello", models_elements)
 
         # Assert
-        self.assertEqual(
-            len(result), 1
-        )  # Should not generate any files due to empty class name
+        self.assertEqual(result, [""])
 
     def test_generate_springboot_controller_files_handle_exception_in_rendering(self):
         # Arrange
