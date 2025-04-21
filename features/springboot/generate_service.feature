@@ -14,3 +14,8 @@ Feature: Generate Service For Springboot
     Given the project name and private class object with method is processed and ready as context
     When the jinja process the context
     Then the service file content is generated for methods only
+
+  Scenario: Successful Generate Private Class Diagram with No Method
+    Given the project name and private class object with no method and ready as context
+    When the jinja process the context
+    Then the service file content is generated with empty method
