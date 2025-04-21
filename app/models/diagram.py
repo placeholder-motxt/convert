@@ -176,10 +176,10 @@ class AbstractRelationshipObject(ABC):
     def get_target_class(self) -> ClassObject:
         return self.__target_class
 
-    def get_source_class_own_amount(self) -> str:
+    def get_source_class_own_amount(self) -> str:  # pragma: no cover
         return self.__sourceClassOwnAmount
 
-    def get_target_class_own_amount(self) -> str:
+    def get_target_class_own_amount(self) -> str:  # pragma: no cover
         return self.__targetClassOwnAmount
 
 
@@ -204,8 +204,11 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = f'@OneToOne(mappedBy="{source}")\n'
-        join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
+        rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")\n'
+        join = (
+            f"@JoinColumn(name = '{source.replace(' ', '_')}', "
+            f"referencedColumnName = 'id')\n"
+        )
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
@@ -237,11 +240,15 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        if self.get_source_class_own_amount == "1":
-            rel_type = f'@OneToMany(mappedBy="{source}")\n'
+        if self.get_source_class_own_amount() == "1":
+            rel_type = f'@OneToMany(mappedBy="{source.replace(" ", "_")}")\n'
+            join = None
         else:
             rel_type = "@ManyToOne\n"
-            join = f"@JoinColumn(name = '{source}', referencedColumnName = 'id')\n"
+            join = (
+                f"@JoinColumn(name = '{source.replace(' ', '_')}', "
+                f"referencedColumnName = 'id')\n"
+            )
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
@@ -269,8 +276,12 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
         target = self.get_target_class().get_name()
         rel_type = "@ManyToMany\n"
         join = "@JoinTable(\n"
-        join += f'\tname = "{source}_{target.lower()}",\n'
-        join += f'\tjoinColumns = @JoinColumn(name = "{source}_id")\n'
-        join += f'\tinverseJoinColumn = @JoinColumn(name = "{target.lower()}_id")\n)\n'
+        join += f'\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",\n'
+        join += f'\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id")\n'
+        join += (
+            f'\tinverseJoinColumn = @JoinColumn(name = "'
+            f'{target.replace(" ", "_").lower()}_id")\n'
+            ")\n"
+        )
         var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
