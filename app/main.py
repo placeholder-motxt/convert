@@ -114,11 +114,9 @@ async def convert(
         if request.project_type == "django":
             tmp_zip_path = await convert_django(project_name, filenames, contents)
         else:
-            print("convert spring")
             tmp_zip_path = await convert_spring(
                 project_name, request.group_id, filenames, contents
             )
-            print(f"{tmp_zip_path = }")
         background_tasks.add_task(remove_file, tmp_zip_path)
 
         return FileResponse(
@@ -134,6 +132,19 @@ async def convert(
             "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
         )
         raise HTTPException(status_code=422, detail=ex_str)
+
+    except HTTPException:
+        raise
+
+    except Exception as ex:
+        ex_str = str(ex)
+        logger.warning(
+            "Unknown error occured: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unknown error occured: {ex_str}\nPlease try again later",
+        )
 
 
 async def convert_django(
@@ -212,17 +223,22 @@ async def convert_spring(
     project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
 ) -> str:
     if not is_valid_java_group_id(group_id):
-        raise HTTPException(status_code=400, detail=f"Invalid group id: {group_id}")
+        msg = f"Invalid group id: {group_id}"
+        logger.warning(msg)
+        raise HTTPException(status_code=400, detail=msg)
 
     # TODO: All other PBI 8 to integrate here
     # This line is for quick integration when PBI 8: 3 gets merged
     # tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
 
-    tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
-    tmp_zip_path = tmp_zip.name
+    # Below are not covered yet because there's no real logic yet
+    tmp_zip = tempfile.NamedTemporaryFile(
+        suffix=".zip", delete=False
+    )  # pragma: no cover
+    tmp_zip_path = tmp_zip.name  # pragma: no cover
 
-    tmp_zip.close()
-    return tmp_zip_path
+    tmp_zip.close()  # pragma: no cover
+    return tmp_zip_path  # pragma: no cover
 
 
 def check_duplicate(
