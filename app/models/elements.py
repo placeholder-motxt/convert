@@ -132,7 +132,7 @@ class ModelsElements(FileElements):
             return files
         except Exception as e:
             logger.error(f"Error rendering template: {e}")
-            return ""
+            return {}
 
 
 class ViewsElements(FileElements):

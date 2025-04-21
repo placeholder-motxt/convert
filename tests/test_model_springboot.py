@@ -56,7 +56,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
         ):
             result = self.models.print_springboot_style("test_project")
 
-            self.assertEqual(result, "")
+            self.assertEqual(result, {})
 
     def test_print_springboot_style_edge_case_no_classes(self):
         """Test: Edge case where no classes are added to the ModelsElements."""

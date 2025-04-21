@@ -81,7 +81,7 @@ class TestRelationshipStrategyBidirectional(unittest.TestCase):
 
     def test_one_to_many_bidirectional(self):
         strategy = ManyToOneStrategy()
-        edge = {"startLabel": "*", "endLabel": "1"}
+        edge = {"startLabel": "1", "endLabel": "*"}
         class_from = ClassObject()
         class_to = ClassObject()
 

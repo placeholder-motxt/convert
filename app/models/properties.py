@@ -128,7 +128,7 @@ class FieldObject:
             "type": MODELS_CHARFIELD,
         }  # Default fallback
 
-    def to_springboot_models_template(self) -> str:
+    def to_springboot_models_template(self) -> dict[str, str]:
         field_type = self.__type.to_models_code().lower()
 
         for key, value in self.SPRING_TYPE_MAPPING.items():
