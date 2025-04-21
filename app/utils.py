@@ -49,15 +49,10 @@ def camel_to_snake(camel_case_str: str) -> str:
 
 def render_project_django_template(
     template_path: str, context: dict[str, Any]
-) -> list[str]:
-    files = []
+) -> dict[str, str]:
+    files = {}
     if not is_valid_python_identifier(context["project_name"]):
         raise ValueError("Project name must not contain whitespace or number!")
-    folder_path = f"project_{context['project_name']}"
-    try:
-        os.makedirs(folder_path)
-    except OSError:
-        raise FileExistsError(f"Folder {folder_path} already exists")
     for template_name in os.listdir(template_path):
         template = f"django_project/{template_name}"
         if template_name == "settings.py.j2":
@@ -66,10 +61,8 @@ def render_project_django_template(
                 "SECRET_KEY": get_random_secret_key(),
             }
         template_name = template_name.replace(".j2", "")
-        with open(os.path.join(folder_path, template_name), "w") as file:
-            file.write(render_template(template, context))
-            file.write("\n")  # add newline at the end of file for linter
-        files.append(template_name)
+        file = render_template(template, context) + "\n"
+        files[template_name] = file
     return files
 
 
