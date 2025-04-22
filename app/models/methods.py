@@ -6,7 +6,7 @@ from copy import deepcopy
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier
+from app.utils import is_valid_python_identifier, render_template
 
 from .properties import ParameterObject, TypeObject
 
@@ -207,7 +207,6 @@ class ClassMethodObject(AbstractMethodObject):
                 "please consult the user manual document on how to name methods"
             )
 
-        res = StringIO()
         return_type_str = "void"
         ret = self.get_return_type()
 
@@ -234,19 +233,19 @@ class ClassMethodObject(AbstractMethodObject):
         param_str_list = [param.to_springboot_code() for param in parameters]
 
         param_str = ", ".join(param_str_list)
-        if self.get_modifier() == "":
-            res.write(f"{return_type_str} {name}({param_str}) {{\n")
-        else:
-            res.write(
-                f"{self.get_modifier()} {return_type_str} {name}({param_str}) {{\n"
-            )
-        res.write("    // TODO: Auto generated function stub\n")
-        res.write(
-            f'    throw new UnsupportedOperationException("{name} function is '
-            + 'not yet implemented");}\n'
-        )
 
-        return res.getvalue()
+        modifier = self.get_modifier()
+        is_default = modifier == ""
+
+        context = {
+            "param": param_str,
+            "return_type": return_type_str,
+            "name": name,
+            "modifier": modifier,
+            "is_default": is_default,
+        }
+
+        return render_template("springboot/method.java.j2", context)
 
     def __add_additional_comments(self, sio: StringIO):
         if len(self.__calls):
