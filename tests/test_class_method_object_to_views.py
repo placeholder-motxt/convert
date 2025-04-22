@@ -57,10 +57,9 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         method.add_parameter(self.param)
         method.set_return_type(self.return_type)
         method.set_modifier("public")
-        expected = "public String method_full(int param1) {\n"
+        expected = "public String method_full(int param1) {\n\n"
         expected += "    // TODO: Auto generated function stub\n"
         expected += '    throw new UnsupportedOperationException("method_full function is not yet implemented");}\n'
-
         self.assertEqual(expected.strip(), method.to_springboot_code().strip())
 
     def test_to_springboot_code_private(self):
@@ -69,7 +68,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         method.add_parameter(self.param)
         method.set_return_type(self.return_type)
         method.set_modifier("private")
-        expected = "private String method_full(int param1) {\n"
+        expected = "private String method_full(int param1) {\n\n"
         expected += "    // TODO: Auto generated function stub\n"
         expected += '    throw new UnsupportedOperationException("method_full function is not yet implemented");}\n'
 
@@ -80,7 +79,7 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         method.set_name("method_full")
         method.add_parameter(self.param)
         method.set_return_type(self.return_type)
-        expected = "String method_full(int param1) {\n"
+        expected = "String method_full(int param1) {\n\n"
         expected += "    // TODO: Auto generated function stub\n"
         expected += '    throw new UnsupportedOperationException("method_full function is not yet implemented");}\n'
 
@@ -158,10 +157,10 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.assertEqual(result, self.method_with_return_type_list.to_views_code())
 
     def test_to_springboot_code_rettype_list(self):
-        result = """List<ABC> method_rettype() {
+        result = """\nList<ABC> method_rettype() {
+
     // TODO: Auto generated function stub
-    throw new UnsupportedOperationException("method_rettype function is not yet implemented");}
-"""
+    throw new UnsupportedOperationException("method_rettype function is not yet implemented");}"""
         self.assertEqual(result, self.method_with_return_type_list.to_springboot_code())
 
     def test_to_views_code_multiple_params(self):

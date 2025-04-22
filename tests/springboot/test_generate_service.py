@@ -231,7 +231,7 @@ public class CartService {
 
 }
 """
-    print(context["output"])
+    
     assert (
         context["output"].replace(" ", "").strip()
         == expected_output.replace(" ", "").strip()

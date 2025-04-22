@@ -432,18 +432,17 @@ please add a return type for method  methodName(param1: type1, param2: )""".stri
         for methods in classobj.get_methods():
             output += methods.to_springboot_code() + "\n"
 
-        expected = """public String getId() {
+        expected = """\npublic String getId() {\n
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("getId function is not yet implemented");}
 
-private String getIdPrivate() {
+private String getIdPrivate() {\n
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("getIdPrivate function is not yet implemented");}
 
-String getIdDefault() {
+String getIdDefault() {\n
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("getIdDefault function is not yet implemented");}
-
 """
         self.assertEqual(expected, output)
 
