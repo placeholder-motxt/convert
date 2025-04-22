@@ -7,13 +7,14 @@ from contextlib import asynccontextmanager
 from io import StringIO
 
 import anyio
+import httpx
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from prometheus_client import Counter, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
-from app.config import APP_CONFIG
+from app.config import APP_CONFIG, SPRING_DEPENDENCIES, SPRING_SERVICE_URL
 from app.generate_frontend.create.create_page_views import generate_create_page_views
 from app.generate_frontend.create.generate_create_page_django import (
     generate_forms_create_page_django,
@@ -501,3 +502,53 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
     }
+
+
+async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
+    params = {
+        "javaVersion": "21",
+        "artifactId": project_name.lower(),
+        "groupId": group_id,
+        "name": project_name,
+        "packaging": "jar",
+        "type": "gradle-project-kotlin",
+        "dependencies": SPRING_DEPENDENCIES,
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(SPRING_SERVICE_URL, params=params)
+
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=500,
+                detail="Unknown error occured. Initializr service might be down.",
+            )
+
+        content_type = resp.headers["content-type"]
+        if content_type != "application/zip":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected content type from server: {content_type}.",
+            )
+
+        content = resp.content
+        if len(content) == 0:
+            raise HTTPException(
+                status_code=500, detail="Failed to create zip, please try again later."
+            )
+
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=503,
+            detail="Initializr service timed out. Please try again later.",
+        )
+
+    except httpx.NetworkError:
+        raise HTTPException(
+            status_code=503,
+            detail="Cannot connect to Initializr service. Service might be down.",
+        )
+
+    async with anyio.NamedTemporaryFile(suffix=".zip", delete=False) as f:
+        await f.write(content)
+        return f.name
