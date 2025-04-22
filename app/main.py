@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import tempfile
 import zipfile
 from contextlib import asynccontextmanager
@@ -184,9 +183,6 @@ async def convert(
             f"{first_fname}_models.py",
             f"{first_fname}_views.py",
         ]
-        folder = f"project_{project_name}"
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
@@ -216,16 +212,17 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
 
-    # write django project template to a folder
+    # write django project template to a dictionary
     files = render_project_django_template(
         os.path.join("app", "templates", "django_project"),
         {"project_name": project_name},
     )
     with zipfile.ZipFile(zipfile_path, "w") as zipf:
         for name, file in files.items():
-            # write django project template to a folder
             arcname = name if name == "manage.py" else f"{project_name}/{name}"
-            zipf.writestr(arcname, file)
+            zipf.writestr(
+                arcname, file()
+            )  # file is a lambda function that returns rendered template as str
     return files
 
 
@@ -297,9 +294,6 @@ def generate_file_to_be_downloaded(
     with the name of the project and add all the files to it.
     """
     # TODO: make app_name dynamic in the future
-    folder_path = f"project_{project_name}"
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path, ignore_errors=True)
     app_name = "main"
     create_django_project(project_name, zipfile_path)
     create_django_app(project_name, app_name, zipfile_path, models, views)

@@ -49,7 +49,7 @@ def camel_to_snake(camel_case_str: str) -> str:
 
 def render_project_django_template(
     template_path: str, context: dict[str, Any]
-) -> dict[str, str]:
+) -> dict[str, Any]:
     files = {}
     project_name = context["project_name"]
     if not is_valid_python_identifier(project_name):
@@ -62,7 +62,11 @@ def render_project_django_template(
                 "SECRET_KEY": get_random_secret_key(),
             }
         template_name = template_name.replace(".j2", "")
-        files[template_name] = render_template(template, context) + "\n"
+        files[template_name] = (
+            # lambda that returns a function that renders the template with the context
+            # and returns the rendered template
+            lambda t=template, c=context: render_template(t, c) + "\n"
+        )
     return files
 
 
