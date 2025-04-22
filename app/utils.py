@@ -51,18 +51,18 @@ def render_project_django_template(
     template_path: str, context: dict[str, Any]
 ) -> dict[str, str]:
     files = {}
-    if not is_valid_python_identifier(context["project_name"]):
+    project_name = context["project_name"]
+    if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
     for template_name in os.listdir(template_path):
         template = f"django_project/{template_name}"
         if template_name == "settings.py.j2":
             context = {
-                "project_name": context["project_name"],
+                "project_name": project_name,
                 "SECRET_KEY": get_random_secret_key(),
             }
         template_name = template_name.replace(".j2", "")
-        file = render_template(template, context) + "\n"
-        files[template_name] = file
+        files[template_name] = render_template(template, context) + "\n"
     return files
 
 
