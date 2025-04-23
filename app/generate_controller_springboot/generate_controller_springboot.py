@@ -1,10 +1,6 @@
-import logging
-
 from app.models.diagram import ClassObject
 from app.models.elements import ModelsElements
-from app.utils import render_template, to_camel_case, to_pascal_case
-
-logger = logging.getLogger("uvicorn.error")
+from app.utils import logger, render_template, to_camel_case, to_pascal_case
 
 
 def generate_springboot_controller_files(
