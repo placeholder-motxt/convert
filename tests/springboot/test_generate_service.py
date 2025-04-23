@@ -91,8 +91,6 @@ def render_template_output(context):
 def check_output(context):
     with open("tests/springboot/test_service_data.txt", "r", encoding="utf-8") as file:
         expected_output = file.read()
-    
-    print(context["output"])
 
     assert context["output"].replace(" ", "").replace("\n", "").strip() == expected_output.replace(" ", "").replace("\n", "").strip()
 
@@ -168,7 +166,6 @@ def check_output(context):
         "tests/springboot/test_service_data_method.txt", "r", encoding="utf-8"
     ) as file:
         expected_output = file.read()
-    print(context["output"])
 
     assert (
         context["output"].replace(" ", "").replace("\n", "").strip()
