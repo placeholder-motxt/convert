@@ -283,6 +283,43 @@ class TestDependencyElements(unittest.TestCase):
         self.assertIn("My@Spring#Boot$App!", result)
         self.assertIn("org.springframework.boot:spring-boot-starter-web", result)
 
+    def test_print_application_properties(self):
+        """Test: Check if the application.properties file is created correctly."""
+        project_name = "MySpringBootApp"
+        result = self.dependency_elements.print_application_properties(project_name)
+        expected_output = (
+            "springdoc.api-docs.enabled=true\n"
+            + "springdoc.swagger-ui.enabled=true\n"
+            + "spring.datasource.url=jdbc:sqlite:mydatabase.db\n"
+            + "spring.datasource.driver-class-name=org.sqlite.JDBC\n"
+            + "spring.jpa.show-sql=true\n"
+            + "spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect\n"
+            + "spring.jpa.hibernate.ddl-auto=update\n"
+        )
+        self.assertEqual(result, expected_output)
+
+    def test_print_application_properties_edge_case_empty_project_name(self):
+        """Test: Edge case where an empty project name is provided."""
+        project_name = ""
+        with self.assertRaises(Exception) as e:
+            self.dependency_elements.print_application_properties(project_name)
+        self.assertEqual(str(e.exception), "Project name cannot be empty!")
+
+    def test_print_application_properties_edge_case_long_project_name(self):
+        """Test: Edge case where a very long project name is provided."""
+        project_name = "A" * 1000
+        result = self.dependency_elements.print_application_properties(project_name)
+        expected_output = (
+            "springdoc.api-docs.enabled=true\n"
+            + "springdoc.swagger-ui.enabled=true\n"
+            + "spring.datasource.url=jdbc:sqlite:mydatabase.db\n"
+            + "spring.datasource.driver-class-name=org.sqlite.JDBC\n"
+            + "spring.jpa.show-sql=true\n"
+            + "spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect\n"
+            + "spring.jpa.hibernate.ddl-auto=update\n"
+        )
+        self.assertEqual(result, expected_output)
+
 
 if __name__ == "__main__":
     unittest.main()
