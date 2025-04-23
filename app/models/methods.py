@@ -6,7 +6,7 @@ from copy import deepcopy
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier, render_template
+from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier, render_template
 
 from .properties import ParameterObject, TypeObject
 
@@ -80,14 +80,6 @@ class ClassMethodObject(AbstractMethodObject):
 
     Its counterpart is the ControllerMethodObject class
     """
-
-    JAVA_TYPE_MAPPING = {
-        "boolean": "boolean",
-        "bool": "boolean",
-        "string": "String",
-        "str": "String",
-        "integer": "int",
-    }
 
     PYTHON_TYPE_MAPPING = {
         "boolean": "bool",
@@ -222,12 +214,10 @@ class ClassMethodObject(AbstractMethodObject):
             if rettype != "void":
                 if list_match:
                     list_type = list_match.group("list_type")
-                    java_type = self.JAVA_TYPE_MAPPING.get(list_type.lower(), list_type)
+                    java_type = JAVA_TYPE_MAPPING.get(list_type.lower(), list_type)
                     return_type_str = f"List<{java_type}>"
                 else:
-                    return_type_str = self.JAVA_TYPE_MAPPING.get(
-                        rettype.lower(), rettype
-                    )
+                    return_type_str = JAVA_TYPE_MAPPING.get(rettype.lower(), rettype)
 
         parameters = self.get_parameters()
         param_str_list = [param.to_springboot_code() for param in parameters]

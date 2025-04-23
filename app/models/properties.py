@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Optional
 
-from app.utils import is_valid_python_identifier
+from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier
 
 
 class TypeObject:
@@ -116,14 +116,6 @@ class ParameterObject:
     string representation of the datatype according to a specific framework."
     """
 
-    JAVA_TYPE_MAPPING = {
-        "boolean": "boolean",
-        "bool": "boolean",
-        "string": "String",
-        "str": "String",
-        "integer": "int",
-    }
-
     def __init__(self):
         self.__name: str = ""
         self.__type: Optional[TypeObject] = None
@@ -173,7 +165,7 @@ class ParameterObject:
                     "please consult the user manual document on how to name parameter types"
                 )
 
-            res += f"{self.JAVA_TYPE_MAPPING.get(param_type.lower(), param_type)} "
+            res += f"{JAVA_TYPE_MAPPING.get(param_type.lower(), param_type)} "
 
         res += self.__name
 
