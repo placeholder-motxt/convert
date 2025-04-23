@@ -275,6 +275,9 @@ class DependencyElements(FileElements):
     def print_django_style(self) -> str:
         return super().print_django_style()
 
+    def print_application_properties(self, project_name: str) -> str:
+        return ""
+
     def print_springboot_style(self, project_name: str) -> str:
         context = {
             "project_name": project_name,
