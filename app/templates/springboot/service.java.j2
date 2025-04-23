@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class {{class_name_capital}}Service {
 
     private final {{class_name_capital}}Repository {{class_name}}Repository;
-
+{% if is_public %}
     // Method for create {{class_name}} instance
     public {{class_name_capital}} create{{class_name_capital}}({{class_name_capital}} {{class_name}}) {
         return {{class_name}}Repository.save({{class_name}});
@@ -36,4 +36,8 @@ public class {{class_name_capital}}Service {
     public void delete{{class_name_capital}}(String id) {
         {{class_name}}Repository.deleteById(id);
     }
+{% endif %}
+    {% for elem in method %}
+    {{elem}}
+    {% endfor %}
 }

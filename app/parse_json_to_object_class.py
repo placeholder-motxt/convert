@@ -119,7 +119,7 @@ class ParseJsonToObjectClass:
 
     def __add_methods_to_class(self, object: dict, class_obj: ClassObject) -> None:
         # iterate all method in a class
-        methods = object["methods"].replace("+", "\n").replace("-", "\n").split("\n")
+        methods = object["methods"].split("\n")
         for method in methods:
             if method != "":
                 class_method_obj = self.__create_method(method)
@@ -135,6 +135,12 @@ class ParseJsonToObjectClass:
 
     def __create_method(self, method: str) -> ClassMethodObject:
         class_method_obj = ClassMethodObject()
+        if method[0] == "+":
+            class_method_obj.set_modifier("public")
+        elif method[0] == "-":
+            class_method_obj.set_modifier("private")
+        method = method.replace("+", "").replace("-", "")
+
         class_method_name = method.split("(")[0].lstrip("+- ").strip()
         if ":" in method.split(")")[1]:
             class_method_rettype_name = method.split(")")[1].split(":")[1].strip()

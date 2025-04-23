@@ -6,7 +6,7 @@ from copy import deepcopy
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier
+from app.utils import is_valid_python_identifier, render_template
 
 from .properties import ParameterObject, TypeObject
 
@@ -23,6 +23,7 @@ class AbstractMethodObject(ABC):
         self.__name: str = ""
         self.__parameters: list[ParameterObject] = []
         self.__return_type: Optional[TypeObject] = None
+        self.__modifier: str = ""
 
     def __str__(self) -> str:
         return (
@@ -66,6 +67,12 @@ class AbstractMethodObject(ABC):
     def get_return_type(self) -> TypeObject:
         return deepcopy(self.__return_type)
 
+    def set_modifier(self, modifier: str):
+        self.__modifier = modifier
+
+    def get_modifier(self) -> str:
+        return self.__modifier
+
 
 class ClassMethodObject(AbstractMethodObject):
     """
@@ -73,6 +80,14 @@ class ClassMethodObject(AbstractMethodObject):
 
     Its counterpart is the ControllerMethodObject class
     """
+
+    JAVA_TYPE_MAPPING = {
+        "boolean": "boolean",
+        "bool": "boolean",
+        "string": "String",
+        "str": "String",
+        "integer": "int",
+    }
 
     PYTHON_TYPE_MAPPING = {
         "boolean": "bool",
@@ -177,6 +192,60 @@ class ClassMethodObject(AbstractMethodObject):
         )
 
         return res.getvalue()
+
+    def to_springboot_code(self) -> str:
+        """
+        Return Springboot representation of method in the UML Diagram
+
+        This implementation ignore method calls so only supports for Class Diagram
+        """
+        name = self.get_name()
+
+        if name is None or not is_valid_python_identifier(name):
+            raise ValueError(
+                f"Invalid method name '{name}'\n"
+                "please consult the user manual document on how to name methods"
+            )
+
+        return_type_str = "void"
+        ret = self.get_return_type()
+
+        if ret is not None:
+            rettype = ret.get_name()
+            list_match = self.LIST_REGEX.match(rettype)
+            if not is_valid_python_identifier(rettype) and list_match is None:
+                raise ValueError(
+                    f"Invalid return type: '{rettype}'\n "
+                    "please consult the user manual document on how to name return variables"
+                )
+
+            if rettype != "void":
+                if list_match:
+                    list_type = list_match.group("list_type")
+                    java_type = self.JAVA_TYPE_MAPPING.get(list_type.lower(), list_type)
+                    return_type_str = f"List<{java_type}>"
+                else:
+                    return_type_str = self.JAVA_TYPE_MAPPING.get(
+                        rettype.lower(), rettype
+                    )
+
+        parameters = self.get_parameters()
+        param_str_list = [param.to_springboot_code() for param in parameters]
+
+        param_str = ", ".join(param_str_list)
+
+        modifier = self.get_modifier()
+        is_default = modifier == ""
+
+        context = {
+            "param": param_str,
+            "return_type": return_type_str,
+            "name": name,
+            "modifier": modifier,
+            "is_default": is_default,
+        }
+
+        return render_template("springboot/method.java.j2", context)
 
     def __add_additional_comments(self, sio: StringIO):
         if len(self.__calls):

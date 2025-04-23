@@ -37,5 +37,20 @@ public class CartService {
         cartRepository.deleteById(id);
     }
 
+
+    void method_params(int param1) {
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_params function is not yet implemented");}
+    
+
+    public void method_param2(String param2) {
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_param2 function is not yet implemented");}
+
+
+    private void method_param3(boolean param3) {
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_param3 function is not yet implemented");}
+
     
 }
