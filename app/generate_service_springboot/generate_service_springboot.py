@@ -18,11 +18,17 @@ def generate_service_java(project_name: str, model: ClassObject) -> str:
     for methods in model.get_methods():
         method.append(methods.to_springboot_code())
 
+    attributes = []
+    for attribute in model.get_fields():
+        attribute_name = attribute.get_name()
+        attributes.append(attribute_name[0].upper() + attribute_name[1:])
+
     context = {
         "project_name": project_name,
         "class_name_capital": class_name_capital,
         "class_name": class_name,
         "is_public": model.get_is_public(),
+        "attributes": attributes,
         "method": method,
     }
     return render_template("springboot/service.java.j2", context)
