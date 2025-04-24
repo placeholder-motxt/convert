@@ -278,18 +278,17 @@ class DependencyElements(FileElements):
         """
         return super().print_django_style()
 
-    def print_application_properties(self, project_name: str) -> str:
-        if project_name == "":
-            raise ValueError("Project name cannot be empty!")
-        return (
-            "springdoc.api-docs.enabled=true\n"
-            + "springdoc.swagger-ui.enabled=true\n"
-            + "spring.datasource.url=jdbc:sqlite:mydatabase.db\n"
-            + "spring.datasource.driver-class-name=org.sqlite.JDBC\n"
-            + "spring.jpa.show-sql=true\n"
-            + "spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect\n"
-            + "spring.jpa.hibernate.ddl-auto=update\n"
-        )
+    def print_application_properties(self) -> str:
+        config = {
+            "springdoc.api-docs.enabled": "true",
+            "springdoc.swagger-ui.enabled": "true",
+            "spring.datasource.url": "jdbc:sqlite:mydatabase.db",
+            "spring.datasource.driver-class-name": "org.sqlite.JDBC",
+            "spring.jpa.show-sql": "true",
+            "spring.jpa.database-platform": "org.hibernate.community.dialect.SQLiteDialect",
+            "spring.jpa.hibernate.ddl-auto": "update",
+        }
+        return "\n".join(f"{key}={value}" for key, value in config.items()) + "\n"
 
     def print_springboot_style(self, project_name: str) -> str:
         context = {
