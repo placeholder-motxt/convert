@@ -1,0 +1,7 @@
+{% if modifier %}
+{{ modifier }} {{ return_type }} {{ name }}({{ param }}) {
+{% else %}
+{{ return_type }} {{ name }}({{ param }}) {
+{% endif %}
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("{{ name }} function is not yet implemented");}
