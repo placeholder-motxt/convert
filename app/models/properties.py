@@ -94,6 +94,7 @@ class FieldObject:
     def __init__(self):
         self.__name: str = ""
         self.__type: Optional[TypeObject] = None
+        self.__modifier = ""
 
     def __str__(self) -> str:
         return f"FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}"
@@ -106,6 +107,13 @@ class FieldObject:
 
     def set_type(self, type: TypeObject):
         self.__type = type
+
+    def set_modifier(self, modifier: str):
+        if (modifier != "public") and (modifier != "private"):
+            raise ValueError(
+                f'Class field modifier must be either "public" or "private" ! Got: {modifier}'
+            )
+        self.__modifier = modifier
 
     def to_models_code(self) -> str:
         field_type = self.__type.to_models_code().lower()
