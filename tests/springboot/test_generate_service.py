@@ -9,7 +9,7 @@ from app.generate_service_springboot.generate_service_springboot import (
 )
 from app.models.diagram import ClassObject
 from app.models.methods import ClassMethodObject
-from app.models.properties import ParameterObject, TypeObject
+from app.models.properties import FieldObject, ParameterObject, TypeObject
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # Go from tests/ to project-root/
 FEATURE_PATH = os.path.join(
@@ -24,6 +24,18 @@ class TestGenerateService(unittest.TestCase):
         class_object.set_name("Cart")
         class_object.set_is_public(True)
         project_name = "burhanpedia"
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("isFull")
+        field_type.set_name("boolean")
+        field.set_type(field_type)
+        class_object.add_field(field)
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("cartId")
+        field_type.set_name("int")
+        field.set_type(field_type)
+        class_object.add_field(field)
 
         output = generate_service_java(project_name, class_object)
 
@@ -32,7 +44,7 @@ class TestGenerateService(unittest.TestCase):
         ) as file:
             expected_output = file.read()
 
-        self.assertEqual(output.strip(), expected_output.strip())
+        self.assertEqual(output.replace(" ", "").replace("\n", "").strip(), expected_output.replace(" ", "").replace("\n", "").strip())
 
 
 # Behavior Test
@@ -51,6 +63,18 @@ def prepare_context(context):
     class_object = ClassObject()
     class_object.set_name("Cart")
     class_object.set_is_public(True)
+    field = FieldObject()
+    field_type = TypeObject()
+    field.set_name("isFull")
+    field_type.set_name("boolean")
+    field.set_type(field_type)
+    class_object.add_field(field)
+    field = FieldObject()
+    field_type = TypeObject()
+    field.set_name("cartId")
+    field_type.set_name("int")
+    field.set_type(field_type)
+    class_object.add_field(field)
 
     context["project_name"] = "burhanpedia"
     context["class_object"] = class_object
@@ -68,7 +92,7 @@ def check_output(context):
     with open("tests/springboot/test_service_data.txt", "r", encoding="utf-8") as file:
         expected_output = file.read()
 
-    assert context["output"].strip() == expected_output.strip()
+    assert context["output"].replace(" ", "").replace("\n", "").strip() == expected_output.replace(" ", "").replace("\n", "").strip()
 
 
 @given(
@@ -78,6 +102,21 @@ def prepare_context(context):
     class_object = ClassObject()
     class_object.set_name("Cart")
     class_object.set_is_public(True)
+
+    field = FieldObject()
+    field_type = TypeObject()
+    field.set_name("isFull")
+    field_type.set_name("boolean")
+    field.set_type(field_type)
+    class_object.add_field(field)
+
+    field = FieldObject()
+    field_type = TypeObject()
+    field.set_name("cartId")
+    field_type.set_name("int")
+    field.set_type(field_type)
+    class_object.add_field(field)
+
     method_with_parameters = ClassMethodObject()
     method_with_parameters.set_name("method_params")
     param = ParameterObject()

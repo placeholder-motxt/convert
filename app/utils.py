@@ -10,6 +10,23 @@ from jinja2 import Environment, PackageLoader, TemplateNotFound
 env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 logger = logging.getLogger("uvicorn.error")
 
+JAVA_TYPE_MAPPING = {
+    "byte": "byte",
+    "long": "long",
+    "float": "float",
+    "char": "char",
+    "character": "char",
+    "boolean": "boolean",
+    "bool": "boolean",
+    "string": "String",
+    "str": "String",
+    "integer": "int",
+    "double": "double",
+    "date": "java.util.Date",
+    "datetime": "java.time.LocalDateTime",
+    "uuid": "java.util.UUID",
+}
+
 
 def remove_file(path: str) -> None:
     os.unlink(path)
