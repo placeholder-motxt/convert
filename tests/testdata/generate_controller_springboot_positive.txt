@@ -1,0 +1,42 @@
+package com.example.burhanpedia.controller;
+
+import com.example.burhanpedia.model.User;
+import com.example.burhanpedia.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+@RestController
+@RequestMapping("/user")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserService userService;
+
+    @PostMapping
+    @Operation(summary = "Create a new User")
+    public User createUser(@RequestBody User user) {
+        // Do not pass the id to create a User, it will be auto-generated
+        return userService.createUser(user);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a user by ID")
+    public User getUser(@PathVariable String id) {
+        return userService.getUser(id);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update an existing User")
+    public User updateUser(@RequestBody User user, @PathVariable String id) {
+        return userService.updateUser(user, id);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a User by ID")
+    public void deleteUser(@PathVariable String id) {
+        userService.deleteUser(id);
+    }
+}

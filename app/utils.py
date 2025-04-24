@@ -3,12 +3,29 @@ import os
 import re
 import secrets
 from keyword import iskeyword
-from typing import Any
+from typing import Any, Optional
 
 from jinja2 import Environment, PackageLoader, TemplateNotFound
 
 env = Environment(loader=PackageLoader("app"))  # nosec B701 - not used for rendering HTML to the user
 logger = logging.getLogger("uvicorn.error")
+
+JAVA_TYPE_MAPPING = {
+    "byte": "byte",
+    "long": "long",
+    "float": "float",
+    "char": "char",
+    "character": "char",
+    "boolean": "boolean",
+    "bool": "boolean",
+    "string": "String",
+    "str": "String",
+    "integer": "int",
+    "double": "double",
+    "date": "java.util.Date",
+    "datetime": "java.time.LocalDateTime",
+    "uuid": "java.util.UUID",
+}
 
 
 def remove_file(path: str) -> None:
@@ -45,6 +62,47 @@ def camel_to_snake(camel_case_str: str) -> str:
     # correctly.
     snake_case_str = re.sub(r"([A-Z]+)(?=[A-Z])", r"\1_", snake_case_str)
     return snake_case_str.lower()
+
+
+def to_camel_case(s: str) -> str:
+    # Remove non-alphanumeric characters, replace with spaces, and split by spaces
+    words = re.sub(r"[^a-zA-Z0-9]", " ", s).split()
+
+    if not words:
+        return ""
+
+    # Check the first word and ensure it's lowercase if it's not already camelCase
+    first_word = words[0]
+
+    # If the first character is uppercase, make it lowercase
+    if first_word[0].isupper():
+        camel_case_str = first_word.lower() + "".join(
+            word.capitalize() for word in words[1:]
+        )
+    else:
+        camel_case_str = first_word + "".join(word.capitalize() for word in words[1:])
+
+    return camel_case_str
+
+
+def to_pascal_case(s: str, acronyms: Optional[set[str]] = None) -> str:
+    if acronyms is None:
+        acronyms = {"API", "HTTP", "XML", "ID", "URL", "JSON"}  # Add more as needed
+
+    # Normalize delimiters
+    s = re.sub(r"[-_]", " ", s)
+
+    words = s.split()
+    result = []
+
+    for word in words:
+        upper_word = word.upper()
+        if upper_word in acronyms:
+            result.append(upper_word)
+        else:
+            result.append(word.capitalize())
+
+    return "".join(result)
 
 
 def render_project_django_template(
