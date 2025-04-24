@@ -180,27 +180,24 @@ def to_pascal_case(s: str, acronyms: Optional[set[str]] = None) -> str:
 
 def render_project_django_template(
     template_path: str, context: dict[str, Any]
-) -> list[str]:
-    files = []
-    if not is_valid_python_identifier(context["project_name"]):
+) -> dict[str, Any]:
+    files = {}
+    project_name = context["project_name"]
+    if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
-    folder_path = f"project_{context['project_name']}"
-    try:
-        os.makedirs(folder_path)
-    except OSError:
-        raise FileExistsError(f"Folder {folder_path} already exists")
     for template_name in os.listdir(template_path):
         template = f"django_project/{template_name}"
         if template_name == "settings.py.j2":
             context = {
-                "project_name": context["project_name"],
+                "project_name": project_name,
                 "SECRET_KEY": get_random_secret_key(),
             }
         template_name = template_name.replace(".j2", "")
-        with open(os.path.join(folder_path, template_name), "w") as file:
-            file.write(render_template(template, context))
-            file.write("\n")  # add newline at the end of file for linter
-        files.append(template_name)
+        files[template_name] = (
+            # lambda that returns a function that renders the template with the context
+            # and returns the rendered template
+            lambda t=template, c=context: render_template(t, c) + "\n"
+        )
     return files
 
 

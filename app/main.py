@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import tempfile
 import zipfile
 from contextlib import asynccontextmanager
@@ -212,9 +211,6 @@ async def convert_django(
             f"{first_fname}_models.py",
             f"{first_fname}_views.py",
         ]
-        folder = f"project_{project_name}"
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
@@ -265,22 +261,17 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
 
-    zipf = zipfile.ZipFile(zipfile_path, "w")
-    # write django project template to a folder
+    # write django project template to a dictionary
     files = render_project_django_template(
         os.path.join("app", "templates", "django_project"),
         {"project_name": project_name},
     )
-
-    # write folder to zip
-    root = os.path.abspath(f"project_{project_name}")
-    for file in files:
-        file_path = os.path.join(root, file)
-        if file == "manage.py":
-            zipf.write(file_path, arcname=f"{file}")
-        else:
-            zipf.write(file_path, arcname=f"{project_name}/{file}")
-    zipf.close()
+    with zipfile.ZipFile(zipfile_path, "w") as zipf:
+        for name, file in files.items():
+            arcname = name if name == "manage.py" else f"{project_name}/{name}"
+            zipf.writestr(
+                arcname, file()
+            )  # file is a lambda function that returns rendered template as str
     return files
 
 
@@ -352,9 +343,6 @@ def generate_file_to_be_downloaded(
     with the name of the project and add all the files to it.
     """
     # TODO: make app_name dynamic in the future
-    folder_path = f"project_{project_name}"
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path, ignore_errors=True)
     app_name = "main"
     create_django_project(project_name, zipfile_path)
     create_django_app(project_name, app_name, zipfile_path, models, views)
