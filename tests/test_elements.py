@@ -283,6 +283,20 @@ class TestDependencyElements(unittest.TestCase):
         self.assertIn("My@Spring#Boot$App!", result)
         self.assertIn("org.springframework.boot:spring-boot-starter-web", result)
 
+    def test_print_application_properties(self):
+        """Test: Check if the application.properties file is created correctly."""
+        result = self.dependency_elements.print_application_properties()
+        expected_output = (
+            "springdoc.api-docs.enabled=true\n"
+            + "springdoc.swagger-ui.enabled=true\n"
+            + "spring.datasource.url=jdbc:sqlite:mydatabase.db\n"
+            + "spring.datasource.driver-class-name=org.sqlite.JDBC\n"
+            + "spring.jpa.show-sql=true\n"
+            + "spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect\n"
+            + "spring.jpa.hibernate.ddl-auto=update\n"
+        )
+        self.assertEqual(result, expected_output)
+
 
 if __name__ == "__main__":
     unittest.main()
