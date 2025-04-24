@@ -141,8 +141,9 @@ class FieldObject:
 
         for key, value in self.SPRING_TYPE_MAPPING.items():
             if key.lower() in field_type:
-                return {"name": self.__name, "type": value}
-        return {"name": self.__name, "type": "String"}  # Default fallback
+                return {"name": self.__name, "type": value, "modifier": self.__modifier}
+        # Default fallback
+        return {"name": self.__name, "type": "String", "modifier": self.__modifier}
 
 
 class ParameterObject:
