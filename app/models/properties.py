@@ -94,7 +94,7 @@ class FieldObject:
     def __init__(self):
         self.__name: str = ""
         self.__type: Optional[TypeObject] = None
-        self.__modifier = ""
+        self.__modifier = "private"
 
     def __str__(self) -> str:
         return f"FieldObject:\n\tname: {self.__name}\n\ttype: {self.__type}"

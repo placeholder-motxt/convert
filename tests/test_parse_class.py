@@ -219,8 +219,10 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
 
-        expected_output = """Method return type not found,
-please add a return type for method  methodName(param1: type1, param2: )""".strip()
+        expected_output = (
+            "Method return type not found, \n"
+            "please add a return type for method  methodName(param1: type1, param2: )"
+        ).strip()
 
         self.assertEqual(str(context.exception).strip(), expected_output)
 

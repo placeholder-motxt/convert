@@ -203,7 +203,6 @@ class ParseJsonToObjectClass:
     def __create_attribute(self, attribute: str) -> FieldObject:
         attr_object = FieldObject()
         attr_type = TypeObject()
-
         modifier = attribute.strip(" ")[0]  # check first character
 
         if modifier == "+":

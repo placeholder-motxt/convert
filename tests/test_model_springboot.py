@@ -89,7 +89,7 @@ class TestFieldObjectSpringBootTemplate(unittest.TestCase):
     def setUp(self):
         self.field_object = FieldObject()
 
-    def test_to_springboot_models_template_positive(self):
+    def test_to_springboot_models_template_positive_private(self):
         self.field_object.set_name("test_field")
         type_obj = TypeObject()
         type_obj.set_name("integer")
@@ -99,6 +99,21 @@ class TestFieldObjectSpringBootTemplate(unittest.TestCase):
             "name": "test_field",
             "type": "Integer",
             "modifier": "private",
+        }
+        self.assertEqual(
+            self.field_object.to_springboot_models_template(), expected_output
+        )
+
+    def test_to_springboot_models_template_positive_public(self):
+        self.field_object.set_name("test_field")
+        type_obj = TypeObject()
+        type_obj.set_name("integer")
+        self.field_object.set_type(type_obj)
+        self.field_object.set_modifier("public")
+        expected_output = {
+            "name": "test_field",
+            "type": "Integer",
+            "modifier": "public",
         }
         self.assertEqual(
             self.field_object.to_springboot_models_template(), expected_output
@@ -159,7 +174,7 @@ class TestFieldObjectSpringBootTemplate(unittest.TestCase):
         type_obj = TypeObject()
         type_obj.set_name("float")
         self.field_object.set_type(type_obj)
-        expected_output = {"name": "", "type": "float", "modifier": ""}
+        expected_output = {"name": "", "type": "float", "modifier": "private"}
         self.assertEqual(
             self.field_object.to_springboot_models_template(), expected_output
         )
