@@ -32,6 +32,13 @@ from app.generate_frontend.read.generate_read_page_django import (
     generate_html_read_pages_django,
 )
 from app.generate_frontend.read.read_page_views import generate_read_page_views
+from app.generate_runner.generate_runner import (
+    generate_springboot_linux_runner,
+    generate_springboot_window_runner,
+)
+from app.generate_swagger.generate_swagger import (
+    generate_swagger_config,
+)
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
@@ -233,6 +240,21 @@ async def convert_spring(
         suffix=".zip", delete=False
     )  # pragma: no cover
     tmp_zip_path = tmp_zip.name  # pragma: no cover
+
+    with zipfile.ZipFile(tmp_zip_path, "w") as zipf:
+        # put swagger config to zip
+        swagger_config_content = generate_swagger_config(group_id, project_name)
+        zipf.writestr(
+            f"{group_id.replace('.', '/')}/config/SwaggerConfig.java",
+            swagger_config_content,
+            compress_type=zipfile.ZIP_DEFLATED,
+        )
+
+        # put runner to zip
+        windows_runner = generate_springboot_window_runner()
+        linux_runner = generate_springboot_linux_runner()
+        zipf.writestr("run.bat", windows_runner, compress_type=zipfile.ZIP_DEFLATED)
+        zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
 
     tmp_zip.close()  # pragma: no cover
     return tmp_zip_path  # pragma: no cover
