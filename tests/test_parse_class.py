@@ -219,7 +219,7 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
 
-        expected_output = """Method return type not found, 
+        expected_output = """Method return type not found,
 please add a return type for method  methodName(param1: type1, param2: )""".strip()
 
         self.assertEqual(str(context.exception).strip(), expected_output)
@@ -445,6 +445,89 @@ String getIdDefault() {\n
     throw new UnsupportedOperationException("getIdDefault function is not yet implemented");}
 """
         self.assertEqual(expected, output)
+
+    def test_create_attribute_public(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Positive case: attribute modifier is "+"
+        attribute = "+ publicName: publicType"
+        field_object = self.parse_json._ParseJsonToObjectClass__create_attribute(
+            attribute
+        )
+        self.assertEqual(field_object._FieldObject__modifier, "public")
+        self.assertEqual(field_object._FieldObject__name, "publicName")
+
+    def test_create_attribute_private(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Positive case: attribute modifier is "-"
+        attribute = "- privateName: privateType"
+        field_object = self.parse_json._ParseJsonToObjectClass__create_attribute(
+            attribute
+        )
+        self.assertEqual(field_object._FieldObject__modifier, "private")
+        self.assertEqual(field_object._FieldObject__name, "privateName")
+
+    def test_create_attribute_invalid_modifier(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Negative case: attribute modifier is invalid
+        attribute = "* invalidModifierName: invalidType"
+        with self.assertRaises(ValueError) as context:
+            self.parse_json._ParseJsonToObjectClass__create_attribute(attribute)
+        self.assertEqual(
+            str(context.exception),
+            """First character of class attribute line must be either "+" or "-" !
+                Your attribute line: "* invalidModifierName: invalidType" """,
+        )
+
+    def test_create_attribute_empty_modifier(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Negative case: empty modifier
+        attribute = "  publicName: publicType"
+        with self.assertRaises(ValueError) as context:
+            self.parse_json._ParseJsonToObjectClass__create_attribute(attribute)
+        self.assertEqual(
+            str(context.exception),
+            """First character of class attribute line must be either "+" or "-" !
+                Your attribute line: "  publicName: publicType" """,
+        )
+
+    def test_create_attribute_no_modifier(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Negative case: no modifier, no space at the beginning
+        attribute = "nameWithoutModifier: type"
+        with self.assertRaises(ValueError) as context:
+            self.parse_json._ParseJsonToObjectClass__create_attribute(attribute)
+        self.assertEqual(
+            str(context.exception),
+            """First character of class attribute line must be either "+" or "-" !
+                Your attribute line: "nameWithoutModifier: type" """,
+        )
+
+    def test_create_attribute_multiple_spaces(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Corner case: multiple spaces around modifier
+        attribute = "  +    nameWithSpaces: typeWithSpaces  "
+        field_object = self.parse_json._ParseJsonToObjectClass__create_attribute(
+            attribute
+        )
+        self.assertEqual(field_object._FieldObject__modifier, "public")
+        self.assertEqual(field_object._FieldObject__name, "nameWithSpaces")
+
+    def test_create_attribute_valid_name_and_type(self):
+        data = {}
+        self.parse_json = ParseJsonToObjectClass(data)
+        # Positive case: valid attribute name and type after setting modifier
+        attribute = "+ validName: validType"
+        field_object = self.parse_json._ParseJsonToObjectClass__create_attribute(
+            attribute
+        )
+        self.assertEqual(field_object._FieldObject__name, "validName")
+        self.assertEqual(field_object._FieldObject__type._TypeObject__name, "validType")
 
 
 if __name__ == "__main__":
