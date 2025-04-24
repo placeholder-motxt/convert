@@ -27,12 +27,12 @@ class TestDownloadSpringProject(unittest.IsolatedAsyncioTestCase):
         tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
         with zipfile.ZipFile(tmp_zip.name, "w") as f:
             f.writestr("build.gradle.kts", "testing")
-            f.mkdir("src")
-            f.mkdir("src/main")
-            f.mkdir("src/main/java")
-            f.mkdir("src/main/java/com")
-            f.mkdir("src/main/java/com/motxt")
-            f.mkdir("src/main/java/com/motxt/spring")
+            f.writestr("src", "")
+            f.writestr("src/main", "")
+            f.writestr("src/main/java", "")
+            f.writestr("src/main/java/com", "")
+            f.writestr("src/main/java/com/motxt", "")
+            f.writestr("src/main/java/com/motxt/spring", "")
         tmp_zip.close()
         mock_spring.return_value = tmp_zip.name
         resp = client.post("/convert", json=self.json)
@@ -50,12 +50,12 @@ class TestDownloadSpringProject(unittest.IsolatedAsyncioTestCase):
         """
         tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
         with zipfile.ZipFile(tmp_zip.name, "w") as f:
-            f.mkdir("src")
-            f.mkdir("src/main")
-            f.mkdir("src/main/java")
-            f.mkdir("src/main/java/com")
-            f.mkdir("src/main/java/com/example")
-            f.mkdir("src/main/java/com/example/spring")
+            f.writestr("src", "")
+            f.writestr("src/main", "")
+            f.writestr("src/main/java", "")
+            f.writestr("src/main/java/com", "")
+            f.writestr("src/main/java/com/example", "")
+            f.writestr("src/main/java/com/example/spring", "")
         tmp_zip.close()
         mock_spring.return_value = tmp_zip.name
         self.json.pop("group_id")
