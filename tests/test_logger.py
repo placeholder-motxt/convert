@@ -1,5 +1,8 @@
+import json
 import logging
+import logging.config
 import os
+from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -175,3 +178,69 @@ def test_uvicorn_error_logger_warning_when_unexpected_exception(
                 logging.WARNING,
                 "An error occured: 'somehow key error occured'",
             ) in caplog.record_tuples
+
+
+@pytest.fixture
+def uvicorn_log_config(tmp_path: Path) -> tuple[dict, Path]:
+    """Load the uvicorn logging config with temp directories"""
+    config_path = "logger_conf.json"
+    with open(config_path) as f:
+        config = json.load(f)
+
+    # Update paths to use temp directory
+    log_dir = tmp_path / "logs"
+    log_dir.mkdir()
+
+    config["handlers"]["default"]["filename"] = str(log_dir / "convert.log")
+    config["handlers"]["access"]["filename"] = str(log_dir / "convert_access.log")
+
+    return config, log_dir
+
+
+def test_uvicorn_error_access_log_config_creates_file(
+    uvicorn_log_config: tuple[dict, Path],
+):
+    config, log_dir = uvicorn_log_config
+    logging.config.dictConfig(config)
+    uvicorn_error = logging.getLogger("uvicorn.error")
+    uvicorn_access = logging.getLogger("uvicorn.access")
+
+    uvicorn_error.error("Some error occured!")
+    uvicorn_access.info("%s%s%s%s%s", "127.0.0.1", "GET", "/", "1.1", "200")
+
+    assert (log_dir / "convert.log").exists()
+    assert (log_dir / "convert_access.log").exists()
+
+    with open(log_dir / "convert.log") as f:
+        content = f.read()
+        assert "Some error occured!" in content
+
+    with open(log_dir / "convert_access.log") as f:
+        content = f.read()
+        assert "GET /" in content
+        assert "200" in content
+        assert "127.0.0.1" in content
+
+
+def test_uvicorn_error_access_rotate_when_near_capacity(
+    uvicorn_log_config: tuple[dict, Path],
+):
+    config, log_dir = uvicorn_log_config
+    config["handlers"]["default"]["maxBytes"] = 1024
+    config["handlers"]["access"]["maxBytes"] = 1024
+
+    logging.config.dictConfig(config)
+    uvicorn_error = logging.getLogger("uvicorn.error")
+    uvicorn_access = logging.getLogger("uvicorn.access")
+
+    uvicorn_error.error("A" * 512)
+    uvicorn_error.error("A" * 600)
+    uvicorn_access.info(
+        "%s%s%s%s%s", "127.0.0.1", "GET", "/" + ("A" * 512), "1.1", "200"
+    )
+    uvicorn_access.info(
+        "%s%s%s%s%s", "127.0.0.1", "GET", "/" + ("A" * 600), "1.1", "200"
+    )
+
+    assert len(list(log_dir.glob("convert.log.*"))) > 0
+    assert len(list(log_dir.glob("convert_access.log.*"))) > 0
