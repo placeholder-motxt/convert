@@ -6,13 +6,14 @@ from contextlib import asynccontextmanager
 from io import StringIO
 
 import anyio
+import httpx
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from prometheus_client import Counter, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
-from app.config import APP_CONFIG
+from app.config import APP_CONFIG, SPRING_DEPENDENCIES, SPRING_SERVICE_URL
 from app.generate_frontend.create.create_page_views import generate_create_page_views
 from app.generate_frontend.create.generate_create_page_django import (
     generate_forms_create_page_django,
@@ -42,6 +43,7 @@ from app.models.elements import (
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
+    is_valid_java_group_id,
     is_valid_python_identifier,
     logger,
     remove_file,
@@ -108,7 +110,46 @@ async def convert(
         )
 
     project_name = request.project_name
-    path = project_name + ".zip"
+    try:
+        if request.project_type == "django":
+            tmp_zip_path = await convert_django(project_name, filenames, contents)
+        else:
+            tmp_zip_path = await convert_spring(
+                project_name, request.group_id, filenames, contents
+            )
+        background_tasks.add_task(remove_file, tmp_zip_path)
+
+        return FileResponse(
+            path=tmp_zip_path,
+            filename=project_name + ".zip",
+            media_type="application/zip",
+        )
+
+    except ValueError as ex:
+        ex_str = str(ex)
+        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
+        logger.warning(
+            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(status_code=422, detail=ex_str)
+
+    except HTTPException:
+        raise
+
+    except Exception as ex:
+        ex_str = str(ex)
+        logger.warning(
+            "Unknown error occured: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unknown error occured: {ex_str}\nPlease try again later",
+        )
+
+
+async def convert_django(
+    project_name: str, filenames: list[str], contents: list[list[str]]
+) -> str:
     first_fname = filenames[0]
     tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
     tmp_zip_path = tmp_zip.name
@@ -149,27 +190,14 @@ async def convert(
         )
 
         tmp_zip.close()
-        return FileResponse(
-            path=tmp_zip_path,
-            filename=path,
-            media_type="application/zip",
-        )
+        return tmp_zip_path
 
-    except ValueError as ex:
-        ex_str = str(ex)
-        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
-        logger.warning(
-            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
-        )
-        # When exception is encountered, background tasks are not run
-        # so we need to clean up ourselves
+    except ValueError:
         tmp_zip.close()
         remove_file(tmp_zip_path)
-        raise HTTPException(status_code=422, detail=ex_str)
+        raise
 
-    except Exception:
-        # When exception is encountered, background tasks are not run
-        # so we need to clean up ourselves
+    except Exception:  # Some other exception that might be missed
         tmp_zip.close()
         remove_file(tmp_zip_path)
         raise
@@ -186,7 +214,28 @@ async def convert(
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
-        background_tasks.add_task(remove_file, tmp_zip_path)
+
+
+async def convert_spring(
+    project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
+) -> str:
+    if not is_valid_java_group_id(group_id):
+        msg = f"Invalid group id: {group_id}"
+        logger.warning(msg)
+        raise HTTPException(status_code=400, detail=msg)
+
+    # TODO: All other PBI 8 to integrate here
+    # This line is for quick integration when PBI 8: 3 gets merged
+    # tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
+
+    # Below are not covered yet because there's no real logic yet
+    tmp_zip = tempfile.NamedTemporaryFile(
+        suffix=".zip", delete=False
+    )  # pragma: no cover
+    tmp_zip_path = tmp_zip.name  # pragma: no cover
+
+    tmp_zip.close()  # pragma: no cover
+    return tmp_zip_path  # pragma: no cover
 
 
 def check_duplicate(
@@ -489,3 +538,53 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
     }
+
+
+async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
+    params = {
+        "javaVersion": "21",
+        "artifactId": project_name.lower(),
+        "groupId": group_id,
+        "name": project_name,
+        "packaging": "jar",
+        "type": "gradle-project-kotlin",
+        "dependencies": SPRING_DEPENDENCIES,
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(SPRING_SERVICE_URL, params=params)
+
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=500,
+                detail="Unknown error occured. Initializr service might be down.",
+            )
+
+        content_type = resp.headers["content-type"]
+        if content_type != "application/zip":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected content type from server: {content_type}.",
+            )
+
+        content = resp.content
+        if len(content) == 0:
+            raise HTTPException(
+                status_code=500, detail="Failed to create zip, please try again later."
+            )
+
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=503,
+            detail="Initializr service timed out. Please try again later.",
+        )
+
+    except httpx.NetworkError:
+        raise HTTPException(
+            status_code=503,
+            detail="Cannot connect to Initializr service. Service might be down.",
+        )
+
+    async with anyio.NamedTemporaryFile(suffix=".zip", delete=False) as f:
+        await f.write(content)
+        return f.name

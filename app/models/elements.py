@@ -293,3 +293,59 @@ class RunBatScriptElements(FileElements):
         with open("app/templates/scripts/run.bat.txt", "r", encoding="utf-8") as file:
             bat = file.read()
         return bat
+
+
+class DependencyElements(FileElements):
+    """
+    This class is only for writing script for dependency in springboot framework
+    """
+
+    def print_django_style(self) -> str:  # pragma: no cover
+        """
+        Only for abstract method purposes and doesn't return anything
+        """
+        return super().print_django_style()
+
+    def print_application_properties(self) -> str:
+        config = {
+            "springdoc.api-docs.enabled": "true",
+            "springdoc.swagger-ui.enabled": "true",
+            "spring.datasource.url": "jdbc:sqlite:mydatabase.db",
+            "spring.datasource.driver-class-name": "org.sqlite.JDBC",
+            "spring.jpa.show-sql": "true",
+            "spring.jpa.database-platform": "org.hibernate.community.dialect.SQLiteDialect",
+            "spring.jpa.hibernate.ddl-auto": "update",
+        }
+        return "\n".join(f"{key}={value}" for key, value in config.items()) + "\n"
+
+    def print_springboot_style(self, project_name: str) -> str:
+        context = {
+            "project_name": project_name,
+            "java": "21",
+            "spring_boot": "3.4",
+            "dependencies": [
+                "org.springframework.boot:spring-boot-starter-thymeleaf",
+                "org.springframework.boot:spring-boot-starter-web",
+                "org.springframework.boot:spring-boot-starter-data-jpa",
+                "org.springframework.boot:spring-boot-starter-validation",
+                "org.springframework.boot:spring-boot-starter",
+                "com.zaxxer:HikariCP",
+                "org.xerial:sqlite-jdbc:3.41.2.2",
+                "jakarta.persistence:jakarta.persistence-api:3.1.0",
+                "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0",
+                "org.hibernate:hibernate-core:5.6.9.Final",
+                "org.xerial:sqlite-jdbc:3.41.2.2",
+                "org.hibernate.orm:hibernate-community-dialects",
+            ],
+            "repositories": [
+                "mavenCentral()",
+                "maven { url 'https://repo.spring.io/milestone' }",
+                "maven { url 'https://repo.spring.io/release' }",
+            ],
+        }
+        try:
+            if project_name == "":
+                raise ValueError("Project name cannot be empty!")
+            return render_template("springboot/build.gradle.kts.j2", context=context)
+        except Exception as e:
+            raise ValueError(f"Error rendering template: {e}")
