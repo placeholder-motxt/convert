@@ -156,6 +156,7 @@ listOfTargetclass = models.ManyToManyField('TargetClass')\n\tpass\n\n\n"
         field.set_name("field1")
         field_type.set_name("boolean")
         field.set_type(field_type)
+        field.set_modifier("private")
         self.class_object.add_field(field)
 
         relationship = OneToOneRelationshipObject()
