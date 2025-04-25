@@ -1,9 +1,13 @@
+import os
 import unittest
 from unittest import mock
 
 from app.models.diagram import ClassObject
 from app.models.elements import ModelsElements
 from app.models.properties import FieldObject, TypeObject
+
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = os.path.join(CUR_DIR, "testdata")
 
 
 class TestModelsElementsSpringBootStyle(unittest.TestCase):
@@ -83,6 +87,68 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
             self.assertEqual(len(result), 1)
             self.assertIn("Class1", result)
             self.assertEqual(result["Class1"], "Rendered Class1")
+
+    def test_springboot_style_public_class_method_modifiers(self):
+        class_obj = ClassObject()
+        class_obj.set_name("Class1")
+        class_obj.set_is_public(True)
+
+        field2 = FieldObject()
+        field2.set_name("field2")
+
+        field_type2 = TypeObject()
+        field_type2.set_name("string")
+        field2.set_type(field_type2)
+        field2.set_modifier("public")
+
+        class_obj.add_field(field2)
+
+        models_elements = ModelsElements("ClassObject.java")
+        models_elements.add_class(class_obj)
+
+        result = models_elements.print_springboot_style("burhanpedia")
+        self.assertIn("public", result["Class1"])
+
+    def test_springboot_style_private_class_method_modifiers(self):
+        class_obj = ClassObject()
+        class_obj.set_name("Class1")
+        class_obj.set_is_public(True)
+
+        field1 = FieldObject()
+        field1.set_name("field1")
+
+        field_type1 = TypeObject()
+        field_type1.set_name("string")
+        field1.set_type(field_type1)
+        field1.set_modifier("private")
+
+        class_obj.add_field(field1)
+
+        models_elements = ModelsElements("ClassObject.java")
+        models_elements.add_class(class_obj)
+
+        result = models_elements.print_springboot_style("burhanpedia")
+        self.assertIn("private", result["Class1"])
+
+    def test_springboot_style_default_class_method_modifiers(self):
+        class_obj = ClassObject()
+        class_obj.set_name("Class1")
+        class_obj.set_is_public(True)
+
+        field1 = FieldObject()
+        field1.set_name("field1")
+
+        field_type1 = TypeObject()
+        field_type1.set_name("string")
+        field1.set_type(field_type1)
+
+        class_obj.add_field(field1)
+
+        models_elements = ModelsElements("ClassObject.java")
+        models_elements.add_class(class_obj)
+
+        result = models_elements.print_springboot_style("burhanpedia")
+        self.assertIn("private", result["Class1"])
 
 
 class TestFieldObjectSpringBootTemplate(unittest.TestCase):
