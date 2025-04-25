@@ -31,7 +31,7 @@ class TestInitializeSpringZip(unittest.IsolatedAsyncioTestCase):
             "type": "gradle-project-kotlin",
             "dependencies": SPRING_DEPENDENCIES,
         }
-        mock_get.assert_called_once_with("http://localhost:8080", params=params)
+        mock_get.assert_called_once_with("http://localhost:8080/starter.zip", params=params)
         self.assertTrue(temp_file_path.endswith(".zip"))
         # Verify file exists and has content
         async with await anyio.open_file(temp_file_path, "rb") as f:
