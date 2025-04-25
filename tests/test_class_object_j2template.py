@@ -92,7 +92,11 @@ class TestClassObjJinja2Template(unittest.TestCase):
                     "name": "Item",
                     "parent": "models.Model",
                     "fields": [
-                        {"name": "name", "type": "models.CharField(max_length=255)"}
+                        {
+                            "name": "name",
+                            "type": "models.CharField(max_length=255)",
+                            "modifier": "private",
+                        }
                     ],
                 }
             ]
