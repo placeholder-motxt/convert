@@ -244,3 +244,22 @@ def test_uvicorn_error_access_rotate_when_near_capacity(
 
     assert len(list(log_dir.glob("convert.log.*"))) > 0
     assert len(list(log_dir.glob("convert_access.log.*"))) > 0
+
+
+def test_uvicorn_error_access_max_backup_five(uvicorn_log_config: tuple[dict, Path]):
+    config, log_dir = uvicorn_log_config
+    config["handlers"]["default"]["maxBytes"] = 1024
+    config["handlers"]["access"]["maxBytes"] = 1024
+
+    logging.config.dictConfig(config)
+    uvicorn_error = logging.getLogger("uvicorn.error")
+    uvicorn_access = logging.getLogger("uvicorn.access")
+
+    for _ in range(10):
+        uvicorn_error.error("A" * 512)
+        uvicorn_access.info(
+            "%s%s%s%s%s", "127.0.0.1", "GET", "/" + ("A" * 512), "1.1", "200"
+        )
+
+    assert len(list(log_dir.glob("convert.log.*"))) == 5
+    assert len(list(log_dir.glob("convert_access.log.*"))) == 5
