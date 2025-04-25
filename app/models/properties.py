@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Optional
 
-from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier
+from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier, logger
 
 MODELS_CHARFIELD = "models.CharField(max_length=255)"
 
@@ -110,6 +110,9 @@ class FieldObject:
 
     def set_modifier(self, modifier: str):
         if (modifier != "public") and (modifier != "private"):
+            logger.error(
+                f'Class field modifier must be either "public" or "private" ! Got: {modifier}'
+            )
             raise ValueError(
                 f'Class field modifier must be either "public" or "private" ! Got: {modifier}'
             )
