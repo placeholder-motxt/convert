@@ -201,10 +201,20 @@ class ParseJsonToObjectClass:
         return param_obj
 
     def __create_attribute(self, attribute: str) -> FieldObject:
-        attribute = attribute.lstrip("+- ")
-
-        attr = FieldObject()
+        attr_object = FieldObject()
         attr_type = TypeObject()
+        modifier = attribute.strip(" ")[0]  # check first character
+
+        if modifier == "+":
+            attr_object.set_modifier("public")
+        elif modifier == "-":
+            attr_object.set_modifier("private")
+        else:
+            raise ValueError(
+                f"""First character of class attribute line must be either "+" or "-" !
+                Your attribute line: "{attribute}" """
+            )
+        attribute = attribute.lstrip("+- ")
 
         attr_name = attribute.split(":")[0].strip()
         attr_type_name = attribute.split(":")[1].strip()
@@ -214,16 +224,16 @@ class ParseJsonToObjectClass:
             and self.__check_name(attr_type_name)
             or self.LIST_TYPE_REGEX.match(attr_type_name)
         ):
-            attr.set_name(attr_name)
+            attr_object.set_name(attr_name)
             attr_type.set_name(attr_type_name)
-            attr.set_type(attr_type)
+            attr_object.set_type(attr_type)
 
         else:
             raise ValueError(
                 f"Error: attribute name or type is not valid: {attr_name}, "
                 f"{attr_type_name}"
             )
-        return attr
+        return attr_object
 
     def __determine_strategy(self, edge: dict) -> RelationshipStrategy:
         start_condition = (
