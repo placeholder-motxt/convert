@@ -261,7 +261,7 @@ async def convert_spring(
 
         src_path = group_id.replace(".", "/") + "/" + project_name
 
-        model_files = writer_models.print_springboot_style(project_name)
+        model_files = writer_models.print_springboot_style(project_name, group_id)
         zipf.writestr(
             "application.properties", dependency.print_application_properties()
         )
@@ -273,15 +273,17 @@ async def convert_spring(
             )
             zipf.writestr(
                 write_springboot_path(src_path, "repository", class_object.get_name()),
-                generate_repository_java(project_name, class_object),
+                generate_repository_java(project_name, class_object, group_id),
             )
             zipf.writestr(
                 write_springboot_path(src_path, "service", class_object.get_name()),
-                generate_service_java(project_name, class_object),
+                generate_service_java(project_name, class_object, group_id),
             )
             zipf.writestr(
                 write_springboot_path(src_path, "controller", class_object.get_name()),
-                generate_springboot_controller_file(project_name, class_object),
+                generate_springboot_controller_file(
+                    project_name, class_object, group_id
+                ),
             )
 
     return tmp_zip_path

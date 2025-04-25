@@ -32,7 +32,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
                 f"Rendered {context['name']}"
             )
 
-            result = self.models.print_springboot_style("test_project")
+            result = self.models.print_springboot_style("test_project", "com.example")
 
             self.assertEqual(len(result), 2)
             self.assertIn("Class1", result)
@@ -54,13 +54,13 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
             "app.models.elements.render_template",
             side_effect=Exception("Render error"),
         ):
-            result = self.models.print_springboot_style("test_project")
+            result = self.models.print_springboot_style("test_project", "com.example")
 
             self.assertEqual(result, {})
 
     def test_print_springboot_style_edge_case_no_classes(self):
         """Test: Edge case where no classes are added to the ModelsElements."""
-        result = self.models.print_springboot_style("test_project")
+        result = self.models.print_springboot_style("test_project", "com.example")
         self.assertEqual(result, {})
 
     def test_print_springboot_style_edge_case_empty_project_name(self):
@@ -78,7 +78,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
                 f"Rendered {context['name']}"
             )
 
-            result = self.models.print_springboot_style("")
+            result = self.models.print_springboot_style("", "com.example")
 
             self.assertEqual(len(result), 1)
             self.assertIn("Class1", result)

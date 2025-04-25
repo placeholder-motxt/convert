@@ -106,7 +106,9 @@ class ModelsElements(FileElements):
             logger.error(f"Error rendering template: {e}")
             return ""
 
-    def print_springboot_style(self, project_name: str) -> dict[str, str]:
+    def print_springboot_style(
+        self, project_name: str, group_id: str
+    ) -> dict[str, str]:
         """
         Returns a dictionary containing the class name as the key and
         the rendered model files as the value
@@ -125,6 +127,7 @@ class ModelsElements(FileElements):
             for model_class in self.__classes:
                 ctx = model_class.to_models_springboot_context()
                 ctx["project_name"] = project_name
+                ctx["group_id"] = group_id
 
                 files[model_class.get_name()] = render_template(
                     "springboot/model.j2", context=ctx

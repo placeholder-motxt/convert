@@ -37,7 +37,7 @@ class TestGenerateService(unittest.TestCase):
         field.set_type(field_type)
         class_object.add_field(field)
 
-        output = generate_service_java(project_name, class_object)
+        output = generate_service_java(project_name, class_object, "com.example")
 
         with open(
             "tests/springboot/test_service_data.txt", "r", encoding="utf-8"
@@ -78,12 +78,13 @@ def prepare_context(context):
 
     context["project_name"] = "burhanpedia"
     context["class_object"] = class_object
+    context["group_id"] = "com.example"
 
 
 @when("the jinja process the context")
 def render_template_output(context):
     context["output"] = generate_service_java(
-        context["project_name"], context["class_object"]
+        context["project_name"], context["class_object"], context["group_id"]
     )
 
 
@@ -151,12 +152,13 @@ def prepare_context(context):
 
     context["project_name"] = "burhanpedia"
     context["class_object"] = class_object
+    context["group_id"] = "com.example"
 
 
 @when("the jinja process the context")
 def render_template_output(context):
     context["output"] = generate_service_java(
-        context["project_name"], context["class_object"]
+        context["project_name"], context["class_object"], context["group_id"]
     )
 
 
@@ -214,12 +216,13 @@ def prepare_context(context):
 
     context["project_name"] = "burhanpedia"
     context["class_object"] = class_object
+    context["group_id"] = "com.example"
 
 
 @when("the jinja process the context")
 def render_template_output(context):
     context["output"] = generate_service_java(
-        context["project_name"], context["class_object"]
+        context["project_name"], context["class_object"], context["group_id"]
     )
 
 
@@ -243,12 +246,13 @@ def prepare_context(context):
 
     context["project_name"] = "burhanpedia"
     context["class_object"] = class_object
+    context["group_id"] = "com.example"
 
 
 @when("the jinja process the context")
 def render_template_output(context):
     context["output"] = generate_service_java(
-        context["project_name"], context["class_object"]
+        context["project_name"], context["class_object"], context["group_id"]
     )
 
 
