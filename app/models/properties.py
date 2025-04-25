@@ -129,11 +129,12 @@ class FieldObject:
 
         for key, value in self.DJANGO_TYPE_MAPPING.items():
             if key.lower() in field_type:
-                return {"name": self.__name, "type": value}
+                return {"name": self.__name, "type": value, "modifier": self.__modifier}
 
         return {
             "name": self.__name,
             "type": MODELS_CHARFIELD,
+            "modifier": self.__modifier,
         }  # Default fallback
 
     def to_springboot_models_template(self) -> dict[str, str]:
