@@ -234,7 +234,7 @@ async def convert_spring(
 
     tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
 
-    with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
+    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
         # Section to Parse the Class Diagram
         duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
             dict()
@@ -284,7 +284,7 @@ async def convert_spring(
                 generate_springboot_controller_file(project_name, class_object),
             )
 
-    return tmp_zip_path  # pragma: no cover
+    return tmp_zip_path
 
 
 def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
