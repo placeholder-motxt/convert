@@ -268,39 +268,27 @@ async def convert_spring(
 
         for class_object in writer_models.get_classes():
             zipf.writestr(
-                "src/main/java/"
-                + src_path
-                + "/model/"
-                + class_object.get_name()
-                + ".java",
+                write_springboot_path(src_path, "model", class_object.get_name()),
                 model_files[class_object.get_name()],
             )
             zipf.writestr(
-                "src/main/java/"
-                + src_path
-                + "/repository/"
-                + class_object.get_name()
-                + ".java",
+                write_springboot_path(src_path, "repository", class_object.get_name()),
                 generate_repository_java(project_name, class_object),
             )
             zipf.writestr(
-                "src/main/java/"
-                + src_path
-                + "/service/"
-                + class_object.get_name()
-                + ".java",
+                write_springboot_path(src_path, "service", class_object.get_name()),
                 generate_service_java(project_name, class_object),
             )
             zipf.writestr(
-                "src/main/java/"
-                + src_path
-                + "/controller/"
-                + class_object.get_name()
-                + ".java",
+                write_springboot_path(src_path, "controller", class_object.get_name()),
                 generate_springboot_controller_file(project_name, class_object),
             )
 
     return tmp_zip_path  # pragma: no cover
+
+
+def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
+    return f"src/main/java/{src_path}/{file}/{class_name}.java"
 
 
 def check_duplicate(
