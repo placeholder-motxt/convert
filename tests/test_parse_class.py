@@ -219,11 +219,10 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             parser.parse_classes()
 
-        self.assertEqual(
-            str(context.exception),
-            "Method return type not found, \n"
-            "please add a return type for method  methodName(param1: type1, param2: )",
-        )
+        expected_output = """Method return type not found, 
+please add a return type for method  methodName(param1: type1, param2: )""".strip()
+
+        self.assertEqual(str(context.exception).strip(), expected_output)
 
     def test_invalid_method_parameter_name(self):
         data = ""
@@ -420,6 +419,32 @@ class TestParseJsonToObjectClass(unittest.TestCase):
         for im in invalid_multiplicities:
             with self.assertRaises(ValueError):
                 self.parser._ParseJsonToObjectClass__validate_amount(im)
+
+    def test_modifier_springboot(self):
+        data = ""
+        with open("tests/test_modifier.json") as file:
+            data = file.read()
+        parser = ParseJsonToObjectClass(data)
+
+        res = parser.parse_classes()
+        classobj = res[0]
+        output = ""
+        for methods in classobj.get_methods():
+            output += methods.to_springboot_code() + "\n"
+
+        expected = """\npublic String getId() {\n
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("getId function is not yet implemented");}
+
+private String getIdPrivate() {\n
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("getIdPrivate function is not yet implemented");}
+
+String getIdDefault() {\n
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("getIdDefault function is not yet implemented");}
+"""
+        self.assertEqual(expected, output)
 
 
 if __name__ == "__main__":

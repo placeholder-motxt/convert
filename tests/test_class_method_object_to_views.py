@@ -43,22 +43,56 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result = "def method_full(request, instance_name, param1: int) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += "    raise NotImplementedError('method_full function is not yet implemented')\n"
         result += "    pass\n"
         self.assertEqual(result, self.method_full.to_views_code())
+
+    def test_to_springboot_code_public(self):
+        method = ClassMethodObject()
+        method.set_name("method_full")
+        method.add_parameter(self.param)
+        method.set_return_type(self.return_type)
+        method.set_modifier("public")
+        expected = "public String method_full(int param1) {\n\n"
+        expected += "    // TODO: Auto generated function stub\n"
+        expected += '    throw new UnsupportedOperationException("method_full function is not yet implemented");}\n'
+        self.assertEqual(expected.strip(), method.to_springboot_code().strip())
+
+    def test_to_springboot_code_private(self):
+        method = ClassMethodObject()
+        method.set_name("method_full")
+        method.add_parameter(self.param)
+        method.set_return_type(self.return_type)
+        method.set_modifier("private")
+        expected = "private String method_full(int param1) {\n\n"
+        expected += "    // TODO: Auto generated function stub\n"
+        expected += '    throw new UnsupportedOperationException("method_full function is not yet implemented");}\n'
+
+        self.assertEqual(expected.strip(), method.to_springboot_code().strip())
+
+    def test_to_springboot_code_default(self):
+        method = ClassMethodObject()
+        method.set_name("method_full")
+        method.add_parameter(self.param)
+        method.set_return_type(self.return_type)
+        expected = "String method_full(int param1) {\n\n"
+        expected += "    // TODO: Auto generated function stub\n"
+        expected += '    throw new UnsupportedOperationException("method_full function is not yet implemented");}\n'
+
+        self.assertEqual(expected.strip(), method.to_springboot_code().strip())
 
     def test_to_views_code_no_return_type(self):
         # Should have params and its type annotation but no return type
         result = "def method_params(request, instance_name, param1: int):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         result += "    pass\n"
@@ -69,9 +103,9 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result = "def method_params(request, instance_name, param1):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         result += "    pass\n"
@@ -83,9 +117,9 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result = "def method_rettype(request, instance_name) -> str:\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += "    raise NotImplementedError('method_rettype"
         result += " function is not yet implemented')\n"
@@ -98,9 +132,9 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result = "def method(request, instance_name):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += (
             "    raise NotImplementedError('method function is not yet implemented')\n"
@@ -113,14 +147,21 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result = "def method_rettype(request, instance_name) -> list[ABC]:\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += "    raise NotImplementedError('method_rettype function is not yet implemented')"
         result += "\n"
         result += "    pass\n"
         self.assertEqual(result, self.method_with_return_type_list.to_views_code())
+
+    def test_to_springboot_code_rettype_list(self):
+        result = """\nList<ABC> method_rettype() {
+
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_rettype function is not yet implemented");}"""
+        self.assertEqual(result, self.method_with_return_type_list.to_springboot_code())
 
     def test_to_views_code_multiple_params(self):
         # All params should appear in order with its type annotation
@@ -142,9 +183,9 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         result += " param3: float):\n"
         result += "    # TODO: Auto generated function stub\n"
         result += '    """\n'
-        result += '    This method is empty due to not having any implementation in the sequence diagram submited.\n'
-        result += '    You can resubmit the files again with the function implemented\n'
-        result += '    in the sequence diagram or implement it yourself\n'
+        result += "    This method is empty due to not having any implementation in the sequence diagram submited.\n"
+        result += "    You can resubmit the files again with the function implemented\n"
+        result += "    in the sequence diagram or implement it yourself\n"
         result += '    """\n'
         result += "    raise NotImplementedError('method_params function is not yet implemented')\n"
         result += "    pass\n"
@@ -174,6 +215,16 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
         self.method_with_name.set_name("abcd!")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_name.to_views_code()
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid method name 'abcd!'\n"
+            "please consult the user manual document on how to name methods",
+        )
+
+    def test_to_springboot_code_invalid_method_name(self):
+        self.method_with_name.set_name("abcd!")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_name.to_springboot_code()
         self.assertEqual(
             str(ctx.exception),
             "Invalid method name 'abcd!'\n"
@@ -221,6 +272,16 @@ class TestClassMethodObjectToViewsCode(unittest.TestCase):
             "please consult the user manual document on how to name parameter types",
         )
 
+    def test_to_springboot_code_invalid_param_type(self):
+        self.param_type.set_name("int!@")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_springboot_code()
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid param type 'int!@'\n"
+            "please consult the user manual document on how to name parameter types",
+        )
+
     def test_to_views_code_invalid_param_name(self):
         # Should not happen if parser catches it
         # But if the param name is not a Python identifier
@@ -246,6 +307,16 @@ please consult the user manual document on how to name parameters",
         self.param.set_name("param_!$")
         with self.assertRaises(ValueError) as ctx:
             self.method_with_parameters.to_views_code()
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid param name 'param_!$'\n\
+please consult the user manual document on how to name parameters",
+        )
+
+    def test_to_springboot_code_invalid_param_name(self):
+        self.param.set_name("param_!$")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_parameters.to_springboot_code()
         self.assertEqual(
             str(ctx.exception),
             "Invalid param name 'param_!$'\n\
@@ -289,6 +360,25 @@ please consult the user manual document on how to name parameters",
         self.assertEqual(
             str(ctx.exception),
             "Invalid return type: 'param_!$'\n "
+            "please consult the user manual document on how to name return variables",
+        )
+
+    def test_to_springboot_code_invalid_return_type(self):
+        self.return_type.set_name("param_!$")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_return_type.to_springboot_code()
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid return type: 'param_!$'\n "
+            "please consult the user manual document on how to name return variables",
+        )
+
+        self.return_type.set_name("list[h$]")
+        with self.assertRaises(ValueError) as ctx:
+            self.method_with_return_type.to_springboot_code()
+        self.assertEqual(
+            str(ctx.exception),
+            "Invalid return type: 'list[h$]'\n "
             "please consult the user manual document on how to name return variables",
         )
 

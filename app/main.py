@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import tempfile
 import zipfile
 from contextlib import asynccontextmanager
@@ -15,6 +14,9 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG, SPRING_DEPENDENCIES, SPRING_SERVICE_URL
+from app.generate_controller_springboot.generate_controller_springboot import (
+    generate_springboot_controller_file,
+)
 from app.generate_frontend.create.create_page_views import generate_create_page_views
 from app.generate_frontend.create.generate_create_page_django import (
     generate_forms_create_page_django,
@@ -33,9 +35,14 @@ from app.generate_frontend.read.generate_read_page_django import (
     generate_html_read_pages_django,
 )
 from app.generate_frontend.read.read_page_views import generate_read_page_views
+from app.generate_repository.generate_repository import generate_repository_java
+from app.generate_service_springboot.generate_service_springboot import (
+    generate_service_java,
+)
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
+    DependencyElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -212,9 +219,6 @@ async def convert_django(
             f"{first_fname}_models.py",
             f"{first_fname}_views.py",
         ]
-        folder = f"project_{project_name}"
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
@@ -228,18 +232,65 @@ async def convert_spring(
         logger.warning(msg)
         raise HTTPException(status_code=400, detail=msg)
 
-    # TODO: All other PBI 8 to integrate here
-    # This line is for quick integration when PBI 8: 3 gets merged
-    # tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
+    tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
 
-    # Below are not covered yet because there's no real logic yet
-    tmp_zip = tempfile.NamedTemporaryFile(
-        suffix=".zip", delete=False
-    )  # pragma: no cover
-    tmp_zip_path = tmp_zip.name  # pragma: no cover
+    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
+        # Section to Parse the Class Diagram
+        duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
+            dict()
+        )
 
-    tmp_zip.close()  # pragma: no cover
-    return tmp_zip_path  # pragma: no cover
+        writer_models = ModelsElements("models.py")
+        dependency = DependencyElements("application.properties")
+
+        classes = []
+        for file_name, content in zip(filenames, contents):
+            json_content = json.loads(content[0])
+            diagram_type = json_content.get("diagram", None)
+
+            if diagram_type is None:
+                raise ValueError("Diagram type not found on .jet file")
+
+            if diagram_type == "ClassDiagram":
+                with parse_latency.labels(diagram="UML class").time():
+                    classes = writer_models.parse(json_content)
+
+                    process_parsed_class(classes, duplicate_class_method_checker)
+            else:
+                raise ValueError("Given diagram is not Class Diagram")
+
+        src_path = group_id.replace(".", "/") + "/" + project_name
+
+        model_files = writer_models.print_springboot_style(project_name, group_id)
+        zipf.writestr(
+            "application.properties", dependency.print_application_properties()
+        )
+
+        for class_object in writer_models.get_classes():
+            zipf.writestr(
+                write_springboot_path(src_path, "model", class_object.get_name()),
+                model_files[class_object.get_name()],
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "repository", class_object.get_name()),
+                generate_repository_java(project_name, class_object, group_id),
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "service", class_object.get_name()),
+                generate_service_java(project_name, class_object, group_id),
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "controller", class_object.get_name()),
+                generate_springboot_controller_file(
+                    project_name, class_object, group_id
+                ),
+            )
+
+    return tmp_zip_path
+
+
+def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
+    return f"src/main/java/{src_path}/{file}/{class_name}.java"
 
 
 def check_duplicate(
@@ -265,22 +316,17 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
         raise ValueError("Project name must not contain whitespace or number!")
 
-    zipf = zipfile.ZipFile(zipfile_path, "w")
-    # write django project template to a folder
+    # write django project template to a dictionary
     files = render_project_django_template(
         os.path.join("app", "templates", "django_project"),
         {"project_name": project_name},
     )
-
-    # write folder to zip
-    root = os.path.abspath(f"project_{project_name}")
-    for file in files:
-        file_path = os.path.join(root, file)
-        if file == "manage.py":
-            zipf.write(file_path, arcname=f"{file}")
-        else:
-            zipf.write(file_path, arcname=f"{project_name}/{file}")
-    zipf.close()
+    with zipfile.ZipFile(zipfile_path, "w") as zipf:
+        for name, file in files.items():
+            arcname = name if name == "manage.py" else f"{project_name}/{name}"
+            zipf.writestr(
+                arcname, file()
+            )  # file is a lambda function that returns rendered template as str
     return files
 
 
@@ -352,9 +398,6 @@ def generate_file_to_be_downloaded(
     with the name of the project and add all the files to it.
     """
     # TODO: make app_name dynamic in the future
-    folder_path = f"project_{project_name}"
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path, ignore_errors=True)
     app_name = "main"
     create_django_project(project_name, zipfile_path)
     create_django_app(project_name, app_name, zipfile_path, models, views)
@@ -564,7 +607,7 @@ async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
     }
     try:
         async with httpx.AsyncClient() as client:
-            resp = await client.get(SPRING_SERVICE_URL, params=params)
+            resp = await client.get(SPRING_SERVICE_URL + "/starter.zip", params=params)
 
         if resp.status_code != 200:
             raise HTTPException(
