@@ -127,24 +127,29 @@ class FieldObject:
     def to_models_code_template(self) -> dict[str, str]:
         field_type = self.__type.to_models_code().lower()
 
-        for key, value in self.DJANGO_TYPE_MAPPING.items():
-            if key.lower() in field_type:
-                return {"name": self.__name, "type": value, "modifier": self.__modifier}
-
-        return {
+        result = {
             "name": self.__name,
             "type": MODELS_CHARFIELD,
             "modifier": self.__modifier,
         }  # Default fallback
 
+        for key, value in self.DJANGO_TYPE_MAPPING.items():
+            if key.lower() in field_type:
+                result["type"] = value
+                return result
+        return result
+
     def to_springboot_models_template(self) -> dict[str, str]:
         field_type = self.__type.to_models_code().lower()
 
+        # Default fallback
+        result = {"name": self.__name, "type": "String", "modifier": self.__modifier}
+
         for key, value in self.SPRING_TYPE_MAPPING.items():
             if key.lower() in field_type:
-                return {"name": self.__name, "type": value, "modifier": self.__modifier}
-        # Default fallback
-        return {"name": self.__name, "type": "String", "modifier": self.__modifier}
+                result["type"] = value
+                return result
+        return result
 
 
 class ParameterObject:
