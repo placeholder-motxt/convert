@@ -12,5 +12,5 @@ CMD [ \
     "--host", "0.0.0.0", \
     "--port", "8000", \
     "--workers", "4", \
-    "--log-config", "logger_conf.json" \
+    "--log-config", "${LOG_CONFIG_PATH:-logger_conf.json}" \
 ]
