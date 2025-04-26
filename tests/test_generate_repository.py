@@ -14,4 +14,4 @@ class TestGenerateRepository(unittest.TestCase):
             expected = f.read().strip()
             kelas = ClassObject()
             kelas.set_name("kelas")
-            self.assertEqual(expected, generate_repository_java("projek", kelas))
+            self.assertEqual(expected, generate_repository_java("projek", kelas, "com.example"))

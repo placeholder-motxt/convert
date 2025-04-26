@@ -36,7 +36,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
                 f"Rendered {context['name']}"
             )
 
-            result = self.models.print_springboot_style("test_project")
+            result = self.models.print_springboot_style("test_project", "com.example")
 
             self.assertEqual(len(result), 2)
             self.assertIn("Class1", result)
@@ -58,13 +58,13 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
             "app.models.elements.render_template",
             side_effect=Exception("Render error"),
         ):
-            result = self.models.print_springboot_style("test_project")
+            result = self.models.print_springboot_style("test_project", "com.example")
 
             self.assertEqual(result, {})
 
     def test_print_springboot_style_edge_case_no_classes(self):
         """Test: Edge case where no classes are added to the ModelsElements."""
-        result = self.models.print_springboot_style("test_project")
+        result = self.models.print_springboot_style("test_project", "com.example")
         self.assertEqual(result, {})
 
     def test_print_springboot_style_edge_case_empty_project_name(self):
@@ -82,7 +82,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
                 f"Rendered {context['name']}"
             )
 
-            result = self.models.print_springboot_style("")
+            result = self.models.print_springboot_style("", "com.example")
 
             self.assertEqual(len(result), 1)
             self.assertIn("Class1", result)
@@ -106,7 +106,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
         models_elements = ModelsElements("ClassObject.java")
         models_elements.add_class(class_obj)
 
-        result = models_elements.print_springboot_style("burhanpedia")
+        result = models_elements.print_springboot_style("burhanpedia", "com.example")
         self.assertIn("public", result["Class1"])
 
     def test_springboot_style_private_class_method_modifiers(self):
@@ -127,7 +127,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
         models_elements = ModelsElements("ClassObject.java")
         models_elements.add_class(class_obj)
 
-        result = models_elements.print_springboot_style("burhanpedia")
+        result = models_elements.print_springboot_style("burhanpedia", "com.example")
         self.assertIn("private", result["Class1"])
 
     def test_springboot_style_default_class_method_modifiers(self):
@@ -147,7 +147,7 @@ class TestModelsElementsSpringBootStyle(unittest.TestCase):
         models_elements = ModelsElements("ClassObject.java")
         models_elements.add_class(class_obj)
 
-        result = models_elements.print_springboot_style("burhanpedia")
+        result = models_elements.print_springboot_style("burhanpedia", "com.example")
         self.assertIn("private", result["Class1"])
 
 

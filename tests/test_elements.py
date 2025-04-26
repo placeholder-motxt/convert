@@ -5,6 +5,7 @@ from unittest import mock
 
 from app.models.diagram import ClassObject
 from app.models.elements import (
+    DependencyElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -245,6 +246,56 @@ class TestRequirementsElements(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(Path("./app/requirements.txt").is_file())
         if Path("./app/requirements.txt").is_file():
             os.remove("./app/requirements.txt")
+
+
+class TestDependencyElements(unittest.TestCase):
+    def setUp(self):
+        self.dependency_elements = DependencyElements("build.gradle.kts")
+
+    def test_print_springboot_style_positive_case(self):
+        """Test: Positive case where valid project name is provided."""
+        project_name = "MySpringBootApp"
+        result = self.dependency_elements.print_springboot_style(project_name)
+        self.assertIn("MySpringBootApp", result)
+        self.assertIn("org.springframework.boot:spring-boot-starter-web", result)
+        self.assertIn("mavenCentral()", result)
+
+    def test_print_springboot_style_negative_case_empty_project_name(self):
+        """Test: Negative case where an empty project name is provided."""
+        project_name = ""
+        with self.assertRaises(Exception) as e:
+            self.dependency_elements.print_springboot_style(project_name)
+        self.assertEqual(
+            str(e.exception), "Error rendering template: Project name cannot be empty!"
+        )
+
+    def test_print_springboot_style_edge_case_long_project_name(self):
+        """Test: Edge case where a very long project name is provided."""
+        project_name = "A" * 1000  # Very long project name
+        result = self.dependency_elements.print_springboot_style(project_name)
+        self.assertIn("A" * 1000, result)
+        self.assertIn("org.springframework.boot:spring-boot-starter-web", result)
+
+    def test_print_springboot_style_edge_case_special_characters_in_project_name(self):
+        """Test: Edge case where project name contains special characters."""
+        project_name = "My@Spring#Boot$App!"
+        result = self.dependency_elements.print_springboot_style(project_name)
+        self.assertIn("My@Spring#Boot$App!", result)
+        self.assertIn("org.springframework.boot:spring-boot-starter-web", result)
+
+    def test_print_application_properties(self):
+        """Test: Check if the application.properties file is created correctly."""
+        result = self.dependency_elements.print_application_properties()
+        expected_output = (
+            "springdoc.api-docs.enabled=true\n"
+            + "springdoc.swagger-ui.enabled=true\n"
+            + "spring.datasource.url=jdbc:sqlite:mydatabase.db\n"
+            + "spring.datasource.driver-class-name=org.sqlite.JDBC\n"
+            + "spring.jpa.show-sql=true\n"
+            + "spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect\n"
+            + "spring.jpa.hibernate.ddl-auto=update\n"
+        )
+        self.assertEqual(result, expected_output)
 
 
 if __name__ == "__main__":

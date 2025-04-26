@@ -6,13 +6,17 @@ from contextlib import asynccontextmanager
 from io import StringIO
 
 import anyio
+import httpx
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from prometheus_client import Counter, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
-from app.config import APP_CONFIG
+from app.config import APP_CONFIG, SPRING_DEPENDENCIES, SPRING_SERVICE_URL
+from app.generate_controller_springboot.generate_controller_springboot import (
+    generate_springboot_controller_file,
+)
 from app.generate_frontend.create.create_page_views import generate_create_page_views
 from app.generate_frontend.create.generate_create_page_django import (
     generate_forms_create_page_django,
@@ -31,9 +35,14 @@ from app.generate_frontend.read.generate_read_page_django import (
     generate_html_read_pages_django,
 )
 from app.generate_frontend.read.read_page_views import generate_read_page_views
+from app.generate_repository.generate_repository import generate_repository_java
+from app.generate_service_springboot.generate_service_springboot import (
+    generate_service_java,
+)
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
+    DependencyElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -42,6 +51,7 @@ from app.models.elements import (
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
+    is_valid_java_group_id,
     is_valid_python_identifier,
     logger,
     remove_file,
@@ -108,7 +118,46 @@ async def convert(
         )
 
     project_name = request.project_name
-    path = project_name + ".zip"
+    try:
+        if request.project_type == "django":
+            tmp_zip_path = await convert_django(project_name, filenames, contents)
+        else:
+            tmp_zip_path = await convert_spring(
+                project_name, request.group_id, filenames, contents
+            )
+        background_tasks.add_task(remove_file, tmp_zip_path)
+
+        return FileResponse(
+            path=tmp_zip_path,
+            filename=project_name + ".zip",
+            media_type="application/zip",
+        )
+
+    except ValueError as ex:
+        ex_str = str(ex)
+        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
+        logger.warning(
+            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(status_code=422, detail=ex_str)
+
+    except HTTPException:
+        raise
+
+    except Exception as ex:
+        ex_str = str(ex)
+        logger.warning(
+            "Unknown error occured: " + ex_str.replace("\n", " "), exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unknown error occured: {ex_str}\nPlease try again later",
+        )
+
+
+async def convert_django(
+    project_name: str, filenames: list[str], contents: list[list[str]]
+) -> str:
     first_fname = filenames[0]
     tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
     tmp_zip_path = tmp_zip.name
@@ -149,27 +198,14 @@ async def convert(
         )
 
         tmp_zip.close()
-        return FileResponse(
-            path=tmp_zip_path,
-            filename=path,
-            media_type="application/zip",
-        )
+        return tmp_zip_path
 
-    except ValueError as ex:
-        ex_str = str(ex)
-        error_counter.labels(error_message=translate_to_cat(ex_str)).inc()
-        logger.warning(
-            "Error occurred at parsing: " + ex_str.replace("\n", " "), exc_info=True
-        )
-        # When exception is encountered, background tasks are not run
-        # so we need to clean up ourselves
+    except ValueError:
         tmp_zip.close()
         remove_file(tmp_zip_path)
-        raise HTTPException(status_code=422, detail=ex_str)
+        raise
 
-    except Exception:
-        # When exception is encountered, background tasks are not run
-        # so we need to clean up ourselves
+    except Exception:  # Some other exception that might be missed
         tmp_zip.close()
         remove_file(tmp_zip_path)
         raise
@@ -186,7 +222,75 @@ async def convert(
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
-        background_tasks.add_task(remove_file, tmp_zip_path)
+
+
+async def convert_spring(
+    project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
+) -> str:
+    if not is_valid_java_group_id(group_id):
+        msg = f"Invalid group id: {group_id}"
+        logger.warning(msg)
+        raise HTTPException(status_code=400, detail=msg)
+
+    tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
+
+    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
+        # Section to Parse the Class Diagram
+        duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
+            dict()
+        )
+
+        writer_models = ModelsElements("models.py")
+        dependency = DependencyElements("application.properties")
+
+        classes = []
+        for file_name, content in zip(filenames, contents):
+            json_content = json.loads(content[0])
+            diagram_type = json_content.get("diagram", None)
+
+            if diagram_type is None:
+                raise ValueError("Diagram type not found on .jet file")
+
+            if diagram_type == "ClassDiagram":
+                with parse_latency.labels(diagram="UML class").time():
+                    classes = writer_models.parse(json_content)
+
+                    process_parsed_class(classes, duplicate_class_method_checker)
+            else:
+                raise ValueError("Given diagram is not Class Diagram")
+
+        src_path = group_id.replace(".", "/") + "/" + project_name
+
+        model_files = writer_models.print_springboot_style(project_name, group_id)
+        zipf.writestr(
+            "application.properties", dependency.print_application_properties()
+        )
+
+        for class_object in writer_models.get_classes():
+            zipf.writestr(
+                write_springboot_path(src_path, "model", class_object.get_name()),
+                model_files[class_object.get_name()],
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "repository", class_object.get_name()),
+                generate_repository_java(project_name, class_object, group_id),
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "service", class_object.get_name()),
+                generate_service_java(project_name, class_object, group_id),
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "controller", class_object.get_name()),
+                generate_springboot_controller_file(
+                    project_name, class_object, group_id
+                ),
+            )
+
+    return tmp_zip_path
+
+
+def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
+    return f"src/main/java/{src_path}/{file}/{class_name}.java"
 
 
 def check_duplicate(
@@ -489,3 +593,53 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
     }
+
+
+async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
+    params = {
+        "javaVersion": "21",
+        "artifactId": project_name.lower(),
+        "groupId": group_id,
+        "name": project_name,
+        "packaging": "jar",
+        "type": "gradle-project-kotlin",
+        "dependencies": SPRING_DEPENDENCIES,
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(SPRING_SERVICE_URL + "/starter.zip", params=params)
+
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=500,
+                detail="Unknown error occured. Initializr service might be down.",
+            )
+
+        content_type = resp.headers["content-type"]
+        if content_type != "application/zip":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected content type from server: {content_type}.",
+            )
+
+        content = resp.content
+        if len(content) == 0:
+            raise HTTPException(
+                status_code=500, detail="Failed to create zip, please try again later."
+            )
+
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=503,
+            detail="Initializr service timed out. Please try again later.",
+        )
+
+    except httpx.NetworkError:
+        raise HTTPException(
+            status_code=503,
+            detail="Cannot connect to Initializr service. Service might be down.",
+        )
+
+    async with anyio.NamedTemporaryFile(suffix=".zip", delete=False) as f:
+        await f.write(content)
+        return f.name

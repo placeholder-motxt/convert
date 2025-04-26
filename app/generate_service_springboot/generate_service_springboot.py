@@ -2,7 +2,7 @@ from app.models.diagram import ClassObject
 from app.utils import render_template
 
 
-def generate_service_java(project_name: str, model: ClassObject) -> str:
+def generate_service_java(project_name: str, model: ClassObject, group_id: str) -> str:
     """
     This method is used to generate Service.java for single ClassObject
 
@@ -30,6 +30,7 @@ def generate_service_java(project_name: str, model: ClassObject) -> str:
         "is_public": model.get_is_public(),
         "attributes": attributes,
         "method": method,
+        "group_id": group_id,
     }
     return render_template("springboot/service.java.j2", context)
 
