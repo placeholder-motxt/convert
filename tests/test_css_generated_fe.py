@@ -9,6 +9,7 @@ from app.main import app
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DIR = os.path.join(CUR_DIR, "testdata")
+CSS_DIR = os.path.join(CUR_DIR, "..", "app", "templates", "css")
 
 
 class TestCssGeneratedFrontend(unittest.TestCase):
@@ -26,6 +27,9 @@ class TestCssGeneratedFrontend(unittest.TestCase):
     def test_no_style_in_request_return_default_style(self):
         resp = self.client.post("/convert", json=self.payload)
         self.assertEqual(resp.status_code, 200)
+
+        with open(os.path.join(CSS_DIR, "modern.css")) as f:
+            expected_css = f.read()
         with tempfile.TemporaryFile() as f:
             f.write(resp.content)
             f.seek(0)
@@ -33,11 +37,8 @@ class TestCssGeneratedFrontend(unittest.TestCase):
                 filenames = zipf.namelist()
                 self.assertIn("css/", filenames)
                 self.assertIn("css/style.css", filenames)
-                with zipf.open("templates/base.html") as basef:
-                    self.assertIn(
-                        '<link rel="stylesheet" href="{% static \'css/style.css\' %}">',
-                        basef.read(),
-                    )
+                with zipf.open("css/style.css") as cssf:
+                    self.assertEqual(expected_css, cssf.read())
 
     def test_no_error_all_known_styles(self):
         """Positive case style sent is known value"""
