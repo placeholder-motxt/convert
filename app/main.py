@@ -46,7 +46,7 @@ from app.generate_service_springboot.generate_service_springboot import (
 from app.generate_swagger.generate_swagger import (
     generate_swagger_config,
 )
-from app.model import ConvertRequest, DownloadRequest
+from app.model import ConvertRequest, DownloadRequest, Style
 from app.models.elements import (
     ClassObject,
     DependencyElements,
@@ -77,6 +77,8 @@ async def lifespan(app: FastAPI):  # pragma: no cover
 app = FastAPI(**APP_CONFIG, lifespan=lifespan)
 instrumentator = Instrumentator().instrument(app)
 BASE_STATIC_TEMPLATES_DIR = os.path.join("app", "templates", "django_app")
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+CSS_DIR = os.path.join(CUR_DIR, "templates", "css")
 
 error_counter = Counter(
     "convert_errors_total", "Total number of errors by message", ["error_message"]
@@ -127,7 +129,9 @@ async def convert(
     project_name = request.project_name
     try:
         if request.project_type == "django":
-            tmp_zip_path = await convert_django(project_name, filenames, contents)
+            tmp_zip_path = await convert_django(
+                project_name, filenames, contents, request.style_theme
+            )
         else:
             tmp_zip_path = await convert_spring(
                 project_name, request.group_id, filenames, contents
@@ -163,7 +167,7 @@ async def convert(
 
 
 async def convert_django(
-    project_name: str, filenames: list[str], contents: list[list[str]]
+    project_name: str, filenames: list[str], contents: list[list[str]], style: Style
 ) -> str:
     first_fname = filenames[0]
     tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
@@ -203,6 +207,11 @@ async def convert_django(
             writer_models=writer_models,
             zipfile_path=tmp_zip_path,
         )
+
+        css_file = os.path.join(CSS_DIR, f"{style}.css")
+        with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
+            async with await anyio.open_file(css_file) as cssf:
+                zipf.writestr("static/css/style.css", await cssf.read())
 
         tmp_zip.close()
         return tmp_zip_path
