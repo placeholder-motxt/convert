@@ -38,11 +38,9 @@ class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
             f.write(resp.content)
             f.seek(0)
             with zipfile.ZipFile(f, "r") as zipf:
-                filenames = zipf.namelist()
-                self.assertIn("css/", filenames)
-                self.assertIn("css/style.css", filenames)
-                with zipf.open("css/style.css") as cssf:
-                    self.assertEqual(expected_css, cssf.read())
+                self.assertIn("static/css/style.css", zipf.namelist())
+                with zipf.open("static/css/style.css") as cssf:
+                    self.assertEqual(expected_css, cssf.read().decode("utf-8"))
 
     def test_no_error_all_known_styles(self):
         """Positive case style sent is known value"""
@@ -74,8 +72,8 @@ class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
                 self.project_name, self.filenames, self.contents, style
             )
             with zipfile.ZipFile(tmp_zip_path, "r") as zipf:
-                with zipf.open("css/style.css") as f:
-                    self.assertEqual(expected, f.read())
+                with zipf.open("static/css/style.css") as f:
+                    self.assertEqual(expected, f.read().decode("utf-8"))
 
             os.remove(tmp_zip_path)
 
@@ -87,11 +85,12 @@ class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
             with zipf.open("templates/base.html") as basef:
                 self.assertIn(
                     """<link rel="stylesheet" href="{% static 'css/style.css' %}">""",
-                    basef.read(),
+                    basef.read().decode("utf-8"),
                 )
 
             with zipf.open(f"{self.project_name}/settings.py") as settingsf:
                 self.assertIn(
-                    "STATICFILES_DIRS = [BASE_DIR / 'static']", settingsf.read()
+                    "STATICFILES_DIRS = [BASE_DIR / 'static']",
+                    settingsf.read().decode("utf-8"),
                 )
         os.remove(tmp_zip_path)
