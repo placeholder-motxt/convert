@@ -371,7 +371,7 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         expected_output = {
             "name": "private TargetClass targetClass;",
             "type": '@OneToOne(mappedBy="source_class")\n',
-            "join": "@JoinColumn(name = 'source_class', referencedColumnName = 'id')\n",
+            "join": "@JoinColumn(name = \"source_class\", referencedColumnName = \"id\")\n",
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
@@ -395,7 +395,7 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         expected_output = {
             "name": "private TargetClass targetClass;",
             "type": "@ManyToOne\n",
-            "join": "@JoinColumn(name = 'source_class', referencedColumnName = 'id')\n",
+            "join": "@JoinColumn(name = \"source_class\", referencedColumnName = \"id\")\n",
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
@@ -422,7 +422,7 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         expected_output = {
             "name": "private  ;",
             "type": '@OneToOne(mappedBy="")\n',
-            "join": "@JoinColumn(name = '', referencedColumnName = 'id')\n",
+            "join": "@JoinColumn(name = \"\", referencedColumnName = \"id\")\n",
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 

@@ -93,17 +93,17 @@ def check_model_folder(context):
 
 @then("the zip contains repository folder for all models")
 def check_repository_folder(context):
-    for model in ["Shape", "Circle", "Circles"]:
+    for model in ["ShapeRepository", "CircleRepository", "CirclesRepository"]:
         assert f"{context['src_path']}/repository/{model}.java" in context["file_list"]
 
 @then("the zip contains service folder for all models")
 def check_service_folder(context):
-    for model in ["Shape", "Circle", "Circles"]:
+    for model in ["ShapeService", "CircleService", "CirclesService"]:
         assert f"{context['src_path']}/service/{model}.java" in context["file_list"]
 
 @then("the zip contains controller folder for all models")
 def check_controller_folder(context):
-    for model in ["Shape", "Circle", "Circles"]:
+    for model in ["ShapeController", "CircleController", "CirclesController"]:
         assert f"{context['src_path']}/controller/{model}.java" in context["file_list"]
 
 @then("the zip contains application.properties")
