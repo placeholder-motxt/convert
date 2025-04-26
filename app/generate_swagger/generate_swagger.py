@@ -3,8 +3,8 @@ from app.utils import render_template
 
 
 # Call this to generate SwaggerConfig.java
-def generate_swagger_config(project_name: str) -> str:
-    context = {"project_name": project_name}
+def generate_swagger_config(trailing_name: str, project_name: str) -> str:
+    context = {"trailng_name": trailing_name, "project_name": project_name}
     return render_template("SwaggerConfig.java.j2", context)
 
 

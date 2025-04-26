@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, check_duplicate
+from app.main import app, check_duplicate, convert_spring
 from app.models.elements import ClassObject, ModelsElements
 from app.models.methods import ClassMethodObject
 
@@ -529,3 +529,23 @@ def test_raise_value_error_on_main():
         "Please make sure the file submitted is not corrupt"
     }
     app.dependency_overrides.clear()  # Reset overrides after test
+
+
+@pytest.mark.asyncio
+async def test_convert_spring():
+    with patch("app.main.initialize_springboot_zip") as mock_zip:
+        mock_zip.return_value = "a.zip"
+        content = [
+            [
+                '{"diagram":"ClassDiagram", "nodes":[{"id":0,"methods":"+ '
+                'classMethod(): string", "name":"Test", '
+                '"x":100, "y":100}], "edges":[]}'
+            ],
+        ]
+        response = await convert_spring(
+            "file1", "com.example", ["file.class.jet"], contents=content
+        )
+
+        assert isinstance(response, str)
+        assert os.path.isfile(response)
+        os.remove(response)
