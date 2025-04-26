@@ -106,7 +106,9 @@ class ModelsElements(FileElements):
             logger.error(f"Error rendering template: {e}")
             return ""
 
-    def print_springboot_style(self, project_name: str) -> dict[str, str]:
+    def print_springboot_style(
+        self, project_name: str, group_id: str
+    ) -> dict[str, str]:
         """
         Returns a dictionary containing the class name as the key and
         the rendered model files as the value
@@ -125,6 +127,7 @@ class ModelsElements(FileElements):
             for model_class in self.__classes:
                 ctx = model_class.to_models_springboot_context()
                 ctx["project_name"] = project_name
+                ctx["group_id"] = group_id
 
                 files[model_class.get_name()] = render_template(
                     "springboot/model.j2", context=ctx
@@ -300,8 +303,23 @@ class DependencyElements(FileElements):
     This class is only for writing script for dependency in springboot framework
     """
 
-    def print_django_style(self) -> str:
+    def print_django_style(self) -> str:  # pragma: no cover
+        """
+        Only for abstract method purposes and doesn't return anything
+        """
         return super().print_django_style()
+
+    def print_application_properties(self) -> str:
+        config = {
+            "springdoc.api-docs.enabled": "true",
+            "springdoc.swagger-ui.enabled": "true",
+            "spring.datasource.url": "jdbc:sqlite:mydatabase.db",
+            "spring.datasource.driver-class-name": "org.sqlite.JDBC",
+            "spring.jpa.show-sql": "true",
+            "spring.jpa.database-platform": "org.hibernate.community.dialect.SQLiteDialect",
+            "spring.jpa.hibernate.ddl-auto": "update",
+        }
+        return "\n".join(f"{key}={value}" for key, value in config.items()) + "\n"
 
     def print_springboot_style(self, project_name: str) -> str:
         context = {

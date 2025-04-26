@@ -32,7 +32,7 @@ class TestSequenceViewsJinja2Template(unittest.TestCase):
         ) as f:
             expected = f.read().strip()
 
-        result = generate_springboot_controller_file("burhanpedia", class_object)
+        result = generate_springboot_controller_file("burhanpedia", class_object, "com.example")
         self.assertEqual(result, expected)
 
     @patch(
@@ -55,7 +55,7 @@ class TestSequenceViewsJinja2Template(unittest.TestCase):
         class_object.get_name.return_value = "User"
         to_pascal_case_mock.return_value = "User"
         to_camel_case_mock.return_value = "user"
-        result = generate_springboot_controller_file("burhanpedia", class_object)
+        result = generate_springboot_controller_file("burhanpedia", class_object, "com.example")
         self.assertEqual(result, "")
 
     @patch(
@@ -76,7 +76,7 @@ class TestSequenceViewsJinja2Template(unittest.TestCase):
         render_template_mock.side_effect = Exception("Test exception")
         class_object = mock.Mock()
         class_object.get_name.return_value = ""
-        result = generate_springboot_controller_file("burhanpedia", class_object)
+        result = generate_springboot_controller_file("burhanpedia", class_object, "com.example")
         self.assertEqual(result, "")
 
 
@@ -106,7 +106,7 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
             )
 
             # Act
-            result = generate_springboot_controller_files("hello", models_elements)
+            result = generate_springboot_controller_files("hello", models_elements, "com.example")
 
             # Assert
             self.assertEqual(len(result), 2)  # Expecting two controller files generated
@@ -116,7 +116,7 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
     def test_generate_springboot_controller_files_no_class(self):
         models_elements = MagicMock()
         models_elements.get_classes.return_value = []
-        result = generate_springboot_controller_files("hello", models_elements)
+        result = generate_springboot_controller_files("hello", models_elements, "com.example")
         self.assertEqual(len(result), 0)
 
     def test_generate_springboot_controller_files_no_public_class(self):
@@ -133,7 +133,7 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
         class_object_2.get_is_public.return_value = False
 
         # Act
-        result = generate_springboot_controller_files("hello", models_elements)
+        result = generate_springboot_controller_files("hello", models_elements, "com.example")
 
         # Assert
         self.assertEqual(
@@ -153,7 +153,7 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
         class_object_1.get_name.return_value = ""  # Empty class name
 
         # Act
-        result = generate_springboot_controller_files("hello", models_elements)
+        result = generate_springboot_controller_files("hello", models_elements, "com.example")
 
         # Assert
         self.assertEqual(result, [""])
@@ -177,6 +177,6 @@ class TestGenerateSpringbootControllerFiles(unittest.TestCase):
             side_effect=Exception("Template error"),
         ):
             # Act
-            result = generate_springboot_controller_files("hello", models_elements)
+            result = generate_springboot_controller_files("hello", models_elements, "com.example")
             # Assert
             self.assertEqual(result, [""])

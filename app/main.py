@@ -14,6 +14,9 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG, SPRING_DEPENDENCIES, SPRING_SERVICE_URL
+from app.generate_controller_springboot.generate_controller_springboot import (
+    generate_springboot_controller_file,
+)
 from app.generate_frontend.create.create_page_views import generate_create_page_views
 from app.generate_frontend.create.generate_create_page_django import (
     generate_forms_create_page_django,
@@ -39,9 +42,14 @@ from app.generate_runner.generate_runner import (
 from app.generate_swagger.generate_swagger import (
     generate_swagger_config,
 )
+from app.generate_repository.generate_repository import generate_repository_java
+from app.generate_service_springboot.generate_service_springboot import (
+    generate_service_java,
+)
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
     ClassObject,
+    DependencyElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -231,15 +239,13 @@ async def convert_spring(
         logger.warning(msg)
         raise HTTPException(status_code=400, detail=msg)
 
-    # TODO: All other PBI 8 to integrate here
-    # This line is for quick integration when PBI 8: 3 gets merged
-    # tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
+    tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
 
-    # Below are not covered yet because there's no real logic yet
-    tmp_zip = tempfile.NamedTemporaryFile(
-        suffix=".zip", delete=False
-    )  # pragma: no cover
-    tmp_zip_path = tmp_zip.name  # pragma: no cover
+    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
+        # Section to Parse the Class Diagram
+        duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
+            dict()
+        )
 
     with zipfile.ZipFile(tmp_zip_path, "w") as zipf:
         # put swagger config to zip
@@ -256,8 +262,58 @@ async def convert_spring(
         zipf.writestr("run.bat", windows_runner, compress_type=zipfile.ZIP_DEFLATED)
         zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
 
-    tmp_zip.close()  # pragma: no cover
-    return tmp_zip_path  # pragma: no cover
+
+        writer_models = ModelsElements("models.py")
+        dependency = DependencyElements("application.properties")
+
+        classes = []
+        for file_name, content in zip(filenames, contents):
+            json_content = json.loads(content[0])
+            diagram_type = json_content.get("diagram", None)
+
+            if diagram_type is None:
+                raise ValueError("Diagram type not found on .jet file")
+
+            if diagram_type == "ClassDiagram":
+                with parse_latency.labels(diagram="UML class").time():
+                    classes = writer_models.parse(json_content)
+
+                    process_parsed_class(classes, duplicate_class_method_checker)
+            else:
+                raise ValueError("Given diagram is not Class Diagram")
+
+        src_path = group_id.replace(".", "/") + "/" + project_name
+
+        model_files = writer_models.print_springboot_style(project_name, group_id)
+        zipf.writestr(
+            "application.properties", dependency.print_application_properties()
+        )
+
+        for class_object in writer_models.get_classes():
+            zipf.writestr(
+                write_springboot_path(src_path, "model", class_object.get_name()),
+                model_files[class_object.get_name()],
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "repository", class_object.get_name()),
+                generate_repository_java(project_name, class_object, group_id),
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "service", class_object.get_name()),
+                generate_service_java(project_name, class_object, group_id),
+            )
+            zipf.writestr(
+                write_springboot_path(src_path, "controller", class_object.get_name()),
+                generate_springboot_controller_file(
+                    project_name, class_object, group_id
+                ),
+            )
+
+    return tmp_zip_path
+
+
+def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
+    return f"src/main/java/{src_path}/{file}/{class_name}.java"
 
 
 def check_duplicate(
@@ -574,7 +630,7 @@ async def initialize_springboot_zip(project_name: str, group_id: str) -> str:
     }
     try:
         async with httpx.AsyncClient() as client:
-            resp = await client.get(SPRING_SERVICE_URL, params=params)
+            resp = await client.get(SPRING_SERVICE_URL + "/starter.zip", params=params)
 
         if resp.status_code != 200:
             raise HTTPException(
