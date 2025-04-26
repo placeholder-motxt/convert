@@ -27,10 +27,13 @@ def prepare_context(context):
     asyncio.run(_prepare_context(context))
 
 async def _prepare_context(context):
-    with patch("httpx.AsyncClient") as mock_client_class:
+    with (patch("httpx.AsyncClient") as mock_client_class,
+        patch("app.main.fix_build_gradle_kts") as mock_fix):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {"content-type": "application/zip"}
+
+        mock_fix.return_value = ""
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, 'w') as zipf:
@@ -94,6 +97,7 @@ def check_model_folder(context):
 
 @then("the zip contains repository folder for all models")
 def check_repository_folder(context):
+    print("aaaa",context["file_list"])
     for model in ["ShapeRepository", "CircleRepository", "CirclesRepository"]:
         assert f"{context['src_path']}/repository/{model}.java" in context["file_list"]
 
@@ -140,10 +144,13 @@ def prepare_content(context):
         context["exception"] = e
 
 async def call_convert_spring(context):
-    with patch("httpx.AsyncClient") as mock_client_class:
+    with (patch("httpx.AsyncClient") as mock_client_class,
+        patch("app.main.fix_build_gradle_kts") as mock_fix):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {"content-type": "application/zip"}
+
+        mock_fix.return_value = ""
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, 'w') as zipf:
@@ -218,10 +225,13 @@ def prepare_content2(context):
 
 async def call_convert_spring2(context):
     
-    with patch("httpx.AsyncClient") as mock_client_class:
+    with (patch("httpx.AsyncClient") as mock_client_class,
+        patch("app.main.fix_build_gradle_kts") as mock_fix):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {"content-type": "application/zip"}
+
+        mock_fix.return_value = ""
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, 'w') as zipf:

@@ -533,7 +533,9 @@ def test_raise_value_error_on_main():
 
 @pytest.mark.asyncio
 async def test_convert_spring():
-    with patch("app.main.initialize_springboot_zip") as mock_zip:
+    with (patch("app.main.initialize_springboot_zip") as mock_zip,
+        patch("app.main.fix_build_gradle_kts") as mock_fix):
+        mock_fix.return_value = ""
         mock_zip.return_value = "a.zip"
         content = [
             [
