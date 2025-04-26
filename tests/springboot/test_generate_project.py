@@ -36,6 +36,7 @@ async def _prepare_context(context):
             with zipfile.ZipFile(tmp_zip.name, 'w') as zipf:
                 zipf.writestr("src/main/java/", "")
                 zipf.writestr("src/test/java/", "")
+                zipf.writestr("build.gradle.kts", "")
 
             with open(tmp_zip.name, "rb") as f:
                 mock_response.content = f.read()
