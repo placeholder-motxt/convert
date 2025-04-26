@@ -3,20 +3,24 @@ import tempfile
 import unittest
 import zipfile
 
+import anyio
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, convert_django
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DIR = os.path.join(CUR_DIR, "testdata")
 CSS_DIR = os.path.join(CUR_DIR, "..", "app", "templates", "css")
 
 
-class TestCssGeneratedFrontend(unittest.TestCase):
+class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         with open(os.path.join(TEST_DIR, "BurhanpediaLite.class.jet")) as f:
             self.class_diag = f.read()
 
+        self.filenames = ["BurhanpediaLite.class.jet"]
+        self.contents = [[self.class_diag]]
+        self.project_name = "test_css"
         self.payload = {
             "filename": ["BurhanpediaLite.class.jet"],
             "content": [[self.class_diag]],
@@ -58,3 +62,36 @@ class TestCssGeneratedFrontend(unittest.TestCase):
             self.payload["style_theme"] = style
             resp = self.client.post("/convert", json=self.payload)
             self.assertEqual(resp.status_code, 422)
+
+    async def test_all_styles_give_correct_result(self):
+        styles = ["classic", "dark", "minimalist", "modern", "vibrant"]
+        for style in styles:
+            async with await anyio.open_file(
+                os.path.join(CSS_DIR, f"{style}.css")
+            ) as f:
+                expected = await f.read()
+            tmp_zip_path = await convert_django(
+                self.project_name, self.filenames, self.contents, style
+            )
+            with zipfile.ZipFile(tmp_zip_path, "r") as zipf:
+                with zipf.open("css/style.css") as f:
+                    self.assertEqual(expected, f.read())
+
+            os.remove(tmp_zip_path)
+
+    async def test_static_related_settings_are_added(self):
+        tmp_zip_path = await convert_django(
+            self.project_name, self.filenames, self.contents, "modern"
+        )
+        with zipfile.ZipFile(tmp_zip_path, "r") as zipf:
+            with zipf.open("templates/base.html") as basef:
+                self.assertIn(
+                    """<link rel="stylesheet" href="{% static 'css/style.css' %}">""",
+                    basef.read(),
+                )
+
+            with zipf.open(f"{self.project_name}/settings.py") as settingsf:
+                self.assertIn(
+                    "STATICFILES_DIRS = [BASE_DIR / 'static']", settingsf.read()
+                )
+        os.remove(tmp_zip_path)
