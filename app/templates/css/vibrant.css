@@ -27,6 +27,11 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 th,
@@ -38,20 +43,31 @@ td {
 form {
   max-width: 600px;
   margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 button,
 input[type="submit"] {
   cursor: pointer;
-  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
-  font-weight: 500;
   transition: all 0.2s ease;
+  background-color: #f0abfc;
+  color: #4c1d95;
+  padding: 12px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(240, 171, 252, 0.3);
 }
 
 a {
   text-decoration: none;
+  color: #f0abfc;
+  font-weight: 600;
+  position: relative;
 }
 
 /* Vibrant Theme Styles */
@@ -65,14 +81,6 @@ h1 {
 h2 {
   font-size: 1.8rem;
   color: #f0abfc;
-}
-
-table {
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 th {
@@ -89,14 +97,6 @@ td {
 
 tr:hover {
   background-color: rgba(255, 255, 255, 0.1);
-}
-
-form {
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 input,
@@ -116,27 +116,11 @@ input::placeholder {
   color: rgba(255, 255, 255, 0.6);
 }
 
-button,
-input[type="submit"] {
-  background-color: #f0abfc;
-  color: #4c1d95;
-  padding: 12px 24px;
-  font-weight: 600;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(240, 171, 252, 0.3);
-}
-
 button:hover,
 input[type="submit"]:hover {
   background-color: #e879f9;
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(240, 171, 252, 0.4);
-}
-
-a {
-  color: #f0abfc;
-  font-weight: 600;
-  position: relative;
 }
 
 a:hover {

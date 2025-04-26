@@ -26,6 +26,10 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 th,
@@ -37,20 +41,28 @@ td {
 form {
   max-width: 600px;
   margin-bottom: 20px;
+  background-color: #1e1e1e;
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 button,
 input[type="submit"] {
   cursor: pointer;
-  padding: 8px 16px;
   border: none;
   border-radius: 4px;
   font-weight: 500;
   transition: all 0.2s ease;
+  background-color: #bb86fc;
+  color: #121212;
+  padding: 10px 20px;
 }
 
 a {
   text-decoration: none;
+  color: #03dac6;
+  font-weight: 500;
 }
 
 /* Dark Theme Styles */
@@ -63,13 +75,6 @@ h1 {
 h2 {
   font-size: 1.6rem;
   color: #03dac6;
-}
-
-table {
-  background-color: #1e1e1e;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 th {
@@ -85,13 +90,6 @@ td {
 
 tr:hover {
   background-color: #252525;
-}
-
-form {
-  background-color: #1e1e1e;
-  padding: 24px;
-  border-radius: 4px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 input,
@@ -111,23 +109,9 @@ input::placeholder {
   color: #888;
 }
 
-button,
-input[type="submit"] {
-  background-color: #bb86fc;
-  color: #121212;
-  padding: 10px 20px;
-  font-weight: 500;
-  border-radius: 4px;
-}
-
 button:hover,
 input[type="submit"]:hover {
   background-color: #a370f7;
-}
-
-a {
-  color: #03dac6;
-  font-weight: 500;
 }
 
 a:hover {

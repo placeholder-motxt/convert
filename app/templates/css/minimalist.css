@@ -26,6 +26,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  border: none;
 }
 
 th,
@@ -37,20 +38,27 @@ td {
 form {
   max-width: 600px;
   margin-bottom: 20px;
+  padding: 0;
 }
 
 button,
 input[type="submit"] {
   cursor: pointer;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  background-color: white;
+  color: #333;
+  padding: 10px 20px;
+  font-weight: 400;
+  border: 1px solid #eee;
+  border-radius: 0;
+  transition: all 0.3s;
 }
 
 a {
   text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 2px;
+  transition: all 0.3s;
 }
 
 /* Minimalist Theme Styles */
@@ -65,10 +73,6 @@ h2 {
   font-size: 1.5rem;
   font-weight: 300;
   color: #555;
-}
-
-table {
-  border: none;
 }
 
 th {
@@ -86,10 +90,6 @@ td {
 
 tr:hover {
   background-color: #f9f9f9;
-}
-
-form {
-  padding: 0;
 }
 
 input,
@@ -112,29 +112,11 @@ textarea:focus {
   border-color: #333;
 }
 
-button,
-input[type="submit"] {
-  background-color: white;
-  color: #333;
-  padding: 10px 20px;
-  font-weight: 400;
-  border: 1px solid #eee;
-  border-radius: 0;
-  transition: all 0.3s;
-}
-
 button:hover,
 input[type="submit"]:hover {
   background-color: #333;
   color: white;
   border-color: #333;
-}
-
-a {
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 2px;
-  transition: all 0.3s;
 }
 
 a:hover {

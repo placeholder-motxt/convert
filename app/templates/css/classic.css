@@ -26,6 +26,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  border: 2px solid #8b0000;
 }
 
 th,
@@ -37,6 +38,9 @@ td {
 form {
   max-width: 600px;
   margin-bottom: 20px;
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #d3d3d3;
 }
 
 button,
@@ -44,13 +48,17 @@ input[type="submit"] {
   cursor: pointer;
   padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 0;
   font-weight: 500;
   transition: all 0.2s ease;
+  background-color: #8b0000;
+  color: white;
+  font-family: "Georgia", serif;
 }
 
 a {
-  text-decoration: none;
+  color: #8b0000;
+  text-decoration: underline;
 }
 
 /* Classic Theme Styles */
@@ -65,10 +73,6 @@ h1 {
 h2 {
   font-size: 1.6rem;
   color: #8b0000;
-}
-
-table {
-  border: 2px solid #8b0000;
 }
 
 th {
@@ -87,12 +91,6 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-form {
-  background-color: white;
-  padding: 20px;
-  border: 1px solid #d3d3d3;
-}
-
 input,
 select,
 textarea {
@@ -103,23 +101,9 @@ textarea {
   font-family: inherit;
 }
 
-button,
-input[type="submit"] {
-  background-color: #8b0000;
-  color: white;
-  padding: 8px 16px;
-  font-family: "Georgia", serif;
-  border-radius: 0;
-}
-
 button:hover,
 input[type="submit"]:hover {
   background-color: #a52a2a;
-}
-
-a {
-  color: #8b0000;
-  text-decoration: underline;
 }
 
 a:hover {
