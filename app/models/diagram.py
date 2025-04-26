@@ -206,8 +206,8 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
         target = self.get_target_class().get_name()
         rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")\n'
         join = (
-            f"@JoinColumn(name = '{source.replace(' ', '_')}', "
-            f"referencedColumnName = 'id')\n"
+            f'@JoinColumn(name = "{source.replace(" ", "_")}", '
+            f'referencedColumnName = "id")\n'
         )
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
@@ -246,8 +246,8 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         else:
             rel_type = "@ManyToOne\n"
             join = (
-                f"@JoinColumn(name = '{source.replace(' ', '_')}', "
-                f"referencedColumnName = 'id')\n"
+                f'@JoinColumn(name = "{source.replace(" ", "_")}", '
+                f'referencedColumnName = "id")\n'
             )
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}

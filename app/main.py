@@ -247,7 +247,7 @@ async def convert_spring(
             dict()
         )
 
-    with zipfile.ZipFile(tmp_zip_path, "w") as zipf:
+    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
         # put swagger config to zip
         swagger_config_content = generate_swagger_config(group_id, project_name)
         zipf.writestr(
@@ -312,7 +312,9 @@ async def convert_spring(
 
 
 def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
-    return f"src/main/java/{src_path}/{file}/{class_name}.java"
+    if file == "model":
+        return f"src/main/java/{src_path}/{file}/{class_name}.java"
+    return f"src/main/java/{src_path}/{file}/{class_name}{file.capitalize()}.java"
 
 
 def check_duplicate(
