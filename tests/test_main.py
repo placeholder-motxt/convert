@@ -533,16 +533,19 @@ def test_raise_value_error_on_main():
 
 @pytest.mark.asyncio
 async def test_convert_spring():
-    content = [
-        [
-            '{"diagram":"ClassDiagram", "nodes":[{"methods":"classMethod()", "name":"Test", '
-            '"x":100, "y":100}], "edges":[]}'
-        ],
-    ]
-    response = await convert_spring(
-        "file1", "com.example", ["file.class.jet"], contents=content
-    )
+    with patch("app.main.initialize_springboot_zip") as mock_zip:
+        mock_zip.return_value = "a.zip"
+        content = [
+            [
+                '{"diagram":"ClassDiagram", "nodes":[{"id":0,"methods":"+ '
+                'classMethod(): string", "name":"Test", '
+                '"x":100, "y":100}], "edges":[]}'
+            ],
+        ]
+        response = await convert_spring(
+            "file1", "com.example", ["file.class.jet"], contents=content
+        )
 
-    assert isinstance(response, str)
-    assert os.path.isfile(response)
-    os.remove(response)
+        assert isinstance(response, str)
+        assert os.path.isfile(response)
+        os.remove(response)

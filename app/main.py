@@ -35,16 +35,16 @@ from app.generate_frontend.read.generate_read_page_django import (
     generate_html_read_pages_django,
 )
 from app.generate_frontend.read.read_page_views import generate_read_page_views
+from app.generate_repository.generate_repository import generate_repository_java
 from app.generate_runner.generate_runner import (
     generate_springboot_linux_runner,
     generate_springboot_window_runner,
 )
-from app.generate_swagger.generate_swagger import (
-    generate_swagger_config,
-)
-from app.generate_repository.generate_repository import generate_repository_java
 from app.generate_service_springboot.generate_service_springboot import (
     generate_service_java,
+)
+from app.generate_swagger.generate_swagger import (
+    generate_swagger_config,
 )
 from app.model import ConvertRequest, DownloadRequest
 from app.models.elements import (
@@ -261,7 +261,6 @@ async def convert_spring(
         linux_runner = generate_springboot_linux_runner()
         zipf.writestr("run.bat", windows_runner, compress_type=zipfile.ZIP_DEFLATED)
         zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
-
 
         writer_models = ModelsElements("models.py")
         dependency = DependencyElements("application.properties")
