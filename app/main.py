@@ -130,7 +130,7 @@ async def convert(
             tmp_zip_path = await convert_django(project_name, filenames, contents)
         else:
             tmp_zip_path = await convert_spring(
-                project_name, request.group_id, filenames, contents
+                project_name.lower(), request.group_id.lower(), filenames, contents
             )
         background_tasks.add_task(remove_file, tmp_zip_path)
 
@@ -253,7 +253,7 @@ async def convert_spring(
         # put swagger config to zip
         swagger_config_content = generate_swagger_config(group_id, project_name)
         zipf.writestr(
-            write_springboot_path(src_path, "config", "SwaggerConfig"),
+            write_springboot_path(src_path, "config", "Swagger"),
             swagger_config_content,
             compress_type=zipfile.ZIP_DEFLATED,
         )
@@ -319,7 +319,6 @@ def fix_build_gradle_kts(zipf: zipfile.ZipFile):
         '"org.springdoc:springdoc-openapi-starter-webmvc-ui"',
         '"org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"',
     )
-    print("11", build_gradle_kts)
     zipf.writestr("build.gradle.kts", build_gradle_kts)
 
 
