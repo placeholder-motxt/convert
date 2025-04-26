@@ -247,11 +247,13 @@ async def convert_spring(
             dict()
         )
 
-    with zipfile.ZipFile(tmp_zip_path, "w") as zipf:
+    src_path = group_id.replace(".", "/") + "/" + project_name
+
+    with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
         # put swagger config to zip
         swagger_config_content = generate_swagger_config(group_id, project_name)
         zipf.writestr(
-            f"{group_id.replace('.', '/')}/config/SwaggerConfig.java",
+            write_springboot_path(src_path, "config", "SwaggerConfig.java"),
             swagger_config_content,
             compress_type=zipfile.ZIP_DEFLATED,
         )
@@ -281,8 +283,6 @@ async def convert_spring(
             else:
                 raise ValueError("Given diagram is not Class Diagram")
 
-        src_path = group_id.replace(".", "/") + "/" + project_name
-
         model_files = writer_models.print_springboot_style(project_name, group_id)
         zipf.writestr(
             "application.properties", dependency.print_application_properties()
@@ -307,6 +307,14 @@ async def convert_spring(
                     project_name, class_object, group_id
                 ),
             )
+
+            build_gradle_kts = zipf.open("build.gradle.kts").read().decode()
+            build_gradle_kts = build_gradle_kts.replace(
+                '"org.springdoc:springdoc-openapi-starter-webmvc-ui"',
+                '"org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"',
+            )
+            print("11", build_gradle_kts)
+            zipf.writestr("build.gradle.kts", build_gradle_kts)
 
     return tmp_zip_path
 
