@@ -253,7 +253,7 @@ async def convert_spring(
         # put swagger config to zip
         swagger_config_content = generate_swagger_config(group_id, project_name)
         zipf.writestr(
-            write_springboot_path(src_path, "config", "SwaggerConfig.java"),
+            write_springboot_path(src_path, "config", "SwaggerConfig"),
             swagger_config_content,
             compress_type=zipfile.ZIP_DEFLATED,
         )
@@ -308,15 +308,19 @@ async def convert_spring(
                 ),
             )
 
-            build_gradle_kts = zipf.open("build.gradle.kts").read().decode()
-            build_gradle_kts = build_gradle_kts.replace(
-                '"org.springdoc:springdoc-openapi-starter-webmvc-ui"',
-                '"org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"',
-            )
-            print("11", build_gradle_kts)
-            zipf.writestr("build.gradle.kts", build_gradle_kts)
+            fix_build_gradle_kts(zipf)
 
     return tmp_zip_path
+
+
+def fix_build_gradle_kts(zipf: zipfile.ZipFile):
+    build_gradle_kts = zipf.open("build.gradle.kts").read().decode()
+    build_gradle_kts = build_gradle_kts.replace(
+        '"org.springdoc:springdoc-openapi-starter-webmvc-ui"',
+        '"org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"',
+    )
+    print("11", build_gradle_kts)
+    zipf.writestr("build.gradle.kts", build_gradle_kts)
 
 
 def write_springboot_path(src_path: str, file: str, class_name: str) -> str:

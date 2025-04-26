@@ -29,7 +29,9 @@ def generate_springboot_controller_file(
         "class_camel": to_camel_case(class_name),
         "project_name": project_name,
         "group_id": group_id,
+        "is_public": class_object.get_is_public(),
     }
+    print("uwuwuwu", context)
     try:
         return render_template("springboot_controller.java.j2", context)
     except Exception as e:

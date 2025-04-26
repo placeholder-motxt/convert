@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class {{class_pascal}}Controller {
 
     private final {{class_pascal}}Service {{class_camel}}Service;
-
+{% if is_public %}
     @PostMapping
     @Operation(summary = "Create a new {{class_pascal}}")
     public {{class_pascal}} create{{class_pascal}}(@RequestBody {{class_pascal}} {{class_camel}}) {
@@ -38,5 +38,5 @@ public class {{class_pascal}}Controller {
     @Operation(summary = "Delete a {{class_pascal}} by ID")
     public void delete{{class_pascal}}(@PathVariable String id) {
         {{class_camel}}Service.delete{{class_pascal}}(id);
-    }
+    }{%- endif %}
 }
