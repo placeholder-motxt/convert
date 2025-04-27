@@ -1,3 +1,5 @@
+import re
+
 from app.models.diagram import ClassObject
 from app.utils import render_template
 
@@ -21,7 +23,17 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
     attributes = []
     for attribute in model.get_fields():
         attribute_name = attribute.get_name()
-        attributes.append(attribute_name[0].upper() + attribute_name[1:])
+        name = attribute_name[0].upper() + attribute_name[1:]
+
+        if (
+            attribute.get_type() == "boolean" or attribute.get_type() == "bool"
+        ) and bool(re.match(r"^is[A-Z].*", attribute_name)):
+            getter = attribute.get_name()
+            setter = "set" + attribute.get_name()[2:]
+        else:
+            getter = "get" + attribute_name[0].upper() + attribute_name[1:]
+            setter = "set" + attribute_name[0].upper() + attribute_name[1:]
+        attributes.append((name, getter, setter))
 
     context = {
         "project_name": project_name,

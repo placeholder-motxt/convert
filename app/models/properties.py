@@ -102,6 +102,9 @@ class FieldObject:
     def get_name(self) -> str:  # pragma: no cover
         return self.__name
 
+    def get_type(self) -> str:  # pragma: no cover
+        return self.__type.get_name()
+
     def set_name(self, name: str):
         self.__name = name
 

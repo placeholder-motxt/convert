@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 {%- if parent %}
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-{%- endif -%}
+{%- endif %}
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class {{ name }}{% if parent %} extends {{ parent }}{% endif %} {
     {% if not parent %}

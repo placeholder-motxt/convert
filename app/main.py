@@ -277,7 +277,7 @@ async def convert_spring(
 
             if diagram_type == "ClassDiagram":
                 with parse_latency.labels(diagram="UML class").time():
-                    classes = writer_models.parse(json_content)
+                    classes = writer_models.parse(json_content, bidirectional=True)
 
                     process_parsed_class(classes, duplicate_class_method_checker)
             else:
@@ -308,7 +308,7 @@ async def convert_spring(
                 ),
             )
 
-            fix_build_gradle_kts(zipf)
+        fix_build_gradle_kts(zipf)
 
     return tmp_zip_path
 

@@ -279,7 +279,7 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
         join += f'\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",\n'
         join += f'\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id")\n'
         join += (
-            f'\tinverseJoinColumn = @JoinColumn(name = "'
+            f'\t, inverseJoinColumns = @JoinColumn(name = "'
             f'{target.replace(" ", "_").lower()}_id")\n'
             ")\n"
         )

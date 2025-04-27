@@ -70,10 +70,10 @@ class ModelsElements(FileElements):
     Parses ClassDiagram to classes
     """
 
-    def parse(self, content: str) -> list[ClassObject]:
+    def parse(self, content: str, bidirectional: bool = False) -> list[ClassObject]:
         parser = ParseJsonToObjectClass(content)
         self.__classes = parser.parse_classes()
-        parser.parse_relationships(self.__classes)
+        parser.parse_relationships(self.__classes, bidirectional)
         return self.__classes
 
     """
