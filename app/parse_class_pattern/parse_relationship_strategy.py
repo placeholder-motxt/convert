@@ -37,8 +37,8 @@ class OneToOneStrategy(RelationshipStrategy):
             ro2 = OneToOneRelationshipObject()
             ro2.set_source_class(class_to_id)
             ro2.set_target_class(class_from_id)
-            ro2.set_source_class_own_amount(edge["endLabel"])
-            ro2.set_target_class_own_amount(edge["startLabel"])
+            ro2.set_source_class_own_amount(edge["startLabel"] + "+")
+            ro2.set_target_class_own_amount(edge["endLabel"] + "+")
             class_to_id.add_relationship(ro2)
 
 
@@ -65,8 +65,8 @@ class ManyToOneStrategy(RelationshipStrategy):
             class_from_id.add_relationship(ro)
             if bidirectional:
                 ro2 = ManyToOneRelationshipObject()
-                ro2.set_source_class_own_amount(edge["endLabel"])
-                ro2.set_target_class_own_amount(edge["startLabel"])
+                ro2.set_source_class_own_amount(edge["startLabel"])
+                ro2.set_target_class_own_amount(edge["endLabel"])
                 ro2.set_source_class(class_to_id)
                 ro2.set_target_class(class_from_id)
                 class_to_id.add_relationship(ro2)
@@ -78,8 +78,8 @@ class ManyToOneStrategy(RelationshipStrategy):
             class_to_id.add_relationship(ro)
             if bidirectional:
                 ro2 = ManyToOneRelationshipObject()
-                ro2.set_source_class_own_amount(edge["startLabel"])
-                ro2.set_target_class_own_amount(edge["endLabel"])
+                ro2.set_source_class_own_amount(edge["endLabel"])
+                ro2.set_target_class_own_amount(edge["startLabel"])
                 ro2.set_source_class(class_from_id)
                 ro2.set_target_class(class_to_id)
                 class_from_id.add_relationship(ro2)
@@ -103,6 +103,6 @@ class ManyToManyStrategy(RelationshipStrategy):
             ro2 = ManyToManyRelationshipObject()
             ro2.set_source_class(class_to_id)
             ro2.set_target_class(class_from_id)
-            ro2.set_source_class_own_amount(edge["endLabel"])
-            ro2.set_target_class_own_amount(edge["startLabel"])
+            ro2.set_source_class_own_amount(edge["startLabel"] + "+")
+            ro2.set_target_class_own_amount(edge["endLabel"] + "+")
             class_to_id.add_relationship(ro2)

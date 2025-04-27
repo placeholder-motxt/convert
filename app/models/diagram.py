@@ -204,11 +204,12 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")\n'
-        join = (
-            f'@JoinColumn(name = "{source.replace(" ", "_")}", '
-            f'referencedColumnName = "id")\n'
-        )
+        if self.get_source_class_own_amount() != "1+":
+            rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
+            join = None
+        else:
+            rel_type = "@OneToOne"
+            join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
@@ -241,15 +242,13 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
         if self.get_source_class_own_amount() == "1":
-            rel_type = f'@OneToMany(mappedBy="{source.replace(" ", "_")}")\n'
+            rel_type = f'@OneToMany(mappedBy="{source.replace(" ", "_")}")'
             join = None
+            var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         else:
-            rel_type = "@ManyToOne\n"
-            join = (
-                f'@JoinColumn(name = "{source.replace(" ", "_")}", '
-                f'referencedColumnName = "id")\n'
-            )
-        var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
+            rel_type = "@ManyToOne"
+            join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
+            var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
 
@@ -274,14 +273,15 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = "@ManyToMany\n"
-        join = "@JoinTable(\n"
-        join += f'\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",\n'
-        join += f'\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id")\n'
+        rel_type = "@ManyToMany"
+        join = "@JoinTable("
+        join += f'\n\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
         join += (
-            f'\t, inverseJoinColumns = @JoinColumn(name = "'
-            f'{target.replace(" ", "_").lower()}_id")\n'
-            ")\n"
+            f'\n\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id"),'
+        )
+        join += (
+            f"\n\tinverseJoinColumns = @JoinColumn("
+            f'name = "{target.replace(" ", "_").lower()}_id")\n)'
         )
         var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}

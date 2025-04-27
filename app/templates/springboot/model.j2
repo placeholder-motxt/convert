@@ -30,9 +30,9 @@ public class {{ name }}{% if parent %} extends {{ parent }}{% endif %} {
 
     {%- for relationship in relationships %}
     {{ relationship.type }}
-    {%- if relationship.join -%}
+    {%- if relationship.join %}
     {{ relationship.join }}
-    {%- endif -%}
+    {%- endif %}
     {{ relationship.name }}
-    {% endfor -%}
+    {% endfor %}
 }
