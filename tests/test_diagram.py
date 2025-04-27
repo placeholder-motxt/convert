@@ -368,10 +368,23 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship = OneToOneRelationshipObject()
         relationship.set_source_class(self.source_class)
         relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
         expected_output = {
             "name": "private TargetClass targetClass;",
-            "type": '@OneToOne(mappedBy="source_class")\n',
-            "join": '@JoinColumn(name = "source_class", referencedColumnName = "id")\n',
+            "type": '@OneToOne(mappedBy="source_class")',
+            "join": None,
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_one_to_one_relationship_positive_2(self):
+        relationship = OneToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1+")
+        expected_output = {
+            "name": "private TargetClass targetClass;",
+            "type": "@OneToOne",
+            "join": '@JoinColumn(name = "source_class_id")',
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
@@ -382,7 +395,7 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship.set_source_class_own_amount("1")
         expected_output = {
             "name": "private TargetClass targetClass;",
-            "type": '@OneToMany(mappedBy="source_class")\n',
+            "type": '@OneToMany(mappedBy="source_class")',
             "join": None,
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
@@ -393,9 +406,9 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship.set_target_class(self.target_class)
         relationship.set_source_class_own_amount("*")
         expected_output = {
-            "name": "private TargetClass targetClass;",
-            "type": "@ManyToOne\n",
-            "join": '@JoinColumn(name = "source_class", referencedColumnName = "id")\n',
+            "name": "private List<TargetClass> targetClass;",
+            "type": "@ManyToOne",
+            "join": '@JoinColumn(name = "source_class_id")',
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
@@ -403,13 +416,14 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship = ManyToManyRelationshipObject()
         relationship.set_source_class(self.source_class)
         relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
         expected_output = {
             "name": "private List<TargetClass> listOfTargetClasss;",
-            "type": "@ManyToMany\n",
-            "join": "@JoinTable(\n"
-            '\tname = "source_class_target_class",\n'
-            '\tjoinColumns = @JoinColumn(name = "source_class_id")\n'
-            '\t, inverseJoinColumns = @JoinColumn(name = "target_class_id")\n)\n',
+            "type": "@ManyToMany",
+            "join": "@JoinTable("
+            '\n\tname = "source_class_target_class",'
+            '\n\tjoinColumns = @JoinColumn(name = "source_class_id"),'
+            '\n\tinverseJoinColumns = @JoinColumn(name = "target_class_id")\n)',
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
@@ -419,10 +433,11 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship = OneToOneRelationshipObject()
         relationship.set_source_class(self.source_class)
         relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
         expected_output = {
             "name": "private  ;",
-            "type": '@OneToOne(mappedBy="")\n',
-            "join": '@JoinColumn(name = "", referencedColumnName = "id")\n',
+            "type": '@OneToOne(mappedBy="")',
+            "join": None,
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
@@ -434,11 +449,11 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship.set_target_class(self.target_class)
         expected_output = {
             "name": "private List<> listOfs;",
-            "type": "@ManyToMany\n",
-            "join": "@JoinTable(\n"
-            '\tname = "_",\n'
-            '\tjoinColumns = @JoinColumn(name = "_id")\n'
-            '\t, inverseJoinColumns = @JoinColumn(name = "_id")\n)\n',
+            "type": "@ManyToMany",
+            "join": "@JoinTable("
+            '\n\tname = "_",'
+            '\n\tjoinColumns = @JoinColumn(name = "_id"),'
+            '\n\tinverseJoinColumns = @JoinColumn(name = "_id")\n)',
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
