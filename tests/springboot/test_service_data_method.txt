@@ -27,7 +27,7 @@ public class CartService {
 
         if (existingCart != null) {
 
-            existingCart.setIsFull(cart.getIsFull());
+            existingCart.setFull(cart.isFull());
 
             existingCart.setCartId(cart.getCartId());
 
@@ -46,7 +46,7 @@ public class CartService {
     void method_params(int param1) {
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("method_params function is not yet implemented");}
-    
+
 
     public void method_param2(String param2) {
     // TODO: Auto generated function stub
@@ -57,5 +57,5 @@ public class CartService {
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("method_param3 function is not yet implemented");}
 
-    
+
 }

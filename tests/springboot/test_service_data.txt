@@ -27,8 +27,8 @@ public class CartService {
 
         if (existingCart != null) {
 
-            existingCart.setIsFull(cart.getIsFull());
-            
+            existingCart.setFull(cart.isFull());
+
             existingCart.setCartId(cart.getCartId());
 
             return cartRepository.save(existingCart);
@@ -42,5 +42,5 @@ public class CartService {
         cartRepository.deleteById(id);
     }
 
-    
+
 }
