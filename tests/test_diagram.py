@@ -95,9 +95,9 @@ class TestClassObject(unittest.TestCase):
             self.class_object.to_models_code()
             == "class ClassTest(models.Model):\n\t\
 field1 = models.BooleanField()\n\tfield2 = models.IntegerField()\n\n\t\
-targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)\n\t\
-targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)\n\t\
-listOfTargetclass = models.ManyToManyField(TargetClass)\n\tpass\n\n\n"
+targetclass = models.OneToOneField('TargetClass', on_delete = models.CASCADE)\n\t\
+targetclassFK = models.ForeignKey('TargetClass', on_delete = models.CASCADE)\n\t\
+listOfTargetclass = models.ManyToManyField('TargetClass')\n\tpass\n\n\n"
         )
 
     def test_get_name(self):
@@ -129,7 +129,7 @@ listOfTargetclass = models.ManyToManyField(TargetClass)\n\tpass\n\n\n"
         model.add_relationship(relationship)
         assert (
             model._ClassObject__get_relationships_to_code()
-            == "\tuser = models.OneToOneField(User, on_delete = models.CASCADE)\n"
+            == "\tuser = models.OneToOneField('User', on_delete = models.CASCADE)\n"
         )
 
     def test_get_methods(self):
@@ -144,6 +144,74 @@ listOfTargetclass = models.ManyToManyField(TargetClass)\n\tpass\n\n\n"
         self.assertTrue(model.get_is_public())
         model.set_is_public(False)
         self.assertFalse(model.get_is_public())
+
+    def test_to_models_springboot_context_positive(self):
+        self.class_object.set_name("Test Class")
+        parent_class = ClassObject()
+        parent_class.set_name("Parent Class")
+        self.class_object.set_parent(parent_class)
+
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("field1")
+        field_type.set_name("boolean")
+        field.set_type(field_type)
+        field.set_modifier("private")
+        self.class_object.add_field(field)
+
+        relationship = OneToOneRelationshipObject()
+        target_class = ClassObject()
+        target_class.set_name("Target Class")
+        relationship.set_source_class(self.class_object)
+        relationship.set_target_class(target_class)
+        self.class_object.add_relationship(relationship)
+        target_class.add_relationship(relationship)
+
+        context = self.class_object.to_models_springboot_context()
+
+        expected_context = {
+            "name": "TestClass",
+            "parent": "ParentClass",
+            "fields": [field.to_springboot_models_template()],
+            "relationships": [relationship.to_springboot_models_template()],
+        }
+
+        self.assertEqual(context, expected_context)
+
+    def test_to_models_springboot_context_no_parent(self):
+        self.class_object.set_name("Test Class")
+        context = self.class_object.to_models_springboot_context()
+
+        expected_context = {
+            "name": "TestClass",
+            "parent": None,
+            "fields": [],
+            "relationships": [],
+        }
+
+        self.assertEqual(context, expected_context)
+
+    def test_to_models_springboot_context_edge_case_invalid_field(self):
+        self.class_object.set_name("Test Class")
+        context = self.class_object.to_models_springboot_context()
+        expected_context = {
+            "name": "TestClass",
+            "parent": None,
+            "fields": [],
+            "relationships": [],
+        }
+        self.assertEqual(context, expected_context)
+
+    def test_to_models_springboot_context_edge_case_invalid_relationship(self):
+        self.class_object.set_name("Test Class")
+        context = self.class_object.to_models_springboot_context()
+        expected_context = {
+            "name": "TestClass",
+            "parent": None,
+            "fields": [],
+            "relationships": [],
+        }
+        self.assertEqual(context, expected_context)
 
 
 class TestAbstractRelationshipObject(unittest.TestCase):
@@ -240,7 +308,7 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
         self.one_to_one_relationship.set_target_class(self.target_class)
         assert (
             self.one_to_one_relationship.to_models_code()
-            == "targetclass = models.OneToOneField(TargetClass, on_delete = models.CASCADE)"
+            == "targetclass = models.OneToOneField('TargetClass', on_delete = models.CASCADE)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
@@ -260,7 +328,7 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
         self.many_to_one_relationship.set_target_class(self.target_class)
         assert (
             self.many_to_one_relationship.to_models_code()
-            == "targetclassFK = models.ForeignKey(TargetClass, on_delete = models.CASCADE)"
+            == "targetclassFK = models.ForeignKey('TargetClass', on_delete = models.CASCADE)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
@@ -280,13 +348,115 @@ class TestManyToManyRelationshipObject(unittest.TestCase):
         self.many_to_many_relationship.set_target_class(self.target_class)
         assert (
             self.many_to_many_relationship.to_models_code()
-            == "listOfTargetclass = models.ManyToManyField(TargetClass)"
+            == "listOfTargetclass = models.ManyToManyField('TargetClass')"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
         self.assertIsInstance(
             self.many_to_many_relationship, AbstractRelationshipObject
         )
+
+
+class TestToSpringbootModelsTemplate(unittest.TestCase):
+    def setUp(self):
+        self.source_class = ClassObject()
+        self.target_class = ClassObject()
+        self.source_class.set_name("Source Class")
+        self.target_class.set_name("Target Class")
+
+    def test_one_to_one_relationship_positive(self):
+        relationship = OneToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
+        expected_output = {
+            "name": "private TargetClass targetClass;",
+            "type": '@OneToOne(mappedBy="source_class")',
+            "join": None,
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_one_to_one_relationship_positive_2(self):
+        relationship = OneToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1+")
+        expected_output = {
+            "name": "private TargetClass targetClass;",
+            "type": "@OneToOne",
+            "join": '@JoinColumn(name = "source_class_id")',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_many_to_one_relationship_positive(self):
+        relationship = ManyToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
+        expected_output = {
+            "name": "private TargetClass targetClass;",
+            "type": '@ManyToOne(mappedBy="source_class_id")\n'
+            '@JsonIgnoreProperties("source_classs")',
+            "join": None,
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_many_to_one_relationship_positive_2(self):
+        relationship = ManyToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("*")
+        expected_output = {
+            "name": "private List<TargetClass> targetClasss;",
+            "type": "@OneToMany\n@JsonIgnore",
+            "join": '@JoinColumn(name = "source_class_id")',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_many_to_many_relationship_positive(self):
+        relationship = ManyToManyRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
+        expected_output = {
+            "name": "private List<TargetClass> listOfTargetClasss;",
+            "type": "@ManyToMany\n@JsonIgnore",
+            "join": "@JoinTable("
+            '\n\tname = "source_class_target_class",'
+            '\n\tjoinColumns = @JoinColumn(name = "source_class_id"),'
+            '\n\tinverseJoinColumns = @JoinColumn(name = "target_class_id")\n)',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_one_to_one_relationship_edge_case_empty_names(self):
+        self.source_class.set_name("")
+        self.target_class.set_name("")
+        relationship = OneToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_source_class_own_amount("1")
+        expected_output = {
+            "name": "private  ;",
+            "type": '@OneToOne(mappedBy="")',
+            "join": None,
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_many_to_many_relationship_edge_case_empty_names(self):
+        self.source_class.set_name("")
+        self.target_class.set_name("")
+        relationship = ManyToManyRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        expected_output = {
+            "name": "private List<> listOfs;",
+            "type": "@ManyToMany\n@JsonIgnore",
+            "join": "@JoinTable("
+            '\n\tname = "_",'
+            '\n\tjoinColumns = @JoinColumn(name = "_id"),'
+            '\n\tinverseJoinColumns = @JoinColumn(name = "_id")\n)',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
 
 if __name__ == "__main__":

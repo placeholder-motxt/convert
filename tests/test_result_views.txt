@@ -8,6 +8,11 @@ from django.apps import apps
 
 def getId(request, instance_name) -> str:
     # TODO: Auto generated function stub
+    """
+    This method is empty due to not having any implementation in the sequence diagram submited.
+    You can resubmit the files again with the function implemented
+    in the sequence diagram or implement it yourself
+    """
     raise NotImplementedError('getId function is not yet implemented')
     pass
 
@@ -17,6 +22,11 @@ def getId(request, instance_name) -> str:
 
 def setRadius(request, instance_name, radius):
     # TODO: Auto generated function stub
+    """
+    This method is empty due to not having any implementation in the sequence diagram submited.
+    You can resubmit the files again with the function implemented
+    in the sequence diagram or implement it yourself
+    """
     raise NotImplementedError('setRadius function is not yet implemented')
     pass
 
@@ -26,6 +36,11 @@ def setRadius(request, instance_name, radius):
 
 def findCircle(request, instance_name, circleId):
     # TODO: Auto generated function stub
+    """
+    This method is empty due to not having any implementation in the sequence diagram submited.
+    You can resubmit the files again with the function implemented
+    in the sequence diagram or implement it yourself
+    """
     raise NotImplementedError('findCircle function is not yet implemented')
     pass
 
@@ -37,13 +52,12 @@ def editRadius(request, circleId, radius):
     pass
 
 def landing_page(request):
-    # Get all models in the current app
-    app_models = apps.get_app_config('main').get_models()
 
-    # Create a dictionary with model names and corresponding view names
     model_info = {}
-    for model in app_models:
-        model_info[model._meta.model_name] = model._meta.verbose_name.title()
+    model_info["shape"] = "Shape"
+    model_info["circle"] = "Circle"
+    model_info["circles"] = "Circles"
+    
 
     return render(request, 'landing_page.html', {'model_info': model_info})
 
@@ -82,19 +96,79 @@ def create_circles(request):
 
 def get_shape(request):
     shapes = Shape.objects.all()
-    return render(request, 'shape_list.html', {'shapes': shapes})
+    all_fields = [field.name for field in Shape._meta.get_fields()]
+    shape_data = []
+    
+    for shape in shapes:
+        shape_dict = {}
+        for field_name in all_fields:
+            try:
+                field = Shape._meta.get_field(field_name)
+                if field.is_relation and field.many_to_many:
+                    related_objects = getattr(shape, field_name).all()
+                    shape_dict[field_name] = ", ".join([str(obj) for obj in related_objects]) or "None"
+                else:
+                    shape_dict[field_name] = getattr(shape, field_name)
+            except:
+                shape_dict[field_name] = "N/A"
+        shape_data.append((shape, shape_dict))
+    
+    return render(request, 'shape_list.html', {
+        'shape_data': shape_data,
+        'fields': all_fields,
+    })
 
 
 
 def get_circle(request):
     circles = Circle.objects.all()
-    return render(request, 'circle_list.html', {'circles': circles})
+    all_fields = [field.name for field in Circle._meta.get_fields()]
+    circle_data = []
+    
+    for circle in circles:
+        circle_dict = {}
+        for field_name in all_fields:
+            try:
+                field = Circle._meta.get_field(field_name)
+                if field.is_relation and field.many_to_many:
+                    related_objects = getattr(circle, field_name).all()
+                    circle_dict[field_name] = ", ".join([str(obj) for obj in related_objects]) or "None"
+                else:
+                    circle_dict[field_name] = getattr(circle, field_name)
+            except:
+                circle_dict[field_name] = "N/A"
+        circle_data.append((circle, circle_dict))
+    
+    return render(request, 'circle_list.html', {
+        'circle_data': circle_data,
+        'fields': all_fields,
+    })
 
 
 
 def get_circles(request):
     circless = Circles.objects.all()
-    return render(request, 'circles_list.html', {'circless': circless})
+    all_fields = [field.name for field in Circles._meta.get_fields()]
+    circles_data = []
+    
+    for circles in circless:
+        circles_dict = {}
+        for field_name in all_fields:
+            try:
+                field = Circles._meta.get_field(field_name)
+                if field.is_relation and field.many_to_many:
+                    related_objects = getattr(circles, field_name).all()
+                    circles_dict[field_name] = ", ".join([str(obj) for obj in related_objects]) or "None"
+                else:
+                    circles_dict[field_name] = getattr(circles, field_name)
+            except:
+                circles_dict[field_name] = "N/A"
+        circles_data.append((circles, circles_dict))
+    
+    return render(request, 'circles_list.html', {
+        'circles_data': circles_data,
+        'fields': all_fields,
+    })
 
 
 

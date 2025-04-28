@@ -4,7 +4,7 @@ from abc import ABC
 from io import StringIO
 from typing import Optional
 
-from app.utils import is_valid_python_identifier, render_template
+from app.utils import is_valid_python_identifier, to_camel_case, to_pascal_case
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
@@ -53,7 +53,7 @@ class ClassObject:
 
         return res
 
-    def to_models_code_template(self, template_name: str) -> str:
+    def to_models_code_template_context(self) -> dict[str]:
         ctx = {
             "name": self.get_name(),
             "parent": self.__parent.get_name() if self.__parent else "models.Model",
@@ -66,7 +66,27 @@ class ClassObject:
         for relationship in self.__relationships:
             ctx["fields"].append(relationship.to_models_code_template())
 
-        return render_template(template_name, {"classes": [ctx]})
+        return ctx
+
+    def to_models_springboot_context(self) -> dict[str, dict[str]]:
+        """Returns a dictionary with the class name, parent class name, fields and relationships
+        for the Spring Boot template."""
+        ctx = {
+            "name": to_pascal_case(self.get_name()),
+            "parent": to_pascal_case(self.__parent.get_name())
+            if self.__parent
+            else None,
+            "fields": [],
+            "relationships": [],
+        }
+
+        for field in self.__fields:
+            ctx["fields"].append(field.to_springboot_models_template())
+
+        for relationship in self.__relationships:
+            ctx["relationships"].append(relationship.to_springboot_models_template())
+
+        return ctx
 
     def __str__(self) -> str:
         """__str__ method for debugging purposes."""
@@ -156,6 +176,12 @@ class AbstractRelationshipObject(ABC):
     def get_target_class(self) -> ClassObject:
         return self.__target_class
 
+    def get_source_class_own_amount(self) -> str:  # pragma: no cover
+        return self.__sourceClassOwnAmount
+
+    def get_target_class_own_amount(self) -> str:  # pragma: no cover
+        return self.__targetClassOwnAmount
+
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where the the startLabel and endLabel are both '1'"""
@@ -166,14 +192,26 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
     def to_models_code(self) -> str:
         return (
             f"{self.get_target_class().get_name().lower()} = "
-            + f"models.OneToOneField({self.get_target_class().get_name()},"
+            + f"models.OneToOneField('{self.get_target_class().get_name()}',"
             + " on_delete = models.CASCADE)"
         )
 
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
-        rel_type = f"models.OneToOneField({name}, on_delete=models.CASCADE)"
+        rel_type = f"models.OneToOneField('{name}', on_delete=models.CASCADE)"
         return {"name": name.lower(), "type": rel_type}
+
+    def to_springboot_models_template(self) -> dict[str, str]:
+        source = self.get_source_class().get_name().lower()
+        target = self.get_target_class().get_name()
+        if self.get_source_class_own_amount() != "1+":
+            rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
+            join = None
+        else:
+            rel_type = "@OneToOne"
+            join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
+        var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
+        return {"name": var, "type": rel_type, "join": join}
 
 
 class ManyToOneRelationshipObject(AbstractRelationshipObject):
@@ -191,14 +229,29 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def to_models_code(self) -> str:
         return (
             f"{self.get_target_class().get_name().lower()}FK "
-            + f"= models.ForeignKey({self.get_target_class().get_name()}, "
+            + f"= models.ForeignKey('{self.get_target_class().get_name()}', "
             + "on_delete = models.CASCADE)"
         )
 
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
-        rel_type = f"models.ForeignKey({name}, on_delete=models.CASCADE)"
+        rel_type = f"models.ForeignKey('{name}', on_delete=models.CASCADE)"
         return {"name": f"{name.lower()}FK", "type": rel_type}
+
+    def to_springboot_models_template(self) -> dict[str, str]:
+        source = self.get_source_class().get_name().lower()
+        target = self.get_target_class().get_name()
+        if self.get_source_class_own_amount() == "1":
+            rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")\n'
+            rel_type += f'@JsonIgnoreProperties("{source.replace(" ", "_")}s")'
+            join = None
+            var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
+        else:
+            rel_type = "@OneToMany\n"
+            rel_type += "@JsonIgnore"
+            join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
+            var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
+        return {"name": var, "type": rel_type, "join": join}
 
 
 class ManyToManyRelationshipObject(AbstractRelationshipObject):
@@ -210,11 +263,28 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_models_code(self) -> str:
         return (
             f"listOf{self.get_target_class().get_name().title()}"
-            + f" = models.ManyToManyField({self.get_target_class().get_name()}"
+            + f" = models.ManyToManyField('{self.get_target_class().get_name()}'"
             + ")"
         )
 
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
-        rel_type = f"models.ManyToManyField({name})"
+        rel_type = f"models.ManyToManyField('{name}')"
         return {"name": f"listOf{name.title()}", "type": rel_type}
+
+    def to_springboot_models_template(self) -> dict[str, str]:
+        source = self.get_source_class().get_name().lower()
+        target = self.get_target_class().get_name()
+        rel_type = "@ManyToMany\n"
+        rel_type += "@JsonIgnore"
+        join = "@JoinTable("
+        join += f'\n\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
+        join += (
+            f'\n\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id"),'
+        )
+        join += (
+            f"\n\tinverseJoinColumns = @JoinColumn("
+            f'name = "{target.replace(" ", "_").lower()}_id")\n)'
+        )
+        var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
+        return {"name": var, "type": rel_type, "join": join}

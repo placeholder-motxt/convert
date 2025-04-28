@@ -193,6 +193,58 @@ class TestParameterObject(unittest.TestCase):
         self.assertEqual(temp.get_name(), "TestParameter")
         self.assertEqual(temp._ParameterObject__type, "type1")
 
+    def test_set_modifier_public(self):
+        # Positive test case: setting the modifier to "public"
+        field_object = FieldObject()
+        field_object.set_modifier("public")
+        # Assuming that we have a way to access the __modifier value
+        # (e.g., a getter or making it public)
+        self.assertEqual(field_object._FieldObject__modifier, "public")
+
+    def test_set_modifier_private(self):
+        # Positive test case: setting the modifier to "private"
+        field_object = FieldObject()
+        field_object.set_modifier("private")
+        self.assertEqual(field_object._FieldObject__modifier, "private")
+
+    def test_set_modifier_invalid(self):
+        # Negative test case: setting the modifier to an invalid value
+        field_object = FieldObject()
+        with self.assertRaises(ValueError) as context:
+            field_object.set_modifier("protected")
+        self.assertEqual(
+            str(context.exception),
+            'Class field modifier must be either "public" or "private" ! Got: protected',
+        )
+
+    def test_set_modifier_empty_string(self):
+        # Negative test case: setting the modifier to an empty string
+        field_object = FieldObject()
+        with self.assertRaises(ValueError) as context:
+            field_object.set_modifier("")
+        self.assertEqual(
+            str(context.exception),
+            'Class field modifier must be either "public" or "private" ! Got: ',
+        )
+
+    def test_set_modifier_none(self):
+        # Negative test case: setting the modifier to None
+        field_object = FieldObject()
+        with self.assertRaises(ValueError) as context:
+            field_object.set_modifier(None)
+        self.assertEqual(
+            str(context.exception),
+            'Class field modifier must be either "public" or "private" ! Got: None',
+        )
+
+    def test_set_modifier_multiple_calls(self):
+        # Corner case: setting modifier to "public" and then "private"
+        field_object = FieldObject()
+        field_object.set_modifier("public")
+        self.assertEqual(field_object._FieldObject__modifier, "public")
+        field_object.set_modifier("private")
+        self.assertEqual(field_object._FieldObject__modifier, "private")
+
 
 if __name__ == "__main__":
     unittest.main()

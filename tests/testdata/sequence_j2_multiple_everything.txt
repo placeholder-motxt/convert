@@ -1,0 +1,75 @@
+#-----method from class class_method_1 ------
+
+def class_method_1(request, instance_name, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str) -> str:
+    if condition == True:
+        ret_var_1 = class_method_1(request, instance_1, argument_1, argument_1, argument_1, argument_1, argument_1)
+    ret_var_1 = class_method_1(request, instance_1)
+    if condition == True:
+        class_method_1(request, instance_1)
+    class_method_1(request, )
+    # TODO: Auto generated function stub
+    raise NotImplementedError('class_method_1 function is not yet implemented')
+    pass
+
+
+#-----method from class class_method_1 ------
+
+def class_method_1(request, instance_name, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str) -> str:
+    if condition == True:
+        ret_var_1 = class_method_1(request, instance_1, argument_1, argument_1, argument_1, argument_1, argument_1)
+    ret_var_1 = class_method_1(request, instance_1)
+    if condition == True:
+        class_method_1(request, instance_1)
+    class_method_1(request, )
+    # TODO: Auto generated function stub
+    raise NotImplementedError('class_method_1 function is not yet implemented')
+    pass
+
+
+#-----method from class class_method_1 ------
+
+def class_method_1(request, instance_name, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str) -> str:
+    if condition == True:
+        ret_var_1 = class_method_1(request, instance_1, argument_1, argument_1, argument_1, argument_1, argument_1)
+    ret_var_1 = class_method_1(request, instance_1)
+    if condition == True:
+        class_method_1(request, instance_1)
+    class_method_1(request, )
+    # TODO: Auto generated function stub
+    raise NotImplementedError('class_method_1 function is not yet implemented')
+    pass
+
+
+
+
+def controller_method_1(request, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str):
+    class_method_1(request)
+    if condition == True:
+        class_method_1(request)
+    ret_var_1 = class_method_1(request)
+    if condition == True:
+        ret_var_1 = class_method_1(request, argument_1, argument_1, argument_1, argument_1, argument_1)
+    class_method_1(request)
+    pass
+
+
+def controller_method_1(request, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str):
+    class_method_1(request)
+    if condition == True:
+        class_method_1(request)
+    ret_var_1 = class_method_1(request)
+    if condition == True:
+        ret_var_1 = class_method_1(request, argument_1, argument_1, argument_1, argument_1, argument_1)
+    class_method_1(request)
+    pass
+
+
+def controller_method_1(request, parameter_1: str, parameter_1: str, parameter_1: str, parameter_1: str):
+    class_method_1(request)
+    if condition == True:
+        class_method_1(request)
+    ret_var_1 = class_method_1(request)
+    if condition == True:
+        ret_var_1 = class_method_1(request, argument_1, argument_1, argument_1, argument_1, argument_1)
+    class_method_1(request)
+    pass

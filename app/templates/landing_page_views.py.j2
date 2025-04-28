@@ -1,10 +1,10 @@
-{% raw %}def landing_page(request):
-    # Get all models in the current app
-    app_models = apps.get_app_config('main').get_models()
+def landing_page(request):
 
-    # Create a dictionary with model names and corresponding view names
     model_info = {}
-    for model in app_models:
-        model_info[model._meta.model_name] = model._meta.verbose_name.title()
+    {% for kelas in classes -%}
+    {% if kelas.get_is_public() -%}
+    model_info["{{ kelas.get_name().lower() }}"] = "{{ kelas.get_name().title() }}"
+    {%- endif %}
+    {% endfor%}
 
-    return render(request, 'landing_page.html', {'model_info': model_info}){% endraw %}
+    return render(request, 'landing_page.html', {'model_info': model_info})

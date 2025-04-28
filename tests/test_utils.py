@@ -6,6 +6,9 @@ import pytest
 from app.utils import (  # Import the function from the module
     camel_to_snake,
     render_template,
+    to_camel_case,
+    to_pascal_case,
+    translate_to_cat,
 )
 
 
@@ -141,3 +144,159 @@ class TestRenderTemplate(unittest.TestCase):
             result = render_template("empty_template.html", {})
             # Assert
             self.assertEqual(result, "")
+
+
+class TestToCamelCase(unittest.TestCase):
+    def test_regular_case(self):
+        self.assertEqual(
+            to_camel_case("hello world example string"), "helloWorldExampleString"
+        )
+
+    def test_case_with_underscores(self):
+        self.assertEqual(
+            to_camel_case("hello_world_example_string"), "helloWorldExampleString"
+        )
+
+    def test_case_with_hyphens(self):
+        self.assertEqual(
+            to_camel_case("hello-world-example-string"), "helloWorldExampleString"
+        )
+
+    def test_mixed_case_input(self):
+        self.assertEqual(
+            to_camel_case("HeLLo WoRLd ExaMplE String"), "helloWorldExampleString"
+        )
+
+    def test_no_special_characters(self):
+        self.assertEqual(to_camel_case("helloWorld"), "helloWorld")
+
+    def test_leading_trailing_spaces(self):
+        self.assertEqual(
+            to_camel_case("  hello world example string  "), "helloWorldExampleString"
+        )
+
+    def test_multiple_spaces_between_words(self):
+        self.assertEqual(
+            to_camel_case("hello    world      example    string"),
+            "helloWorldExampleString",
+        )
+
+    def test_empty_string(self):
+        self.assertEqual(to_camel_case(""), "")
+
+    def test_single_word(self):
+        self.assertEqual(to_camel_case("hello"), "hello")
+
+    def test_non_alphanumeric_characters(self):
+        self.assertEqual(to_camel_case("!@#$%^&*()_+"), "")
+
+    def test_random_non_alphanumeric_characters(self):
+        self.assertEqual(to_camel_case("$$$hello###world$$$"), "helloWorld")
+
+
+class TestErrorClassification(unittest.TestCase):
+    def test_error_categories(self):
+        test_cases = [
+            ("Project name must not contain whitespace or number", "invalid_project"),
+            ("App name must not contain whitespace", "invalid_project"),
+            ("File MyProject.zip does not exist", "missing_file"),
+            (
+                "Cannot call class 'UserController' objects not defined in Class Diagram!",
+                "undefined_class",
+            ),
+            ("Error: Invalid JSON format", "invalid_class_file"),
+            (
+                "Nodes not found in the json, \nplease make sure the file isn't corrupt",
+                "invalid_class_file",
+            ),
+            (
+                "Class not found in the json, \nplease make sure the file isn't corrupt",
+                "invalid_class_file",
+            ),
+            ("ModelsElements does not contain any classes", "invalid_class_file"),
+            ("Can't create edit views with no class", "invalid_class_file"),
+            ("The .sequence.jet is not valid", "invalid_sequence_file"),
+            (
+                "please consult the user manual document on how to name classes",
+                "invalid_class_name",
+            ),
+            (
+                "Method return type not found, \nplease add a return type for method save",
+                "invalid_method_return",
+            ),
+            ("method name or method return type name", "invalid_method_return"),
+            (
+                "please consult the user manual document on how to name return variables",
+                "invalid_return_variable",
+            ),
+            ("Too deep self calls on a sequence diagram", "too_many_self_call"),
+            ("Invalid param name", "invalid_param_name"),
+            ("Parameter name please consult the user", "invalid_param_name"),
+            (
+                "please consult the user manual document on how to name parameters",
+                "invalid_param_name",
+            ),
+            ("Error: attribute name or type is not valid", "invalid_attribute_name"),
+            (
+                "Return edge label must be a valid variable name!",
+                "invalid_attribute_name",
+            ),
+            (
+                "please consult the user manual document on how to name parameter types",
+                "invalid_param_type",
+            ),
+            (
+                "Return edge must have a corresponding call edge on sequence diagram",
+                "no_call_edge",
+            ),
+            ("Association multiplicity is empty on relation", "invalid_relation"),
+            ("Invalid use of * in multiplicity on relation", "invalid_relation"),
+            ("Relationship in class diagram is wrong", "invalid_relation"),
+            ("Invalid multiplicity on relationship", "invalid_relation"),
+            (
+                "please consult the user manual document on how to name methods",
+                "invalid_method_name",
+            ),
+            ("method cannot be empty", "invalid_method_name"),
+            ("ClassMethodObject cannot be SET to be None", "invalid_method_name"),
+            (
+                "Duplicate class name 'AccountService' on sequence diagram",
+                "duplicate_class",
+            ),
+            ("instance_name cannot be empty", "invalid_instance_name"),
+            ("please remove one of the parameters", "duplicate_attribute"),
+            ("Something unexpected", "other"),  # unmatched case
+        ]
+
+        for message, expected_category in test_cases:
+            with self.subTest(msg=message):
+                category = translate_to_cat(message)
+                self.assertEqual(category, expected_category)
+
+
+class TestToPascalCase(unittest.TestCase):
+    def test_basic_cases(self):
+        self.assertEqual(to_pascal_case("hello_world"), "HelloWorld")
+        self.assertEqual(to_pascal_case("convert-to-pascal"), "ConvertToPascal")
+        self.assertEqual(
+            to_pascal_case("multiple words with spaces"), "MultipleWordsWithSpaces"
+        )
+
+    def test_acronym_handling(self):
+        self.assertEqual(to_pascal_case("api_response"), "APIResponse")
+        self.assertEqual(to_pascal_case("get_http_status"), "GetHTTPStatus")
+        self.assertEqual(to_pascal_case("parse_xml_data"), "ParseXMLData")
+        self.assertEqual(to_pascal_case("user_id"), "UserID")
+
+    def test_custom_acronym_set(self):
+        acronyms = {"DB", "SQL"}
+        self.assertEqual(to_pascal_case("connect_to_db", acronyms), "ConnectToDB")
+        self.assertEqual(to_pascal_case("run_sql_query", acronyms), "RunSQLQuery")
+
+    def test_edge_cases(self):
+        self.assertEqual(to_pascal_case(""), "")
+        self.assertEqual(to_pascal_case("    "), "")
+        self.assertEqual(
+            to_pascal_case("alreadyPascalCase"), "Alreadypascalcase"
+        )  # no detection of existing PascalCase
+        self.assertEqual(to_pascal_case("123number_test"), "123numberTest")

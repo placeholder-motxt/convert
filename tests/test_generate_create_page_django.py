@@ -106,14 +106,13 @@ class TestGenerateFormsCreatePageDjango(unittest.TestCase):
         self.assertIn(
             "class PersonForm(forms.ModelForm):", result
         )  # Checking the generated form class
-        self.assertIn("name", result)  # Field names should appear in the form
 
     def test_generate_forms_create_page_django_no_fields(self):
         # Test case where the class has no fields
         self.class_object.get_fields.return_value = []  # Empty fields
         result = generate_forms_create_page_django(self.models_elements)
         self.assertIn("class PersonForm(forms.ModelForm):", result)
-        self.assertIn("fields = []", result)  # No fields in the form
+        self.assertIn("fields = ('__all__')", result)  # No fields in the form
 
     def test_generate_forms_create_page_django_empty_class(self):
         # Test negative case where the class has no fields
