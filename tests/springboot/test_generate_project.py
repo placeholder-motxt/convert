@@ -131,7 +131,7 @@ def check_controller_folder(context):
 
 @then("the zip contains application.properties")
 def check_application_properties(context):
-    assert "application.properties" in context["file_list"]
+    assert "src/main/resources/application.properties" in context["file_list"]
 
 
 @given("the context JSON with no diagram type")
