@@ -294,7 +294,8 @@ async def convert_spring(
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
         zipf.writestr(
-            "application.properties", dependency.print_application_properties()
+            "src/main/resources/application.properties",
+            dependency.print_application_properties(),
         )
 
         # Specific line of code to generate HomeController for Swagger Redirection
