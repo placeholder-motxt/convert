@@ -244,11 +244,11 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         if self.get_source_class_own_amount() == "1":
             rel_type = f'@OneToMany(mappedBy="{source.replace(" ", "_")}")'
             join = None
-            var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
+            var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)};"
         else:
             rel_type = "@ManyToOne"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
-            var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)};"
+            var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
 
