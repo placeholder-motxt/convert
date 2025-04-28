@@ -242,11 +242,13 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
         if self.get_source_class_own_amount() == "1":
-            rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")'
+            rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")\n'
+            rel_type += f'@JsonIgnoreProperties("{source.replace(" ", "_")}s")'
             join = None
             var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         else:
-            rel_type = "@OneToMany"
+            rel_type = "@OneToMany\n"
+            rel_type += "@JsonIgnore"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
@@ -273,7 +275,8 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = "@ManyToMany"
+        rel_type = "@ManyToMany\n"
+        rel_type += "@JsonIgnore"
         join = "@JoinTable("
         join += f'\n\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
         join += (

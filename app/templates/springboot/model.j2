@@ -2,6 +2,8 @@ package {{ group_id }}.{{ project_name }}.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 {% if not parent %}
 import io.swagger.v3.oas.annotations.media.Schema;
 {%- endif %}
