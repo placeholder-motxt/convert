@@ -120,7 +120,12 @@ def check_service_folder(context):
 
 @then("the zip contains controller folder for all models")
 def check_controller_folder(context):
-    for model in ["ShapeController", "CircleController", "CirclesController"]:
+    for model in [
+        "ShapeController",
+        "CircleController",
+        "CirclesController",
+        "HomeController",
+    ]:
         assert f"{context['src_path']}/controller/{model}.java" in context["file_list"]
 
 
