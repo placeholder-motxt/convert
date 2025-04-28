@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, check_duplicate, convert_spring
+from app.main import app, check_duplicate, convert_spring, fix_build_gradle_kts
 from app.models.elements import ClassObject, ModelsElements
 from app.models.methods import ClassMethodObject
 
@@ -553,3 +553,27 @@ async def test_convert_spring():
         assert isinstance(response, str)
         assert os.path.isfile(response)
         os.remove(response)
+
+
+def test_fix_build_gradle_kts_with_patch():
+    # Mock the zipfile.ZipFile
+    mock_zipf = MagicMock()
+
+    # Mock reading the original build.gradle.kts content
+    original_content = (
+        'implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")'
+    )
+    expected_content = (
+        'implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")'
+    )
+
+    # Mock zipf.open().read().decode()
+    mock_file = MagicMock()
+    mock_file.read.return_value = original_content.encode("utf-8")
+    mock_zipf.open.return_value = mock_file
+
+    # Call the function with the mocked zip
+    fix_build_gradle_kts(mock_zipf)
+
+    # Check that writestr is called with the correct modified content
+    mock_zipf.writestr.assert_called_once_with("build.gradle.kts", expected_content)
