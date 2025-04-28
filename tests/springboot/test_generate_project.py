@@ -61,9 +61,9 @@ async def _prepare_context(context):
             "content": [
                 [
                     '{"diagram":"ClassDiagram","nodes":['
-                    '{"methods":"","name":"Shape","x":100,"y":70,"attributes":"+ colour: string","id":0,"type":"ClassNode"},'
-                    '{"methods":"+ getId (): string\\n+ setRadius (radius: integer): void","name":"Circle","x":320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":"ClassNode"},'
-                    '{"methods":"+ findCircle(circleid: string): string","name":"Circles","x":190,"y":300,"attributes":"","id":2,"type":"ClassNode"}'
+                    '{"methods":"","name":"+ Shape","x":100,"y":70,"attributes":"+ colour: string","id":0,"type":"ClassNode"},'
+                    '{"methods":"+ getId (): string\\n+ setRadius (radius: integer): void","name":"+ Circle","x":320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":"ClassNode"},'
+                    '{"methods":"+ findCircle(circleid: string): string","name":"+ Circles","x":190,"y":300,"attributes":"","id":2,"type":"ClassNode"}'
                     '],"edges":['
                     '{"Generalization Type":"Inheritance","start":1,"end":0,"type":"GeneralizationEdge"},'
                     '{"startLabel":"*","middleLabel":"","start":1,"directionality":"Unspecified","end":2,"endLabel":"1","type":"AssociationEdge"}'
