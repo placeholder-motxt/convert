@@ -1,0 +1,42 @@
+package {{group_id}}.{{project_name}}.controller;
+
+import {{group_id}}.{{project_name}}.model.{{class_pascal}};
+import {{group_id}}.{{project_name}}.service.{{class_pascal}}Service;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+@RestController
+@RequestMapping("/{{class_camel}}")
+@RequiredArgsConstructor
+public class {{class_pascal}}Controller {
+
+    private final {{class_pascal}}Service {{class_camel}}Service;
+{% if is_public %}
+    @PostMapping
+    @Operation(summary = "Create a new {{class_pascal}}")
+    public {{class_pascal}} create{{class_pascal}}(@RequestBody {{class_pascal}} {{class_camel}}) {
+        // Do not pass the id to create a {{class_pascal}}, it will be auto-generated
+        return {{class_camel}}Service.create{{class_pascal}}({{class_camel}});
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a {{class_camel}} by ID")
+    public {{class_pascal}} get{{class_pascal}}(@PathVariable String id) {
+        return {{class_camel}}Service.get{{class_pascal}}(id);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update an existing {{class_pascal}}")
+    public {{class_pascal}} update{{class_pascal}}(@RequestBody {{class_pascal}} {{class_camel}}, @PathVariable String id) {
+        return {{class_camel}}Service.update{{class_pascal}}({{class_camel}}, id);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a {{class_pascal}} by ID")
+    public void delete{{class_pascal}}(@PathVariable String id) {
+        {{class_camel}}Service.delete{{class_pascal}}(id);
+    }{%- endif %}
+}

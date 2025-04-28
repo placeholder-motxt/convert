@@ -1,0 +1,1 @@
+{"diagram":"ClassDiagram","nodes":[{"methods":"+ getId(): string\n- getIdPrivate(): string\ngetIdDefault(): string","name":"Tes","x":510,"y":140,"attributes":"- id: string","id":0,"type":"ClassNode"}],"edges":[],"version":"3.8"}

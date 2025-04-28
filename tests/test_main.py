@@ -1,11 +1,10 @@
 import os
 from unittest.mock import MagicMock, Mock, patch
 
-import anyio
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, check_duplicate
+from app.main import app, check_duplicate, convert_spring, fix_build_gradle_kts
 from app.models.elements import ClassObject, ModelsElements
 from app.models.methods import ClassMethodObject
 
@@ -142,15 +141,13 @@ async def test_convert_endpoint_valid_content_class_diagram():
             "project_name": "file1",
         }
 
-        async with await anyio.open_file("file1.zip", "w") as f:
-            await f.write("")
-
         # Send the request to the endpoint
         response = client.post("/convert", json=payload)
         # Validate the response
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
 
 
 @pytest.mark.asyncio
@@ -210,8 +207,9 @@ async def test_convert_endpoint_class_diagram():
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
         assert response.content.startswith(
-            b"PK"
+            b"PK\x03\x04"
         )  # Check that the response is a zip file
 
 
@@ -271,8 +269,9 @@ async def test_convert_endpoint_sequence_diagram():
         # Validate the response
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
         assert response.content.startswith(
-            b"PK"
+            b"PK\x03\x04"
         )  # Check that the response is a zip file
 
 
@@ -361,6 +360,7 @@ async def test_convert_endpoint_valid_sequence_diagram():
         mock_check_duplicate.assert_called()
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
 
 
 @pytest.mark.asyncio
@@ -397,6 +397,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
 
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
+        assert "file1.zip" in response.headers["content-disposition"]
 
 
 @pytest.mark.asyncio
@@ -528,3 +529,51 @@ def test_raise_value_error_on_main():
         "Please make sure the file submitted is not corrupt"
     }
     app.dependency_overrides.clear()  # Reset overrides after test
+
+
+@pytest.mark.asyncio
+async def test_convert_spring():
+    with (
+        patch("app.main.initialize_springboot_zip") as mock_zip,
+        patch("app.main.fix_build_gradle_kts") as mock_fix,
+    ):
+        mock_fix.return_value = ""
+        mock_zip.return_value = "a.zip"
+        content = [
+            [
+                '{"diagram":"ClassDiagram", "nodes":[{"id":0,"methods":"+ '
+                'classMethod(): string", "name":"Test", '
+                '"x":100, "y":100}], "edges":[]}'
+            ],
+        ]
+        response = await convert_spring(
+            "file1", "com.example", ["file.class.jet"], contents=content
+        )
+
+        assert isinstance(response, str)
+        assert os.path.isfile(response)
+        os.remove(response)
+
+
+def test_fix_build_gradle_kts_with_patch():
+    # Mock the zipfile.ZipFile
+    mock_zipf = MagicMock()
+
+    # Mock reading the original build.gradle.kts content
+    original_content = (
+        'implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")'
+    )
+    expected_content = (
+        'implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")'
+    )
+
+    # Mock zipf.open().read().decode()
+    mock_file = MagicMock()
+    mock_file.read.return_value = original_content.encode("utf-8")
+    mock_zipf.open.return_value = mock_file
+
+    # Call the function with the mocked zip
+    fix_build_gradle_kts(mock_zipf)
+
+    # Check that writestr is called with the correct modified content
+    mock_zipf.writestr.assert_called_once_with("build.gradle.kts", expected_content)

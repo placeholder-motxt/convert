@@ -55,7 +55,9 @@ class ParseJsonToObjectClass:
 
         return self.__classes
 
-    def parse_relationships(self, classes: list[ClassObject]) -> list[ClassObject]:
+    def parse_relationships(
+        self, classes: list[ClassObject], bidirectional: bool = False
+    ) -> list[ClassObject]:
         edges = self.__json["edges"]
 
         for edge in edges:
@@ -75,7 +77,9 @@ class ParseJsonToObjectClass:
                 )
 
             strategy = self.__determine_strategy(edge)
-            strategy.create_relationship(edge, class_from_id, class_to_id)
+            strategy.create_relationship(
+                edge, class_from_id, class_to_id, bidirectional
+            )
 
         return classes
 
@@ -115,7 +119,7 @@ class ParseJsonToObjectClass:
 
     def __add_methods_to_class(self, object: dict, class_obj: ClassObject) -> None:
         # iterate all method in a class
-        methods = object["methods"].replace("+", "\n").replace("-", "\n").split("\n")
+        methods = object["methods"].split("\n")
         for method in methods:
             if method != "":
                 class_method_obj = self.__create_method(method)
@@ -131,6 +135,12 @@ class ParseJsonToObjectClass:
 
     def __create_method(self, method: str) -> ClassMethodObject:
         class_method_obj = ClassMethodObject()
+        if method[0] == "+":
+            class_method_obj.set_modifier("public")
+        elif method[0] == "-":
+            class_method_obj.set_modifier("private")
+        method = method.replace("+", "").replace("-", "")
+
         class_method_name = method.split("(")[0].lstrip("+- ").strip()
         if ":" in method.split(")")[1]:
             class_method_rettype_name = method.split(")")[1].split(":")[1].strip()
@@ -191,10 +201,20 @@ class ParseJsonToObjectClass:
         return param_obj
 
     def __create_attribute(self, attribute: str) -> FieldObject:
-        attribute = attribute.lstrip("+- ")
-
-        attr = FieldObject()
+        attr_object = FieldObject()
         attr_type = TypeObject()
+        modifier = attribute.strip(" ")[0]  # check first character
+
+        if modifier == "+":
+            attr_object.set_modifier("public")
+        elif modifier == "-":
+            attr_object.set_modifier("private")
+        else:
+            raise ValueError(
+                f"""First character of class attribute line must be either "+" or "-" !
+                Your attribute line: "{attribute}" """
+            )
+        attribute = attribute.lstrip("+- ")
 
         attr_name = attribute.split(":")[0].strip()
         attr_type_name = attribute.split(":")[1].strip()
@@ -204,16 +224,16 @@ class ParseJsonToObjectClass:
             and self.__check_name(attr_type_name)
             or self.LIST_TYPE_REGEX.match(attr_type_name)
         ):
-            attr.set_name(attr_name)
+            attr_object.set_name(attr_name)
             attr_type.set_name(attr_type_name)
-            attr.set_type(attr_type)
+            attr_object.set_type(attr_type)
 
         else:
             raise ValueError(
                 f"Error: attribute name or type is not valid: {attr_name}, "
                 f"{attr_type_name}"
             )
-        return attr
+        return attr_object
 
     def __determine_strategy(self, edge: dict) -> RelationshipStrategy:
         start_condition = (

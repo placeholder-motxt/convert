@@ -8,6 +8,7 @@ from app.models.diagram import (
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
 )
+from app.models.elements import ModelsElements
 from app.models.properties import FieldObject, TypeObject
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -27,6 +28,9 @@ class TestClassObjJinja2Template(unittest.TestCase):
 
         self.field_obj.set_type(self.type_obj)
         self.cls_obj.add_field(self.field_obj)
+
+        self.models_elements = ModelsElements("models.py")
+        self.models_elements.add_class(self.cls_obj)
 
     def build_class_object(
         self,
@@ -74,21 +78,25 @@ class TestClassObjJinja2Template(unittest.TestCase):
 
     @patch("jinja2.Environment.get_template")
     def test_model_correct_template_used(self, mock_get_template: MagicMock):
-        self.cls_obj.to_models_code_template("models.py.j2")
+        self.models_elements.print_django_style_template("models.py.j2")
         mock_get_template.assert_called_once_with("models.py.j2")
 
-    @patch("app.models.diagram.render_template")
+    @patch("app.models.elements.render_template")
     def test_render_template_called_with_correct_args(
         self, mock_render_template: MagicMock
     ):
-        self.cls_obj.to_models_code_template("models.py.j2")
+        self.models_elements.print_django_style_template("models.py.j2")
         ctx = {
             "classes": [
                 {
                     "name": "Item",
                     "parent": "models.Model",
                     "fields": [
-                        {"name": "name", "type": "models.CharField(max_length=255)"}
+                        {
+                            "name": "name",
+                            "type": "models.CharField(max_length=255)",
+                            "modifier": "private",
+                        }
                     ],
                 }
             ]
@@ -98,7 +106,7 @@ class TestClassObjJinja2Template(unittest.TestCase):
     def test_to_views_template_no_parent_one_field(self):
         with open(os.path.join(TEST_DIR, "simple_model.txt")) as f:
             expected = f.read().strip()
-        res = self.cls_obj.to_models_code_template("models.py.j2").strip()
+        res = self.models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(res, expected)
 
     def test_class_without_fields(self):
@@ -106,8 +114,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             expected = f.read().strip()
 
         cls_obj = self.build_class_object("EmptyModel")
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_unknown_field_type(self):
@@ -123,7 +133,9 @@ class TestClassObjJinja2Template(unittest.TestCase):
         field_obj.set_type(type_obj)
         self.cls_obj.add_field(field_obj)
 
-        result = self.cls_obj.to_models_code_template("models.py.j2").strip()
+        result = self.models_elements.print_django_style_template(
+            "models.py.j2"
+        ).strip()
         self.assertEqual(result, expected)
 
     def test_class_with_inheritance(self):
@@ -137,8 +149,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
                 {"name": "is_admin", "type": "boolean"},
             ],
         )
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_one_to_one_relationship(self):
@@ -155,7 +169,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_many_to_one_relationship(self):
@@ -172,7 +189,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_many_to_many_relationship(self):
@@ -189,7 +209,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_multiple_relationships(self):
@@ -208,7 +231,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_fields_and_one_relationship(self):
@@ -226,7 +252,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_fields_and_multiple_relationships(self):
@@ -247,7 +276,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_inheritance_fields_and_relationships(self):
@@ -268,7 +300,10 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
 
     def test_class_with_all_features(self):
@@ -289,5 +324,17 @@ class TestClassObjJinja2Template(unittest.TestCase):
             ],
         )
 
-        result = cls_obj.to_models_code_template("models.py.j2").strip()
+        models_elements = ModelsElements("models.py")
+        models_elements.add_class(cls_obj)
+
+        result = models_elements.print_django_style_template("models.py.j2").strip()
         self.assertEqual(result, expected)
+
+    @patch("app.models.elements.render_template")
+    def test_print_django_style_template_exception(
+        self, mock_render_template: MagicMock
+    ):
+        mock_render_template.side_effect = Exception("Test exception")
+        your_instance = ModelsElements("models.py")
+        result = your_instance.print_django_style_template()
+        self.assertEqual(result, "")

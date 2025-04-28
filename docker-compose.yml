@@ -4,6 +4,8 @@ services:
   motxt-convert:
     build: .
     container_name: motxt-convert
+    volumes:
+      - ./logs:/app/logs
     ports:
       - "8000:8000"
     networks:
@@ -38,6 +40,31 @@ services:
         reservations:
           cpus: "0.25"
           memory: 64M
+
+  loki-convert:
+    image: grafana/loki:latest
+    container_name: loki-convert
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yaml:/etc/loki/loki-config.yaml
+    command: -config.file=/etc/loki/loki-config.yaml
+
+  promtail-convert:
+    image: grafana/promtail:latest
+    container_name: promtail-convert
+    volumes:
+      - ./monitoring/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - ./logs:/var/log/
+    command: -config.file=/etc/promtail/promtail-config.yaml
+
+  grafana-convert:
+    image: grafana/grafana:latest
+    container_name: grafana-convert
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana-config.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
 
 networks:
   monitoring:

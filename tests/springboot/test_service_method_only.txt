@@ -1,0 +1,33 @@
+package com.example.burhanpedia.service;
+
+import com.example.burhanpedia.model.Cart;
+import com.example.burhanpedia.repository.CartRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CartService {
+
+    private final CartRepository cartRepository;
+    
+    
+    void method_params(int param1) {
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_params function is not yet implemented");}
+    
+
+
+    public void method_param2(String param2) {
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_param2 function is not yet implemented");}
+
+
+
+    private void method_param3(boolean param3) {
+    // TODO: Auto generated function stub
+    throw new UnsupportedOperationException("method_param3 function is not yet implemented");}
+    
+
+
+}
