@@ -2,6 +2,9 @@ package {{ group_id }}.{{ project_name }}.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+{% if not parent %}
+import io.swagger.v3.oas.annotations.media.Schema;
+{%- endif %}
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +23,7 @@ import java.util.UUID;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class {{ name }}{% if parent %} extends {{ parent }}{% endif %} {
     {% if not parent %}
+    @Schema(hidden = true)
     @Id
     private String id = UUID.randomUUID().toString();
 {% endif -%}

@@ -242,13 +242,13 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
         if self.get_source_class_own_amount() == "1":
-            rel_type = f'@OneToMany(mappedBy="{source.replace(" ", "_")}")'
+            rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")'
             join = None
-            var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)};"
-        else:
-            rel_type = "@ManyToOne"
-            join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
+        else:
+            rel_type = "@OneToMany"
+            join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
+            var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
 
 
