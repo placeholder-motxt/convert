@@ -120,13 +120,18 @@ def check_service_folder(context):
 
 @then("the zip contains controller folder for all models")
 def check_controller_folder(context):
-    for model in ["ShapeController", "CircleController", "CirclesController"]:
+    for model in [
+        "ShapeController",
+        "CircleController",
+        "CirclesController",
+        "HomeController",
+    ]:
         assert f"{context['src_path']}/controller/{model}.java" in context["file_list"]
 
 
 @then("the zip contains application.properties")
 def check_application_properties(context):
-    assert "application.properties" in context["file_list"]
+    assert "src/main/resources/application.properties" in context["file_list"]
 
 
 @given("the context JSON with no diagram type")
