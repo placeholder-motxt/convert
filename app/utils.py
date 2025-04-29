@@ -95,8 +95,8 @@ def is_valid_python_identifier(identifier: str) -> bool:
     return identifier.isidentifier() and not iskeyword(identifier)
 
 
-def is_valid_java_group_id(group_id: str) -> bool:
-    for component in group_id.split("."):
+def is_valid_java_package_name(package_name: str) -> bool:
+    for component in package_name.split("."):
         if not component:
             return False
 

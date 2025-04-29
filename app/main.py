@@ -58,7 +58,7 @@ from app.models.elements import (
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
-    is_valid_java_group_id,
+    is_valid_java_package_name,
     is_valid_python_identifier,
     logger,
     remove_file,
@@ -79,6 +79,7 @@ instrumentator = Instrumentator().instrument(app)
 BASE_STATIC_TEMPLATES_DIR = os.path.join("app", "templates", "django_app")
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 CSS_DIR = os.path.join(CUR_DIR, "templates", "css")
+DuplicateChecker = dict[tuple[str, str], ClassMethodObject]
 
 error_counter = Counter(
     "convert_errors_total", "Total number of errors by message", ["error_message"]
@@ -243,8 +244,9 @@ async def convert_django(
 async def convert_spring(
     project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
 ) -> str:
-    if not is_valid_java_group_id(group_id):
-        msg = f"Invalid group id: {group_id}"
+    package_name = f"{project_name}.{group_id}"
+    if not is_valid_java_package_name(package_name):
+        msg = f"Invalid Java package name: {package_name}"
         logger.warning(msg)
         raise HTTPException(status_code=400, detail=msg)
 
@@ -252,9 +254,7 @@ async def convert_spring(
 
     with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
         # Section to Parse the Class Diagram
-        duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = (
-            dict()
-        )
+        duplicate_class_method_checker: DuplicateChecker = {}
 
     src_path = group_id.replace(".", "/") + "/" + project_name
 
@@ -355,8 +355,8 @@ def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
 def check_duplicate(
     class_objects: dict[str, ClassObject],
     class_object_name: str,
-    duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject],
-) -> dict[tuple[str, str], ClassMethodObject]:
+    duplicate_class_method_checker: DuplicateChecker,
+) -> DuplicateChecker:
     class_object = class_objects.get(class_object_name, None)
     if not class_object:
         return duplicate_class_method_checker
@@ -560,8 +560,8 @@ def get_names_from_classes(
 
 
 def process_parsed_class(
-    classes: list,
-    duplicate_checker: dict[tuple[str, str], ClassMethodObject],
+    classes: list[ClassObject],
+    duplicate_checker: DuplicateChecker,
 ):
     for model_class in classes:
         for method in model_class.get_methods():
@@ -576,7 +576,7 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
     """
     response_content_models = StringIO()
     response_content_views = StringIO()
-    duplicate_class_method_checker: dict[tuple[str, str], ClassMethodObject] = dict()
+    duplicate_class_method_checker: DuplicateChecker = {}
 
     writer_models = ModelsElements("models.py")
     writer_views = ViewsElements("views.py")
