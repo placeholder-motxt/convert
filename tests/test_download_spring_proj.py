@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.utils import is_valid_java_group_id
+from app.utils import is_valid_java_package_name
 
 client = TestClient(app)
 
@@ -71,10 +71,28 @@ class TestDownloadSpringProject(unittest.IsolatedAsyncioTestCase):
         """
         for group_id in ["123.abcd", ":a.ha", ".abcd", "hjk.", "int.abc"]:
             self.json["group_id"] = group_id
+            package_name = f"{self.json['project_name']}.{group_id}"
             resp = client.post("/convert", json=self.json)
             self.assertEqual(resp.status_code, 400)
-            self.assertEqual(resp.json()["detail"], f"Invalid group id: {group_id}")
+            self.assertEqual(
+                resp.json()["detail"], f"Invalid Java package name: {package_name}"
+            )
+
+    async def test_invalid_project_name_valid_group_id(self):
+        """
+        When project_name is invalid but group id is valid it should
+        still return an error
+        """
+        self.json["group_id"] = "spring.example"
+        for project_name in ["123", ".bakfsd", ":fsf", "abscd.", "class.abc"]:
+            self.json["project_name"] = project_name
+            package_name = f"{project_name}.{self.json['group_id']}"
+            resp = client.post("/convert", json=self.json)
+            self.assertEqual(resp.status_code, 400)
+            self.assertEqual(
+                resp.json()["detail"], f"Invalid Java package name: {package_name}"
+            )
 
     async def test_valid_group_id(self):
         for group_id in ["com.example", "abc.def", "A_asdf.K_", "_asf123._32"]:
-            self.assertTrue(is_valid_java_group_id(group_id))
+            self.assertTrue(is_valid_java_package_name(group_id))

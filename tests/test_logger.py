@@ -204,8 +204,10 @@ def test_uvicorn_error_logger_warning_when_invalid_group_id(caplog: LogCaptureFi
         assert (
             "uvicorn.error",
             logging.WARNING,
-            "Invalid group id: .abcd",
+            "Invalid Java package name: test..abcd",
         ) in caplog.record_tuples
+
+
 @pytest.fixture
 def uvicorn_log_config(tmp_path: Path) -> tuple[dict, Path]:
     """Load the uvicorn logging config with temp directories"""
