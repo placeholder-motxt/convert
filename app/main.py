@@ -58,7 +58,7 @@ from app.models.elements import (
 from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
-    is_valid_java_group_id,
+    is_valid_java_package_name,
     is_valid_python_identifier,
     logger,
     remove_file,
@@ -243,8 +243,9 @@ async def convert_django(
 async def convert_spring(
     project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
 ) -> str:
-    if not is_valid_java_group_id(group_id):
-        msg = f"Invalid group id: {group_id}"
+    package_name = f"{project_name}.{group_id}"
+    if not is_valid_java_package_name(package_name):
+        msg = f"Invalid Java package name: {package_name}"
         logger.warning(msg)
         raise HTTPException(status_code=400, detail=msg)
 
