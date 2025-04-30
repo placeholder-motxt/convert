@@ -456,7 +456,6 @@ def generate_file_to_be_downloaded(
     Function to generate the file to be downloaded. This function will create a zip file
     with the name of the project and add all the files to it.
     """
-    # TODO: make app_name dynamic in the future
     app_name = "main"
     create_django_project(project_name, zipfile_path)
     create_django_app(project_name, app_name, zipfile_path, models, views)
