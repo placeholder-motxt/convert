@@ -24,6 +24,8 @@ jobs:
         with:
           name: merge-metadata
           path: ./merge-data
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine branch to checkout or stop
         id: result

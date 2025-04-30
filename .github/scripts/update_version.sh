@@ -13,14 +13,16 @@ CURRENT_VERSION=$(grep -oP 'VERSION = "\K[0-9]+\.[0-9]+\.[0-9]+' "$CONFIG_FILE")
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
 # Update the version based on the branch
-if [[ "$BRANCH" == "main" ]]; then
+if [[ "$BRANCH" =~ ^BUG-FIX- ]]; then
+  PATCH=$((PATCH + 1))
+elif [[ "$BRANCH" == "main" ]]; then
   MAJOR=$((MAJOR + 1))
   MINOR=0
   PATCH=0
 elif [[ "$BRANCH" == "staging" ]]; then
   MINOR=$((MINOR + 1))
   PATCH=0
-elif [[ "$BRANCH" =~ ^BUG-FIX- ]] || [[ "$BRANCH" == "dev" ]]; then
+elif [[ "$BRANCH" == "dev" ]]; then
   PATCH=$((PATCH + 1))
 else
   echo "Branch not recognized: $BRANCH. No version update performed."
