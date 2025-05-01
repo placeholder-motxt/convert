@@ -208,7 +208,10 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
             join = None
         else:
-            rel_type = "@OneToOne(cascade = CascadeType.ALL)"
+            rel_type = (
+                "@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, "
+                "CascadeType.REMOVE})"
+            )
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
@@ -247,7 +250,10 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
             join = None
             var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         else:
-            rel_type = "@OneToMany(cascade = CascadeType.ALL)"
+            rel_type = (
+                "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},"
+            )
+            rel_type += "\n\t\torphanRemoval = true\n)"
             rel_type += "\n\t@JsonIgnore"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
@@ -275,7 +281,7 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = "@ManyToMany(cascade = CascadeType.ALL)"
+        rel_type = "@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})"
         rel_type += "\n\t@JsonIgnore"
         join = "@JoinTable("
         join += f'\n\t\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
