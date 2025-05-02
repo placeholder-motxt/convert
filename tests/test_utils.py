@@ -1,10 +1,13 @@
+import keyword
 import unittest
+from typing import Any, Type
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from app.utils import (  # Import the function from the module
     camel_to_snake,
+    is_valid_java_identifier,
     render_template,
     to_camel_case,
     to_pascal_case,
@@ -300,3 +303,93 @@ class TestToPascalCase(unittest.TestCase):
             to_pascal_case("alreadyPascalCase"), "Alreadypascalcase"
         )  # no detection of existing PascalCase
         self.assertEqual(to_pascal_case("123number_test"), "123numberTest")
+
+
+class TestIsValidJavaIdentifier(unittest.TestCase):
+    """All methods here follow the one-assertion-per-test rule."""
+
+    # ── positive samples ───────────────────────────────────────────────────────
+    _positive_cases: dict[str, str] = {
+        "single_lower": "a",
+        "single_upper": "Z",
+        "underscore_only": "_",
+        "dollar_only": "$",
+        "camelCase": "camelCase",
+        "leading_underscore": "_privateVar",
+        "leading_dollar": "$generated",
+        "alphanumeric": "var123",
+        "non_ascii": "Éclair",
+        "very_long": "a" * 1000,
+    }
+
+    # ── negative samples ────────────────────────────────────────────────────────
+    _negative_cases: dict[str, str] = {
+        "keyword_class": "class",
+        "keyword_for": "for",
+        "keyword_while": "while",
+        "starts_with_digit": "1stPlace",
+        "digit_only": "9",
+        "hyphen": "contains-hyphen",
+        "space": "white space",
+        "tab": "tab\tchar",
+        "newline": "newline\n",
+        "asterisk": "a*b",
+        "hash": "hash#tag",
+        "emoji": "smile😊",
+    }
+
+    # ── edge / exceptional samples ─────────────────────────────────────────────
+    _raises_cases: dict[str, tuple[Any, Type[Exception]]] = {
+        "empty_string": ("", IndexError),
+        "none_input": (None, TypeError),  # type: ignore[arg-type]
+    }
+
+
+# ── helpers that add *typed* one-assertion tests ──────────────────────────────
+def _add_bool_test(cls: type, name: str, identifier: str, expected: bool) -> None:
+    def _test(
+        self: unittest.TestCase, identifier: str = identifier, expected: bool = expected
+    ) -> None:
+        self.assertEqual(is_valid_java_identifier(identifier), expected)
+
+    _test.__name__ = f"test_{name}"
+    setattr(cls, _test.__name__, _test)
+
+
+def _add_raises_test(
+    cls: type,
+    name: str,
+    identifier: Any,  # noqa: ANN401
+    exc: Type[Exception],
+) -> None:
+    def _test(
+        self: unittest.TestCase,
+        identifier: Any = identifier,  # noqa: ANN401
+        exc: Type[Exception] = exc,
+    ) -> None:
+        with self.assertRaises(exc):
+            is_valid_java_identifier(identifier)  # type: ignore[arg-type]
+
+    _test.__name__ = f"test_{name}"
+    setattr(cls, _test.__name__, _test)
+
+
+# positive cases
+for _name, _ident in TestIsValidJavaIdentifier._positive_cases.items():
+    _add_bool_test(TestIsValidJavaIdentifier, f"valid_{_name}", _ident, True)
+
+# negative cases
+for _name, _ident in TestIsValidJavaIdentifier._negative_cases.items():
+    _add_bool_test(TestIsValidJavaIdentifier, f"invalid_{_name}", _ident, False)
+
+# each Python keyword becomes its own single-assert test
+for _kw in keyword.kwlist:
+    _add_bool_test(TestIsValidJavaIdentifier, f"keyword_{_kw}", _kw, False)
+
+# edge / exception cases
+for _name, (_ident, _exc) in TestIsValidJavaIdentifier._raises_cases.items():
+    _add_raises_test(TestIsValidJavaIdentifier, f"raises_{_name}", _ident, _exc)
+
+
+if __name__ == "__main__":
+    unittest.main()
