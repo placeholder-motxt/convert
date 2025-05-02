@@ -35,6 +35,21 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
             setter = "set" + attribute_name[0].upper() + attribute_name[1:]
         attributes.append((name, getter, setter))
 
+    if model.get_parent() is not None:
+        for attribute in model.get_parent().get_fields():
+            attribute_name = attribute.get_name()
+            name = attribute_name[0].upper() + attribute_name[1:]
+
+            if (
+                attribute.get_type() == "boolean" or attribute.get_type() == "bool"
+            ) and bool(re.match(r"^is[A-Z].*", attribute_name)):
+                getter = attribute.get_name()
+                setter = "set" + attribute.get_name()[2:]
+            else:
+                getter = "get" + attribute_name[0].upper() + attribute_name[1:]
+                setter = "set" + attribute_name[0].upper() + attribute_name[1:]
+            attributes.append((name, getter, setter))
+
     context = {
         "project_name": project_name,
         "class_name_capital": class_name_capital,
