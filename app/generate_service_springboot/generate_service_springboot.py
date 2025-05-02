@@ -34,7 +34,12 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
 
 def get_all_attributes(model: ClassObject) -> list[str]:
     attributes = []
-    for attribute in model.get_fields():
+
+    fields = model.get_fields()
+    if model.get_parent() is not None:
+        fields += model.get_parent().get_fields()
+
+    for attribute in fields:
         attribute_name = attribute.get_name()
         name = attribute_name[0].upper() + attribute_name[1:]
 
@@ -48,20 +53,6 @@ def get_all_attributes(model: ClassObject) -> list[str]:
             setter = "set" + attribute_name[0].upper() + attribute_name[1:]
         attributes.append((name, getter, setter))
 
-    if model.get_parent() is not None:
-        for attribute in model.get_parent().get_fields():
-            attribute_name = attribute.get_name()
-            name = attribute_name[0].upper() + attribute_name[1:]
-
-            if (
-                attribute.get_type() == "boolean" or attribute.get_type() == "bool"
-            ) and bool(re.match(r"^is[A-Z].*", attribute_name)):
-                getter = attribute.get_name()
-                setter = "set" + attribute.get_name()[2:]
-            else:
-                getter = "get" + attribute_name[0].upper() + attribute_name[1:]
-                setter = "set" + attribute_name[0].upper() + attribute_name[1:]
-            attributes.append((name, getter, setter))
     return attributes
 
 
