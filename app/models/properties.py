@@ -30,6 +30,14 @@ class TypeObject:
     def to_models_code(self) -> str:
         return self.__name.title()
 
+    def get_name_springboot(self) -> str:
+        if self.__name == "str":
+            return "String"
+        elif self.__name == "int":
+            return "int"
+        elif self.__name == "bool":
+            return "boolean"
+
     def get_name(self) -> str:
         return self.__name
 
