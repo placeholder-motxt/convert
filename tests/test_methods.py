@@ -1,6 +1,7 @@
 import unittest
 from abc import ABC
 from unittest import mock
+from unittest.mock import MagicMock, patch
 
 from app.models.methods import (
     AbstractMethodCallObject,
@@ -224,6 +225,141 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         expected_output = "if x > 5:\n\t\tvalue = mock_method(request, arg1)"
         self.assertEqual(self.method_call_object.print_django_style(), expected_output)
 
+    # Positive Test Case 1: Method with valid arguments and a return variable name
+    @patch.object(AbstractMethodObject, "get_name", return_value="testMethod")
+    @patch.object(
+        ArgumentObject, "print_springboot_style_template", return_value={"arg": "value"}
+    )
+    def test_valid_method_call_with_arguments_and_return_var(
+        self, mock_get_name: MagicMock, mock_print_arg: MagicMock
+    ):
+        method_call_obj = AbstractMethodCallObject()
+
+        # Mocking a method and adding an argument
+        method_mock = AbstractMethodObject()
+        method_call_obj.set_method(method_mock)
+        method_call_obj.set_return_var_name("result")
+        method_call_obj.set_condition("if true")
+
+        argument = ArgumentObject()
+        method_call_obj.add_argument(argument)
+
+        expected_result = {
+            "condition": "if true",
+            "return_var_name": "result",
+            "method_name": "testMethod",
+            "arguments": [{"arg": "value"}],
+        }
+
+        result = method_call_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    # Positive Test Case 2: ClassMethodCallObject with instance name
+    @patch.object(AbstractMethodObject, "get_name", return_value="testMethod")
+    @patch.object(
+        ArgumentObject, "print_springboot_style_template", return_value={"arg": "value"}
+    )
+    def test_class_method_call_with_instance_name(
+        self, mock_get_name: MagicMock, mock_print_arg: MagicMock
+    ):
+        method_call_obj = ClassMethodCallObject()
+        method_call_obj.set_instance_name("instance1")
+
+        # Mocking a method and adding an argument
+        method_mock = AbstractMethodObject()
+        method_call_obj.set_method(method_mock)
+        method_call_obj.set_return_var_name("result")
+        method_call_obj.set_condition("if true")
+
+        argument = ArgumentObject()
+        method_call_obj.add_argument(argument)
+
+        expected_result = {
+            "condition": "if true",
+            "return_var_name": "result",
+            "method_name": "testMethod",
+            "instance_name": "instance1",
+            "arguments": [{"arg": "value"}],
+        }
+
+        result = method_call_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    # Negative Test Case 1: Method with no arguments and empty return variable name
+    @patch.object(AbstractMethodObject, "get_name", return_value="testMethod")
+    def test_method_with_no_arguments_and_empty_return_var(
+        self, mock_get_name: MagicMock
+    ):
+        method_call_obj = AbstractMethodCallObject()
+
+        # Mocking a method
+        method_mock = AbstractMethodObject()
+        method_call_obj.set_method(method_mock)
+
+        expected_result = {"method_name": "testMethod", "arguments": []}
+
+        result = method_call_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    # Negative Test Case 2: Method with empty condition
+    @patch.object(AbstractMethodObject, "get_name", return_value="testMethod")
+    def test_method_with_empty_condition(self, mock_get_name: MagicMock):
+        method_call_obj = AbstractMethodCallObject()
+
+        # Mocking a method
+        method_mock = AbstractMethodObject()
+        method_call_obj.set_method(method_mock)
+        method_call_obj.set_return_var_name("result")
+
+        # Setting empty condition
+        method_call_obj.set_condition("")
+
+        expected_result = {
+            "return_var_name": "result",
+            "method_name": "testMethod",
+            "arguments": [],
+        }
+
+        result = method_call_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    # Corner Case: Method with no method, no arguments, no return var name, and no condition
+    def test_method_with_no_method_or_arguments(self):
+        method_call_obj = AbstractMethodCallObject()
+        with self.assertRaises(AttributeError):
+            method_call_obj.print_springboot_style_template()
+
+    # Edge Case: Arguments are complex or involve mocked classes
+    @patch.object(AbstractMethodObject, "get_name", return_value="testMethod")
+    @patch.object(
+        ArgumentObject,
+        "print_springboot_style_template",
+        return_value={"complex_arg": "complex_value"},
+    )
+    def test_method_with_complex_arguments(
+        self, mock_get_name: MagicMock, mock_print_arg: MagicMock
+    ):
+        method_call_obj = AbstractMethodCallObject()
+
+        # Mocking a method
+        method_mock = AbstractMethodObject()
+        method_call_obj.set_method(method_mock)
+        method_call_obj.set_return_var_name("complex_result")
+        method_call_obj.set_condition("if complex")
+
+        complex_argument = ArgumentObject()
+        method_call_obj.add_argument(complex_argument)
+
+        expected_result = {
+            "condition": "if complex",
+            "return_var_name": "complex_result",
+            "method_name": "testMethod",
+            "arguments": [{"complex_arg": "complex_value"}],
+        }
+
+        result = method_call_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
 
 class TestControllerMethodCallObject(unittest.TestCase):
     def setUp(self):
@@ -374,6 +510,13 @@ class TestArgumentObject(unittest.TestCase):
         test_name = "test_argument"
         self.argument_object.set_name(test_name)
         self.assertEqual(self.argument_object.print_django_style(), test_name)
+
+    # Positive Test Case 1: Argument with a valid name
+    def test_valid_argument_name(self):
+        arg_obj = ArgumentObject()
+        arg_obj.set_name("validArgument")
+        result = arg_obj.print_springboot_style_template()
+        self.assertEqual(result, {"argument_name": "validArgument"})
 
 
 if __name__ == "__main__":
