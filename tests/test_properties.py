@@ -156,6 +156,57 @@ class TestTypeObject(unittest.TestCase):
         self.type_object.set_name("TestType")
         self.assertEqual(self.type_object._TypeObject__name, "TestType")
 
+    def test_get_name_springboot_str(self):
+        """Test case for 'str' mapped to 'String' in Spring Boot."""
+        type_obj = TypeObject()
+        type_obj.set_name("string")
+        self.assertEqual(type_obj.get_name_springboot(), "String")
+
+    def test_get_name_springboot_int(self):
+        """Test case for 'int' mapped to 'int' in Spring Boot."""
+        type_obj = TypeObject()
+        type_obj.set_name("integer")
+        self.assertEqual(type_obj.get_name_springboot(), "int")
+
+    def test_get_name_springboot_bool(self):
+        """Test case for 'bool' mapped to 'boolean' in Spring Boot."""
+        type_obj = TypeObject()
+        type_obj.set_name("boolean")
+        self.assertEqual(type_obj.get_name_springboot(), "boolean")
+
+    def test_get_name_springboot_invalid_type(self):
+        """Test case for invalid type that should not map to a known Spring Boot type."""
+        type_obj = TypeObject()
+        type_obj.set_name("float")
+        # We expect None because 'float' does not have a mapping in get_name_springboot
+        self.assertIsNone(type_obj.get_name_springboot())
+
+    def test_get_name_springboot_empty_string(self):
+        """Test case for empty string passed as name."""
+        type_obj = TypeObject()
+        type_obj.set_name("")
+        self.assertIsNone(type_obj.get_name_springboot())  # Empty string maps to None
+
+    def test_get_name_springboot_case_insensitivity(self):
+        """Test case for case insensitivity when setting name."""
+        type_obj = TypeObject()
+        type_obj.set_name("STRING")
+        self.assertEqual(type_obj.get_name_springboot(), "String")
+
+    def test_get_name_springboot_non_standard_case(self):
+        """Test case for non-standard names, e.g., mixed case strings."""
+        type_obj = TypeObject()
+        type_obj.set_name("BoOlEan")
+        self.assertEqual(type_obj.get_name_springboot(), "boolean")
+
+    def test_get_name_springboot_edge_large_input(self):
+        """Test case for handling very large inputs."""
+        type_obj = TypeObject()
+        type_obj.set_name("a" * 1000)  # Arbitrary large string
+        self.assertIsNone(
+            type_obj.get_name_springboot()
+        )  # Edge cases that should not map
+
 
 class TestParameterObject(unittest.TestCase):
     def setUp(self):
