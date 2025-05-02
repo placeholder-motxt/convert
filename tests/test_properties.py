@@ -1,5 +1,6 @@
 import unittest
 from copy import copy, deepcopy
+from unittest.mock import MagicMock, patch
 
 from app.models.properties import (
     FieldObject,
@@ -296,6 +297,92 @@ class TestParameterObject(unittest.TestCase):
         field_object.set_modifier("private")
         self.assertEqual(field_object._FieldObject__modifier, "private")
 
+    # Positive test case where everything is valid
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_valid_param(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = TypeObject()
+        string_type.set_name("string")
+        param.set_type(string_type)
+        result = param.to_springboot_code_template()
+        self.assertEqual(result["param_name"], "param1")
+        self.assertEqual(result["param_type"], "String")
+
+    # Negative case when param name is invalid
+    @patch("app.utils.is_valid_java_identifier", return_value=False)
+    def test_invalid_param_name(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("invalid param name")
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()
+
+    # Negative case when param type is not standard
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_non_standard_param_type(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = TypeObject()
+        string_type.set_name("hallo")
+        param.set_type(string_type)
+        with self.assertRaises(TypeError):
+            param.to_springboot_code_template()
+
+    # Corner case when param name is None
+    @patch("app.utils.is_valid_java_identifier", return_value=False)
+    def test_param_name_none(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name(None)
+        param.set_type(TypeObject().set_name("string"))
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()
+
+    # Corner case when param name is an empty string
+    @patch("app.utils.is_valid_java_identifier", return_value=False)
+    def test_empty_param_name(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("")
+        param.set_type(TypeObject().set_name("string"))
+        with self.assertRaises(IndexError):
+            param.to_springboot_code_template()
+
+    # Test case when param type is None
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_param_type_none(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        param.set_type(None)
+        result = param.to_springboot_code_template()
+        self.assertEqual(result["param_name"], "param1")
+        self.assertNotIn("param_type", result)
+
+    # Test case when param type has a valid mapping (non-None param type)
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_param_type_valid(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = TypeObject()
+        string_type.set_name("string")
+        param.set_type(string_type)
+        result = param.to_springboot_code_template()
+        self.assertEqual(result["param_type"], "String")
+
+    # Test case when param type is not valid java identifier
+    def test_param_type_invalid_param_type(self):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = MagicMock()
+        string_type.get_name_springboot.return_value = "&&&"
+        param.set_type(string_type)
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()
+
 
 if __name__ == "__main__":
-    unittest.main()
+    param = ParameterObject()
+    param.set_name("param1")
+    string_type = TypeObject()
+    string_type.set_name("hallo")
+    param.set_type(string_type)
+    result = param.to_springboot_code_template()
+    print(result)
