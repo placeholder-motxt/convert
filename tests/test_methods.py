@@ -142,6 +142,109 @@ class TestControllerMethodObject(unittest.TestCase):
         )
         self.assertEqual(self.controller_method.print_django_style(), expected_output)
 
+    # Positive Test Case 1: Method with valid name, parameters, and method calls
+    @patch.object(
+        ParameterObject,
+        "to_springboot_code_template",
+        return_value={"param_name": "exampleParam"},
+    )
+    @patch.object(
+        AbstractMethodCallObject,
+        "print_springboot_style_template",
+        return_value={"method_name": "methodCall"},
+    )
+    def test_valid_method_with_parameters_and_calls(
+        self, mock_print_method_call: MagicMock, mock_param_template: MagicMock
+    ):
+        method_obj = ControllerMethodObject()
+        method_obj.set_name("testControllerMethod")
+
+        param1 = ParameterObject()
+        method_obj.add_parameter(param1)
+
+        # Adding a mock method call
+        method_call_mock = AbstractMethodCallObject()
+        method_obj.add_call(method_call_mock)
+
+        expected_result = {
+            "method_name": "testControllerMethod",
+            "params": [{"param_name": "exampleParam"}],
+            "method_calls": [{"method_name": "methodCall"}],
+        }
+
+        result = method_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    # Negative Test Case 1: Method with empty name
+    def test_method_with_empty_name(self):
+        method_obj = ControllerMethodObject()
+        method_obj.set_name("")
+
+        with self.assertRaises(ValueError) as context:
+            method_obj.print_springboot_style_template()
+
+        self.assertEqual(
+            str(context.exception),
+            "method cannot be empty\nplease consult the user manual document",
+        )
+
+    # Negative Test Case 2: Method with invalid parameters
+    @patch.object(
+        ParameterObject, "to_springboot_code_template", return_value={}
+    )  # Mock empty dictionary
+    def test_method_with_invalid_parameters(
+        self, mock_to_springboot_code_template: MagicMock
+    ):
+        method_obj = ControllerMethodObject()
+        method_obj.set_name("testMethodWithInvalidParams")
+
+        param1 = ParameterObject()
+        method_obj.add_parameter(param1)
+
+        result = method_obj.print_springboot_style_template()
+        expected_result = {
+            "method_name": "testMethodWithInvalidParams",
+            "params": [{}],  # The parameter's template is invalid (empty dictionary)
+            "method_calls": [],  # No method calls
+        }
+
+        self.assertEqual(result, expected_result)
+
+    # Corner Case 1: Method with no parameters
+    def test_method_with_no_parameters(self):
+        method_obj = ControllerMethodObject()
+        method_obj.set_name("testMethodWithNoParams")
+
+        expected_result = {
+            "method_name": "testMethodWithNoParams",
+            "params": [],
+            "method_calls": [],  # No method calls
+        }
+
+        result = method_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    # Corner Case 2: Method with a very large number of parameters
+    @patch.object(
+        ParameterObject,
+        "to_springboot_code_template",
+        return_value={"param_name": "param"},
+    )
+    def test_method_with_large_number_of_parameters(
+        self, mock_to_springboot_code_template: MagicMock
+    ):
+        method_obj = ControllerMethodObject()
+        method_obj.set_name("testMethodWithManyParams")
+
+        # Adding 1000 parameters to the method
+        for _ in range(1000):
+            param = ParameterObject()
+            method_obj.add_parameter(param)
+
+        # Only checking the length of params in the result
+        result = method_obj.print_springboot_style_template()
+        self.assertEqual(len(result["params"]), 1000)
+
 
 class TestAbstractMethodCallObject(unittest.TestCase):
     def setUp(self):
