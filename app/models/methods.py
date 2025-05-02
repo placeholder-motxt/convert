@@ -347,6 +347,23 @@ class ControllerMethodObject(AbstractMethodObject):
         ]
         return context
 
+    def print_springboot_style_template(self) -> dict[str]:
+        if not self.get_name():
+            raise ValueError(
+                "method cannot be empty\nplease consult the user manual document"
+            )
+        context = {}
+        context["method_name"] = self.get_name()
+        context["params"] = [
+            param.to_springboot_code_template() for param in self.get_parameters()
+        ]
+
+        context["method_calls"] = [
+            method_call.print_springboot_style_template()
+            for method_call in self.__calls
+        ]
+        return context
+
 
 class AbstractMethodCallObject(ABC):
     """
