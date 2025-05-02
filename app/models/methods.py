@@ -480,6 +480,25 @@ class AbstractMethodCallObject(ABC):
             ]
         return context
 
+    def print_springboot_style_template(self) -> dict[str]:
+        context = {}
+
+        if self.__condition:
+            context["condition"] = self.__condition
+        if self.__return_var_name:
+            context["return_var_name"] = self.__return_var_name
+        context["method_name"] = self.__method.get_name()
+        if isinstance(self, ClassMethodCallObject):
+            context["instance_name"] = self.get_instance_name()
+
+        context["arguments"] = []
+
+        if self.__arguments:
+            context["arguments"] = [
+                arg.print_springboot_style_template() for arg in self.__arguments
+            ]
+        return context
+
 
 class ClassMethodCallObject(AbstractMethodCallObject):
     """Represents a method call of a ClassMethod"""
@@ -562,4 +581,7 @@ class ArgumentObject:
         return self.__name
 
     def print_django_style_template(self) -> dict[str]:
+        return {"argument_name": self.__name}
+
+    def print_springboot_style_template(self) -> dict[str]:
         return {"argument_name": self.__name}
