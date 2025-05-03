@@ -34,14 +34,6 @@ class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
 
         with open(os.path.join(CSS_DIR, "modern.css")) as f:
             expected_css = f.read()
-            expected_css += (
-                "tr > td > form {"
-                "all: unset; /* optional - resets all styles */"
-                "margin: 0;"
-                "padding: 0;"
-                "background: none;"
-                "}"
-            )
         with tempfile.TemporaryFile() as f:
             f.write(resp.content)
             f.seek(0)
@@ -77,14 +69,6 @@ class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
                 os.path.join(CSS_DIR, f"{style}.css")
             ) as f:
                 expected = await f.read()
-                expected += (
-                    "tr > td > form {"
-                    "all: unset; /* optional - resets all styles */"
-                    "margin: 0;"
-                    "padding: 0;"
-                    "background: none;"
-                    "}"
-                )
             tmp_zip_path = await convert_django(
                 self.project_name, self.filenames, self.contents, style
             )
