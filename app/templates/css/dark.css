@@ -47,6 +47,13 @@ form {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
+tr > td > form {
+  all: unset; /* optional - resets all styles */
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+
 button,
 input[type="submit"] {
   cursor: pointer;
