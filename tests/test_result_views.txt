@@ -62,7 +62,7 @@ def landing_page(request):
     model_info["shape"] = "Shape"
     model_info["circle"] = "Circle"
     model_info["circles"] = "Circles"
-
+    
 
     return render(request, 'landing_page.html', {'model_info': model_info})
 
@@ -103,7 +103,7 @@ def get_shape(request):
     shapes = Shape.objects.all()
     all_fields = [field.name for field in Shape._meta.get_fields()]
     shape_data = []
-
+    
     for shape in shapes:
         shape_dict = {}
         for field_name in all_fields:
@@ -117,7 +117,7 @@ def get_shape(request):
             except:
                 shape_dict[field_name] = "N/A"
         shape_data.append((shape, shape_dict))
-
+    
     return render(request, 'shape_list.html', {
         'shape_data': shape_data,
         'fields': all_fields,
@@ -129,7 +129,7 @@ def get_circle(request):
     circles = Circle.objects.all()
     all_fields = [field.name for field in Circle._meta.get_fields()]
     circle_data = []
-
+    
     for circle in circles:
         circle_dict = {}
         for field_name in all_fields:
@@ -143,7 +143,7 @@ def get_circle(request):
             except:
                 circle_dict[field_name] = "N/A"
         circle_data.append((circle, circle_dict))
-
+    
     return render(request, 'circle_list.html', {
         'circle_data': circle_data,
         'fields': all_fields,
@@ -155,7 +155,7 @@ def get_circles(request):
     circless = Circles.objects.all()
     all_fields = [field.name for field in Circles._meta.get_fields()]
     circles_data = []
-
+    
     for circles in circless:
         circles_dict = {}
         for field_name in all_fields:
@@ -169,7 +169,7 @@ def get_circles(request):
             except:
                 circles_dict[field_name] = "N/A"
         circles_data.append((circles, circles_dict))
-
+    
     return render(request, 'circles_list.html', {
         'circles_data': circles_data,
         'fields': all_fields,
