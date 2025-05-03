@@ -69,6 +69,7 @@ class TestIntegrationInitializeSpring(unittest.IsolatedAsyncioTestCase):
                     "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0",
                     buildf.read().decode("utf-8"),
                 )
+        os.remove(tmp_zip_path)
 
     async def test_application_properties_properly_filled(self):
         expected = ""
@@ -81,6 +82,7 @@ class TestIntegrationInitializeSpring(unittest.IsolatedAsyncioTestCase):
         with zipfile.ZipFile(tmp_zip_path) as zipf:
             with zipf.open("src/main/resources/application.properties") as f:
                 self.assertEqual(expected, f.read().decode("utf-8"))
+        os.remove(tmp_zip_path)
 
     async def test_no_duplicate_files(self):
         resp = client.post("/convert", json=self.json)
