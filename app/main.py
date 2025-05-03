@@ -212,8 +212,7 @@ async def convert_django(
         css_file = os.path.join(CSS_DIR, f"{style}.css")
         with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
             async with await anyio.open_file(css_file) as cssf:
-                css_content = await cssf.read()
-                zipf.writestr("static/css/style.css", css_content)
+                zipf.writestr("static/css/style.css", await cssf.read())
 
         tmp_zip.close()
         return tmp_zip_path
