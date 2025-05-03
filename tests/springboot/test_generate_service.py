@@ -263,7 +263,12 @@ def render_template_output(context):
 
 @then("the service file content is generated with empty method")
 def check_output(context):
-    expected_output = """package com.example.burhanpedia.service;
+    expected_output = """/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
+
+package com.example.burhanpedia.service;
 
 import com.example.burhanpedia.model.Cart;
 import com.example.burhanpedia.repository.CartRepository;
