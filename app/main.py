@@ -46,7 +46,7 @@ from app.generate_service_springboot.generate_service_springboot import (
 from app.generate_swagger.generate_swagger import (
     generate_swagger_config,
 )
-from app.model import ConvertRequest, DownloadRequest, Style
+from app.model import ConvertRequest, DownloadRequest, DuplicateChecker, Style
 from app.models.elements import (
     ClassObject,
     ModelsElements,
@@ -54,7 +54,6 @@ from app.models.elements import (
     UrlsElement,
     ViewsElements,
 )
-from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
     is_valid_java_package_name,
@@ -78,7 +77,6 @@ instrumentator = Instrumentator().instrument(app)
 BASE_STATIC_TEMPLATES_DIR = os.path.join("app", "templates", "django_app")
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 CSS_DIR = os.path.join(CUR_DIR, "templates", "css")
-DuplicateChecker = dict[tuple[str, str], ClassMethodObject]
 
 error_counter = Counter(
     "convert_errors_total", "Total number of errors by message", ["error_message"]
