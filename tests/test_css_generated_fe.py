@@ -62,7 +62,6 @@ class TestCssGeneratedFrontend(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(resp.status_code, 422)
 
     async def test_all_styles_give_correct_result(self):
-        self.maxDiff = None
         styles = ["classic", "dark", "minimalist", "modern", "vibrant"]
         for style in styles:
             async with await anyio.open_file(
