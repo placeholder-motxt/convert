@@ -212,7 +212,16 @@ async def convert_django(
         css_file = os.path.join(CSS_DIR, f"{style}.css")
         with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
             async with await anyio.open_file(css_file) as cssf:
-                zipf.writestr("static/css/style.css", await cssf.read())
+                css_content = await cssf.read()
+                css_content += (
+                    "tr > td > form {"
+                    "all: unset; /* optional - resets all styles */"
+                    "margin: 0;"
+                    "padding: 0;"
+                    "background: none;"
+                    "}"
+                )
+                zipf.writestr("static/css/style.css", css_content)
 
         tmp_zip.close()
         return tmp_zip_path
