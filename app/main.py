@@ -49,7 +49,6 @@ from app.generate_swagger.generate_swagger import (
 from app.model import ConvertRequest, DownloadRequest, Style
 from app.models.elements import (
     ClassObject,
-    DependencyElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
@@ -274,7 +273,6 @@ async def convert_spring(
         zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
 
         writer_models = ModelsElements("models.py")
-        dependency = DependencyElements("application.properties")
 
         classes = []
         for file_name, content in zip(filenames, contents):
@@ -293,10 +291,6 @@ async def convert_spring(
                 raise ValueError("Given diagram is not Class Diagram")
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
-        zipf.writestr(
-            "src/main/resources/application.properties",
-            dependency.print_application_properties(),
-        )
 
         # Specific line of code to generate HomeController for Swagger Redirection
         zipf.writestr(
@@ -332,18 +326,7 @@ async def convert_spring(
                 generate_repository_java(project_name, class_object, group_id),
             )
 
-        fix_build_gradle_kts(zipf)
-
     return tmp_zip_path
-
-
-def fix_build_gradle_kts(zipf: zipfile.ZipFile):
-    build_gradle_kts = zipf.open("build.gradle.kts").read().decode()
-    build_gradle_kts = build_gradle_kts.replace(
-        '"org.springdoc:springdoc-openapi-starter-webmvc-ui"',
-        '"org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"',
-    )
-    zipf.writestr("build.gradle.kts", build_gradle_kts)
 
 
 def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
