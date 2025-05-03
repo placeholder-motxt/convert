@@ -22,7 +22,6 @@ class TestSequenceViewsJinja2Template(unittest.TestCase):
     def test_generate_springboot_controller_file_positive(
         self, to_camel_case_mock: MagicMock, to_pascal_case_mock: MagicMock
     ):
-        self.maxDiff = None
         class_object = mock.Mock()
         class_object.get_name.return_value = "User"
         class_object.get_is_public.return_value = True

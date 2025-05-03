@@ -19,7 +19,6 @@ FEATURE_PATH = os.path.join(
 
 class TestGenerateService(unittest.TestCase):
     def test_generate_service(self):
-        self.maxDiff = None
         class_object = ClassObject()
         class_object.set_name("Cart")
         class_object.set_is_public(True)
@@ -44,7 +43,10 @@ class TestGenerateService(unittest.TestCase):
         ) as file:
             expected_output = file.read()
 
-        self.assertEqual(output.replace(" ", "").replace("\n", "").strip(), expected_output.replace(" ", "").replace("\n", "").strip())
+        self.assertEqual(
+            output.replace(" ", "").replace("\n", "").strip(),
+            expected_output.replace(" ", "").replace("\n", "").strip(),
+        )
 
 
 # Behavior Test
@@ -93,7 +95,10 @@ def check_output(context):
     with open("tests/springboot/test_service_data.txt", "r", encoding="utf-8") as file:
         expected_output = file.read()
 
-    assert context["output"].replace(" ", "").replace("\n", "").strip() == expected_output.replace(" ", "").replace("\n", "").strip()
+    assert (
+        context["output"].replace(" ", "").replace("\n", "").strip()
+        == expected_output.replace(" ", "").replace("\n", "").strip()
+    )
 
 
 @given(
@@ -274,7 +279,7 @@ public class CartService {
 
 }
 """
-    
+
     assert (
         context["output"].replace(" ", "").strip()
         == expected_output.replace(" ", "").strip()
