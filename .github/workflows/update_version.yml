@@ -39,7 +39,7 @@ jobs:
       - name: Run update version script
         run: |
           chmod +x .github/scripts/update_version.sh
-          .github/scripts/update_version.sh
+          .github/scripts/update_version.sh ${{ github.head_ref }}
 
       - name: Get new version
         run: |
