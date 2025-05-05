@@ -10,6 +10,8 @@ from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier, render_temp
 
 from .properties import ParameterObject, TypeObject
 
+EMPTY_METHOD_ERR_MSG = "method cannot be empty\nplease consult the user manual document"
+
 
 class AbstractMethodObject(ABC):
     """
@@ -317,9 +319,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style(self) -> str:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         result = StringIO()
         result.write(f"def {self.get_name()}(request")
         for parameter in self.get_parameters():
@@ -333,9 +333,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style_template(self) -> dict[str]:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         context = {}
         context["method_name"] = self.get_name()
         context["params"] = [
@@ -344,6 +342,21 @@ class ControllerMethodObject(AbstractMethodObject):
 
         context["method_calls"] = [
             method_call.print_django_style_template() for method_call in self.__calls
+        ]
+        return context
+
+    def print_springboot_style_template(self) -> dict[str]:
+        if not self.get_name():
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
+        context = {}
+        context["method_name"] = self.get_name()
+        context["params"] = [
+            param.to_springboot_code_template() for param in self.get_parameters()
+        ]
+
+        context["method_calls"] = [
+            method_call.print_springboot_style_template()
+            for method_call in self.__calls
         ]
         return context
 
@@ -480,6 +493,25 @@ class AbstractMethodCallObject(ABC):
             ]
         return context
 
+    def print_springboot_style_template(self) -> dict[str]:
+        context = {}
+
+        if self.__condition:
+            context["condition"] = self.__condition
+        if self.__return_var_name:
+            context["return_var_name"] = self.__return_var_name
+        context["method_name"] = self.__method.get_name()
+        if isinstance(self, ClassMethodCallObject):
+            context["instance_name"] = self.get_instance_name()
+
+        context["arguments"] = []
+
+        if self.__arguments:
+            context["arguments"] = [
+                arg.print_springboot_style_template() for arg in self.__arguments
+            ]
+        return context
+
 
 class ClassMethodCallObject(AbstractMethodCallObject):
     """Represents a method call of a ClassMethod"""
@@ -562,4 +594,7 @@ class ArgumentObject:
         return self.__name
 
     def print_django_style_template(self) -> dict[str]:
+        return {"argument_name": self.__name}
+
+    def print_springboot_style_template(self) -> dict[str]:
         return {"argument_name": self.__name}

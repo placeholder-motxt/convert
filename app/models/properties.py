@@ -3,7 +3,11 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Optional
 
-from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier
+from app.utils import (
+    JAVA_TYPE_MAPPING,
+    is_valid_java_identifier,
+    is_valid_python_identifier,
+)
 
 MODELS_CHARFIELD = "models.CharField(max_length=255)"
 
@@ -32,6 +36,19 @@ class TypeObject:
 
     def get_name(self) -> str:
         return self.__name
+
+    def get_name_springboot(self) -> str:
+        if self.__name == "str":
+            return "String"
+        elif self.__name == "int":
+            return "int"
+        elif self.__name == "bool":
+            return "boolean"
+        else:
+            raise ValueError(
+                f"Invalid Springboot type name: {self.__name}.\
+                Type name must be one of 'str', 'int', or 'bool'"
+            )
 
     def __copy__(self) -> TypeObject:
         copy = TypeObject()
@@ -231,6 +248,26 @@ class ParameterObject:
         if self.__type is not None:
             param_type = self.__type.get_name()
             if not is_valid_python_identifier(param_type):
+                raise ValueError(
+                    f"Invalid param type '{param_type}'\n"
+                    "please consult the user manual document on how to name parameter types"
+                )
+            context["param_type"] = param_type
+        return context
+
+    def to_springboot_code_template(self) -> dict[str]:
+        context = {}
+        context["param_name"] = ""
+        if self.__name is None or not is_valid_java_identifier(self.__name):
+            raise ValueError(
+                f"Invalid param name '{self.__name}'\n"
+                "please consult the user manual document on how to name parameters"
+            )
+
+        context["param_name"] = self.__name
+        if self.__type is not None:
+            param_type = self.__type.get_name_springboot()
+            if not is_valid_java_identifier(param_type):
                 raise ValueError(
                     f"Invalid param type '{param_type}'\n"
                     "please consult the user manual document on how to name parameter types"
