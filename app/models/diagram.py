@@ -26,6 +26,9 @@ class ClassObject:
     def get_fields(self) -> list[FieldObject]:  # pragma: no cover
         return self.__fields
 
+    def get_parent(self) -> ClassObject:  # pragma: no cover
+        return self.__parent
+
     def to_models_code(self) -> str:
         return (
             f"class {self.__name}"
