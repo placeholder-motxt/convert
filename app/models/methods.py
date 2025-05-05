@@ -358,6 +358,7 @@ class ControllerMethodObject(AbstractMethodObject):
             method_call.print_springboot_style_template()
             for method_call in self.__calls
         ]
+        context["return_type"] = self.get_return_type().get_name_springboot()
         return context
 
 

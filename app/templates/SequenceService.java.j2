@@ -1,0 +1,19 @@
+package {{group_id}}.{{project_name}}.service;
+import {{group_id}}.{{project_name}}.model.*;
+import {{group_id}}.{{project_name}}.service.*;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class SequenceService {%raw%}{{%endraw%}{% for controller_method in controller_methods %}
+    public {{controller_method.return_type}} {{controller_method.method_name}}({% for param in controller_method.params %}{{param.param_type}} {{param.param_name}}{% if not loop.last %}, {% endif %}{%endfor%}){
+{% for method_call in controller_method.method_calls %}        {% if method_call.condition is defined %}if ({{ method_call.condition }}){
+            {% endif %}{% if method_call.return_var_name is defined %}{{ method_call.return_var_name }} = {% endif %}{{ method_call.method_name }}({% for argument in method_call.arguments %}{{ argument.argument_name }}{% if not loop.last %}, {% endif %}{% endfor %});{% if method_call.condition is defined %}
+        }{% endif %}
+{% endfor %}
+    // TODO: Auto generated function stub
+    }
+{% endfor %}
+}
