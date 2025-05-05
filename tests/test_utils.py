@@ -1,4 +1,3 @@
-import keyword
 import unittest
 from typing import Any, Type
 from unittest.mock import MagicMock, patch
@@ -6,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.utils import (  # Import the function from the module
+    JAVA_KEYWORDS,
     camel_to_snake,
     is_valid_java_identifier,
     render_template,
@@ -383,7 +383,7 @@ for _name, _ident in TestIsValidJavaIdentifier._negative_cases.items():
     _add_bool_test(TestIsValidJavaIdentifier, f"invalid_{_name}", _ident, False)
 
 # each Python keyword becomes its own single-assert test
-for _kw in keyword.kwlist:
+for _kw in JAVA_KEYWORDS:
     _add_bool_test(TestIsValidJavaIdentifier, f"keyword_{_kw}", _kw, False)
 
 # edge / exception cases
