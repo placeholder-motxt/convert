@@ -161,6 +161,9 @@ class TestControllerMethodObject(unittest.TestCase):
 
         param1 = ParameterObject()
         method_obj.add_parameter(param1)
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_obj.set_return_type(str_type)
 
         # Adding a mock method call
         method_call_mock = AbstractMethodCallObject()
@@ -170,6 +173,7 @@ class TestControllerMethodObject(unittest.TestCase):
             "method_name": "testControllerMethod",
             "params": [{"param_name": "exampleParam"}],
             "method_calls": [{"method_name": "methodCall"}],
+            "return_type": "String",
         }
 
         result = method_obj.print_springboot_style_template()
@@ -198,6 +202,10 @@ class TestControllerMethodObject(unittest.TestCase):
         method_obj = ControllerMethodObject()
         method_obj.set_name("testMethodWithInvalidParams")
 
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_obj.set_return_type(str_type)
+
         param1 = ParameterObject()
         method_obj.add_parameter(param1)
 
@@ -206,6 +214,7 @@ class TestControllerMethodObject(unittest.TestCase):
             "method_name": "testMethodWithInvalidParams",
             "params": [{}],  # The parameter's template is invalid (empty dictionary)
             "method_calls": [],  # No method calls
+            "return_type": "String",
         }
 
         self.assertEqual(result, expected_result)
@@ -215,10 +224,15 @@ class TestControllerMethodObject(unittest.TestCase):
         method_obj = ControllerMethodObject()
         method_obj.set_name("testMethodWithNoParams")
 
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_obj.set_return_type(str_type)
+
         expected_result = {
             "method_name": "testMethodWithNoParams",
             "params": [],
             "method_calls": [],  # No method calls
+            "return_type": "String",
         }
 
         result = method_obj.print_springboot_style_template()
@@ -235,6 +249,9 @@ class TestControllerMethodObject(unittest.TestCase):
     ):
         method_obj = ControllerMethodObject()
         method_obj.set_name("testMethodWithManyParams")
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_obj.set_return_type(str_type)
 
         # Adding 1000 parameters to the method
         for _ in range(1000):
