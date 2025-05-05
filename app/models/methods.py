@@ -10,6 +10,8 @@ from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier, render_temp
 
 from .properties import ParameterObject, TypeObject
 
+EMPTY_METHOD_ERR_MSG = "method cannot be empty\nplease consult the user manual document"
+
 
 class AbstractMethodObject(ABC):
     """
@@ -317,9 +319,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style(self) -> str:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         result = StringIO()
         result.write(f"def {self.get_name()}(request")
         for parameter in self.get_parameters():
@@ -333,9 +333,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style_template(self) -> dict[str]:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         context = {}
         context["method_name"] = self.get_name()
         context["params"] = [
@@ -349,9 +347,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_springboot_style_template(self) -> dict[str]:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         context = {}
         context["method_name"] = self.get_name()
         context["params"] = [
