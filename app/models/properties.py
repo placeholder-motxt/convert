@@ -44,6 +44,11 @@ class TypeObject:
             return "int"
         elif self.__name == "bool":
             return "boolean"
+        else:
+            raise ValueError(
+                f"Invalid Springboot type name: {self.__name}.\
+                Type name must be one of 'str', 'int', or 'bool'"
+            )
 
     def __copy__(self) -> TypeObject:
         copy = TypeObject()
