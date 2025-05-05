@@ -167,7 +167,7 @@ class TestTypeObject(unittest.TestCase):
         """Test case for 'int' mapped to 'int' in Spring Boot."""
         type_obj = TypeObject()
         type_obj.set_name("integer")
-        self.assertEqual(type_obj.get_name_springboot(), "int")
+        self.assertEqual(type_obj.get_name_springboot(), "Integer")
 
     def test_get_name_springboot_bool(self):
         """Test case for 'bool' mapped to 'boolean' in Spring Boot."""
@@ -178,8 +178,7 @@ class TestTypeObject(unittest.TestCase):
     def test_get_name_springboot_invalid_type(self):
         """Test case for invalid type that should not map to a known Spring Boot type."""
         type_obj = TypeObject()
-        type_obj.set_name("float")
-        # We expect Error because 'float' does not have a mapping in get_name_springboot
+        type_obj.set_name("wee")
         with self.assertRaises(ValueError):
             type_obj.get_name_springboot()
 
