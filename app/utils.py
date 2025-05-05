@@ -1,4 +1,3 @@
-import keyword
 import logging
 import os
 import re
@@ -298,7 +297,7 @@ ERROR_CATEGORY_PATTERNS = [
 
 def is_valid_java_identifier(identifier: str) -> bool:
     # Rule 1: Identifier must not be a keyword
-    if identifier in keyword.kwlist:
+    if identifier in JAVA_KEYWORDS:
         return False
 
     # Rule 2: Identifier must start with a letter, underscore, or dollar sign
