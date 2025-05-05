@@ -179,14 +179,16 @@ class TestTypeObject(unittest.TestCase):
         """Test case for invalid type that should not map to a known Spring Boot type."""
         type_obj = TypeObject()
         type_obj.set_name("float")
-        # We expect None because 'float' does not have a mapping in get_name_springboot
-        self.assertIsNone(type_obj.get_name_springboot())
+        # We expect Error because 'float' does not have a mapping in get_name_springboot
+        with self.assertRaises(ValueError):
+            type_obj.get_name_springboot()
 
     def test_get_name_springboot_empty_string(self):
         """Test case for empty string passed as name."""
         type_obj = TypeObject()
         type_obj.set_name("")
-        self.assertIsNone(type_obj.get_name_springboot())  # Empty string maps to None
+        with self.assertRaises(ValueError):
+            type_obj.get_name_springboot()  # Empty string maps to None
 
     def test_get_name_springboot_case_insensitivity(self):
         """Test case for case insensitivity when setting name."""
@@ -204,9 +206,8 @@ class TestTypeObject(unittest.TestCase):
         """Test case for handling very large inputs."""
         type_obj = TypeObject()
         type_obj.set_name("a" * 1000)  # Arbitrary large string
-        self.assertIsNone(
+        with self.assertRaises(ValueError):
             type_obj.get_name_springboot()
-        )  # Edge cases that should not map
 
 
 class TestParameterObject(unittest.TestCase):
@@ -325,7 +326,7 @@ class TestParameterObject(unittest.TestCase):
         string_type = TypeObject()
         string_type.set_name("hallo")
         param.set_type(string_type)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             param.to_springboot_code_template()
 
     # Corner case when param name is None
@@ -376,13 +377,3 @@ class TestParameterObject(unittest.TestCase):
         param.set_type(string_type)
         with self.assertRaises(ValueError):
             param.to_springboot_code_template()
-
-
-if __name__ == "__main__":
-    param = ParameterObject()
-    param.set_name("param1")
-    string_type = TypeObject()
-    string_type.set_name("hallo")
-    param.set_type(string_type)
-    result = param.to_springboot_code_template()
-    print(result)
