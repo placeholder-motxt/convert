@@ -254,11 +254,11 @@ please consult the user manual document on how to name parameters"
         self.check_for_duplicate_attribute(params, method, duplicate_attribute_checker)
 
         if ret_var is not None:
-            if not is_valid_python_identifier(ret_var):
-                raise ValueError(
-                    f"Invalid return variable name '{ret_var}' on sequence diagram \n\
-please consult the user manual document on how to name return variables"
-                )
+            #             if not is_valid_python_identifier(ret_var):
+            #                 raise ValueError(
+            #                     f"Invalid return variable name '{ret_var}' on sequence diagram \n\
+            # please consult the user manual document on how to name return variables"
+            #                 )
             self.__call_nodes[end_id]["ret_var"] = ret_var
 
         if class_name == "views":
@@ -379,7 +379,9 @@ please consult the user manual document on how to name return variables"
                 self.add_argument_object(callee_method, call_obj)
 
                 if ret_var is not None:
-                    call_obj.set_return_var_name(ret_var)
+                    ret_var_name, ret_var_type = self.process_return_variable(ret_var)
+                    call_obj.set_return_var_name(ret_var_name)
+                    call_obj.set_return_var_type(ret_var_type)
 
                 if isinstance(caller_method, ClassMethodObject):
                     caller_method.add_class_method_call(call_obj)
