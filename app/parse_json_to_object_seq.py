@@ -15,7 +15,7 @@ from app.models.methods import (
     ControllerMethodCallObject,
     ControllerMethodObject,
 )
-from app.models.properties import ParameterObject
+from app.models.properties import ParameterObject, TypeObject
 
 from .utils import is_valid_python_identifier
 
@@ -385,6 +385,24 @@ please consult the user manual document on how to name return variables"
                     caller_method.add_class_method_call(call_obj)
                 else:
                     caller_method.add_call(call_obj)
+
+    def process_return_variable(self, ret_var: str) -> tuple[str, TypeObject]:
+        name_type_pair = ret_var.split(sep=":")
+        if len(name_type_pair) != 2:
+            raise ValueError(
+                f"Invalid return variable: {ret_var}!"
+                "Format must be <returnVariableName>: <returnVariableType>"
+                "\nExample: person: String"
+            )
+        ret_var_name = name_type_pair[0].strip()
+        ret_var_type_name = name_type_pair[1].strip()
+        if len(ret_var_type_name) < 1:
+            raise ValueError(f"Empty return variable type: {ret_var}!")
+        ret_var_type = TypeObject()
+        ret_var_type.set_name(ret_var_type_name)
+        if len(ret_var_name) < 1:
+            raise ValueError(f"Empty return variable name: {ret_var}!")
+        return ret_var_name, ret_var_type
 
     def check_call_depth(
         self, rev_call_tree: dict[int, int], callee: int
