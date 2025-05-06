@@ -11,6 +11,25 @@ from app.utils import (
 
 MODELS_CHARFIELD = "models.CharField(max_length=255)"
 
+SPRING_TYPE_MAPPING = {
+    "boolean": "boolean",
+    "String": "String",
+    "str": "String",
+    "int": "Integer",
+    "bool": "boolean",
+    "integer": "Integer",
+    "float": "float",
+    "double": "double",
+    "Date": "LocalDate",
+    "DateTime": "LocalDateTime",
+    "Time": "LocalTime",
+    "Text": "String",
+    "Email": "String",
+    "URL": "String",
+    "UUID": "UUID",
+    "Decimal": "BigDecimal",
+}
+
 
 class TypeObject:
     """
@@ -38,17 +57,10 @@ class TypeObject:
         return self.__name
 
     def get_name_springboot(self) -> str:
-        if self.__name == "str":
-            return "String"
-        elif self.__name == "int":
-            return "int"
-        elif self.__name == "bool":
-            return "boolean"
-        else:
-            raise ValueError(
-                f"Invalid Springboot type name: {self.__name}.\
-                Type name must be one of 'str', 'int', or 'bool'"
-            )
+        for key, value in SPRING_TYPE_MAPPING.items():
+            if self.__name == key:
+                return value
+        raise ValueError(f"Invalid Springboot type name: {self.__name}")
 
     def __copy__(self) -> TypeObject:
         copy = TypeObject()
@@ -87,25 +99,6 @@ class FieldObject:
         "URL": "models.URLField()",
         "UUID": "models.UUIDField()",
         "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
-    }
-
-    SPRING_TYPE_MAPPING = {
-        "boolean": "boolean",
-        "String": "String",
-        "str": "String",
-        "int": "Integer",
-        "bool": "boolean",
-        "integer": "Integer",
-        "float": "float",
-        "double": "double",
-        "Date": "LocalDate",
-        "DateTime": "LocalDateTime",
-        "Time": "LocalTime",
-        "Text": "String",
-        "Email": "String",
-        "URL": "String",
-        "UUID": "UUID",
-        "Decimal": "BigDecimal",
     }
 
     def __init__(self):
@@ -165,7 +158,7 @@ class FieldObject:
         # Default fallback
         result = {"name": self.__name, "type": "String", "modifier": self.__modifier}
 
-        for key, value in self.SPRING_TYPE_MAPPING.items():
+        for key, value in SPRING_TYPE_MAPPING.items():
             if key.lower() in field_type:
                 result["type"] = value
                 return result

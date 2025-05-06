@@ -1,6 +1,7 @@
 import re
 
 from app.models.diagram import ClassObject
+from app.models.elements import ViewsElements
 from app.utils import render_template
 
 
@@ -49,3 +50,17 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
 
 def format_class_name(name: str) -> tuple[str, str]:
     return name.capitalize(), name[0].lower() + name[1:]
+
+
+def generate_sequence_service_java(
+    project_name: str, views_elements: ViewsElements, group_id: str
+) -> str:
+    context = {"project_name": project_name, "group_id": group_id}
+    if len(views_elements.get_controller_methods()) == 0:
+        return ""
+    controller_method_context = [
+        controller_method_object.print_springboot_style_template()
+        for controller_method_object in views_elements.get_controller_methods()
+    ]
+    context["controller_methods"] = controller_method_context
+    return render_template("SequenceService.java.j2", context)

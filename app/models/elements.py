@@ -223,6 +223,11 @@ class ViewsElements(FileElements):
             logger.error(f"Error rendering template: {e}")
             return ""
 
+    def get_controller_methods(
+        self,
+    ) -> list[ControllerMethodObject]:  # pragma: no cover
+        return self.__controller_methods
+
 
 class UrlsElement(FileElements):
     def __init__(self, file_name: str = "urls.py"):

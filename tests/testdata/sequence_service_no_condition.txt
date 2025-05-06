@@ -1,0 +1,18 @@
+package com.example.burhanpedia.service;
+import com.example.burhanpedia.model.*;
+import com.example.burhanpedia.service.*;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class SequenceService {
+    public String controller_method_1(String parameter_1){
+        ret_var_1 = controller_method_1(argument_1);
+        ret_var_1 = class_method_1();
+
+    // TODO: Auto generated function stub
+    }
+
+}
