@@ -6,6 +6,7 @@ from app.models.diagram import (
 )
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, ParameterObject, TypeObject
+from app.models.relationship_enum import RelationshipType
 from app.parse_class_pattern.parse_relationship_state import MultiplicityValidator
 from app.parse_class_pattern.parse_relationship_strategy import (
     ManyToManyStrategy,
@@ -64,6 +65,16 @@ class ParseJsonToObjectClass:
             class_from_id = classes[edge["start"]]
             class_to_id = classes[edge["end"]]
 
+            if "type" in edge.keys():
+                relation_type = edge["type"]
+                relation_type = (
+                    RelationshipType.AGGREGATION
+                    if relation_type == "AggregationEdge"
+                    else RelationshipType.ASSOCIATION
+                )
+            else:
+                relation_type = RelationshipType.ASSOCIATION
+
             if "type" in edge.keys() and edge["type"] == "GeneralizationEdge":
                 class_from_id.set_parent(class_to_id)
                 continue
@@ -78,7 +89,7 @@ class ParseJsonToObjectClass:
 
             strategy = self.__determine_strategy(edge)
             strategy.create_relationship(
-                edge, class_from_id, class_to_id, bidirectional
+                edge, class_from_id, class_to_id, relation_type, bidirectional
             )
 
         return classes

@@ -8,6 +8,7 @@ from app.utils import is_valid_python_identifier, to_camel_case, to_pascal_case
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
+from .relationship_enum import RelationshipType
 
 
 class ClassObject:
@@ -150,6 +151,7 @@ class AbstractRelationshipObject(ABC):
         self.__target_class: Optional[ClassObject] = None
         self.__sourceClassOwnAmount: str = ""
         self.__targetClassOwnAmount: str = ""
+        self.__relation_type: RelationshipType = RelationshipType.ASSOCIATION
 
     def set_source_class(self, source_class: ClassObject):
         if source_class is None:
@@ -172,6 +174,12 @@ class AbstractRelationshipObject(ABC):
 
     def set_target_class_own_amount(self, amount: str):
         self.__targetClassOwnAmount = amount
+
+    def set_type(self, type: RelationshipType):
+        self.__relation_type = type
+
+    def get_type(self) -> RelationshipType:
+        return self.__relation_type
 
     def get_source_class(self) -> ClassObject:
         return self.__source_class
