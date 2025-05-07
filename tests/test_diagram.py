@@ -338,6 +338,16 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
             == "targetclass = models.OneToOneField('TargetClass', on_delete = models.CASCADE)"
         )
 
+    def test_one_to_one_relationship_aggregation(self):
+        self.one_to_one_relationship.set_source_class(self.source_class)
+        self.one_to_one_relationship.set_target_class(self.target_class)
+        self.one_to_one_relationship.set_type(RelationshipType.AGGREGATION)
+        assert (
+            self.one_to_one_relationship.to_models_code()
+            == "targetclass = models.OneToOneField('TargetClass', on_delete = models.SET_NULL, "
+            "null=True)"
+        )
+
     def test_is_instance_of_abstract_relationship_object(self):
         self.assertIsInstance(self.one_to_one_relationship, AbstractRelationshipObject)
 
@@ -356,6 +366,16 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
         assert (
             self.many_to_one_relationship.to_models_code()
             == "targetclassFK = models.ForeignKey('TargetClass', on_delete = models.CASCADE)"
+        )
+
+    def test_many_to_one_relationship_aggregation(self):
+        self.many_to_one_relationship.set_source_class(self.source_class)
+        self.many_to_one_relationship.set_target_class(self.target_class)
+        self.many_to_one_relationship.set_type(RelationshipType.AGGREGATION)
+        assert (
+            self.many_to_one_relationship.to_models_code()
+            == "targetclassFK = models.ForeignKey('TargetClass', on_delete = models.SET_NULL,"
+            " null=True)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
