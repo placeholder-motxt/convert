@@ -201,6 +201,12 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
     def to_models_code(self) -> str:
+        if self.get_type() == RelationshipType.AGGREGATION:
+            return (
+                f"{self.get_target_class().get_name().lower()} = "
+                + f"models.OneToOneField('{self.get_target_class().get_name()}',"
+                + " on_delete = models.SET_NULL, null=True)"
+            )
         return (
             f"{self.get_target_class().get_name().lower()} = "
             + f"models.OneToOneField('{self.get_target_class().get_name()}',"
@@ -241,6 +247,12 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
     def to_models_code(self) -> str:
+        if self.get_type() == RelationshipType.AGGREGATION:
+            return (
+                f"{self.get_target_class().get_name().lower()}FK = "
+                + f"models.ForeignKey('{self.get_target_class().get_name()}',"
+                + " on_delete = models.SET_NULL, null=True)"
+            )
         return (
             f"{self.get_target_class().get_name().lower()}FK "
             + f"= models.ForeignKey('{self.get_target_class().get_name()}', "
