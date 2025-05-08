@@ -19,7 +19,6 @@ FEATURE_PATH = os.path.join(
 
 class TestGenerateService(unittest.TestCase):
     def test_generate_service(self):
-        self.maxDiff = None
         parent = ClassObject()
         parent.set_name("Pembeli")
         field = FieldObject()
@@ -28,7 +27,6 @@ class TestGenerateService(unittest.TestCase):
         field_type.set_name("string")
         field.set_type(field_type)
         parent.add_field(field)
-
 
         class_object = ClassObject()
         class_object.set_parent(parent)
@@ -54,11 +52,12 @@ class TestGenerateService(unittest.TestCase):
             "tests/springboot/test_generate_service_inherit.txt", "r", encoding="utf-8"
         ) as file:
             expected_output = file.read()
-            
-        assert "setFull(cart.isFull())" in expected_output
-        assert "setCartId(cart.getCartId())" in expected_output
-        assert "setUsername(cart.getUsername())" in expected_output
-        self.assertEqual(output.replace(" ", "").replace("\n", "").strip(), expected_output.replace(" ", "").replace("\n", "").strip())
+
+        self.assertEqual(
+            output.replace(" ", "").replace("\n", "").strip(),
+            expected_output.replace(" ", "").replace("\n", "").strip(),
+        )
+
 
 
 # Behavior Test
@@ -110,7 +109,13 @@ def check_output(context):
     assert "setFull(cart.isFull())" in expected_output
     assert "setCartId(cart.getCartId())" in expected_output
 
-    assert context["output"].replace(" ", "").replace("\n", "").strip() == expected_output.replace(" ", "").replace("\n", "").strip()
+    assert "setFull(cart.isFull())" in expected_output
+    assert "setCartId(cart.getCartId())" in expected_output
+
+    assert (
+        context["output"].replace(" ", "").replace("\n", "").strip()
+        == expected_output.replace(" ", "").replace("\n", "").strip()
+    )
 
 
 @given(
@@ -276,7 +281,12 @@ def render_template_output(context):
 
 @then("the service file content is generated with empty method")
 def check_output(context):
-    expected_output = """package com.example.burhanpedia.service;
+    expected_output = """/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
+
+package com.example.burhanpedia.service;
 
 import com.example.burhanpedia.model.Cart;
 import com.example.burhanpedia.repository.CartRepository;
@@ -292,7 +302,7 @@ public class CartService {
 
 }
 """
-    
+
     assert (
         context["output"].replace(" ", "").strip()
         == expected_output.replace(" ", "").strip()

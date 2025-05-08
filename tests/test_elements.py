@@ -197,6 +197,10 @@ class TestUrlsElements(unittest.IsolatedAsyncioTestCase):
         res = self.requirements_elements.print_django_style()
         self.assertEqual(
             res,
+            '"""\n'
+            "This code is generated using MoTxT,\n"
+            "checkout more about us on https://motxt.ppl.cs.ui.ac.id\n"
+            '"""\n\n'
             "from django.urls import path\n"
             "from .views import (\n    "
             "landing_page,\n    "
