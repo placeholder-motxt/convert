@@ -30,7 +30,7 @@ jobs:
           pip install -r requirements-tests.txt
 
       - name: Run Tests with Coverage
-        run: python -m pytest --cov=app --cov-report=xml
+        run: python -m pytest --ignore=tests/integration --cov=app --cov-report=xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4

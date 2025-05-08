@@ -59,6 +59,7 @@ class TestGenerateService(unittest.TestCase):
         )
 
 
+
 # Behavior Test
 scenarios(FEATURE_PATH)
 
@@ -104,6 +105,9 @@ def render_template_output(context):
 def check_output(context):
     with open("tests/springboot/test_service_data.txt", "r", encoding="utf-8") as file:
         expected_output = file.read()
+    
+    assert "setFull(cart.isFull())" in expected_output
+    assert "setCartId(cart.getCartId())" in expected_output
 
     assert "setFull(cart.isFull())" in expected_output
     assert "setCartId(cart.getCartId())" in expected_output

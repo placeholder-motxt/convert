@@ -20,8 +20,26 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
     for methods in model.get_methods():
         method.append(methods.to_springboot_code())
 
+    context = {
+        "project_name": project_name,
+        "class_name_capital": class_name_capital,
+        "class_name": class_name,
+        "is_public": model.get_is_public(),
+        "attributes": get_all_attributes(model),
+        "method": method,
+        "group_id": group_id,
+    }
+    return render_template("springboot/service.java.j2", context)
+
+
+def get_all_attributes(model: ClassObject) -> list[str]:
     attributes = []
-    for attribute in model.get_fields():
+
+    fields = model.get_fields()
+    if model.get_parent() is not None:
+        fields += model.get_parent().get_fields()
+
+    for attribute in fields:
         attribute_name = attribute.get_name()
         name = attribute_name[0].upper() + attribute_name[1:]
 
@@ -35,16 +53,7 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
             setter = "set" + attribute_name[0].upper() + attribute_name[1:]
         attributes.append((name, getter, setter))
 
-    context = {
-        "project_name": project_name,
-        "class_name_capital": class_name_capital,
-        "class_name": class_name,
-        "is_public": model.get_is_public(),
-        "attributes": attributes,
-        "method": method,
-        "group_id": group_id,
-    }
-    return render_template("springboot/service.java.j2", context)
+    return attributes
 
 
 def format_class_name(name: str) -> tuple[str, str]:

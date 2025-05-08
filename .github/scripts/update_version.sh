@@ -5,6 +5,7 @@ CONFIG_FILE="app/config.py"
 
 # Get the current branch (or the branch the PR is being merged into)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
+SOURCE=$1
 
 # Read the current version from the config file
 CURRENT_VERSION=$(grep -oP 'VERSION = "\K[0-9]+\.[0-9]+\.[0-9]+' "$CONFIG_FILE")
@@ -13,7 +14,7 @@ CURRENT_VERSION=$(grep -oP 'VERSION = "\K[0-9]+\.[0-9]+\.[0-9]+' "$CONFIG_FILE")
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
 # Update the version based on the branch
-if [[ "$BRANCH" =~ ^BUG-FIX- ]]; then
+if [[ "$SOURCE" =~ ^BUG-FIX- ]]; then
   PATCH=$((PATCH + 1))
 elif [[ "$BRANCH" == "main" ]]; then
   MAJOR=$((MAJOR + 1))
