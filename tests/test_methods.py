@@ -739,8 +739,18 @@ class TestHandleReturnVarDeclaration(unittest.TestCase):
             },
         ]
         controller_method_object = ControllerMethodObject()
-        with self.assertRaises(ValueError):
+        controller_method_object.set_name("hello")
+        with self.assertRaises(ValueError) as context:
             controller_method_object.handle_return_var_declaration(method_calls)
+
+        self.assertEqual(
+            str(context.exception),
+            (
+                "return variable type not assigned when "
+                "calling method_name1 in "
+                "hello method"
+            ),
+        )
 
     def test_input_with_none_return_var_name(self):
         method_calls = [
