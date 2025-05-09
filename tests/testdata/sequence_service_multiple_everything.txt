@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SequenceService {
     public String controller_method_1(String parameter_1, String parameter_1, String parameter_1, String parameter_1){
+        String ret_var_1;
+
         class_method_1();
         if (condition == True){
             class_method_1();
         }
-        String ret_var_1 = class_method_1();
+        ret_var_1 = class_method_1();
         if (condition == True){
             ret_var_1 = class_method_1(argument_1, argument_1, argument_1, argument_1, argument_1);
         }
@@ -23,11 +25,13 @@ public class SequenceService {
     }
 
     public String controller_method_1(String parameter_1, String parameter_1, String parameter_1, String parameter_1){
+        String ret_var_1;
+
         class_method_1();
         if (condition == True){
             class_method_1();
         }
-        String ret_var_1 = class_method_1();
+        ret_var_1 = class_method_1();
         if (condition == True){
             ret_var_1 = class_method_1(argument_1, argument_1, argument_1, argument_1, argument_1);
         }
@@ -37,11 +41,13 @@ public class SequenceService {
     }
 
     public String controller_method_1(String parameter_1, String parameter_1, String parameter_1, String parameter_1){
+        String ret_var_1;
+
         class_method_1();
         if (condition == True){
             class_method_1();
         }
-        String ret_var_1 = class_method_1();
+        ret_var_1 = class_method_1();
         if (condition == True){
             ret_var_1 = class_method_1(argument_1, argument_1, argument_1, argument_1, argument_1);
         }
