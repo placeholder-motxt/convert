@@ -375,6 +375,13 @@ class ControllerMethodObject(AbstractMethodObject):
                 return_var_name not in encountered_return_var_names
                 and return_var_name is not None
             ):
+                return_var_type = method_call.get("return_var_type")
+                if return_var_type is None:
+                    raise ValueError(
+                        "return variable type not assigned when "
+                        f"calling {method_call} in"
+                        f"{self.get_name} method"
+                    )
                 result.append(method_call)
                 encountered_return_var_names.add(return_var_name)
 
