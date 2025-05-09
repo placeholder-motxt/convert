@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class SequenceService {
     public String controller_method_1(String parameter_1){
         if (condition == True){
-            ret_var_1 = controller_method_1();
+            String ret_var_1 = controller_method_1();
         }
         if (condition == True){
             ret_var_1 = class_method_1();
