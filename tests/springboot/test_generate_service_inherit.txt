@@ -2,7 +2,6 @@
 This code is generated using MoTxT,
 checkout more about us on https://motxt.ppl.cs.ui.ac.id
 */
-
 package com.example.burhanpedia.service;
 
 import com.example.burhanpedia.model.Cart;
@@ -36,6 +35,8 @@ public class CartService {
 
             existingCart.setCartId(cart.getCartId());
 
+            existingCart.setUsername(cart.getUsername());
+
             return cartRepository.save(existingCart);
         } else {
             throw new RuntimeException("Cart not found for id: " + id);
@@ -46,21 +47,6 @@ public class CartService {
     public void deleteCart(String id) {
         cartRepository.deleteById(id);
     }
-
-
-    void method_params(int param1) {
-    // TODO: Auto generated function stub
-    throw new UnsupportedOperationException("method_params function is not yet implemented");}
-
-
-    public void method_param2(String param2) {
-    // TODO: Auto generated function stub
-    throw new UnsupportedOperationException("method_param2 function is not yet implemented");}
-
-
-    private void method_param3(boolean param3) {
-    // TODO: Auto generated function stub
-    throw new UnsupportedOperationException("method_param3 function is not yet implemented");}
 
 
 }

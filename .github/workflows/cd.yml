@@ -24,6 +24,8 @@ jobs:
         with:
           name: merge-metadata
           path: ./merge-data
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine branch to checkout or stop
         id: result
@@ -44,7 +46,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     needs: determine-branch
-    if: ${{ !needs.determine-branch.outputs.stop }}
+    if: ${{ needs.determine-branch.outputs.stop == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

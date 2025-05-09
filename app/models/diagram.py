@@ -8,6 +8,7 @@ from app.utils import is_valid_python_identifier, to_camel_case, to_pascal_case
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
+from .relationship_enum import RelationshipType
 
 
 class ClassObject:
@@ -25,6 +26,9 @@ class ClassObject:
 
     def get_fields(self) -> list[FieldObject]:  # pragma: no cover
         return self.__fields
+
+    def get_parent(self) -> ClassObject:  # pragma: no cover
+        return self.__parent
 
     def to_models_code(self) -> str:
         return (
@@ -147,6 +151,7 @@ class AbstractRelationshipObject(ABC):
         self.__target_class: Optional[ClassObject] = None
         self.__sourceClassOwnAmount: str = ""
         self.__targetClassOwnAmount: str = ""
+        self.__relation_type: RelationshipType = RelationshipType.ASSOCIATION
 
     def set_source_class(self, source_class: ClassObject):
         if source_class is None:
@@ -170,6 +175,12 @@ class AbstractRelationshipObject(ABC):
     def set_target_class_own_amount(self, amount: str):
         self.__targetClassOwnAmount = amount
 
+    def set_type(self, type: RelationshipType):
+        self.__relation_type = type
+
+    def get_type(self) -> RelationshipType:
+        return self.__relation_type
+
     def get_source_class(self) -> ClassObject:
         return self.__source_class
 
@@ -190,6 +201,12 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
     def to_models_code(self) -> str:
+        if self.get_type() == RelationshipType.AGGREGATION:
+            return (
+                f"{self.get_target_class().get_name().lower()} = "
+                + f"models.OneToOneField('{self.get_target_class().get_name()}',"
+                + " on_delete = models.SET_NULL, null=True)"
+            )
         return (
             f"{self.get_target_class().get_name().lower()} = "
             + f"models.OneToOneField('{self.get_target_class().get_name()}',"
@@ -208,7 +225,10 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
             join = None
         else:
-            rel_type = "@OneToOne"
+            rel_type = (
+                "@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, "
+                "CascadeType.REMOVE})"
+            )
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
@@ -227,6 +247,12 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
     def to_models_code(self) -> str:
+        if self.get_type() == RelationshipType.AGGREGATION:
+            return (
+                f"{self.get_target_class().get_name().lower()}FK = "
+                + f"models.ForeignKey('{self.get_target_class().get_name()}',"
+                + " on_delete = models.SET_NULL, null=True)"
+            )
         return (
             f"{self.get_target_class().get_name().lower()}FK "
             + f"= models.ForeignKey('{self.get_target_class().get_name()}', "
@@ -242,13 +268,16 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
         if self.get_source_class_own_amount() == "1":
-            rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")\n'
-            rel_type += f'@JsonIgnoreProperties("{source.replace(" ", "_")}s")'
+            rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")'
+            rel_type += f'\n\t@JsonIgnoreProperties("{source.replace(" ", "_")}s")'
             join = None
             var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         else:
-            rel_type = "@OneToMany\n"
-            rel_type += "@JsonIgnore"
+            rel_type = (
+                "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},"
+            )
+            rel_type += "\n\t\torphanRemoval = true\n)"
+            rel_type += "\n\t@JsonIgnore"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
@@ -275,16 +304,16 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = "@ManyToMany\n"
-        rel_type += "@JsonIgnore"
+        rel_type = "@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})"
+        rel_type += "\n\t@JsonIgnore"
         join = "@JoinTable("
-        join += f'\n\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
+        join += f'\n\t\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
         join += (
-            f'\n\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id"),'
+            f'\n\t\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id"),'
         )
         join += (
-            f"\n\tinverseJoinColumns = @JoinColumn("
-            f'name = "{target.replace(" ", "_").lower()}_id")\n)'
+            f"\n\t\tinverseJoinColumns = @JoinColumn("
+            f'name = "{target.replace(" ", "_").lower()}_id")\n\t)'
         )
         var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}

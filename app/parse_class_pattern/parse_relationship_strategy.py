@@ -4,6 +4,7 @@ from app.models.diagram import (
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
 )
+from app.models.relationship_enum import RelationshipType
 
 
 class RelationshipStrategy:
@@ -12,6 +13,7 @@ class RelationshipStrategy:
         edge: dict,
         class_from_id: ClassObject,
         class_to_id: ClassObject,
+        type: RelationshipType,
         bidirectional: bool = False,
     ) -> None:
         raise NotImplementedError(
@@ -25,9 +27,23 @@ class OneToOneStrategy(RelationshipStrategy):
         edge: dict,
         class_from_id: ClassObject,
         class_to_id: ClassObject,
+        type: RelationshipType,
         bidirectional: bool = False,
     ) -> None:
         ro = OneToOneRelationshipObject()
+        ro.set_type(type)
+
+        # This is for django implementation of aggregation only
+        # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
+        if ro.get_type() == RelationshipType.AGGREGATION:
+            ro.set_source_class(class_to_id)
+            ro.set_target_class(class_from_id)
+            ro.set_source_class_own_amount(edge["endLabel"])
+            ro.set_target_class_own_amount(edge["startLabel"])
+            class_to_id.add_relationship(ro)
+            return
+
+        ro.set_target_class_own_amount(edge["startLabel"])
         ro.set_source_class(class_from_id)
         ro.set_target_class(class_to_id)
         ro.set_source_class_own_amount(edge["startLabel"])
@@ -48,9 +64,11 @@ class ManyToOneStrategy(RelationshipStrategy):
         edge: dict,
         class_from_id: ClassObject,
         class_to_id: ClassObject,
+        type: RelationshipType,
         bidirectional: bool = False,
     ) -> None:
         ro = ManyToOneRelationshipObject()
+        ro.set_type(type)
         start_condition = (
             "*" in edge["startLabel"]
             or "." in edge["startLabel"]
@@ -58,6 +76,9 @@ class ManyToOneStrategy(RelationshipStrategy):
         )
 
         if start_condition:
+            if ro.get_type() == RelationshipType.AGGREGATION:
+                raise ValueError("Aggregation cannot be Many to One")
+
             ro.set_source_class_own_amount(edge["startLabel"])
             ro.set_target_class_own_amount(edge["endLabel"])
             ro.set_source_class(class_from_id)
@@ -71,6 +92,16 @@ class ManyToOneStrategy(RelationshipStrategy):
                 ro2.set_target_class(class_from_id)
                 class_to_id.add_relationship(ro2)
         else:
+            # This is for django implementation of aggregation only
+            # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
+            if ro.get_type() == RelationshipType.AGGREGATION:
+                ro.set_source_class(class_to_id)
+                ro.set_target_class(class_from_id)
+                ro.set_source_class_own_amount(edge["endLabel"])
+                ro.set_target_class_own_amount(edge["startLabel"])
+                class_to_id.add_relationship(ro)
+                return
+
             ro.set_source_class_own_amount(edge["endLabel"])
             ro.set_target_class_own_amount(edge["startLabel"])
             ro.set_source_class(class_to_id)
@@ -91,9 +122,22 @@ class ManyToManyStrategy(RelationshipStrategy):
         edge: dict,
         class_from_id: ClassObject,
         class_to_id: ClassObject,
+        type: RelationshipType,
         bidirectional: bool = False,
     ) -> None:
         ro = ManyToManyRelationshipObject()
+        ro.set_type(type)
+
+        # This is for django implementation of aggregation only
+        # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
+        if ro.get_type() == RelationshipType.AGGREGATION:
+            ro.set_source_class(class_to_id)
+            ro.set_target_class(class_from_id)
+            ro.set_source_class_own_amount(edge["endLabel"])
+            ro.set_target_class_own_amount(edge["startLabel"])
+            class_to_id.add_relationship(ro)
+            return
+
         ro.set_source_class(class_from_id)
         ro.set_target_class(class_to_id)
         ro.set_source_class_own_amount(edge["startLabel"])

@@ -1,5 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
+<!--This code is generated using MoTxT, checkout more about us on https://motxt.ppl.cs.ui.ac.id-->
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />

@@ -46,16 +46,14 @@ from app.generate_service_springboot.generate_service_springboot import (
 from app.generate_swagger.generate_swagger import (
     generate_swagger_config,
 )
-from app.model import ConvertRequest, DownloadRequest, Style
+from app.model import ConvertRequest, DownloadRequest, DuplicateChecker, Style
 from app.models.elements import (
     ClassObject,
-    DependencyElements,
     ModelsElements,
     RequirementsElements,
     UrlsElement,
     ViewsElements,
 )
-from app.models.methods import ClassMethodObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 from app.utils import (
     is_valid_java_package_name,
@@ -79,7 +77,6 @@ instrumentator = Instrumentator().instrument(app)
 BASE_STATIC_TEMPLATES_DIR = os.path.join("app", "templates", "django_app")
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 CSS_DIR = os.path.join(CUR_DIR, "templates", "css")
-DuplicateChecker = dict[tuple[str, str], ClassMethodObject]
 
 error_counter = Counter(
     "convert_errors_total", "Total number of errors by message", ["error_message"]
@@ -274,7 +271,6 @@ async def convert_spring(
         zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
 
         writer_models = ModelsElements("models.py")
-        dependency = DependencyElements("application.properties")
 
         classes = []
         for file_name, content in zip(filenames, contents):
@@ -293,10 +289,6 @@ async def convert_spring(
                 raise ValueError("Given diagram is not Class Diagram")
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
-        zipf.writestr(
-            "src/main/resources/application.properties",
-            dependency.print_application_properties(),
-        )
 
         # Specific line of code to generate HomeController for Swagger Redirection
         zipf.writestr(
@@ -332,18 +324,7 @@ async def convert_spring(
                 generate_repository_java(project_name, class_object, group_id),
             )
 
-        fix_build_gradle_kts(zipf)
-
     return tmp_zip_path
-
-
-def fix_build_gradle_kts(zipf: zipfile.ZipFile):
-    build_gradle_kts = zipf.open("build.gradle.kts").read().decode()
-    build_gradle_kts = build_gradle_kts.replace(
-        '"org.springdoc:springdoc-openapi-starter-webmvc-ui"',
-        '"org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0"',
-    )
-    zipf.writestr("build.gradle.kts", build_gradle_kts)
 
 
 def write_springboot_path(src_path: str, file: str, class_name: str) -> str:
@@ -456,7 +437,6 @@ def generate_file_to_be_downloaded(
     Function to generate the file to be downloaded. This function will create a zip file
     with the name of the project and add all the files to it.
     """
-    # TODO: make app_name dynamic in the future
     app_name = "main"
     create_django_project(project_name, zipfile_path)
     create_django_app(project_name, app_name, zipfile_path, models, views)

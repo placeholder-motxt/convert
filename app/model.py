@@ -2,7 +2,10 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
+from app.models.methods import ClassMethodObject
+
 Style = Literal["classic", "dark", "minimalist", "modern", "vibrant"]
+DuplicateChecker = dict[tuple[str, str], ClassMethodObject]
 
 
 class ConvertRequest(BaseModel):

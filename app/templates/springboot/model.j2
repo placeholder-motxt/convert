@@ -1,3 +1,8 @@
+/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
+
 package {{ group_id }}.{{ project_name }}.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -30,15 +35,15 @@ public class {{ name }}{% if parent %} extends {{ parent }}{% endif %} {
     private String id = UUID.randomUUID().toString();
 {% endif -%}
 
-    {%+ for field in fields %}
+    {% for field in fields %}
     {{field.modifier}} {{field.type}} {{ field.name }};
-{% endfor %}
+{% endfor -%}
 
-    {%- for relationship in relationships %}
+    {% for relationship in relationships %}
     {{ relationship.type }}
     {%- if relationship.join %}
     {{ relationship.join }}
     {%- endif %}
     {{ relationship.name }}
-    {% endfor %}
+    {% endfor +%}
 }
