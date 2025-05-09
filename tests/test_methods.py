@@ -726,17 +726,21 @@ class TestHandleReturnVarDeclaration(unittest.TestCase):
 
     def test_input_with_missing_keys(self):
         method_calls = [
-            {"return_var_name": "result"},
-            {"return_var_name": "output", "return_var_type": "String"},
-            {"return_var_name": "result", "return_var_type": "int"},
-        ]
-        expected_result = [
-            {"return_var_name": "result"},
-            {"return_var_name": "output", "return_var_type": "String"},
+            {"method_name": "method_name1", "return_var_name": "result"},
+            {
+                "method_name": "method_name1",
+                "return_var_name": "output",
+                "return_var_type": "String",
+            },
+            {
+                "method_name": "method_name1",
+                "return_var_name": "result",
+                "return_var_type": "int",
+            },
         ]
         controller_method_object = ControllerMethodObject()
-        result = controller_method_object.handle_return_var_declaration(method_calls)
-        self.assertEqual(result, expected_result)
+        with self.assertRaises(ValueError):
+            controller_method_object.handle_return_var_declaration(method_calls)
 
     def test_input_with_none_return_var_name(self):
         method_calls = [
