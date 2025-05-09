@@ -226,7 +226,7 @@ def prepare_invalid_diagram(context: dict):
         "filename": ["Invalid_1.class.jet"],
         "content": [
             [
-                '{"diagram":"SequenceDiagram","nodes":[{"methods":"","name":"Shape","x":100,"y":70,'
+                '{"diagram":"Diagram","nodes":[{"methods":"","name":"Shape","x":100,"y":70,'
                 '"attributes":"+ colour: string","id":0,"type":"ClassNode"},{"methods":'
                 '"+ getId (): string\\n+ setRadius (radius: integer): void","name":"Circle","x":'
                 '320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":'
@@ -294,7 +294,7 @@ async def call_convert_spring2(context: dict):
 def check_error_2(context: dict):
     assert context["exception2"] is not None, "Expected exception, but none was raised"
     assert isinstance(context["exception2"], ValueError)
-    assert str(context["exception2"]) == "Given diagram is not Class Diagram"
+    assert str(context["exception2"]) == "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
 
 
 def cleanup(context: dict):
