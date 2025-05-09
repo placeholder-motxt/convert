@@ -359,6 +359,11 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_mock = AbstractMethodObject()
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("result")
+
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         method_call_obj.set_condition("if true")
 
         argument = ArgumentObject()
@@ -369,6 +374,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "return_var_name": "result",
             "method_name": "testMethod",
             "arguments": [{"arg": "value"}],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -389,6 +395,11 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_mock = AbstractMethodObject()
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("result")
+
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         method_call_obj.set_condition("if true")
 
         argument = ArgumentObject()
@@ -400,6 +411,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "method_name": "testMethod",
             "instance_name": "instance1",
             "arguments": [{"arg": "value"}],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -431,6 +443,10 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("result")
 
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         # Setting empty condition
         method_call_obj.set_condition("")
 
@@ -438,6 +454,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "return_var_name": "result",
             "method_name": "testMethod",
             "arguments": [],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -465,6 +482,11 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_mock = AbstractMethodObject()
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("complex_result")
+
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         method_call_obj.set_condition("if complex")
 
         complex_argument = ArgumentObject()
@@ -475,6 +497,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "return_var_name": "complex_result",
             "method_name": "testMethod",
             "arguments": [{"complex_arg": "complex_value"}],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()

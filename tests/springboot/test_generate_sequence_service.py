@@ -37,6 +37,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.controller_method_call_1.set_method(self.controller_method_1)
         self.controller_method_call_1.set_condition("condition == True")
         self.controller_method_call_1.set_ret_var("ret_var_1")
+        self.controller_method_call_1.set_return_var_type(str_type)
 
         self.argument_1 = ArgumentObject()
         self.argument_1.set_method_object(self.controller_method_call_1)
@@ -55,6 +56,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_call_1.set_method(self.class_method_1)
         self.class_method_call_1.set_condition("condition == True")
         self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_return_var_type(str_type)
         self.class_method_call_1.set_instance_name("instance_1")
 
         self.controller_method_1.add_call(self.class_method_call_1)
@@ -151,6 +153,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.controller_method_call_1 = ControllerMethodCallObject()
         self.controller_method_call_1.set_method(self.controller_method_1)
         self.controller_method_call_1.set_ret_var("ret_var_1")
+        self.controller_method_call_1.set_return_var_type(str_type)
 
         self.argument_1 = ArgumentObject()
         self.argument_1.set_method_object(self.controller_method_call_1)
@@ -168,6 +171,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_call_1 = ClassMethodCallObject()
         self.class_method_call_1.set_method(self.class_method_1)
         self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_return_var_type(str_type)
         self.class_method_call_1.set_instance_name("instance_1")
 
         self.controller_method_1.add_call(self.class_method_call_1)
@@ -244,6 +248,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.controller_method_call_1.set_method(self.controller_method_1)
         self.controller_method_call_1.set_condition("condition == True")
         self.controller_method_call_1.set_ret_var("ret_var_1")
+        self.controller_method_call_1.set_return_var_type(str_type)
 
         self.argument_1 = ArgumentObject()
         self.argument_1.set_method_object(self.controller_method_call_1)
@@ -262,6 +267,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_call_1.set_method(self.class_method_1)
         self.class_method_call_1.set_condition("condition == True")
         self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_return_var_type(str_type)
         self.class_method_call_1.set_instance_name("instance_1")
 
         self.controller_method_1.add_call(self.class_method_call_1)
@@ -295,6 +301,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.controller_method_call_1.set_method(self.controller_method_1)
         self.controller_method_call_1.set_condition("condition == True")
         self.controller_method_call_1.set_ret_var("ret_var_1")
+        self.controller_method_call_1.set_return_var_type(str_type)
 
         self.controller_method_1.add_call(self.controller_method_call_1)
 
@@ -306,6 +313,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_call_1.set_method(self.class_method_1)
         self.class_method_call_1.set_condition("condition == True")
         self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_return_var_type(str_type)
         self.class_method_call_1.set_instance_name("instance_1")
 
         self.controller_method_1.add_call(self.class_method_call_1)
@@ -343,12 +351,14 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_call_1.set_method(self.class_method_1)
         self.class_method_call_1.set_condition("condition == True")
         self.class_method_call_1.set_ret_var("ret_var_1")
+        self.class_method_call_1.set_return_var_type(str_type)
         self.class_method_call_1.set_instance_name("instance_1")
 
         self.class_method_call_2 = ClassMethodCallObject()
         self.class_method_call_2.set_method(self.class_method_1)
         self.class_method_call_2.set_ret_var("ret_var_1")
         self.class_method_call_2.set_instance_name("instance_1")
+        self.class_method_call_2.set_return_var_type(str_type)
 
         self.class_method_call_3 = ClassMethodCallObject()
         self.class_method_call_3.set_method(self.class_method_1)
