@@ -174,6 +174,7 @@ class TestControllerMethodObject(unittest.TestCase):
             "params": [{"param_name": "exampleParam"}],
             "method_calls": [{"method_name": "methodCall"}],
             "return_type": "String",
+            "return_var_declaration": [],
         }
 
         result = method_obj.print_springboot_style_template()
@@ -215,6 +216,7 @@ class TestControllerMethodObject(unittest.TestCase):
             "params": [{}],  # The parameter's template is invalid (empty dictionary)
             "method_calls": [],  # No method calls
             "return_type": "String",
+            "return_var_declaration": [],
         }
 
         self.assertEqual(result, expected_result)
@@ -233,6 +235,7 @@ class TestControllerMethodObject(unittest.TestCase):
             "params": [],
             "method_calls": [],  # No method calls
             "return_type": "String",
+            "return_var_declaration": [],
         }
 
         result = method_obj.print_springboot_style_template()
@@ -359,6 +362,11 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_mock = AbstractMethodObject()
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("result")
+
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         method_call_obj.set_condition("if true")
 
         argument = ArgumentObject()
@@ -369,6 +377,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "return_var_name": "result",
             "method_name": "testMethod",
             "arguments": [{"arg": "value"}],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -389,6 +398,11 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_mock = AbstractMethodObject()
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("result")
+
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         method_call_obj.set_condition("if true")
 
         argument = ArgumentObject()
@@ -400,6 +414,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "method_name": "testMethod",
             "instance_name": "instance1",
             "arguments": [{"arg": "value"}],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -431,6 +446,10 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("result")
 
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         # Setting empty condition
         method_call_obj.set_condition("")
 
@@ -438,6 +457,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "return_var_name": "result",
             "method_name": "testMethod",
             "arguments": [],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -465,6 +485,11 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_mock = AbstractMethodObject()
         method_call_obj.set_method(method_mock)
         method_call_obj.set_return_var_name("complex_result")
+
+        str_type = TypeObject()
+        str_type.set_name("string")
+        method_call_obj.set_return_var_type(str_type)
+
         method_call_obj.set_condition("if complex")
 
         complex_argument = ArgumentObject()
@@ -475,6 +500,7 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "return_var_name": "complex_result",
             "method_name": "testMethod",
             "arguments": [{"complex_arg": "complex_value"}],
+            "return_var_type": "String",
         }
 
         result = method_call_obj.print_springboot_style_template()
@@ -637,6 +663,109 @@ class TestArgumentObject(unittest.TestCase):
         arg_obj.set_name("validArgument")
         result = arg_obj.print_springboot_style_template()
         self.assertEqual(result, {"argument_name": "validArgument"})
+
+
+class TestHandleReturnVarDeclaration(unittest.TestCase):
+    def setUp(self):
+        # This method will be run before each test
+        self.method_calls = [
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "output", "return_var_type": "String"},
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "error", "return_var_type": "boolean"},
+        ]
+
+    def test_no_duplicates(self):
+        method_calls = [
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "output", "return_var_type": "String"},
+            {"return_var_name": "error", "return_var_type": "boolean"},
+        ]
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, method_calls)
+
+    def test_duplicates(self):
+        method_calls = [
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "output", "return_var_type": "String"},
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "error", "return_var_type": "boolean"},
+        ]
+        expected_result = [
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "output", "return_var_type": "String"},
+            {"return_var_name": "error", "return_var_type": "boolean"},
+        ]
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, expected_result)
+
+    def test_all_duplicates(self):
+        method_calls = [
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "result", "return_var_type": "int"},
+            {"return_var_name": "result", "return_var_type": "int"},
+        ]
+        expected_result = [{"return_var_name": "result", "return_var_type": "int"}]
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, expected_result)
+
+    def test_empty_input(self):
+        method_calls = []
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, [])
+
+    def test_single_element_input(self):
+        method_calls = [{"return_var_name": "result", "return_var_type": "int"}]
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, method_calls)
+
+    def test_input_with_missing_keys(self):
+        method_calls = [
+            {"method_name": "method_name1", "return_var_name": "result"},
+            {
+                "method_name": "method_name1",
+                "return_var_name": "output",
+                "return_var_type": "String",
+            },
+            {
+                "method_name": "method_name1",
+                "return_var_name": "result",
+                "return_var_type": "int",
+            },
+        ]
+        controller_method_object = ControllerMethodObject()
+        with self.assertRaises(ValueError):
+            controller_method_object.handle_return_var_declaration(method_calls)
+
+    def test_input_with_none_return_var_name(self):
+        method_calls = [
+            {"return_var_name": None, "return_var_type": "int"},
+            {"return_var_name": "output", "return_var_type": "String"},
+            {"return_var_name": None, "return_var_type": "int"},
+        ]
+        expected_result = [{"return_var_name": "output", "return_var_type": "String"}]
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, expected_result)
+
+    def test_input_with_empty_return_var_type(self):
+        method_calls = [
+            {"return_var_name": "result", "return_var_type": ""},
+            {"return_var_name": "output", "return_var_type": "String"},
+            {"return_var_name": "result", "return_var_type": "int"},
+        ]
+        expected_result = [
+            {"return_var_name": "result", "return_var_type": ""},
+            {"return_var_name": "output", "return_var_type": "String"},
+        ]
+        controller_method_object = ControllerMethodObject()
+        result = controller_method_object.handle_return_var_declaration(method_calls)
+        self.assertEqual(result, expected_result)
 
 
 if __name__ == "__main__":

@@ -358,8 +358,34 @@ class ControllerMethodObject(AbstractMethodObject):
             method_call.print_springboot_style_template()
             for method_call in self.__calls
         ]
+        context["return_var_declaration"] = self.handle_return_var_declaration(
+            context["method_calls"]
+        )
         context["return_type"] = self.get_return_type().get_name_springboot()
         return context
+
+    def handle_return_var_declaration(self, method_calls: list[dict]) -> list[dict]:
+        encountered_return_var_names = set()
+
+        result = []
+        for method_call in method_calls:
+            return_var_name = method_call.get("return_var_name")
+
+            if (
+                return_var_name not in encountered_return_var_names
+                and return_var_name is not None
+            ):
+                return_var_type = method_call.get("return_var_type")
+                if return_var_type is None:
+                    raise ValueError(
+                        "return variable type not assigned when "
+                        f"calling {method_call} in"
+                        f"{self.get_name} method"
+                    )
+                result.append(method_call)
+                encountered_return_var_names.add(return_var_name)
+
+        return result
 
 
 class AbstractMethodCallObject(ABC):
@@ -505,6 +531,7 @@ class AbstractMethodCallObject(ABC):
             context["condition"] = self.__condition
         if self.__return_var_name:
             context["return_var_name"] = self.__return_var_name
+            context["return_var_type"] = self.__return_var_type.get_name_springboot()
         context["method_name"] = self.__method.get_name()
         if isinstance(self, ClassMethodCallObject):
             context["instance_name"] = self.get_instance_name()
@@ -515,6 +542,7 @@ class AbstractMethodCallObject(ABC):
             context["arguments"] = [
                 arg.print_springboot_style_template() for arg in self.__arguments
             ]
+
         return context
 
 
