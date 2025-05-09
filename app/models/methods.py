@@ -437,8 +437,8 @@ class AbstractMethodCallObject(ABC):
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
 
-    def set_return_var_type(self, type: TypeObject):
-        self.__return_var_type = type
+    def set_return_var_type(self, type_var: TypeObject):
+        self.__return_var_type = type_var
 
     # Method created since set_return_var_name somehow is broken
     def set_ret_var(self, name: str):  # pragma: no cover
