@@ -379,8 +379,8 @@ class ControllerMethodObject(AbstractMethodObject):
                 if return_var_type is None:
                     raise ValueError(
                         "return variable type not assigned when "
-                        f"calling {method_call} in"
-                        f"{self.get_name} method"
+                        f"calling {method_call.get('method_name')} in "
+                        f"{self.get_name()} method"
                     )
                 result.append(method_call)
                 encountered_return_var_names.add(return_var_name)
