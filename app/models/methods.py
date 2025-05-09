@@ -361,6 +361,18 @@ class ControllerMethodObject(AbstractMethodObject):
         context["return_type"] = self.get_return_type().get_name_springboot()
         return context
 
+    def handle_duplicate_return_value_names(
+        self, method_calls: list[dict]
+    ) -> dict[str]:
+        encountered_return_var_names = set()
+        for method_call in method_calls:
+            return_var_name = method_call.get("return_var_name")
+            if return_var_name in encountered_return_var_names:
+                method_call["return_var_type"] = ""
+            else:
+                encountered_return_var_names.add(return_var_name)
+        return method_calls
+
 
 class AbstractMethodCallObject(ABC):
     """
