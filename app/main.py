@@ -249,10 +249,6 @@ async def convert_spring(
 
     tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
 
-    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
-        # Section to Parse the Class Diagram
-        duplicate_class_method_checker: DuplicateChecker = {}
-
     src_path = group_id.replace(".", "/") + "/" + project_name
 
     with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
