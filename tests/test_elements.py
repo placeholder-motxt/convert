@@ -36,7 +36,7 @@ class TestModelsElements(unittest.TestCase):
                 obj.parse("content"), mock_parser_instance.parse_classes.return_value
             )
 
-    def test_print_django_style_not_implemented(self):
+    def test_print_django_style(self):
         obj = ModelsElements("models.py")
         obj.parse(open("tests/test_input.txt", "r").read())
         res = obj.print_django_style()
