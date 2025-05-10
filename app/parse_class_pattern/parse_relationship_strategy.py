@@ -1,10 +1,48 @@
 from app.models.diagram import (
+    AbstractRelationshipObject,
     ClassObject,
     ManyToManyRelationshipObject,
     ManyToOneRelationshipObject,
     OneToOneRelationshipObject,
 )
 from app.models.relationship_enum import RelationshipType
+
+
+def _relation_obj_setter_helper(
+    ro: AbstractRelationshipObject,
+    edge: dict,
+    class_from_id: ClassObject,
+    class_to_id: ClassObject,
+    type: RelationshipType,
+    bidirectional: bool = False,
+):
+    ro.set_type(type)
+
+    # This is for django implementation of aggregation only
+    # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
+    if ro.get_type() in [
+        RelationshipType.AGGREGATION,
+        RelationshipType.COMPOSITION,
+    ]:
+        ro.set_source_class(class_to_id)
+        ro.set_target_class(class_from_id)
+        ro.set_source_class_own_amount(edge["endLabel"])
+        ro.set_target_class_own_amount(edge["startLabel"])
+        class_to_id.add_relationship(ro)
+        return
+
+    ro.set_source_class(class_from_id)
+    ro.set_target_class(class_to_id)
+    ro.set_source_class_own_amount(edge["startLabel"])
+    ro.set_target_class_own_amount(edge["endLabel"])
+    class_from_id.add_relationship(ro)
+    if bidirectional:
+        ro2 = ManyToManyRelationshipObject()
+        ro2.set_source_class(class_to_id)
+        ro2.set_target_class(class_from_id)
+        ro2.set_source_class_own_amount(edge["startLabel"] + "+")
+        ro2.set_target_class_own_amount(edge["endLabel"] + "+")
+        class_to_id.add_relationship(ro2)
 
 
 class RelationshipStrategy:
@@ -31,33 +69,9 @@ class OneToOneStrategy(RelationshipStrategy):
         bidirectional: bool = False,
     ) -> None:
         ro = OneToOneRelationshipObject()
-        ro.set_type(type)
-
-        # This is for django implementation of aggregation only
-        # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
-        if ro.get_type() in [
-            RelationshipType.AGGREGATION,
-            RelationshipType.COMPOSITION,
-        ]:
-            ro.set_source_class(class_to_id)
-            ro.set_target_class(class_from_id)
-            ro.set_source_class_own_amount(edge["endLabel"])
-            ro.set_target_class_own_amount(edge["startLabel"])
-            class_to_id.add_relationship(ro)
-            return
-
-        ro.set_source_class(class_from_id)
-        ro.set_target_class(class_to_id)
-        ro.set_source_class_own_amount(edge["startLabel"])
-        ro.set_target_class_own_amount(edge["endLabel"])
-        class_from_id.add_relationship(ro)
-        if bidirectional:
-            ro2 = OneToOneRelationshipObject()
-            ro2.set_source_class(class_to_id)
-            ro2.set_target_class(class_from_id)
-            ro2.set_source_class_own_amount(edge["startLabel"] + "+")
-            ro2.set_target_class_own_amount(edge["endLabel"] + "+")
-            class_to_id.add_relationship(ro2)
+        _relation_obj_setter_helper(
+            ro, edge, class_from_id, class_to_id, type, bidirectional
+        )
 
 
 class ManyToOneStrategy(RelationshipStrategy):
@@ -131,38 +145,6 @@ class ManyToManyStrategy(RelationshipStrategy):
         bidirectional: bool = False,
     ) -> None:
         ro = ManyToManyRelationshipObject()
-        ro.set_type(type)
-
-        # This is for django implementation of aggregation only
-        # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
-        if ro.get_type() == RelationshipType.AGGREGATION:
-            ro.set_source_class(class_to_id)
-            ro.set_target_class(class_from_id)
-            ro.set_source_class_own_amount(edge["endLabel"])
-            ro.set_target_class_own_amount(edge["startLabel"])
-            class_to_id.add_relationship(ro)
-            return
-
-        # specific for django implementation of composition for now
-        # since "end" is the class that "owns" the "start" class but
-        # in django the "owned by" class needs to be the one to set FK
-        if ro.get_type() == RelationshipType.COMPOSITION:
-            ro.set_source_class(class_to_id)
-            ro.set_target_class(class_from_id)
-            ro.set_source_class_own_amount(edge["endLabel"])
-            ro.set_target_class_own_amount(edge["startLabel"])
-            class_to_id.add_relationship(ro)
-            return
-
-        ro.set_source_class(class_from_id)
-        ro.set_target_class(class_to_id)
-        ro.set_source_class_own_amount(edge["startLabel"])
-        ro.set_target_class_own_amount(edge["endLabel"])
-        class_from_id.add_relationship(ro)
-        if bidirectional:
-            ro2 = ManyToManyRelationshipObject()
-            ro2.set_source_class(class_to_id)
-            ro2.set_target_class(class_from_id)
-            ro2.set_source_class_own_amount(edge["startLabel"] + "+")
-            ro2.set_target_class_own_amount(edge["endLabel"] + "+")
-            class_to_id.add_relationship(ro2)
+        _relation_obj_setter_helper(
+            ro, edge, class_from_id, class_to_id, type, bidirectional
+        )
