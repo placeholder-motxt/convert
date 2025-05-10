@@ -166,7 +166,7 @@ class TestRelationshipStrategy(unittest.TestCase):
             edge, cls_src, cls_target, RelationshipType.COMPOSITION
         )
 
-        relationships = cls_target._ClassObject__relationships
+        relationships = cls_src._ClassObject__relationships
         self.assertEqual(len(relationships), 1)
         self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
         self.assertEqual(type(relationships[0]), ManyToOneRelationshipObject)
