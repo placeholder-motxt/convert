@@ -6,8 +6,7 @@ class Buku(models.Model):
 	penulis = models.CharField(max_length=255)
 	penerbit = models.CharField(max_length=255)
 
-	copybukuFK = models.ForeignKey('Buku', on_delete=models.CASCADE)
-
+	copybukuFK = models.ForeignKey('CopyBuku', on_delete = models.CASCADE)
 	pass
 
 
