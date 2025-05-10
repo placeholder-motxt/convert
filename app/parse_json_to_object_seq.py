@@ -206,8 +206,18 @@ class ParseJsonToObjectSeq:
     ):
         for param in params.split(","):
             param = param.strip()
+            param = param.replace(" ", "")
+
+            param_type = ""
+
+            if ":" in param:
+                data_split = param.split(":")
+                param = data_split[0]
+                param_type = data_split[1]
+
             if param == "":
                 continue
+
             if not is_valid_python_identifier(param):
                 raise ValueError(
                     f"Invalid param name '{param}' on sequence diagram \n\
@@ -218,8 +228,14 @@ please consult the user manual document on how to name parameters"
                     f"Duplicate attribute '{param}' on sequence diagram \n\
 please remove one of the parameters"
                 )
+
             param_obj = ParameterObject()
             param_obj.set_name(param)
+            if param_type != "":
+                param_object = TypeObject()
+                param_object.set_name(param_type)
+                param_obj.set_type(param_object)
+
             method.add_parameter(param_obj)
             duplicate_attribute_checker.add(param)
 
