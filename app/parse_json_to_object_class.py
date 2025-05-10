@@ -65,13 +65,11 @@ class ParseJsonToObjectClass:
             class_from_id = classes[edge["start"]]
             class_to_id = classes[edge["end"]]
 
-            if "type" in edge.keys() and "Aggregation Type" in edge.keys():
-                relation_type = edge["Aggregation Type"]
-                relation_type = (
-                    RelationshipType.AGGREGATION
-                    if relation_type == "Aggregation"
-                    else RelationshipType.ASSOCIATION
-                )
+            relation_type = edge.get("Aggregation Type", None)
+            if relation_type == "Aggregation":
+                relation_type = RelationshipType.AGGREGATION
+            elif relation_type == "Composition":
+                relation_type = RelationshipType.COMPOSITION
             else:
                 relation_type = RelationshipType.ASSOCIATION
 

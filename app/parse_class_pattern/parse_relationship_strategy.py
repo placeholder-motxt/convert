@@ -54,7 +54,6 @@ class OneToOneStrategy(RelationshipStrategy):
             class_to_id.add_relationship(ro)
             return
 
-        ro.set_target_class_own_amount(edge["startLabel"])
         ro.set_source_class(class_from_id)
         ro.set_target_class(class_to_id)
         ro.set_source_class_own_amount(edge["startLabel"])
