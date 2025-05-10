@@ -141,7 +141,7 @@ class TestRelationshipStrategy(unittest.TestCase):
         self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
         self.assertEqual(type(relationships[0]), OneToOneRelationshipObject)
 
-    def test_many_to_one_composition(self):
+    def test_one_to_many_composition(self):
         strategy = ManyToOneStrategy()
         edge = {"startLabel": "1", "endLabel": "*"}
         cls_src = ClassObject()
@@ -156,7 +156,7 @@ class TestRelationshipStrategy(unittest.TestCase):
         self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
         self.assertEqual(type(relationships[0]), ManyToOneRelationshipObject)
 
-    def test_one_to_many_composition(self):
+    def test_many_to_one_composition(self):
         strategy = ManyToOneStrategy()
         edge = {"startLabel": "*", "endLabel": "1"}
         cls_src = ClassObject()
