@@ -100,7 +100,7 @@ class TestGenerateService(unittest.TestCase):
         assert (
             "existingPembeli.setUsername(pembeli.getUsername())" in output
         )  # Level: Pembeli
-    
+        
     def test_method_call(self):
         """
         This test already handle the case when the method call contains parameters and not
@@ -123,6 +123,30 @@ class TestGenerateService(unittest.TestCase):
             isBorrowed()
 """
         assert expected_contains.replace(" ", "").replace("\n", "") in output.replace(" ", "").replace("\n", "")
+
+
+
+    def test_edge_multilevel_cyclic_inheritance(self):
+        class_a = ClassObject()
+        class_a.set_name("TestA")
+
+        class_b = ClassObject()
+        class_b.set_name("TestB")
+
+        class_c = ClassObject()
+        class_c.set_name("TestC")
+
+        class_a.set_parent(class_b)
+        class_b.set_parent(class_c)
+        class_c.set_parent(class_a)
+
+        with self.assertRaises(ValueError) as ctx:
+            generate_service_java("TestInvalid", class_a, "com.example")
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Cyclic Inheritance detected! It should not be allowed!"
+        )
 
 
 
