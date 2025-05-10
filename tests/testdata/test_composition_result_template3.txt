@@ -11,7 +11,6 @@ class Buku(models.Model):
     judul = models.CharField(max_length=255)
     penulis = models.CharField(max_length=255)
     penerbit = models.CharField(max_length=255)
-    copybuku = models.OneToOneField('CopyBuku', on_delete=models.CASCADE)
     
 
 class Peminjaman(models.Model):
@@ -30,5 +29,6 @@ class CopyBuku(models.Model):
     isAvailable = models.BooleanField()
     edisi = models.IntegerField()
     tahunTerbit = models.IntegerField()
+    buku = models.OneToOneField('Buku', on_delete=models.CASCADE)
     
 
