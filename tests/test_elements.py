@@ -135,6 +135,36 @@ class TestModelsElements(unittest.TestCase):
         res = model.print_django_style()
         self.assertEqual(res, expected)
 
+    def test_composition_one_to_many_template(self):
+        self.maxDiff = None
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition1.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result_template1.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
+
+    def test_composition_many_to_one_template(self):
+        self.maxDiff = None
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition2.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result_template2.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
+
 
 class TestViewsElements(unittest.TestCase):
     def setUp(self):
