@@ -12,6 +12,6 @@ class {{ class.name }}({{ class.parent }}):
     {{ field.name }} = {{ field.type }}
     {% else -%}{#- this else block only happens if fields is empty -#}
     pass
-    {%- endfor -%}
+    {%- endfor %}
 
-{%- endfor -%}
+{% endfor -%}
