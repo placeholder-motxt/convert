@@ -229,14 +229,41 @@ class ClassMethodObject(AbstractMethodObject):
         modifier = self.get_modifier()
         is_default = modifier == ""
 
+        method_call_string = []
+
+        if self.__calls != []:
+            for call in self.__calls:
+                result = call.print_springboot_style_template()
+                arguments = ""
+
+                for elem in result["arguments"]:
+                    arguments += elem["argument_name"]
+                    arguments += ", "
+
+                # This specific line of code to trim the last ", " at the end of arguments
+                arguments = arguments[: len(arguments) - 2]
+
+                if "return_var_type" in result:
+                    method_call_string.append(
+                        f"{result['return_var_type']} {result['return_var_name']} \
+                        = {result['method_name']}({arguments})\n"
+                    )
+                else:
+                    method_call_string.append(f"{result['method_name']}({arguments})\n")
+
+        # print(f"Kasus {self.get_name()}")
+        # print(method_call_string)
+
         context = {
             "param": param_str,
             "return_type": return_type_str,
             "name": name,
             "modifier": modifier,
             "is_default": is_default,
+            "content": method_call_string,
+            "contain_call": (method_call_string != []),
         }
-
+        print(method_call_string != "")
         return render_template("springboot/method.java.j2", context)
 
     def __add_additional_comments(self, sio: StringIO):
