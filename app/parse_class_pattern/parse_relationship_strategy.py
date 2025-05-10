@@ -35,7 +35,10 @@ class OneToOneStrategy(RelationshipStrategy):
 
         # This is for django implementation of aggregation only
         # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
-        if ro.get_type() == RelationshipType.AGGREGATION:
+        if ro.get_type() in [
+            RelationshipType.AGGREGATION,
+            RelationshipType.COMPOSITION,
+        ]:
             ro.set_source_class(class_to_id)
             ro.set_target_class(class_from_id)
             ro.set_source_class_own_amount(edge["endLabel"])
@@ -43,7 +46,6 @@ class OneToOneStrategy(RelationshipStrategy):
             class_to_id.add_relationship(ro)
             return
 
-        ro.set_target_class_own_amount(edge["startLabel"])
         ro.set_source_class(class_from_id)
         ro.set_target_class(class_to_id)
         ro.set_source_class_own_amount(edge["startLabel"])
@@ -94,7 +96,10 @@ class ManyToOneStrategy(RelationshipStrategy):
         else:
             # This is for django implementation of aggregation only
             # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
-            if ro.get_type() == RelationshipType.AGGREGATION:
+            if ro.get_type() in [
+                RelationshipType.AGGREGATION,
+                RelationshipType.COMPOSITION,
+            ]:
                 ro.set_source_class(class_to_id)
                 ro.set_target_class(class_from_id)
                 ro.set_source_class_own_amount(edge["endLabel"])
@@ -131,6 +136,17 @@ class ManyToManyStrategy(RelationshipStrategy):
         # This is for django implementation of aggregation only
         # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
         if ro.get_type() == RelationshipType.AGGREGATION:
+            ro.set_source_class(class_to_id)
+            ro.set_target_class(class_from_id)
+            ro.set_source_class_own_amount(edge["endLabel"])
+            ro.set_target_class_own_amount(edge["startLabel"])
+            class_to_id.add_relationship(ro)
+            return
+
+        # specific for django implementation of composition for now
+        # since "end" is the class that "owns" the "start" class but
+        # in django the "owned by" class needs to be the one to set FK
+        if ro.get_type() == RelationshipType.COMPOSITION:
             ro.set_source_class(class_to_id)
             ro.set_target_class(class_from_id)
             ro.set_source_class_own_amount(edge["endLabel"])
