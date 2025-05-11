@@ -232,9 +232,9 @@ please remove one of the parameters"
             param_obj = ParameterObject()
             param_obj.set_name(param)
             if param_type != "":
-                param_object = TypeObject()
-                param_object.set_name(param_type)
-                param_obj.set_type(param_object)
+                type_object = TypeObject()
+                type_object.set_name(param_type)
+                param_obj.set_type(type_object)
 
             method.add_parameter(param_obj)
             duplicate_attribute_checker.add(param)
