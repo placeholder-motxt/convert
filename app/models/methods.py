@@ -193,14 +193,9 @@ class ClassMethodObject(AbstractMethodObject):
         if self.__calls != []:
             for call in self.__calls:
                 result = call.print_springboot_style_template()
-                arguments = ""
-
-                for elem in result["arguments"]:
-                    arguments += elem["argument_name"]
-                    arguments += ", "
-
-                # This specific line of code to trim the last ", " at the end of arguments
-                arguments = arguments[: len(arguments) - 2]
+                arguments = ", ".join(
+                    elem["argument_name"] for elem in result["arguments"]
+                )
 
                 if "return_var_type" in result:
                     method_call_string.append(
