@@ -36,9 +36,19 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
 def get_all_attributes(model: ClassObject) -> list[str]:
     attributes = []
 
-    fields = model.get_fields()
-    if model.get_parent() is not None:
-        fields += model.get_parent().get_fields()
+    fields = []
+    fields += model.get_fields()
+
+    parent = model.get_parent()
+
+    accessed_parent = []
+
+    while parent is not None:
+        if parent.get_name() in accessed_parent:
+            raise ValueError("Cyclic Inheritance detected! It should not be allowed!")
+        accessed_parent.append(parent.get_name())
+        fields += parent.get_fields()
+        parent = parent.get_parent()
 
     for attribute in fields:
         attribute_name = attribute.get_name()

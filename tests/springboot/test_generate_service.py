@@ -58,6 +58,71 @@ class TestGenerateService(unittest.TestCase):
             expected_output.replace(" ", "").replace("\n", "").strip(),
         )
 
+    def test_multilevel_inheritance(self):
+        class_object_parent = ClassObject()
+        class_object_parent.set_name("AbstractUser")
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("id")
+        field_type.set_name("string")
+        field.set_type(field_type)
+        class_object_parent.add_field(field)
+
+        class_object = ClassObject()
+        class_object.set_name("User")
+        class_object.set_parent(class_object_parent)
+
+        project_name = "burhanpedia"
+
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("email")
+        field_type.set_name("string")
+        field.set_type(field_type)
+        class_object.add_field(field)
+
+        parent = ClassObject()
+        parent.set_name("Pembeli")
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("username")
+        field_type.set_name("string")
+        field.set_type(field_type)
+        parent.add_field(field)
+        parent.set_parent(class_object)
+        parent.set_is_public(True)
+
+        output = generate_service_java(project_name, parent, "com.example")
+
+        assert "existingPembeli.setId(pembeli.getId())" in output  # Level: AsbtractUser
+        assert "existingPembeli.setEmail(pembeli.getEmail())" in output  # Level: User
+        assert (
+            "existingPembeli.setUsername(pembeli.getUsername())" in output
+        )  # Level: Pembeli
+    
+    def test_edge_multilevel_cyclic_inheritance(self):
+        class_a = ClassObject()
+        class_a.set_name("TestA")
+
+        class_b = ClassObject()
+        class_b.set_name("TestB")
+
+        class_c = ClassObject()
+        class_c.set_name("TestC")
+
+        class_a.set_parent(class_b)
+        class_b.set_parent(class_c)
+        class_c.set_parent(class_a)
+
+        with self.assertRaises(ValueError) as ctx:
+            generate_service_java("TestInvalid", class_a, "com.example")
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Cyclic Inheritance detected! It should not be allowed!"
+        )
+
+
 
 
 # Behavior Test
@@ -105,7 +170,7 @@ def render_template_output(context):
 def check_output(context):
     with open("tests/springboot/test_service_data.txt", "r", encoding="utf-8") as file:
         expected_output = file.read()
-    
+
     assert "setFull(cart.isFull())" in expected_output
     assert "setCartId(cart.getCartId())" in expected_output
 
