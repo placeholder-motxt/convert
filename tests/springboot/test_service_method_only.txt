@@ -1,3 +1,8 @@
+/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
+
 package com.example.burhanpedia.service;
 
 import com.example.burhanpedia.model.Cart;
@@ -10,12 +15,12 @@ import org.springframework.stereotype.Service;
 public class CartService {
 
     private final CartRepository cartRepository;
-    
-    
+
+
     void method_params(int param1) {
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("method_params function is not yet implemented");}
-    
+
 
 
     public void method_param2(String param2) {
@@ -27,7 +32,7 @@ public class CartService {
     private void method_param3(boolean param3) {
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("method_param3 function is not yet implemented");}
-    
+
 
 
 }

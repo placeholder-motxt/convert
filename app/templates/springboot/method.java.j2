@@ -2,6 +2,10 @@
 {{ modifier }} {{ return_type }} {{ name }}({{ param }}) {
 {% else %}
 {{ return_type }} {{ name }}({{ param }}) {
-{% endif %}
+{% endif -%}
+    {%- if contain_call %}{% for elem in content %}
+    {{ elem }}{% endfor -%}
+    {%- else %}
     // TODO: Auto generated function stub
     throw new UnsupportedOperationException("{{ name }} function is not yet implemented");}
+    {%- endif %}

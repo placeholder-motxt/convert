@@ -293,3 +293,20 @@ ERROR_CATEGORY_PATTERNS = [
     ("invalid_instance_name", [r"instance_name cannot be empty"]),
     ("duplicate_attribute", [r"please remove one of the parameters"]),
 ]
+
+
+def is_valid_java_identifier(identifier: str) -> bool:
+    # Rule 1: Identifier must not be a keyword
+    if identifier in JAVA_KEYWORDS:
+        return False
+
+    # Rule 2: Identifier must start with a letter, underscore, or dollar sign
+    if not (identifier[0].isalpha() or identifier[0] == "_" or identifier[0] == "$"):
+        return False
+
+    # Rule 3: All characters in identifier must be alphanumeric, underscore, or dollar sign
+    for char in identifier:
+        if not (char.isalnum() or char == "_" or char == "$"):
+            return False
+
+    return True

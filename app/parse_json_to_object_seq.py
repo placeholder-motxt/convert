@@ -15,7 +15,7 @@ from app.models.methods import (
     ControllerMethodCallObject,
     ControllerMethodObject,
 )
-from app.models.properties import ParameterObject
+from app.models.properties import ParameterObject, TypeObject
 
 from .utils import is_valid_python_identifier
 
@@ -206,8 +206,18 @@ class ParseJsonToObjectSeq:
     ):
         for param in params.split(","):
             param = param.strip()
+            param = param.replace(" ", "")
+
+            param_type = ""
+
+            if ":" in param:
+                data_split = param.split(":")
+                param = data_split[0]
+                param_type = data_split[1]
+
             if param == "":
                 continue
+
             if not is_valid_python_identifier(param):
                 raise ValueError(
                     f"Invalid param name '{param}' on sequence diagram \n\
@@ -218,8 +228,14 @@ please consult the user manual document on how to name parameters"
                     f"Duplicate attribute '{param}' on sequence diagram \n\
 please remove one of the parameters"
                 )
+
             param_obj = ParameterObject()
             param_obj.set_name(param)
+            if param_type != "":
+                type_object = TypeObject()
+                type_object.set_name(param_type)
+                param_obj.set_type(type_object)
+
             method.add_parameter(param_obj)
             duplicate_attribute_checker.add(param)
 
@@ -254,11 +270,11 @@ please consult the user manual document on how to name parameters"
         self.check_for_duplicate_attribute(params, method, duplicate_attribute_checker)
 
         if ret_var is not None:
-            if not is_valid_python_identifier(ret_var):
-                raise ValueError(
-                    f"Invalid return variable name '{ret_var}' on sequence diagram \n\
-please consult the user manual document on how to name return variables"
-                )
+            #             if not is_valid_python_identifier(ret_var):
+            #                 raise ValueError(
+            #                     f"Invalid return variable name '{ret_var}' on sequence diagram \n\
+            # please consult the user manual document on how to name return variables"
+            #                 )
             self.__call_nodes[end_id]["ret_var"] = ret_var
 
         if class_name == "views":
@@ -379,12 +395,32 @@ please consult the user manual document on how to name return variables"
                 self.add_argument_object(callee_method, call_obj)
 
                 if ret_var is not None:
-                    call_obj.set_return_var_name(ret_var)
+                    ret_var_name, ret_var_type = self.process_return_variable(ret_var)
+                    call_obj.set_return_var_name(ret_var_name)
+                    call_obj.set_return_var_type(ret_var_type)
 
                 if isinstance(caller_method, ClassMethodObject):
                     caller_method.add_class_method_call(call_obj)
                 else:
                     caller_method.add_call(call_obj)
+
+    def process_return_variable(self, ret_var: str) -> tuple[str, TypeObject]:
+        name_type_pair = ret_var.split(sep=":")
+        if len(name_type_pair) != 2:
+            raise ValueError(
+                f"Invalid return variable: {ret_var}!"
+                "Format must be <returnVariableName>: <returnVariableType>"
+                "\nExample: person: String"
+            )
+        ret_var_name = name_type_pair[0].strip()
+        ret_var_type_name = name_type_pair[1].strip()
+        if len(ret_var_type_name) < 1:
+            raise ValueError(f"Empty return variable type: {ret_var}!")
+        ret_var_type = TypeObject()
+        ret_var_type.set_name(ret_var_type_name)
+        if len(ret_var_name) < 1:
+            raise ValueError(f"Empty return variable name: {ret_var}!")
+        return ret_var_name, ret_var_type
 
     def check_call_depth(
         self, rev_call_tree: dict[int, int], callee: int

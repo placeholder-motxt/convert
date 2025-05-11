@@ -1,3 +1,7 @@
+/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
 package com.example.burhanpedia.service;
 
 import com.example.burhanpedia.model.Cart;

@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from app.models.properties import TypeObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -575,3 +576,106 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             "Invalid param name 'try' on sequence diagram \n"
             "please consult the user manual document on how to name parameters",
         )
+
+
+class TestProcessReturnVariable(unittest.TestCase):
+    # ----------  POSITIVE PATHS  ----------
+    def test_valid_string_mapping(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("person: String")
+        self.assertEqual(name, "person")
+
+        expected = TypeObject()
+        expected.set_name("str")
+        self.assertEqual(typ, expected)
+
+    def test_valid_integer_mapping(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("age: integer")
+        self.assertEqual(name, "age")
+
+        expected = TypeObject()
+        expected.set_name("int")
+        self.assertEqual(typ, expected)
+
+    def test_valid_boolean_with_leading_space(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable(
+            "flag:  Boolean"
+        )  # double-space before “Boolean”
+        self.assertEqual(name, "flag")
+
+        expected = TypeObject()
+        expected.set_name("bool")
+        self.assertEqual(typ, expected)
+
+    def test_valid_no_space_between_parts(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("score:float")
+        self.assertEqual(name, "score")
+
+        expected = TypeObject()
+        expected.set_name("float")
+        self.assertEqual(typ, expected)
+
+    # ----------  NEGATIVE / ERROR PATHS  ----------
+    def test_error_no_colon(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable("invalid")
+
+    def test_error_multiple_colons(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable("a:b:c")
+
+    def test_error_empty_type(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable("name:")
+
+    def test_error_empty_name(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable(":String")
+
+    # ===== NEW *CORNER* CASES =====
+    def test_case_insensitive_and_uppercase(self):
+        """Alias mapping should be case-insensitive."""
+        parser = ParseJsonToObjectSeq()
+        _, typ = parser.process_return_variable("note: STRING")
+        exp = TypeObject()
+        exp.set_name("str")
+        self.assertEqual(typ, exp)
+
+    def test_extra_whitespace_around_colon(self):
+        """
+        Only a single leading space in front of the type is removed by the
+        implementation; trailing/embedded spaces remain.
+        """
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("data  : String")
+        self.assertEqual(name, "data")  # trailing spaces in name removed
+        self.assertEqual(typ.get_name(), "str")  # mapping still works
+
+    def test_multiple_leading_spaces_before_type(self):
+        """Two+ leading spaces leave one space behind ⇢ alias mapping NOT applied."""
+        parser = ParseJsonToObjectSeq()
+        _, typ = parser.process_return_variable("value:   int")
+        # should keep the leading spaces _inside_ the stored name
+        self.assertEqual(typ.get_name(), "int")  # spaces removed
+
+    def test_unknown_custom_type_passthrough(self):
+        """Unrecognised types are stored verbatim."""
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("payload: CustomType")
+        self.assertEqual(name, "payload")
+        self.assertEqual(typ.get_name(), "CustomType")  # untouched
+
+    def test_unicode_name(self):
+        """Non-ASCII variable names should parse fine."""
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("имя: Boolean")
+        exp = TypeObject()
+        exp.set_name("bool")
+        self.assertEqual((name, typ), ("имя", exp))

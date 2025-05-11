@@ -10,6 +10,7 @@ from app.models.diagram import (
 )
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, TypeObject
+from app.models.relationship_enum import RelationshipType
 
 
 class TestClassObject(unittest.TestCase):
@@ -286,6 +287,28 @@ class TestAbstractRelationshipObject(unittest.TestCase):
             "1",
         )
 
+    def test_set_relationship_type(self):
+        self.relationship_object.set_type(RelationshipType.ASSOCIATION)
+        self.assertEqual(
+            self.relationship_object._AbstractRelationshipObject__relation_type,
+            RelationshipType.ASSOCIATION,
+        )
+        self.relationship_object.set_type(RelationshipType.AGGREGATION)
+        self.assertEqual(
+            self.relationship_object._AbstractRelationshipObject__relation_type,
+            RelationshipType.AGGREGATION,
+        )
+        self.relationship_object.set_type(RelationshipType.COMPOSITION)
+        self.assertEqual(
+            self.relationship_object._AbstractRelationshipObject__relation_type,
+            RelationshipType.COMPOSITION,
+        )
+        self.relationship_object.set_type(RelationshipType.GENERALIZATION)
+        self.assertEqual(
+            self.relationship_object._AbstractRelationshipObject__relation_type,
+            RelationshipType.GENERALIZATION,
+        )
+
     def test_get_source_class(self):
         self.relationship_object.set_source_class(1)
         assert self.relationship_object.get_source_class() == 1
@@ -293,6 +316,10 @@ class TestAbstractRelationshipObject(unittest.TestCase):
     def test_get_target_class(self):
         self.relationship_object.set_target_class(1)
         assert self.relationship_object.get_target_class() == 1
+
+    def test_get_type(self):
+        self.relationship_object.set_type(RelationshipType.COMPOSITION)
+        assert self.relationship_object.get_type() == RelationshipType.COMPOSITION
 
 
 class TestOneToOneRelationshipObject(unittest.TestCase):
@@ -309,6 +336,16 @@ class TestOneToOneRelationshipObject(unittest.TestCase):
         assert (
             self.one_to_one_relationship.to_models_code()
             == "targetclass = models.OneToOneField('TargetClass', on_delete = models.CASCADE)"
+        )
+
+    def test_one_to_one_relationship_aggregation(self):
+        self.one_to_one_relationship.set_source_class(self.source_class)
+        self.one_to_one_relationship.set_target_class(self.target_class)
+        self.one_to_one_relationship.set_type(RelationshipType.AGGREGATION)
+        assert (
+            self.one_to_one_relationship.to_models_code()
+            == "targetclass = models.OneToOneField('TargetClass', on_delete = models.SET_NULL, "
+            "null=True)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):
@@ -329,6 +366,16 @@ class TestManyToOneRelationshipObject(unittest.TestCase):
         assert (
             self.many_to_one_relationship.to_models_code()
             == "targetclassFK = models.ForeignKey('TargetClass', on_delete = models.CASCADE)"
+        )
+
+    def test_many_to_one_relationship_aggregation(self):
+        self.many_to_one_relationship.set_source_class(self.source_class)
+        self.many_to_one_relationship.set_target_class(self.target_class)
+        self.many_to_one_relationship.set_type(RelationshipType.AGGREGATION)
+        assert (
+            self.many_to_one_relationship.to_models_code()
+            == "targetclassFK = models.ForeignKey('TargetClass', on_delete = models.SET_NULL,"
+            " null=True)"
         )
 
     def test_is_instance_of_abstract_relationship_object(self):

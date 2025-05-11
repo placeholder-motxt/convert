@@ -249,10 +249,6 @@ async def convert_spring(
 
     tmp_zip_path = await initialize_springboot_zip(project_name, group_id)
 
-    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
-        # Section to Parse the Class Diagram
-        duplicate_class_method_checker: DuplicateChecker = {}
-
     src_path = group_id.replace(".", "/") + "/" + project_name
 
     with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
@@ -270,23 +266,9 @@ async def convert_spring(
         zipf.writestr("run.bat", windows_runner, compress_type=zipfile.ZIP_DEFLATED)
         zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
 
-        writer_models = ModelsElements("models.py")
+        data = fetch_data(filenames, contents)
 
-        classes = []
-        for file_name, content in zip(filenames, contents):
-            json_content = json.loads(content[0])
-            diagram_type = json_content.get("diagram", None)
-
-            if diagram_type is None:
-                raise ValueError("Diagram type not found on .jet file")
-
-            if diagram_type == "ClassDiagram":
-                with parse_latency.labels(diagram="UML class").time():
-                    classes = writer_models.parse(json_content, bidirectional=True)
-
-                    process_parsed_class(classes, duplicate_class_method_checker)
-            else:
-                raise ValueError("Given diagram is not Class Diagram")
+        writer_models = data["model_element"]
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
 

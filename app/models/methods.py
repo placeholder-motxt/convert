@@ -10,6 +10,8 @@ from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier, render_temp
 
 from .properties import ParameterObject, TypeObject
 
+EMPTY_METHOD_ERR_MSG = "method cannot be empty\nplease consult the user manual document"
+
 
 class AbstractMethodObject(ABC):
     """
@@ -185,6 +187,25 @@ class ClassMethodObject(AbstractMethodObject):
 
         return res.getvalue()
 
+    def __get_method_call_springboot(self) -> list[str]:
+        method_call_string = []
+
+        if self.__calls != []:
+            for call in self.__calls:
+                result = call.print_springboot_style_template()
+                arguments = ", ".join(
+                    elem["argument_name"] for elem in result["arguments"]
+                )
+
+                if "return_var_type" in result:
+                    method_call_string.append(
+                        f"{result['return_var_type']} {result['return_var_name']} \
+                        = {result['method_name']}({arguments})\n"
+                    )
+                else:
+                    method_call_string.append(f"{result['method_name']}({arguments})\n")
+        return method_call_string
+
     def to_springboot_code(self) -> str:
         """
         Return Springboot representation of method in the UML Diagram
@@ -227,12 +248,16 @@ class ClassMethodObject(AbstractMethodObject):
         modifier = self.get_modifier()
         is_default = modifier == ""
 
+        method_call_string = self.__get_method_call_springboot()
+
         context = {
             "param": param_str,
             "return_type": return_type_str,
             "name": name,
             "modifier": modifier,
             "is_default": is_default,
+            "content": method_call_string,
+            "contain_call": (method_call_string != []),
         }
 
         return render_template("springboot/method.java.j2", context)
@@ -317,9 +342,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style(self) -> str:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         result = StringIO()
         result.write(f"def {self.get_name()}(request")
         for parameter in self.get_parameters():
@@ -333,9 +356,7 @@ class ControllerMethodObject(AbstractMethodObject):
 
     def print_django_style_template(self) -> dict[str]:
         if not self.get_name():
-            raise ValueError(
-                "method cannot be empty\nplease consult the user manual document"
-            )
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
         context = {}
         context["method_name"] = self.get_name()
         context["params"] = [
@@ -346,6 +367,48 @@ class ControllerMethodObject(AbstractMethodObject):
             method_call.print_django_style_template() for method_call in self.__calls
         ]
         return context
+
+    def print_springboot_style_template(self) -> dict[str]:
+        if not self.get_name():
+            raise ValueError(EMPTY_METHOD_ERR_MSG)
+        context = {}
+        context["method_name"] = self.get_name()
+        context["params"] = [
+            param.to_springboot_code_template() for param in self.get_parameters()
+        ]
+
+        context["method_calls"] = [
+            method_call.print_springboot_style_template()
+            for method_call in self.__calls
+        ]
+        context["return_var_declaration"] = self.handle_return_var_declaration(
+            context["method_calls"]
+        )
+        context["return_type"] = self.get_return_type().get_name_springboot()
+        return context
+
+    def handle_return_var_declaration(self, method_calls: list[dict]) -> list[dict]:
+        encountered_return_var_names = set()
+
+        result = []
+        for method_call in method_calls:
+            return_var_name = method_call.get("return_var_name")
+
+            if (
+                return_var_name not in encountered_return_var_names
+                and return_var_name is not None
+            ):
+                return_var_type = method_call.get("return_var_type")
+                if return_var_type is None:
+                    raise ValueError(
+                        "return variable type not assigned when "
+                        f"calling {method_call.get('method_name')} in "
+                        f"{self.get_name()} method"
+                    )
+                result.append(method_call)
+                encountered_return_var_names.add(return_var_name)
+
+        return result
 
 
 class AbstractMethodCallObject(ABC):
@@ -361,6 +424,7 @@ class AbstractMethodCallObject(ABC):
         self.__method: Optional[AbstractMethodObject] = None
         self.__arguments: list[ArgumentObject] = []
         self.__return_var_name: str = ""
+        self.__return_var_type: Optional[TypeObject] = None
         self.__condition = ""
 
     def __str__(self) -> str:
@@ -395,6 +459,9 @@ class AbstractMethodCallObject(ABC):
 
     def add_argument(self, argument: ArgumentObject):
         self.__arguments.append(argument)
+
+    def set_return_var_type(self, type_var: TypeObject):
+        self.__return_var_type = type_var
 
     # Method created since set_return_var_name somehow is broken
     def set_ret_var(self, name: str):  # pragma: no cover
@@ -480,6 +547,27 @@ class AbstractMethodCallObject(ABC):
             ]
         return context
 
+    def print_springboot_style_template(self) -> dict[str]:
+        context = {}
+
+        if self.__condition:
+            context["condition"] = self.__condition
+        if self.__return_var_name:
+            context["return_var_name"] = self.__return_var_name
+            context["return_var_type"] = self.__return_var_type.get_name_springboot()
+        context["method_name"] = self.__method.get_name()
+        if isinstance(self, ClassMethodCallObject):
+            context["instance_name"] = self.get_instance_name()
+
+        context["arguments"] = []
+
+        if self.__arguments:
+            context["arguments"] = [
+                arg.print_springboot_style_template() for arg in self.__arguments
+            ]
+
+        return context
+
 
 class ClassMethodCallObject(AbstractMethodCallObject):
     """Represents a method call of a ClassMethod"""
@@ -562,4 +650,7 @@ class ArgumentObject:
         return self.__name
 
     def print_django_style_template(self) -> dict[str]:
+        return {"argument_name": self.__name}
+
+    def print_springboot_style_template(self) -> dict[str]:
         return {"argument_name": self.__name}
