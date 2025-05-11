@@ -100,7 +100,7 @@ class TestGenerateService(unittest.TestCase):
         assert (
             "existingPembeli.setUsername(pembeli.getUsername())" in output
         )  # Level: Pembeli
-        
+
     def test_method_call(self):
         """
         This test already handle the case when the method call contains parameters and not
@@ -123,8 +123,6 @@ class TestGenerateService(unittest.TestCase):
             isBorrowed()
 """
         assert expected_contains.replace(" ", "").replace("\n", "") in output.replace(" ", "").replace("\n", "")
-
-
 
     def test_edge_multilevel_cyclic_inheritance(self):
         class_a = ClassObject()

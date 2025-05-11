@@ -216,6 +216,11 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
         rel_type = f"models.OneToOneField('{name}', on_delete=models.CASCADE)"
+        if self.get_type() == RelationshipType.AGGREGATION:
+            rel_type = (
+                f"models.OneToOneField('{name}', on_delete=models.SET_NULL, null=True)"
+            )
+
         return {"name": name.lower(), "type": rel_type}
 
     def to_springboot_models_template(self) -> dict[str, str]:
@@ -262,6 +267,11 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
         rel_type = f"models.ForeignKey('{name}', on_delete=models.CASCADE)"
+        if self.get_type() == RelationshipType.AGGREGATION:
+            rel_type = (
+                f"models.ForeignKey('{name}', on_delete=models.SET_NULL, null=True)"
+            )
+
         return {"name": f"{name.lower()}FK", "type": rel_type}
 
     def to_springboot_models_template(self) -> dict[str, str]:
