@@ -187,6 +187,25 @@ class ClassMethodObject(AbstractMethodObject):
 
         return res.getvalue()
 
+    def __get_method_call_springboot(self) -> list[str]:
+        method_call_string = []
+
+        if self.__calls != []:
+            for call in self.__calls:
+                result = call.print_springboot_style_template()
+                arguments = ", ".join(
+                    elem["argument_name"] for elem in result["arguments"]
+                )
+
+                if "return_var_type" in result:
+                    method_call_string.append(
+                        f"{result['return_var_type']} {result['return_var_name']} \
+                        = {result['method_name']}({arguments})\n"
+                    )
+                else:
+                    method_call_string.append(f"{result['method_name']}({arguments})\n")
+        return method_call_string
+
     def to_springboot_code(self) -> str:
         """
         Return Springboot representation of method in the UML Diagram
@@ -229,12 +248,16 @@ class ClassMethodObject(AbstractMethodObject):
         modifier = self.get_modifier()
         is_default = modifier == ""
 
+        method_call_string = self.__get_method_call_springboot()
+
         context = {
             "param": param_str,
             "return_type": return_type_str,
             "name": name,
             "modifier": modifier,
             "is_default": is_default,
+            "content": method_call_string,
+            "contain_call": (method_call_string != []),
         }
 
         return render_template("springboot/method.java.j2", context)

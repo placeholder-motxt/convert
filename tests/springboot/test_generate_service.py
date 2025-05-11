@@ -10,6 +10,7 @@ from app.generate_service_springboot.generate_service_springboot import (
 from app.models.diagram import ClassObject
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, ParameterObject, TypeObject
+from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # Go from tests/ to project-root/
 FEATURE_PATH = os.path.join(
@@ -99,7 +100,30 @@ class TestGenerateService(unittest.TestCase):
         assert (
             "existingPembeli.setUsername(pembeli.getUsername())" in output
         )  # Level: Pembeli
-    
+
+    def test_method_call(self):
+        """
+        This test already handle the case when the method call contains parameters and not
+        For other cases like invalid diagram etc is already handled in Sequence Parser Test
+        """
+        with open("tests/springboot/test_valid_json_seq.txt", "r", encoding="utf-8") as file:
+            json_data = file.read()
+
+        parser = ParseJsonToObjectSeq()
+        parser.set_json(json_data)
+        parser.parse()
+
+        class_objects = parser.get_class_objects()
+
+        # ListCopy Case
+        output = generate_service_java("tes", class_objects['ListCopy'], "com.example")
+        expected_contains = """
+        void borrow(String isbn) {
+            String copyBuku = findCopyBuku(isbn)
+            isBorrowed()
+"""
+        assert expected_contains.replace(" ", "").replace("\n", "") in output.replace(" ", "").replace("\n", "")
+
     def test_edge_multilevel_cyclic_inheritance(self):
         class_a = ClassObject()
         class_a.set_name("TestA")
@@ -262,7 +286,6 @@ def check_output(context):
         == expected_output.replace(" ", "").replace("\n", "").strip()
     )
 
-
 @given(
     "the project name and private class object with method is processed and ready as context"
 )
@@ -320,6 +343,7 @@ def check_output(context):
         "tests/springboot/test_service_method_only.txt", "r", encoding="utf-8"
     ) as file:
         expected_output = file.read()
+    
     assert (
         context["output"].replace(" ", "").replace("\n", "").strip()
         == expected_output.replace(" ", "").replace("\n", "").strip()
