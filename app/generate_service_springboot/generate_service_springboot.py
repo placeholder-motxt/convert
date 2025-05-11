@@ -41,12 +41,12 @@ def get_all_attributes(model: ClassObject) -> list[str]:
 
     parent = model.get_parent()
 
-    accessed_parent = []
+    accessed_parent = set()
 
     while parent is not None:
         if parent.get_name() in accessed_parent:
             raise ValueError("Cyclic Inheritance detected! It should not be allowed!")
-        accessed_parent.append(parent.get_name())
+        accessed_parent.add(parent.get_name())
         fields += parent.get_fields()
         parent = parent.get_parent()
 
