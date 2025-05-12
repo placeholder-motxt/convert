@@ -41,6 +41,7 @@ from app.generate_runner.generate_runner import (
     generate_springboot_window_runner,
 )
 from app.generate_service_springboot.generate_service_springboot import (
+    generate_sequence_service_java,
     generate_service_java,
 )
 from app.generate_swagger.generate_swagger import (
@@ -305,6 +306,12 @@ async def convert_spring(
                 write_springboot_path(src_path, "repository", class_object.get_name()),
                 generate_repository_java(project_name, class_object, group_id),
             )
+        zipf.writestr(
+            write_springboot_path(src_path, "service", "SequenceService"),
+            generate_sequence_service_java(
+                project_name, data["views_element"], group_id
+            ),
+        )
 
     return tmp_zip_path
 
@@ -613,6 +620,7 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "models": response_content_models.getvalue(),
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
+        "views_element": writer_views,
     }
 
 
