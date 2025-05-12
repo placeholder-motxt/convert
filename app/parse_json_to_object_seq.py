@@ -440,12 +440,6 @@ please consult the user manual document on how to name parameters"
         return_vars = []
         for edge in (e for e in self.__edges if e["type"] == "ReturnEdge"):
             label = edge["label"].strip()
-            if not is_valid_python_identifier(label):
-                raise ValueError(
-                    f"Return edge label must be a valid variable name! Given '{edge['label']}' \n\
-on sequence diagram please consult the user manual document on how to name methods"
-                )
-
             call_tuple = (edge["end"], edge["start"])
             if call_tuple not in self.__method_call:
                 raise ValueError(

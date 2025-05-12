@@ -20,21 +20,6 @@ class TestParseMisc(unittest.TestCase):
             self.assertEqual(result[3], "hasTanggunganResult")
             self.assertEqual(result[4], "hasTanggunganResult")
 
-    def test_parse_return_edge_label_invalid(self):
-        with open("tests/testdata/parse_misc_negative1.json") as file:
-            json_data = file.read().replace("\n", "")
-            self.parser.set_json(json_data)
-            self.parser.parse()
-
-            with self.assertRaises(ValueError) as context:
-                self.parser.parse_return_edge()
-            self.assertEqual(
-                str(context.exception),
-                "Return edge label must be a valid variable name! Given '@return' \n"
-                "on sequence diagram please consult the "
-                "user manual document on how to name methods",
-            )
-
     def test_parse_return_edge_no_call_edge(self):
         with open("tests/testdata/parse_misc_negative2.json") as file:
             json_data = file.read().replace("\n", "")
