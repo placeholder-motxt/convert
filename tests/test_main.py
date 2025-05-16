@@ -24,6 +24,7 @@ def test_file() -> dict:
 
 
 def test_file_already_exists():
+    """This should now be successfull"""
     with open("file1_models.py", "w") as f:
         f.write("Some initial content")
 
@@ -65,8 +66,7 @@ def test_file_already_exists():
                     "project_name": "file1",
                 },
             )
-            assert response.status_code == 400
-            assert response.json()["detail"] == "Please try again later"
+            assert response.status_code == 200
     finally:
         # Clean up: remove the file created for the test
         if os.path.exists("file1_models.py"):
@@ -74,6 +74,7 @@ def test_file_already_exists():
 
 
 def test_slash_on_filename():
+    """This should now be successfull as we don't need to check the given filenames"""
     # Try to upload a file
     with (
         patch("app.main.ModelsElements") as mockparser,
@@ -104,8 +105,7 @@ def test_slash_on_filename():
                 "project_name": "file1",
             },
         )
-        assert response.status_code == 400
-        assert response.json()["detail"] == "/ not allowed in file name"
+        assert response.status_code == 200
 
 
 @pytest.mark.asyncio

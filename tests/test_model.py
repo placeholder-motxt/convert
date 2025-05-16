@@ -1,7 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from app.main import ConvertRequest, DownloadRequest
+from app.main import ConvertRequest
+from app.model import DownloadRequest
 
 
 def test_valid_download_request():
