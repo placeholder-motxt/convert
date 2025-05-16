@@ -302,6 +302,7 @@ please consult the user manual document on how to name parameters"
 
                 else:
                     method = ClassMethodObject()
+                    method.set_class_object_name(class_name)
 
                 self.__call_nodes[end_id]["method"] = method
                 self.__call_nodes[end_id]["caller"] = start_id
