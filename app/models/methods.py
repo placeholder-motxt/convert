@@ -90,6 +90,8 @@ class ClassMethodObject(AbstractMethodObject):
     }
     LIST_REGEX = re.compile(r"^list\[(?P<list_type>\w*)\]", re.IGNORECASE)
 
+    __class_object_name: Optional[str] = None
+
     def __init__(self):
         super().__init__()
         self.__calls: list[ClassMethodCallObject] = []
@@ -106,6 +108,12 @@ class ClassMethodObject(AbstractMethodObject):
                 "please consult the user manual document"
             )
         self.__calls.append(class_method_call)
+
+    def set_class_object_name(self, class_object_name: str):  # pragma: no cover
+        self.__class_object_name = class_object_name
+
+    def get_class_object_name(self) -> str:  # pragma: no cover
+        return self.__class_object_name
 
     def to_views_code(self) -> str:
         """
@@ -573,7 +581,8 @@ class AbstractMethodCallObject(ABC):
             context["arguments"] = [
                 arg.print_springboot_style_template() for arg in self.__arguments
             ]
-
+        if isinstance(self.__method, ClassMethodObject):
+            context["class_name"] = self.__method.get_class_object_name()
         return context
 
 
