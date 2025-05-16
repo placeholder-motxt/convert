@@ -693,6 +693,9 @@ class DummyMethodCall:
     def set_return_var_type(self, var_type: str):
         self.ret_var_type = var_type
 
+    def get_name(self) -> str:
+        return "name"
+
 
 class TestParseReturnEdge(unittest.TestCase):
     def setUp(self):
@@ -798,3 +801,43 @@ class TestParseReturnEdge(unittest.TestCase):
         result = self.parser.parse_return_edge()
         self.assertEqual(result, ["retWithSpaces()_name"])
         self.assertEqual(method_call_mock.ret_var_name, "retWithSpaces()_name")
+
+    def test_return_edge_with_empty_return_var_name_raises(self):
+        method_call_mock = DummyMethodCall()
+        call_tuple = ("A", "B")
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "retLabel()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {"end": "B", "method_call": method_call_mock}
+        }
+        # process_return_variable returns invalid (empty name)
+        self.parser.process_return_variable = MagicMock(return_value=("", "retVarType"))
+
+        with self.assertRaises(ValueError) as cm:
+            self.parser.parse_return_edge()
+        self.assertIn(
+            "Return value name or return value type not set", str(cm.exception)
+        )
+        self.assertIn(method_call_mock.get_name(), str(cm.exception))
+
+    def test_return_edge_with_empty_return_var_type_raises(self):
+        method_call_mock = DummyMethodCall()
+        call_tuple = ("A", "B")
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "retLabel()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {"end": "B", "method_call": method_call_mock}
+        }
+        # process_return_variable returns invalid (empty type)
+        self.parser.process_return_variable = MagicMock(
+            return_value=("retVarName", None)
+        )
+
+        with self.assertRaises(ValueError) as cm:
+            self.parser.parse_return_edge()
+        self.assertIn(
+            "Return value name or return value type not set", str(cm.exception)
+        )
+        self.assertIn(method_call_mock.get_name(), str(cm.exception))
