@@ -8,13 +8,15 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SequenceService {
+    Class1Service class1Service;
+
     public String controller_method_1(String parameter_1){
 
         if (condition == True){
             controller_method_1(argument_1);
         }
         if (condition == True){
-            class_method_1();
+            class1Service.class_method_1();
         }
 
     // TODO: Auto generated function stub
