@@ -42,7 +42,7 @@ class FileElements(ABC):
 
         async with await anyio.open_file(file, "w") as f:
             await f.write(to_be_print)
-        print("done writing", file)
+
         return file
 
 
