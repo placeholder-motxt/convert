@@ -47,7 +47,13 @@ from app.generate_service_springboot.generate_service_springboot import (
 from app.generate_swagger.generate_swagger import (
     generate_swagger_config,
 )
-from app.model import ConvertRequest, DownloadRequest, DuplicateChecker, Style
+from app.model import (
+    ConvertRequest,
+    DataResult,
+    DownloadRequest,
+    DuplicateChecker,
+    Style,
+)
 from app.models.elements import (
     ClassObject,
     ModelsElements,
@@ -252,20 +258,19 @@ async def convert_spring(
 
     src_path = group_id.replace(".", "/") + "/" + project_name
 
-    with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
+    with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
         # put swagger config to zip
         swagger_config_content = generate_swagger_config(group_id, project_name)
         zipf.writestr(
             write_springboot_path(src_path, "config", "Swagger"),
             swagger_config_content,
-            compress_type=zipfile.ZIP_DEFLATED,
         )
 
         # put runner to zip
         windows_runner = generate_springboot_window_runner()
         linux_runner = generate_springboot_linux_runner()
-        zipf.writestr("run.bat", windows_runner, compress_type=zipfile.ZIP_DEFLATED)
-        zipf.writestr("run.sh", linux_runner, compress_type=zipfile.ZIP_DEFLATED)
+        zipf.writestr("run.bat", windows_runner)
+        zipf.writestr("run.sh", linux_runner)
 
         data = fetch_data(filenames, contents)
 
@@ -537,7 +542,7 @@ def process_parsed_class(
             duplicate_checker[(model_class.get_name(), method.get_name())] = method
 
 
-def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
+def fetch_data(filenames: list[str], contents: list[list[str]]) -> DataResult:
     """
     This is the logic from convert() method to process the requested
     files. To use this method, pass the request.filename and request.content
