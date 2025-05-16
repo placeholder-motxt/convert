@@ -50,7 +50,6 @@ from app.generate_swagger.generate_swagger import (
 from app.model import (
     ConvertRequest,
     DataResult,
-    DownloadRequest,
     DuplicateChecker,
     Style,
 )
@@ -97,26 +96,6 @@ parse_latency = Histogram(
 @app.get("/")
 def read_root() -> dict:
     return {"message": "Hello, FastAPI World!"}
-
-
-async def download_file(request: DownloadRequest) -> FileResponse:
-    raw_filename = request.filename
-
-    if "/" in raw_filename or "\\" in raw_filename:
-        logger.warning(f"Bad filename: {raw_filename}")
-        raise HTTPException(status_code=400, detail="/ not allowed in file name")
-
-    file = raw_filename + request.type + ".py"
-    if os.path.exists(file):
-        logger.warning(f"File already exists: {file}")
-        # TODO: Add to metrics so we can know how many request actually face this problem
-        raise HTTPException(status_code=400, detail="Please try again later")
-
-    async with await anyio.open_file(file, "w") as f:
-        await f.write(request.content)
-
-    logger.info(f"Finished writing: {file}")
-    return file
 
 
 @app.post("/convert")
@@ -186,22 +165,6 @@ async def convert_django(
 
         writer_url = UrlsElement()
         writer_url.set_classes(writer_models.get_classes())
-
-        await download_file(
-            request=DownloadRequest(
-                filename=first_fname,
-                content=fetched["models"],
-                type="_models",
-            ),
-        )
-
-        await download_file(
-            request=DownloadRequest(
-                filename=first_fname,
-                content=fetched["views"],
-                type="_views",
-            ),
-        )
 
         await writer_requirements.write_to_file("./app")
         await writer_url.write_to_file("./app")
