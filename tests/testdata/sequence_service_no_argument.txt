@@ -14,7 +14,7 @@ public class SequenceService {
         String ret_var_1;
 
         if (condition == True){
-            ret_var_1 = controller_method_1();
+            ret_var_1 = this.controller_method_1();
         }
         if (condition == True){
             ret_var_1 = class1Service.class_method_1();

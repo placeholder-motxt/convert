@@ -13,7 +13,7 @@ public class SequenceService {
     public String controller_method_1(String parameter_1){
 
         if (condition == True){
-            controller_method_1(argument_1);
+            this.controller_method_1(argument_1);
         }
         if (condition == True){
             class1Service.class_method_1();
