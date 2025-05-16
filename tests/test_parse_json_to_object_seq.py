@@ -740,6 +740,7 @@ class TestParseReturnEdge(unittest.TestCase):
         self.assertEqual(result, ["retLabel()_name"])
         self.assertEqual(method_call_mock.ret_var_name, "retLabel()_name")
         self.assertEqual(method_call_mock.ret_var_type, "retLabel()_type")
+        self.parser.process_return_variable.assert_called_once_with("retLabel()")
 
     def test_return_edge_with_matching_call_but_method_call_is_none(self):
         # If "method_call" is None or falsy, it should not process or append label
@@ -773,6 +774,12 @@ class TestParseReturnEdge(unittest.TestCase):
         self.assertEqual(results, ["ret1()_name", "ret2()_name"])
         self.assertEqual(method_call_1.ret_var_name, "ret1()_name")
         self.assertEqual(method_call_2.ret_var_name, "ret2()_name")
+        self.parser.process_return_variable.assert_has_calls(
+            [
+                unittest.mock.call("ret1()"),
+                unittest.mock.call("ret2()"),
+            ]
+        )
 
     def test_label_with_extra_spaces_stripped(self):
         method_call_mock = DummyMethodCall()
