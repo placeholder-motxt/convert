@@ -14,7 +14,7 @@ public class SequenceService {%raw%}{{%endraw%}{% for class_name in class_names 
 {% for return_variable in controller_method.return_var_declaration %}        {{return_variable.return_var_type}} {{return_variable.return_var_name}};
 {% endfor %}
 {% for method_call in controller_method.method_calls %}        {% if method_call.condition is defined %}if ({{ method_call.condition }}){
-            {% endif %}{% if method_call.return_var_name is defined %}{{ method_call.return_var_name }} = {% endif %}{% if method_call.class_name is defined %}{{method_call.class_name}}Service.{%endif%}{{ method_call.method_name }}({% for argument in method_call.arguments %}{{ argument.argument_name }}{% if not loop.last %}, {% endif %}{% endfor %});{% if method_call.condition is defined %}
+            {% endif %}{% if method_call.return_var_name is defined %}{{ method_call.return_var_name }} = {% endif %}{% if method_call.class_name_camel is defined %}{{method_call.class_name_camel}}Service.{%endif%}{{ method_call.method_name }}({% for argument in method_call.arguments %}{{ argument.argument_name }}{% if not loop.last %}, {% endif %}{% endfor %});{% if method_call.condition is defined %}
         }{% endif %}
 {% endfor %}
     // TODO: Auto generated function stub

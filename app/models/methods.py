@@ -6,7 +6,12 @@ from copy import deepcopy
 from io import StringIO
 from typing import Optional
 
-from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier, render_template
+from app.utils import (
+    JAVA_TYPE_MAPPING,
+    is_valid_python_identifier,
+    render_template,
+    to_camel_case,
+)
 
 from .properties import ParameterObject, TypeObject
 
@@ -583,6 +588,7 @@ class AbstractMethodCallObject(ABC):
             ]
         if isinstance(self.__method, ClassMethodObject):
             context["class_name"] = self.__method.get_class_object_name()
+            context["class_name_camel"] = to_camel_case(context["class_name"])
         return context
 
 
