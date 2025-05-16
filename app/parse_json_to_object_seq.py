@@ -452,8 +452,14 @@ please consult the user manual document on how to name parameters"
                 and method_call_info["method_call"]
             ):
                 ret_var_name, ret_var_type = self.process_return_variable(label)
-                method_call_info["method_call"].set_ret_var(ret_var_name)
-                method_call_info["method_call"].set_return_var_type(ret_var_type)
-                return_vars.append(ret_var_name)
-
+                if ret_var_name and ret_var_type:
+                    method_call_info["method_call"].set_ret_var(ret_var_name)
+                    method_call_info["method_call"].set_return_var_type(ret_var_type)
+                    return_vars.append(ret_var_name)
+                else:
+                    raise ValueError(
+                        "Return value name or return value type not set when "
+                        f"calling {method_call_info['method_call'].get_name()} "
+                        "in Sequence Diagram!"
+                    )
         return return_vars
