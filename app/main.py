@@ -153,7 +153,6 @@ async def convert(
 async def convert_django(
     project_name: str, filenames: list[str], contents: list[list[str]], style: Style
 ) -> str:
-    first_fname = filenames[0]
     tmp_zip = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
     tmp_zip_path = tmp_zip.name
     try:
@@ -200,8 +199,6 @@ async def convert_django(
             f"{project_name}_views.py",
             os.path.join("app", "requirements.txt"),
             os.path.join("app", "urls.py"),
-            f"{first_fname}_models.py",
-            f"{first_fname}_views.py",
         ]
         for file in files:
             if os.path.exists(file):
