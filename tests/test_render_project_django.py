@@ -72,7 +72,7 @@ class TestGenerateDjangoProjectTemplate(unittest.TestCase):
             create_django_project("test project", self.tmp_zip.name)
         self.assertEqual(
             str(context.exception),
-            "Project name must not contain whitespace or number!",
+            "Project name must not contain whitespace or number! Got: 'test project'",
         )
         if os.path.exists("project_test_project"):
             shutil.rmtree("project_test_project")
@@ -154,7 +154,7 @@ class TestGenerateDjangoMain(unittest.TestCase):
             create_django_app("test_main", "buku pin", self.tmp_zip.name)
         self.assertEqual(
             str(context.exception),
-            "App name must not contain whitespace!",
+            "App name must not contain whitespace! Got: 'buku pin'",
         )
 
     def test_generate_django_app_negative_invalid_project_name(self):
@@ -162,7 +162,7 @@ class TestGenerateDjangoMain(unittest.TestCase):
             create_django_app("test main", "main", self.tmp_zip.name)
         self.assertEqual(
             str(context.exception),
-            "Project name must not contain whitespace!",
+            "Project name must not contain whitespace! Got: 'test main'",
         )
 
     def test_generate_django_app_negative_zip_not_exist(self):

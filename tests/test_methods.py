@@ -180,6 +180,42 @@ class TestControllerMethodObject(unittest.TestCase):
         result = method_obj.print_springboot_style_template()
         self.assertEqual(result, expected_result)
 
+    @patch.object(
+        ParameterObject,
+        "to_springboot_code_template",
+        return_value={"param_name": "exampleParam"},
+    )
+    @patch.object(
+        AbstractMethodCallObject,
+        "print_springboot_style_template",
+        return_value={"method_name": "methodCall"},
+    )
+    def test_valid_method_with_no_return_var_type(
+        self, mock_print_method_call: MagicMock, mock_param_template: MagicMock
+    ):
+        method_obj = ControllerMethodObject()
+        method_obj.set_name("testControllerMethod")
+
+        param1 = ParameterObject()
+        method_obj.add_parameter(param1)
+        str_type = TypeObject()
+        str_type.set_name("string")
+
+        # Adding a mock method call
+        method_call_mock = AbstractMethodCallObject()
+        method_obj.add_call(method_call_mock)
+
+        expected_result = {
+            "method_name": "testControllerMethod",
+            "params": [{"param_name": "exampleParam"}],
+            "method_calls": [{"method_name": "methodCall"}],
+            "return_type": "",
+            "return_var_declaration": [],
+        }
+
+        result = method_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
     # Negative Test Case 1: Method with empty name
     def test_method_with_empty_name(self):
         method_obj = ControllerMethodObject()
@@ -378,6 +414,36 @@ class TestAbstractMethodCallObject(unittest.TestCase):
             "method_name": "testMethod",
             "arguments": [{"arg": "value"}],
             "return_var_type": "String",
+        }
+
+        result = method_call_obj.print_springboot_style_template()
+        self.assertEqual(result, expected_result)
+
+    @patch.object(AbstractMethodObject, "get_name", return_value="testMethod")
+    @patch.object(
+        ArgumentObject, "print_springboot_style_template", return_value={"arg": "value"}
+    )
+    def test_valid_method_call_with_no_return_var_type(
+        self, mock_get_name: MagicMock, mock_print_arg: MagicMock
+    ):
+        method_call_obj = AbstractMethodCallObject()
+
+        # Mocking a method and adding an argument
+        method_mock = AbstractMethodObject()
+        method_call_obj.set_method(method_mock)
+        method_call_obj.set_return_var_name("result")
+
+        method_call_obj.set_condition("if true")
+
+        argument = ArgumentObject()
+        method_call_obj.add_argument(argument)
+
+        expected_result = {
+            "condition": "if true",
+            "return_var_name": "result",
+            "method_name": "testMethod",
+            "arguments": [{"arg": "value"}],
+            "return_var_type": "",
         }
 
         result = method_call_obj.print_springboot_style_template()

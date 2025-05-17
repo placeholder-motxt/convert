@@ -388,7 +388,10 @@ class ControllerMethodObject(AbstractMethodObject):
         context["return_var_declaration"] = self.handle_return_var_declaration(
             context["method_calls"]
         )
-        context["return_type"] = self.get_return_type().get_name_springboot()
+        if self.get_return_type() is None:
+            context["return_type"] = ""
+        else:
+            context["return_type"] = self.get_return_type().get_name_springboot()
         return context
 
     def handle_return_var_declaration(self, method_calls: list[dict]) -> list[dict]:
@@ -558,7 +561,12 @@ class AbstractMethodCallObject(ABC):
             context["condition"] = self.__condition
         if self.__return_var_name:
             context["return_var_name"] = self.__return_var_name
-            context["return_var_type"] = self.__return_var_type.get_name_springboot()
+            if self.__return_var_type is None:
+                context["return_var_type"] = ""
+            else:
+                context["return_var_type"] = (
+                    self.__return_var_type.get_name_springboot()
+                )
         context["method_name"] = self.__method.get_name()
         if isinstance(self, ClassMethodCallObject):
             context["instance_name"] = self.get_instance_name()

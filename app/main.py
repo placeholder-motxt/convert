@@ -41,6 +41,7 @@ from app.generate_runner.generate_runner import (
     generate_springboot_window_runner,
 )
 from app.generate_service_springboot.generate_service_springboot import (
+    generate_sequence_service_java,
     generate_service_java,
 )
 from app.generate_swagger.generate_swagger import (
@@ -305,6 +306,12 @@ async def convert_spring(
                 write_springboot_path(src_path, "repository", class_object.get_name()),
                 generate_repository_java(project_name, class_object, group_id),
             )
+        zipf.writestr(
+            write_springboot_path(src_path, "service", "SequenceService"),
+            generate_sequence_service_java(
+                project_name, data["views_element"], group_id
+            ),
+        )
 
     return tmp_zip_path
 
@@ -329,14 +336,17 @@ def check_duplicate(
             duplicate_class_method_checker[key] = class_method_object
         else:
             raise ValueError(
-                f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
+                f"Cannot call method '{class_method_object.get_name()}' of "
+                f"class '{class_object_name}'! The method or class is not defined in Class Diagram!"
             )
     return duplicate_class_method_checker
 
 
 def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace or number!")
+        raise ValueError(
+            f"Project name must not contain whitespace or number! Got: '{project_name}'"
+        )
 
     # write django project template to a dictionary
     files = render_project_django_template(
@@ -354,9 +364,11 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
 
 def validate_django_app(project_name: str, app_name: str, zipfile_path: str):
     if not is_valid_python_identifier(app_name):
-        raise ValueError("App name must not contain whitespace!")
+        raise ValueError(f"App name must not contain whitespace! Got: '{app_name}'")
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace!")
+        raise ValueError(
+            f"Project name must not contain whitespace! Got: '{project_name}'"
+        )
     if not os.path.exists(zipfile_path):
         raise FileNotFoundError(f"File {zipfile_path} does not exist")
 
@@ -577,7 +589,8 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
 
         else:
             raise ValueError(
-                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram! "
+                f"Got '{diagram_type}'"
             )
 
     for class_method_object in duplicate_class_method_checker.values():
@@ -613,6 +626,7 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "models": response_content_models.getvalue(),
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
+        "views_element": writer_views,
     }
 
 
