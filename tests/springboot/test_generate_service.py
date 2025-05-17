@@ -121,8 +121,10 @@ class TestGenerateService(unittest.TestCase):
         expected_contains = """
         void borrow(String isbn) {
             String copyBuku = findCopyBuku(isbn);
-            isBorrowed();
+            copyBukuService.isBorrowed();
 """
+        assert "import com.example.tes.service.CopyBukuService;" in output
+        assert "private final CopyBukuService copyBukuService;" in output
         assert expected_contains.replace(" ", "").replace("\n", "") in output.replace(" ", "").replace("\n", "")
 
     def test_edge_multilevel_cyclic_inheritance(self):
@@ -203,8 +205,8 @@ def check_output(context):
     assert "setCartId(cart.getCartId())" in expected_output
 
     assert (
-        context["output"].replace(" ", "").replace("\n", "").strip()
-        == expected_output.replace(" ", "").replace("\n", "").strip()
+        context["output"].strip().replace(" ", "").replace("\n", "")
+        == expected_output.strip().replace(" ", "").replace("\n", "")
     )
 
 
@@ -394,6 +396,6 @@ public class CartService {
 """
 
     assert (
-        context["output"].replace(" ", "").strip()
-        == expected_output.replace(" ", "").strip()
+        context["output"].replace(" ", "").replace("\n", "").strip()
+        == expected_output.replace(" ", "").replace("\n", "").strip()
     )
