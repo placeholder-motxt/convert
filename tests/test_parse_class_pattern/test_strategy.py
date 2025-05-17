@@ -126,6 +126,66 @@ class TestRelationshipStrategy(unittest.TestCase):
                 edge, class_from, class_to, RelationshipType.AGGREGATION
             )
 
+    def test_one_to_one_composition(self):
+        strategy = OneToOneStrategy()
+        edge = {"startLabel": "1", "endLabel": "1"}
+        cls_src = ClassObject()
+        cls_target = ClassObject()
+
+        strategy.create_relationship(
+            edge, cls_src, cls_target, RelationshipType.COMPOSITION
+        )
+
+        relationships = cls_target._ClassObject__relationships
+        self.assertEqual(len(relationships), 1)
+        self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
+        self.assertEqual(type(relationships[0]), OneToOneRelationshipObject)
+
+    def test_one_to_many_composition(self):
+        strategy = ManyToOneStrategy()
+        edge = {"startLabel": "1", "endLabel": "*"}
+        cls_src = ClassObject()
+        cls_target = ClassObject()
+
+        strategy.create_relationship(
+            edge, cls_src, cls_target, RelationshipType.COMPOSITION
+        )
+
+        relationships = cls_target._ClassObject__relationships
+        self.assertEqual(len(relationships), 1)
+        self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
+        self.assertEqual(type(relationships[0]), ManyToOneRelationshipObject)
+
+    def test_many_to_one_composition(self):
+        strategy = ManyToOneStrategy()
+        edge = {"startLabel": "*", "endLabel": "1"}
+        cls_src = ClassObject()
+        cls_target = ClassObject()
+
+        strategy.create_relationship(
+            edge, cls_src, cls_target, RelationshipType.COMPOSITION
+        )
+
+        relationships = cls_src._ClassObject__relationships
+        self.assertEqual(len(relationships), 1)
+        self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
+        self.assertEqual(type(relationships[0]), ManyToOneRelationshipObject)
+
+    def test_many_to_many_composition(self):
+        strategy = ManyToManyStrategy()
+        edge = {"startLabel": "*", "endLabel": "*"}
+        cls_src = ClassObject()
+        cls_target = ClassObject()
+
+        strategy.create_relationship(
+            edge, cls_src, cls_target, RelationshipType.COMPOSITION
+        )
+
+        relationships = cls_target._ClassObject__relationships
+        self.assertEqual(len(relationships), 1)
+        self.assertEqual(relationships[0].get_type(), RelationshipType.COMPOSITION)
+        self.assertEqual(type(relationships[0]), ManyToManyRelationshipObject)
+
 
 class TestRelationshipStrategyBidirectional(unittest.TestCase):
     def test_one_to_one_bidirectional(self):
