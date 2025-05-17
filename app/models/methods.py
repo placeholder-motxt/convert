@@ -200,6 +200,27 @@ class ClassMethodObject(AbstractMethodObject):
 
         return res.getvalue()
 
+    def __render_method_call(self, result: dict, arguments: str) -> str:
+        if "return_var_type" in result:
+            if result["service"].lower() == self.get_class_object_name().lower():
+                return (
+                    f"{result['return_var_type']} {result['return_var_name']} = "
+                    f"{result['method_name']}({arguments});\n"
+                )
+
+            else:
+                return (
+                    f"{result['return_var_type']} {result['return_var_name']}"
+                    f" = {result['service']}Service."
+                    f"{result['method_name']}({arguments});\n"
+                )
+
+        else:
+            if result["service"].lower() == self.get_class_object_name().lower():
+                return f"{result['method_name']}({arguments});\n"
+            else:
+                return f"{result['service']}Service.{result['method_name']}({arguments});\n"
+
     def __get_method_call_springboot(self) -> list[str]:
         method_call_string = []
 
@@ -209,38 +230,8 @@ class ClassMethodObject(AbstractMethodObject):
                 arguments = ", ".join(
                     elem["argument_name"] for elem in result["arguments"]
                 )
+                method_call_string.append(self.__render_method_call(result, arguments))
 
-                if "return_var_type" in result:
-                    if (
-                        result["service"].lower()
-                        == self.get_class_object_name().lower()
-                    ):
-                        method_call_string.append(
-                            (
-                                f"{result['return_var_type']} {result['return_var_name']} = "
-                                f"{result['method_name']}({arguments});\n"
-                            )
-                        )
-                    else:
-                        method_call_string.append(
-                            (
-                                f"{result['return_var_type']} {result['return_var_name']}"
-                                f" = {result['service']}Service."
-                                f"{result['method_name']}({arguments});\n"
-                            )
-                        )
-                else:
-                    if (
-                        result["service"].lower()
-                        == self.get_class_object_name().lower()
-                    ):
-                        method_call_string.append(
-                            f"{result['method_name']}({arguments});\n"
-                        )
-                    else:
-                        method_call_string.append(
-                            f"{result['service']}Service.{result['method_name']}({arguments});\n"
-                        )
         return method_call_string
 
     def to_springboot_code(self) -> str:
