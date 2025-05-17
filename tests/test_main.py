@@ -442,7 +442,8 @@ def test_check_duplicate_no_matching_method():
     duplicate_class_method_checker = {"hello": ClassObject()}
     with pytest.raises(
         ValueError,
-        match="Cannot call class 'class1' objects not defined in Class Diagram!",
+        match="Cannot call method 'method1' of class 'class1'! The method or class is not defined "
+        "in Class Diagram!",
     ):
         check_duplicate(
             class_objects, class_object.get_name(), duplicate_class_method_checker
@@ -509,7 +510,8 @@ def test_check_duplicate_empty_duplicate_class_method_checker():
 
     with pytest.raises(
         ValueError,
-        match="Cannot call class 'class1' objects not defined in Class Diagram!",
+        match="Cannot call method 'method1' of class 'class1'! The method or class is "
+        "not defined in Class Diagram!",
     ):
         check_duplicate(
             class_objects, class_object.get_name(), duplicate_class_method_checker

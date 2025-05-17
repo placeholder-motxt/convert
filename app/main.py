@@ -336,14 +336,17 @@ def check_duplicate(
             duplicate_class_method_checker[key] = class_method_object
         else:
             raise ValueError(
-                f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
+                f"Cannot call method '{class_method_object.get_name()}' of "
+                f"class '{class_object_name}'! The method or class is not defined in Class Diagram!"
             )
     return duplicate_class_method_checker
 
 
 def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace or number!")
+        raise ValueError(
+            f"Project name must not contain whitespace or number! Got: '{project_name}'"
+        )
 
     # write django project template to a dictionary
     files = render_project_django_template(
@@ -361,9 +364,11 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
 
 def validate_django_app(project_name: str, app_name: str, zipfile_path: str):
     if not is_valid_python_identifier(app_name):
-        raise ValueError("App name must not contain whitespace!")
+        raise ValueError(f"App name must not contain whitespace! Got: '{app_name}'")
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace!")
+        raise ValueError(
+            f"Project name must not contain whitespace! Got: '{project_name}'"
+        )
     if not os.path.exists(zipfile_path):
         raise FileNotFoundError(f"File {zipfile_path} does not exist")
 
@@ -584,7 +589,8 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
 
         else:
             raise ValueError(
-                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram! "
+                f"Got '{diagram_type}'"
             )
 
     for class_method_object in duplicate_class_method_checker.values():
