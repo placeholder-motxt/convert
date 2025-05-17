@@ -148,6 +148,7 @@ async def test_convert_endpoint_valid_content_class_diagram():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "file1.zip" in response.headers["content-disposition"]
+        assert response.content[8:10] == b"\x08\x00"  # Compression method = DEFLATE
 
 
 @pytest.mark.asyncio
@@ -211,6 +212,7 @@ async def test_convert_endpoint_class_diagram():
         assert response.content.startswith(
             b"PK\x03\x04"
         )  # Check that the response is a zip file
+        assert response.content[8:10] == b"\x08\x00"  # Compression method = DEFLATE
 
 
 @pytest.mark.asyncio
@@ -273,6 +275,7 @@ async def test_convert_endpoint_sequence_diagram():
         assert response.content.startswith(
             b"PK\x03\x04"
         )  # Check that the response is a zip file
+        assert response.content[8:10] == b"\x08\x00"  # Compression method = DEFLATE
 
 
 @pytest.mark.asyncio
@@ -361,6 +364,7 @@ async def test_convert_endpoint_valid_sequence_diagram():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "file1.zip" in response.headers["content-disposition"]
+        assert response.content[8:10] == b"\x08\x00"
 
 
 @pytest.mark.asyncio
@@ -398,6 +402,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "file1.zip" in response.headers["content-disposition"]
+        assert response.content[8:10] == b"\x08\x00"
 
 
 @pytest.mark.asyncio
