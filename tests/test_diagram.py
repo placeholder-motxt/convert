@@ -514,6 +514,27 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
+    def test_many_to_many_relationship_composition(self):
+        relationship = ManyToManyRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_type(RelationshipType.COMPOSITION)
+        relationship.set_source_class_own_amount("1")
+        expected_output = {
+            "name": "private List<TargetClass> listOfTargetClasss;",
+            "type": (
+                "@ManyToMany(\n\t\t"
+                "cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},\n\t\t"
+                "orphanRemoval = true\n)\n\t"
+                "@JsonIgnore"
+            ),
+            "join": "@JoinTable("
+            '\n\t\tname = "source_class_target_class",'
+            '\n\t\tjoinColumns = @JoinColumn(name = "source_class_id"),'
+            '\n\t\tinverseJoinColumns = @JoinColumn(name = "target_class_id")\n\t)',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
     def test_one_to_one_relationship_edge_case_empty_names(self):
         self.source_class.set_name("")
         self.target_class.set_name("")
