@@ -34,8 +34,6 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
                         parent_name[0].lower() + parent_name[1:] + "Service"
                     )
 
-    print(model_service_needed)
-
     context = {
         "project_name": project_name,
         "class_name_capital": class_name_capital,

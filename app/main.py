@@ -270,6 +270,7 @@ async def convert_spring(
         data = fetch_data(filenames, contents)
 
         writer_models = data["model_element"]
+        seq_reference = data["seq_class"]
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
 
@@ -293,6 +294,19 @@ async def convert_spring(
                     ),
                 )
 
+            if class_object.get_name() in seq_reference:
+                seq_object_reference = seq_reference[class_object.get_name()]
+                for seq_method in seq_object_reference.get_methods():
+                    if seq_method.get_method_calls() != []:
+                        for model_method in class_object.get_methods():
+                            if model_method.get_name() == seq_method.get_name():
+                                model_method.set_class_object_name(
+                                    seq_method.get_class_object_name()
+                                )
+                                model_method.set_method_calls(
+                                    seq_method.get_method_calls()
+                                )
+
             zipf.writestr(
                 write_springboot_path(src_path, "service", class_object.get_name()),
                 generate_service_java(project_name, class_object, group_id),
@@ -307,7 +321,7 @@ async def convert_spring(
                 generate_repository_java(project_name, class_object, group_id),
             )
         zipf.writestr(
-            write_springboot_path(src_path, "service", "SequenceService"),
+            write_springboot_path(src_path, "service", "Sequence"),
             generate_sequence_service_java(
                 project_name, data["views_element"], group_id
             ),
@@ -555,6 +569,8 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
     writer_models = ModelsElements("models.py")
     writer_views = ViewsElements("views.py")
 
+    seq_class_object = []
+
     classes = []
     for file_name, content in zip(filenames, contents):
         json_content = json.loads(content[0])
@@ -586,6 +602,8 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
                     duplicate_class_method_checker = check_duplicate(
                         class_objects, class_object, duplicate_class_method_checker
                     )
+
+                seq_class_object = seq_parser.get_class_objects()
 
         else:
             raise ValueError(
@@ -627,6 +645,7 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
         "views_element": writer_views,
+        "seq_class": seq_class_object,
     }
 
 

@@ -120,6 +120,14 @@ class ClassMethodObject(AbstractMethodObject):
     def get_class_object_name(self) -> str:  # pragma: no cover
         return self.__class_object_name
 
+    def get_method_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
+        return self.__calls
+
+    def set_method_calls(
+        self, method_call: list[ClassMethodCallObject]
+    ):  # pragma: no cover
+        self.__calls = method_call
+
     def to_views_code(self) -> str:
         """
         Returns Django representation of the class method in string
@@ -223,14 +231,17 @@ class ClassMethodObject(AbstractMethodObject):
 
     def __get_method_call_springboot(self) -> list[str]:
         method_call_string = []
-
+        return_var = ""
         if self.__calls != []:
             for call in self.__calls:
                 result = call.print_springboot_style_template()
                 arguments = ", ".join(
                     elem["argument_name"] for elem in result["arguments"]
                 )
+                return_var = call.get_return_var_name()
                 method_call_string.append(self.__render_method_call(result, arguments))
+
+            method_call_string.append(f"    return {return_var};" + "}\n")
 
         return method_call_string
 
