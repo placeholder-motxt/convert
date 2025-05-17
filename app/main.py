@@ -239,6 +239,19 @@ async def convert_django(
                 os.remove(file)
 
 
+def set_springboot_method_call(class_object: ClassObject, seq_reference: dict):
+    if class_object.get_name() in seq_reference:
+        seq_object_reference = seq_reference[class_object.get_name()]
+        for seq_method in seq_object_reference.get_methods():
+            if seq_method.get_method_calls() != []:
+                for model_method in class_object.get_methods():
+                    if model_method.get_name() == seq_method.get_name():
+                        model_method.set_class_object_name(
+                            seq_method.get_class_object_name()
+                        )
+                        model_method.set_method_calls(seq_method.get_method_calls())
+
+
 async def convert_spring(
     project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
 ) -> str:
@@ -294,19 +307,7 @@ async def convert_spring(
                     ),
                 )
 
-            if class_object.get_name() in seq_reference:
-                seq_object_reference = seq_reference[class_object.get_name()]
-                for seq_method in seq_object_reference.get_methods():
-                    if seq_method.get_method_calls() != []:
-                        for model_method in class_object.get_methods():
-                            if model_method.get_name() == seq_method.get_name():
-                                model_method.set_class_object_name(
-                                    seq_method.get_class_object_name()
-                                )
-                                model_method.set_method_calls(
-                                    seq_method.get_method_calls()
-                                )
-
+            set_springboot_method_call(class_object, seq_reference)
             zipf.writestr(
                 write_springboot_path(src_path, "service", class_object.get_name()),
                 generate_service_java(project_name, class_object, group_id),
