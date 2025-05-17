@@ -339,7 +339,8 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
                 "cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
             )
             params.append("orphanRemoval = true\n")
-            rel_type = f"@ManyToMany(\n\t\t{',\n\t\t'.join(params)})\n\t@JsonIgnore"
+            params_str = ",\n\t\t".join(params)
+            rel_type = f"@ManyToMany(\n\t\t{params_str})\n\t@JsonIgnore"
         else:
             rel_type = (
                 "@ManyToMany("
