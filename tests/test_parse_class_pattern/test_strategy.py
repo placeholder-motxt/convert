@@ -228,8 +228,8 @@ class TestRelationshipStrategyBidirectional(unittest.TestCase):
             {
                 "join": '@JoinColumn(name = "_id")',
                 "name": "private  ;",
-                "type": "@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, "
-                "CascadeType.REMOVE})",
+                "type": "@OneToOne(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE, "
+                "CascadeType.REMOVE},\n\t\torphanRemoval = true\n)",
             },
         )
         self.assertEqual(
@@ -279,6 +279,40 @@ class TestRelationshipStrategyBidirectional(unittest.TestCase):
 
         strategy.create_relationship(
             edge, class_from, class_to, RelationshipType.ASSOCIATION, bidirectional=True
+        )
+        self.assertEqual(len(class_from._ClassObject__relationships), 1)
+        self.assertEqual(
+            class_from._ClassObject__relationships[0].get_target_class(), class_to
+        )
+        self.assertEqual(
+            class_to._ClassObject__relationships[0].get_target_class(), class_from
+        )
+
+    def test_many_to_many_bidirectional_aggregation(self):
+        strategy = ManyToManyStrategy()
+        edge = {"startLabel": "*", "endLabel": "*"}
+        class_from = ClassObject()
+        class_to = ClassObject()
+
+        strategy.create_relationship(
+            edge, class_from, class_to, RelationshipType.AGGREGATION, bidirectional=True
+        )
+        self.assertEqual(len(class_from._ClassObject__relationships), 1)
+        self.assertEqual(
+            class_from._ClassObject__relationships[0].get_target_class(), class_to
+        )
+        self.assertEqual(
+            class_to._ClassObject__relationships[0].get_target_class(), class_from
+        )
+
+    def test_many_to_many_bidirectional_composition(self):
+        strategy = ManyToOneStrategy()
+        edge = {"startLabel": "*", "endLabel": "1"}
+        class_from = ClassObject()
+        class_to = ClassObject()
+
+        strategy.create_relationship(
+            edge, class_from, class_to, RelationshipType.COMPOSITION, bidirectional=True
         )
         self.assertEqual(len(class_from._ClassObject__relationships), 1)
         self.assertEqual(
