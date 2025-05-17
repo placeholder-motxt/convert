@@ -165,18 +165,17 @@ async def convert_django(
         writer_url = UrlsElement()
         writer_url.set_classes(writer_models.get_classes())
 
-        await writer_requirements.write_to_file("./app")
-        await writer_url.write_to_file("./app")
+        file_elements = (writer_models, writer_requirements, writer_url)
         generate_file_to_be_downloaded(
             project_name=project_name,
             models=response_content_models,
             views=response_content_views,
-            writer_models=writer_models,
+            file_elements=file_elements,
             zipfile_path=tmp_zip_path,
         )
 
         css_file = os.path.join(CSS_DIR, f"{style}.css")
-        with zipfile.ZipFile(tmp_zip_path, "a") as zipf:
+        with zipfile.ZipFile(tmp_zip_path, "a", zipfile.ZIP_DEFLATED) as zipf:
             async with await anyio.open_file(css_file) as cssf:
                 zipf.writestr("static/css/style.css", await cssf.read())
 
@@ -315,7 +314,7 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
         os.path.join("app", "templates", "django_project"),
         {"project_name": project_name},
     )
-    with zipfile.ZipFile(zipfile_path, "w") as zipf:
+    with zipfile.ZipFile(zipfile_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for name, file in files.items():
             arcname = name if name == "manage.py" else f"{project_name}/{name}"
             zipf.writestr(
@@ -344,7 +343,7 @@ def create_django_app(
 
     validate_django_app(project_name, app_name, zipfile_path)
 
-    with zipfile.ZipFile(zipfile_path, "a") as zipf:
+    with zipfile.ZipFile(zipfile_path, "a", zipfile.ZIP_DEFLATED) as zipf:
         for file in os.listdir("app/templates/django_app"):
             # file that use jinja2 template
             if file == "apps.py.j2":
@@ -384,7 +383,7 @@ def generate_file_to_be_downloaded(
     project_name: str,
     models: str,
     views: str,
-    writer_models: ModelsElements,
+    file_elements: tuple[ModelsElements, RequirementsElements, UrlsElement],
     zipfile_path: str,
 ) -> list[str]:
     """
@@ -395,20 +394,16 @@ def generate_file_to_be_downloaded(
     create_django_project(project_name, zipfile_path)
     create_django_app(project_name, app_name, zipfile_path, models, views)
 
-    with zipfile.ZipFile(zipfile_path, "a") as zipf:
+    with zipfile.ZipFile(zipfile_path, "a", zipfile.ZIP_DEFLATED) as zipf:
         # requirements.txt
-        if not os.path.exists("app/requirements.txt"):
-            raise FileNotFoundError("File requirements.txt does not exist")
-        zipf.write(
-            "app/requirements.txt",
-            arcname="requirements.txt",
+        zipf.writestr(
+            "requirements.txt",
+            file_elements[1].print_django_style(),
         )
         # urls.py
-        if not os.path.exists("app/urls.py"):
-            raise FileNotFoundError("File urls.py does not exist")
-        zipf.write(
-            "app/urls.py",
-            arcname=f"{app_name}/urls.py",
+        zipf.writestr(
+            f"{app_name}/urls.py",
+            file_elements[2].print_django_style(),
         )
         # script files
         zipf.write(
@@ -422,6 +417,7 @@ def generate_file_to_be_downloaded(
         # write frontend files to zip
 
         # CREATE
+        writer_models = file_elements[0]
         create_pages = generate_html_create_pages_django(writer_models)
         for name, page in get_names_from_classes(writer_models, create_pages).items():
             file_name = f"create_{name.lower()}.html"
