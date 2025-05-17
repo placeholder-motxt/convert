@@ -9,12 +9,14 @@ import {{group_id}}.{{project_name}}.model.{{class_name_capital}};
 import {{group_id}}.{{project_name}}.repository.{{class_name_capital}}Repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+{% for service in import_service %}import {{group_id}}.{{project_name}}.service.{{ service }}Service;{% endfor %}
 
 @Service
 @RequiredArgsConstructor
 public class {{class_name_capital}}Service {
 
     private final {{class_name_capital}}Repository {{class_name}}Repository;
+    {% for service in instance_service %}private final {{ service[0]|upper ~ service[1:] }} {{ service }};{% endfor %}
 {% if is_public %}
     // Method for create {{class_name}} instance
     public {{class_name_capital}} create{{class_name_capital}}({{class_name_capital}} {{class_name}}) {

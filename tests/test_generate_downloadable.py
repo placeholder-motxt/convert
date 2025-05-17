@@ -354,5 +354,8 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram",
+            (
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram! "
+                "Got 'ActivityDiagram'"
+            ),
         )

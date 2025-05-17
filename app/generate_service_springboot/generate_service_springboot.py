@@ -2,7 +2,8 @@ import re
 
 from app.models.diagram import ClassObject
 from app.models.elements import ViewsElements
-from app.utils import render_template
+from app.models.methods import ClassMethodObject
+from app.utils import render_template, to_camel_case, to_pascal_case
 
 
 def generate_service_java(project_name: str, model: ClassObject, group_id: str) -> str:
@@ -18,8 +19,20 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
     class_name_capital, class_name = format_class_name(model.get_name())
     method = []
 
+    model_service_needed = set()
+    instance_service_needed = set()
+
     for methods in model.get_methods():
         method.append(methods.to_springboot_code())
+
+        for method_call in methods.get_calls():
+            if isinstance(method_call.get_method(), ClassMethodObject):
+                parent_name = method_call.get_method().get_class_object_name()
+                if parent_name.lower() != model.get_name().lower():
+                    model_service_needed.add(parent_name)
+                    instance_service_needed.add(
+                        parent_name[0].lower() + parent_name[1:] + "Service"
+                    )
 
     context = {
         "project_name": project_name,
@@ -29,6 +42,8 @@ def generate_service_java(project_name: str, model: ClassObject, group_id: str) 
         "attributes": get_all_attributes(model),
         "method": method,
         "group_id": group_id,
+        "import_service": model_service_needed,
+        "instance_service": instance_service_needed,
     }
     return render_template("springboot/service.java.j2", context)
 
@@ -70,7 +85,7 @@ def get_all_attributes(model: ClassObject) -> list[str]:
 
 
 def format_class_name(name: str) -> tuple[str, str]:
-    return name.capitalize(), name[0].lower() + name[1:]
+    return name[0].upper() + name[1:], name[0].lower() + name[1:]
 
 
 def generate_sequence_service_java(
@@ -84,4 +99,28 @@ def generate_sequence_service_java(
         for controller_method_object in views_elements.get_controller_methods()
     ]
     context["controller_methods"] = controller_method_context
+
+    # Class names are obtained for instantiating Services
+    class_names = handle_duplicate_service_instantiation(controller_method_context)
+    class_names_pairs = [
+        {
+            "pascal_name": to_pascal_case(class_name),
+            "camel_name": to_camel_case(class_name),
+        }
+        for class_name in class_names
+    ]
+    context["class_names"] = class_names_pairs
+
     return render_template("SequenceService.java.j2", context)
+
+
+def handle_duplicate_service_instantiation(
+    controller_method_context: list,
+) -> list[str]:
+    duplicate_service_instantiation_remover = set()
+    for controller_method in controller_method_context:
+        for method_call in controller_method["method_calls"]:
+            class_name = method_call.get("class_name", None)
+            if class_name is not None:
+                duplicate_service_instantiation_remover.add(class_name)
+    return list(duplicate_service_instantiation_remover)

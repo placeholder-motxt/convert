@@ -239,6 +239,19 @@ async def convert_django(
                 os.remove(file)
 
 
+def set_springboot_method_call(class_object: ClassObject, seq_reference: dict):
+    if class_object.get_name() in seq_reference:
+        seq_object_reference = seq_reference[class_object.get_name()]
+        for seq_method in seq_object_reference.get_methods():
+            if seq_method.get_method_calls() != []:
+                for model_method in class_object.get_methods():
+                    if model_method.get_name() == seq_method.get_name():
+                        model_method.set_class_object_name(
+                            seq_method.get_class_object_name()
+                        )
+                        model_method.set_method_calls(seq_method.get_method_calls())
+
+
 async def convert_spring(
     project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
 ) -> str:
@@ -270,6 +283,7 @@ async def convert_spring(
         data = fetch_data(filenames, contents)
 
         writer_models = data["model_element"]
+        seq_reference = data["seq_class"]
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
 
@@ -293,6 +307,7 @@ async def convert_spring(
                     ),
                 )
 
+            set_springboot_method_call(class_object, seq_reference)
             zipf.writestr(
                 write_springboot_path(src_path, "service", class_object.get_name()),
                 generate_service_java(project_name, class_object, group_id),
@@ -307,7 +322,7 @@ async def convert_spring(
                 generate_repository_java(project_name, class_object, group_id),
             )
         zipf.writestr(
-            write_springboot_path(src_path, "service", "SequenceService"),
+            write_springboot_path(src_path, "service", "Sequence"),
             generate_sequence_service_java(
                 project_name, data["views_element"], group_id
             ),
@@ -336,14 +351,17 @@ def check_duplicate(
             duplicate_class_method_checker[key] = class_method_object
         else:
             raise ValueError(
-                f"Cannot call class '{class_object_name}' objects not defined in Class Diagram!"
+                f"Cannot call method '{class_method_object.get_name()}' of "
+                f"class '{class_object_name}'! The method or class is not defined in Class Diagram!"
             )
     return duplicate_class_method_checker
 
 
 def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace or number!")
+        raise ValueError(
+            f"Project name must not contain whitespace or number! Got: '{project_name}'"
+        )
 
     # write django project template to a dictionary
     files = render_project_django_template(
@@ -361,9 +379,11 @@ def create_django_project(project_name: str, zipfile_path: str) -> list[str]:
 
 def validate_django_app(project_name: str, app_name: str, zipfile_path: str):
     if not is_valid_python_identifier(app_name):
-        raise ValueError("App name must not contain whitespace!")
+        raise ValueError(f"App name must not contain whitespace! Got: '{app_name}'")
     if not is_valid_python_identifier(project_name):
-        raise ValueError("Project name must not contain whitespace!")
+        raise ValueError(
+            f"Project name must not contain whitespace! Got: '{project_name}'"
+        )
     if not os.path.exists(zipfile_path):
         raise FileNotFoundError(f"File {zipfile_path} does not exist")
 
@@ -550,6 +570,8 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
     writer_models = ModelsElements("models.py")
     writer_views = ViewsElements("views.py")
 
+    seq_class_object = []
+
     classes = []
     for file_name, content in zip(filenames, contents):
         json_content = json.loads(content[0])
@@ -582,9 +604,12 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
                         class_objects, class_object, duplicate_class_method_checker
                     )
 
+                seq_class_object = seq_parser.get_class_objects()
+
         else:
             raise ValueError(
-                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram! "
+                f"Got '{diagram_type}'"
             )
 
     for class_method_object in duplicate_class_method_checker.values():
@@ -621,6 +646,7 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> dict[str]:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
         "views_element": writer_views,
+        "seq_class": seq_class_object,
     }
 
 
