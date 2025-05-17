@@ -199,11 +199,15 @@ class ClassMethodObject(AbstractMethodObject):
 
                 if "return_var_type" in result:
                     method_call_string.append(
-                        f"{result['return_var_type']} {result['return_var_name']} \
-                        = {result['method_name']}({arguments})\n"
+                        (
+                            f"{result['return_var_type']} {result['return_var_name']} = "
+                            f"{result['method_name']}({arguments});\n"
+                        )
                     )
                 else:
-                    method_call_string.append(f"{result['method_name']}({arguments})\n")
+                    method_call_string.append(
+                        f"{result['method_name']}({arguments});\n"
+                    )
         return method_call_string
 
     def to_springboot_code(self) -> str:

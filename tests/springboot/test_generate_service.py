@@ -117,10 +117,11 @@ class TestGenerateService(unittest.TestCase):
 
         # ListCopy Case
         output = generate_service_java("tes", class_objects['ListCopy'], "com.example")
+        
         expected_contains = """
         void borrow(String isbn) {
-            String copyBuku = findCopyBuku(isbn)
-            isBorrowed()
+            String copyBuku = findCopyBuku(isbn);
+            isBorrowed();
 """
         assert expected_contains.replace(" ", "").replace("\n", "") in output.replace(" ", "").replace("\n", "")
 
