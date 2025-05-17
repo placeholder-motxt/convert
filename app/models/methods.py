@@ -211,16 +211,36 @@ class ClassMethodObject(AbstractMethodObject):
                 )
 
                 if "return_var_type" in result:
-                    method_call_string.append(
-                        (
-                            f"{result['return_var_type']} {result['return_var_name']} = "
+                    if (
+                        result["service"].lower()
+                        == self.get_class_object_name().lower()
+                    ):
+                        method_call_string.append(
+                            (
+                                f"{result['return_var_type']} {result['return_var_name']} = "
+                                f"{result['method_name']}({arguments});\n"
+                            )
+                        )
+                    else:
+                        method_call_string.append(
+                            (
+                                f"{result['return_var_type']} {result['return_var_name']}"
+                                f" = {result['service']}Service."
+                                f"{result['method_name']}({arguments});\n"
+                            )
+                        )
+                else:
+                    if (
+                        result["service"].lower()
+                        == self.get_class_object_name().lower()
+                    ):
+                        method_call_string.append(
                             f"{result['method_name']}({arguments});\n"
                         )
-                    )
-                else:
-                    method_call_string.append(
-                        f"{result['method_name']}({arguments});\n"
-                    )
+                    else:
+                        method_call_string.append(
+                            f"{result['service']}Service.{result['method_name']}({arguments});\n"
+                        )
         return method_call_string
 
     def to_springboot_code(self) -> str:
@@ -583,6 +603,10 @@ class AbstractMethodCallObject(ABC):
         context["method_name"] = self.__method.get_name()
         if isinstance(self, ClassMethodCallObject):
             context["instance_name"] = self.get_instance_name()
+            context["service"] = (
+                self.get_method().get_class_object_name()[0].lower()
+                + self.get_method().get_class_object_name()[1:]
+            )
 
         context["arguments"] = []
 
