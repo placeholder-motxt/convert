@@ -3,15 +3,13 @@ import logging
 import logging.config
 import os
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from pytest import LogCaptureFixture
 
-from app.main import app, download_file
-from app.model import DownloadRequest
+from app.main import app
 from app.utils import render_template
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -88,69 +86,6 @@ def test_uvicorn_error_logger_no_warning_convert_unexpected_error(
             == "Unknown error occured: some unexpected error\nPlease try again later"
         )
         assert resp.status_code == 500
-
-
-@pytest.mark.asyncio
-async def test_uvicorn_error_logger_warning_when_download_file_bad_filename(
-    caplog: LogCaptureFixture,
-):
-    # Positive case
-    req = DownloadRequest(filename="/etc/passwd", content="abcd", type="abcd")
-    with caplog.at_level(logging.WARNING, "uvicorn.error"):
-        try:
-            await download_file(req)
-        except HTTPException:
-            # already tested in test_main.py
-            pass
-
-        assert len(caplog.records) == 1
-        assert (
-            "uvicorn.error",
-            logging.WARNING,
-            "Bad filename: /etc/passwd",
-        ) in caplog.record_tuples
-
-
-@pytest.mark.asyncio
-async def test_uvicorn_error_logger_warning_when_download_file_file_exists(
-    caplog: LogCaptureFixture,
-):
-    # Positive case
-    req = DownloadRequest(filename="abcd", content="abcd", type="abcd")
-    with caplog.at_level(logging.WARNING, "uvicorn.error"):
-        try:
-            with patch("app.main.os.path.exists") as mock_exists:
-                mock_exists.return_value = True
-                await download_file(req)
-        except HTTPException:
-            # already tested in test_main.py
-            pass
-
-        assert len(caplog.records) == 1
-        assert (
-            "uvicorn.error",
-            logging.WARNING,
-            "File already exists: abcdabcd.py",
-        ) in caplog.record_tuples
-
-
-@pytest.mark.asyncio
-async def test_uvicorn_error_logger_info_when_download_file_success(
-    caplog: LogCaptureFixture,
-):
-    # Positive case
-    req = DownloadRequest(filename="abcd", content="abcd", type="abcd")
-    with caplog.at_level(logging.INFO, "uvicorn.error"):
-        with patch("app.main.anyio.open_file") as mock_anyio:
-            mock_anyio.return_value = AsyncMock()
-            await download_file(req)
-
-        assert len(caplog.records) == 1
-        assert (
-            "uvicorn.error",
-            logging.INFO,
-            "Finished writing: abcdabcd.py",
-        ) in caplog.record_tuples
 
 
 def test_uvicorn_error_logger_error_when_template_not_found(

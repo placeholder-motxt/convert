@@ -11,7 +11,7 @@ class Buku(models.Model):
     judul = models.CharField(max_length=255)
     penulis = models.CharField(max_length=255)
     penerbit = models.CharField(max_length=255)
-    
+
 
 class Peminjaman(models.Model):
     ID = models.CharField(max_length=255)
@@ -20,7 +20,7 @@ class Peminjaman(models.Model):
     tglKembali = models.DateField()
     isLunasDenda = models.BooleanField()
     besaranDenda = models.IntegerField()
-    
+
 
 class CopyBuku(models.Model):
     kodeBarcode = models.CharField(max_length=255)
@@ -30,5 +30,3 @@ class CopyBuku(models.Model):
     edisi = models.IntegerField()
     tahunTerbit = models.IntegerField()
     bukuFK = models.ForeignKey('Buku', on_delete=models.CASCADE)
-    
-

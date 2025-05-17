@@ -36,13 +36,13 @@ class FileElements(ABC):
     def print_django_style(self) -> str:  # pragma: no cover
         pass
 
-    async def write_to_file(self, path: str) -> None:
+    async def write_to_file(self, path: str) -> str:
         file = path + "/" + self.__name
         to_be_print = self.print_django_style()
 
         async with await anyio.open_file(file, "w") as f:
             await f.write(to_be_print)
-        print("done writing", file)
+
         return file
 
 

@@ -106,7 +106,6 @@ class TestModelsElements(unittest.TestCase):
         self.assertEqual(classes[1].get_name(), "DuplicateClass")
 
     def test_composition_one_to_many(self):
-        self.maxDiff = None
         data = ""
         with open(os.path.join(TEST_DIR, "test_composition1.json")) as f:
             data = f.read()
@@ -121,7 +120,6 @@ class TestModelsElements(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_composition_many_to_one(self):
-        self.maxDiff = None
         data = ""
         with open(os.path.join(TEST_DIR, "test_composition2.json")) as f:
             data = f.read()
@@ -178,7 +176,6 @@ class TestModelsElements(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_aggregation_one_to_one_template(self):
-        self.maxDiff = None
         data = ""
         with open(os.path.join(TEST_DIR, "test_aggregation1.json")) as f:
             data = f.read()
