@@ -461,8 +461,9 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         method_call_obj.set_instance_name("instance1")
 
         # Mocking a method and adding an argument
-        method_mock = AbstractMethodObject()
+        method_mock = ClassMethodObject()
         method_call_obj.set_method(method_mock)
+        method_mock.set_class_object_name("oke")
         method_call_obj.set_return_var_name("result")
 
         str_type = TypeObject()
@@ -474,14 +475,14 @@ class TestAbstractMethodCallObject(unittest.TestCase):
         argument = ArgumentObject()
         method_call_obj.add_argument(argument)
 
-        expected_result = {
-            "condition": "if true",
-            "return_var_name": "result",
-            "method_name": "testMethod",
-            "instance_name": "instance1",
-            "arguments": [{"arg": "value"}],
-            "return_var_type": "String",
-        }
+        expected_result = {'condition': 'if true', 
+                           'return_var_name': 'result', 
+                           'return_var_type': 'String', 
+                           'method_name': 'testMethod', 
+                           'instance_name': 'instance1', 
+                           'service': 'oke', 'arguments': [{'arg': 'value'}], 
+                           'class_name': 'oke', 
+                           'class_name_camel': 'oke'}
 
         result = method_call_obj.print_springboot_style_template()
         self.assertEqual(result, expected_result)

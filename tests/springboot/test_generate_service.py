@@ -122,6 +122,7 @@ class TestGenerateService(unittest.TestCase):
         void borrow(String isbn) {
             String copyBuku = findCopyBuku(isbn);
             copyBukuService.isBorrowed();
+            return ;
 """
         assert "import com.example.tes.service.CopyBukuService;" in output
         assert "private final CopyBukuService copyBukuService;" in output
