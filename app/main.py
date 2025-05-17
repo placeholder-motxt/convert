@@ -196,8 +196,6 @@ async def convert_django(
         files = [
             f"{project_name}_models.py",
             f"{project_name}_views.py",
-            os.path.join("app", "requirements.txt"),
-            os.path.join("app", "urls.py"),
         ]
         for file in files:
             if os.path.exists(file):
@@ -498,7 +496,7 @@ def process_parsed_class(
             duplicate_checker[(model_class.get_name(), method.get_name())] = method
 
 
-def fetch_data(filenames: list[str], contents: list[list[str]]) -> DataResult:
+def fetch_data(_filenames: list[str], contents: list[list[str]]) -> DataResult:
     """
     This is the logic from convert() method to process the requested
     files. To use this method, pass the request.filename and request.content
@@ -512,7 +510,7 @@ def fetch_data(filenames: list[str], contents: list[list[str]]) -> DataResult:
     writer_views = ViewsElements("views.py")
 
     classes = []
-    for file_name, content in zip(filenames, contents):
+    for content in contents:
         json_content = json.loads(content[0])
         diagram_type = json_content.get("diagram", None)
 
