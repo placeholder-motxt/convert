@@ -303,9 +303,8 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
                 )
                 onetomany_params.append("orphanRemoval = true")
 
-            rel_type = (
-                f"@OneToMany(\n\t\t{',\n\t\t'.join(onetomany_params)}\n)\n\t@JsonIgnore"
-            )
+            params_str = ",\n\t\t".join(onetomany_params)
+            rel_type = f"@OneToMany(\n\t\t{params_str}\n)\n\t@JsonIgnore"
             # FK in target table referencing source
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
@@ -356,6 +355,7 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
         param.append(
             f'inverseJoinColumns = @JoinColumn(name = "{target.replace(" ", "_").lower()}_id")'
         )
-        join = f"@JoinTable(\n\t\t{',\n\t\t'.join(param)}\n\t)"
+        params_str = ",\n\t\t".join(param)
+        join = f"@JoinTable(\n\t\t{params_str}\n\t)"
         var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
