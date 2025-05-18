@@ -2,9 +2,7 @@ import re
 
 from app.models.diagram import ClassObject
 from app.models.elements import ViewsElements
-
 from app.models.methods import ClassMethodObject
-
 from app.utils import render_template, to_camel_case, to_pascal_case
 
 
