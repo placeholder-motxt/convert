@@ -13,10 +13,10 @@ def _relation_obj_setter_helper(
     edge: dict,
     class_from_id: ClassObject,
     class_to_id: ClassObject,
-    type: RelationshipType,
+    relation_type: RelationshipType,
     bidirectional: bool = False,
 ):
-    ro.set_type(type)
+    ro.set_type(relation_type)
 
     # This is for django implementation of aggregation only
     # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
@@ -29,6 +29,17 @@ def _relation_obj_setter_helper(
         ro.set_source_class_own_amount(edge["endLabel"])
         ro.set_target_class_own_amount(edge["startLabel"])
         class_to_id.add_relationship(ro)
+        if bidirectional:
+            # Set up ownee side
+            if isinstance(ro, OneToOneRelationshipObject):
+                ro2 = OneToOneRelationshipObject()
+            elif isinstance(ro, ManyToManyRelationshipObject):
+                ro2 = ManyToManyRelationshipObject()
+            ro2.set_source_class(class_from_id)
+            ro2.set_target_class(class_to_id)
+            ro2.set_source_class_own_amount(edge["startLabel"] + "+")
+            ro2.set_target_class_own_amount(edge["endLabel"] + "+")
+            class_from_id.add_relationship(ro2)
         return
 
     ro.set_source_class(class_from_id)
@@ -37,7 +48,10 @@ def _relation_obj_setter_helper(
     ro.set_target_class_own_amount(edge["endLabel"])
     class_from_id.add_relationship(ro)
     if bidirectional:
-        ro2 = ManyToManyRelationshipObject()
+        if isinstance(ro, OneToOneRelationshipObject):
+            ro2 = OneToOneRelationshipObject()
+        elif isinstance(ro, ManyToManyRelationshipObject):
+            ro2 = ManyToManyRelationshipObject()
         ro2.set_source_class(class_to_id)
         ro2.set_target_class(class_from_id)
         ro2.set_source_class_own_amount(edge["startLabel"] + "+")

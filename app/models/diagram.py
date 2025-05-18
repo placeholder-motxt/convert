@@ -230,10 +230,18 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
             join = None
         else:
-            rel_type = (
-                "@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, "
-                "CascadeType.REMOVE})"
+            cascade_values = (
+                "{CascadeType.PERSIST, CascadeType.MERGE}"
+                if self.get_type() == RelationshipType.AGGREGATION
+                else "{CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
             )
+            orphan = (
+                ", orphanRemoval = false"
+                if self.get_type() == RelationshipType.AGGREGATION
+                else ""
+            )
+
+            rel_type = rel_type = f"@OneToOne(cascade = {cascade_values}{orphan})"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
