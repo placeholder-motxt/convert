@@ -228,8 +228,8 @@ class TestRelationshipStrategyBidirectional(unittest.TestCase):
             {
                 "join": '@JoinColumn(name = "_id")',
                 "name": "private  ;",
-                "type": "@OneToOne(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE, "
-                "CascadeType.REMOVE},\n\t\torphanRemoval = true\n)",
+                "type": "@OneToOne(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},"
+                "\n\t\torphanRemoval = true\n)",
             },
         )
         self.assertEqual(
