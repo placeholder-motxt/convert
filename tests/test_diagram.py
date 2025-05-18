@@ -423,16 +423,32 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
 
-    def test_one_to_one_relationship_positive_2(self):
+    def test_one_to_one_relationship_aggregation(self):
         relationship = OneToOneRelationshipObject()
         relationship.set_source_class(self.source_class)
         relationship.set_target_class(self.target_class)
+        relationship.set_type(RelationshipType.AGGREGATION)
+        relationship.set_source_class_own_amount("1+")
+        expected_output = {
+            "name": "private TargetClass targetClass;",
+            "type": "@OneToOne(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},\n\t\t"
+            "orphanRemoval = false\n)",
+            "join": '@JoinColumn(name = "source_class_id")',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_one_to_one_relationship_composition(self):
+        relationship = OneToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_type(RelationshipType.COMPOSITION)
         relationship.set_source_class_own_amount("1+")
         expected_output = {
             "name": "private TargetClass targetClass;",
             "type": (
-                "@OneToOne(cascade = {CascadeType.PERSIST, "
-                "CascadeType.MERGE, CascadeType.REMOVE})"
+                "@OneToOne(\n\t\tcascade = {CascadeType.PERSIST, "
+                "CascadeType.MERGE, CascadeType.REMOVE}"
+                ",\n\t\torphanRemoval = true\n)"
             ),
             "join": '@JoinColumn(name = "source_class_id")',
         }
@@ -455,11 +471,29 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         relationship = ManyToOneRelationshipObject()
         relationship.set_source_class(self.source_class)
         relationship.set_target_class(self.target_class)
+        relationship.set_type(RelationshipType.AGGREGATION)
         relationship.set_source_class_own_amount("*")
         expected_output = {
             "name": "private List<TargetClass> targetClasss;",
             "type": "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},\n\t\t"
-            "orphanRemoval = true\n)\n\t@JsonIgnore",
+            "orphanRemoval = false\n)\n\t@JsonIgnore",
+            "join": '@JoinColumn(name = "source_class_id")',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_many_to_one_relationship_composition(self):
+        relationship = ManyToOneRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_type(RelationshipType.COMPOSITION)
+        relationship.set_source_class_own_amount("*")
+        expected_output = {
+            "name": "private List<TargetClass> targetClasss;",
+            "type": (
+                "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE"
+                ", CascadeType.REMOVE},\n\t\t"
+                "orphanRemoval = true\n)\n\t@JsonIgnore"
+            ),
             "join": '@JoinColumn(name = "source_class_id")',
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
@@ -473,6 +507,27 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
             "name": "private List<TargetClass> listOfTargetClasss;",
             "type": (
                 "@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})\n\t"
+                "@JsonIgnore"
+            ),
+            "join": "@JoinTable("
+            '\n\t\tname = "source_class_target_class",'
+            '\n\t\tjoinColumns = @JoinColumn(name = "source_class_id"),'
+            '\n\t\tinverseJoinColumns = @JoinColumn(name = "target_class_id")\n\t)',
+        }
+        self.assertEqual(relationship.to_springboot_models_template(), expected_output)
+
+    def test_many_to_many_relationship_composition(self):
+        relationship = ManyToManyRelationshipObject()
+        relationship.set_source_class(self.source_class)
+        relationship.set_target_class(self.target_class)
+        relationship.set_type(RelationshipType.COMPOSITION)
+        relationship.set_source_class_own_amount("1")
+        expected_output = {
+            "name": "private List<TargetClass> listOfTargetClasss;",
+            "type": (
+                "@ManyToMany(\n\t\t"
+                "cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},\n\t\t"
+                "orphanRemoval = true\n)\n\t"
                 "@JsonIgnore"
             ),
             "join": "@JoinTable("

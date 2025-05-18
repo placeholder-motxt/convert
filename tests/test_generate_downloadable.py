@@ -24,8 +24,8 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
         self.filename = json_data["filename"]
         self.content = json_data["content"]
         data = fetch_data(self.filename, self.content)
-        writer_requirements = RequirementsElements("requirements.txt")
-        writer_urls = UrlsElement("urls.py")
+        writer_requirements = RequirementsElements()
+        writer_urls = UrlsElement()
         # simulate the creation of requirements.txt and urls.py instead of using write_to_file()
         with open(os.path.join(os.getcwd(), "app", "requirements.txt"), "w") as f:
             f.write(writer_requirements.print_django_style())
@@ -33,6 +33,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
         self.models_content = data["models"]
         self.views_content = data["views"]
         self.writer_models = data["model_element"]
+        self.file_elements = (self.writer_models, writer_requirements, writer_urls)
         self.project_name = self.filename[0]
         writer_urls.set_classes(self.writer_models.get_classes())
         with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
@@ -62,7 +63,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
             self.project_name,
             self.models_content,
             self.views_content,
-            self.writer_models,
+            self.file_elements,
             self.tmp_zip.name,
         )
 
@@ -96,37 +97,37 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
             for file in zipf.namelist():
                 self.assertIn(file, expected_output)
 
-    def test_generate_file_to_be_downloaded_without_requirements(self):
+    def test_generate_file_to_be_downloaded_without_writing_requirements_to_disk(self):
         if os.path.exists(os.path.join(os.getcwd(), "app", "requirements.txt")):
             os.remove(os.path.join(os.getcwd(), "app", "requirements.txt"))
-        with self.assertRaises(FileNotFoundError) as ctx:
-            generate_file_to_be_downloaded(
-                self.project_name,
-                self.models_content,
-                self.views_content,
-                self.writer_models,
-                self.tmp_zip.name,
-            )
-        self.assertEqual(
-            str(ctx.exception),
-            "File requirements.txt does not exist",
+
+        result = generate_file_to_be_downloaded(
+            self.project_name,
+            self.models_content,
+            self.views_content,
+            self.file_elements,
+            self.tmp_zip.name,
         )
 
-    def test_generate_file_to_be_downloaded_without_urls(self):
+        self.assertIn("requirements.txt", result)
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
+            self.assertIn("requirements.txt", zipf.namelist())
+
+    def test_generate_file_to_be_downloaded_without_writing_urls_to_disk(self):
         if os.path.exists(os.path.join(os.getcwd(), "app", "urls.py")):
             os.remove(os.path.join(os.getcwd(), "app", "urls.py"))
-        with self.assertRaises(FileNotFoundError) as ctx:
-            generate_file_to_be_downloaded(
-                self.project_name,
-                self.models_content,
-                self.views_content,
-                self.writer_models,
-                self.tmp_zip.name,
-            )
-        self.assertEqual(
-            str(ctx.exception),
-            "File urls.py does not exist",
+
+        result = generate_file_to_be_downloaded(
+            self.project_name,
+            self.models_content,
+            self.views_content,
+            self.file_elements,
+            self.tmp_zip.name,
         )
+
+        self.assertIn("main/urls.py", result)
+        with zipfile.ZipFile(self.tmp_zip.name, "r") as zipf:
+            self.assertIn("main/urls.py", zipf.namelist())
 
     def test_generate_file_to_be_downloaded_multiple_calls(self):
         """
@@ -139,7 +140,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
             self.project_name,
             self.models_content,
             self.views_content,
-            self.writer_models,
+            self.file_elements,
             tmp_zipfile.name,
         )
         self.assertTrue(os.path.exists(tmp_zipfile.name))
@@ -153,7 +154,7 @@ class TestGenerateFileToBeDownloadedPrivate(unittest.TestCase):
             self.project_name,
             self.models_content,
             self.views_content,
-            self.writer_models,
+            self.file_elements,
             self.tmp_zip.name,
         )
         self.assertTrue(os.path.exists(self.tmp_zip.name))
@@ -178,8 +179,8 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
         self.content = json_data["content"]
         self.project_name = json_data["project_name"]
         data = fetch_data(self.filename, self.content)
-        writer_requirements = RequirementsElements("requirements.txt")
-        writer_urls = UrlsElement("urls.py")
+        writer_requirements = RequirementsElements()
+        writer_urls = UrlsElement()
         # simulate the creation of requirements.txt and urls.py instead of using write_to_file()
         with open(os.path.join(os.getcwd(), "app", "requirements.txt"), "w") as f:
             f.write(writer_requirements.print_django_style())
@@ -187,6 +188,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
         self.models_content = data["models"]
         self.views_content = data["views"]
         self.writer_models = data["model_element"]
+        self.file_elements = (self.writer_models, writer_requirements, writer_urls)
         writer_urls.set_classes(self.writer_models.get_classes())
         with open(os.path.join(os.getcwd(), "app", "urls.py"), "w") as f:
             f.write(writer_urls.print_django_style())
@@ -227,7 +229,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
                 invalid_project_name,
                 self.models_content,
                 self.views_content,
-                self.writer_models,
+                self.file_elements,
                 self.tmp_zip.name,
             )
         self.assertIn(
@@ -244,7 +246,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
             self.project_name,
             self.models_content,
             self.views_content,
-            self.writer_models,
+            self.file_elements,
             self.tmp_zip.name,
         )
         expected_files = [
@@ -296,7 +298,7 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
             self.project_name,
             self.models_content,
             self.views_content,
-            self.writer_models,
+            self.file_elements,
             self.tmp_zip.name,
         )
 
@@ -354,5 +356,8 @@ class TestGenerateFileToBeDownloadedPublic(unittest.TestCase):
 
         self.assertEqual(
             str(ctx.exception),
-            "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram",
+            (
+                "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram! "
+                "Got 'ActivityDiagram'"
+            ),
         )

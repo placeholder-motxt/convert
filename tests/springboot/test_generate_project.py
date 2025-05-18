@@ -294,7 +294,10 @@ async def call_convert_spring2(context: dict):
 def check_error_2(context: dict):
     assert context["exception2"] is not None, "Expected exception, but none was raised"
     assert isinstance(context["exception2"], ValueError)
-    assert str(context["exception2"]) == "Unknown diagram type. Diagram type must be ClassDiagram or SequenceDiagram"
+    assert str(context["exception2"]) == (
+        "Unknown diagram type. Diagram type must be "
+        "ClassDiagram or SequenceDiagram! Got 'Diagram'"
+    )
 
 
 def cleanup(context: dict):

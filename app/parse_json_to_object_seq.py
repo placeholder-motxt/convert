@@ -302,6 +302,7 @@ please consult the user manual document on how to name parameters"
 
                 else:
                     method = ClassMethodObject()
+                    method.set_class_object_name(class_name)
 
                 self.__call_nodes[end_id]["method"] = method
                 self.__call_nodes[end_id]["caller"] = start_id
@@ -451,7 +452,15 @@ please consult the user manual document on how to name parameters"
                 method_call_info["end"] == edge["start"]
                 and method_call_info["method_call"]
             ):
-                method_call_info["method_call"].set_ret_var(label)
-                return_vars.append(label)
-
+                ret_var_name, ret_var_type = self.process_return_variable(label)
+                if ret_var_name and ret_var_type:
+                    method_call_info["method_call"].set_ret_var(ret_var_name)
+                    method_call_info["method_call"].set_return_var_type(ret_var_type)
+                    return_vars.append(ret_var_name)
+                else:
+                    raise ValueError(
+                        "Return value name or return value type not set when "
+                        f"calling {method_call_info['method_call'].get_name()} "
+                        "in Sequence Diagram!"
+                    )
         return return_vars
