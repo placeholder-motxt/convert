@@ -83,6 +83,7 @@ class ModelsElements(FileElements):
     def topological_sort_model(self) -> list[ClassObject]:
         visited = set()
         result = []
+        temp_mark = set()
 
         def visit(cls: ClassObject):
             """
@@ -91,11 +92,19 @@ class ModelsElements(FileElements):
             has been visited and if not, it directly visits the parent before
             being added into result and visited
             """
-            if cls.get_name() in visited:
+            class_name = cls.get_name()
+            if class_name in visited:
                 return
-            if cls.get_parent() and cls.get_parent().get_name() not in visited:
+
+            if class_name in temp_mark:
+                raise ValueError(f"Cyclic Inheritance Detected at {class_name}")
+
+            temp_mark.add(class_name)
+            if cls.get_parent():
                 visit(cls.get_parent())
-            visited.add(cls.get_name())
+            temp_mark.remove(class_name)
+
+            visited.add(class_name)
             result.append(cls)
 
         for cls in self.__classes:
