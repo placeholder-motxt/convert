@@ -80,12 +80,33 @@ class ModelsElements(FileElements):
     Writes classes to models.py
     """
 
+    def topological_sort_model(self) -> list[ClassObject]:
+        visited = set()
+        result = []
+
+        def visit(cls: ClassObject):
+            if cls.get_name() in visited:
+                return
+            if cls.get_parent() and cls.get_parent().get_name() not in visited:
+                visit(cls.get_parent())
+            visited.add(cls.get_name())
+            result.append(cls)
+
+        for cls in self.__classes:
+            visit(cls)
+
+        return result
+
     def print_django_style(self) -> str:
         # A faster way to build string
         # https://stackoverflow.com/questions/2414667/python-string-class-like-stringbuilder-in-c
         response_content = "from django.db import models\n\n"
+
         response_content += "".join(
-            [model_class.to_models_code() for model_class in self.__classes]
+            [
+                model_class.to_models_code()
+                for model_class in self.topological_sort_model()
+            ]
         )
         response_content = response_content.strip()
         response_content += "\n" if len(response_content) != 0 else ""
