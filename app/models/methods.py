@@ -126,6 +126,14 @@ class ClassMethodObject(AbstractMethodObject):
             )
         return self.__class_object_name
 
+    def get_method_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
+        return self.__calls
+
+    def set_method_calls(
+        self, method_call: list[ClassMethodCallObject]
+    ):  # pragma: no cover
+        self.__calls = method_call
+
     def to_views_code(self) -> str:
         """
         Returns Django representation of the class method in string
@@ -206,23 +214,41 @@ class ClassMethodObject(AbstractMethodObject):
 
         return res.getvalue()
 
+    def __render_method_call(self, result: dict, arguments: str) -> str:
+        if "return_var_type" in result:
+            if result["service"].lower() == self.get_class_object_name().lower():
+                return (
+                    f"{result['return_var_type']} {result['return_var_name']} = "
+                    f"{result['method_name']}({arguments});\n"
+                )
+
+            else:
+                return (
+                    f"{result['return_var_type']} {result['return_var_name']}"
+                    f" = {result['service']}Service."
+                    f"{result['method_name']}({arguments});\n"
+                )
+
+        else:
+            if result["service"].lower() == self.get_class_object_name().lower():
+                return f"{result['method_name']}({arguments});\n"
+            else:
+                return f"{result['service']}Service.{result['method_name']}({arguments});\n"
+
     def __get_method_call_springboot(self) -> list[str]:
         method_call_string = []
-
+        return_var = ""
         if self.__calls != []:
             for call in self.__calls:
                 result = call.print_springboot_style_template()
                 arguments = ", ".join(
                     elem["argument_name"] for elem in result["arguments"]
                 )
+                return_var = call.get_return_var_name()
+                method_call_string.append(self.__render_method_call(result, arguments))
 
-                if "return_var_type" in result:
-                    method_call_string.append(
-                        f"{result['return_var_type']} {result['return_var_name']} \
-                        = {result['method_name']}({arguments})\n"
-                    )
-                else:
-                    method_call_string.append(f"{result['method_name']}({arguments})\n")
+            method_call_string.append(f"    return {return_var};" + "}\n")
+
         return method_call_string
 
     def to_springboot_code(self) -> str:
@@ -404,7 +430,7 @@ class ControllerMethodObject(AbstractMethodObject):
             context["method_calls"]
         )
         if self.get_return_type() is None:
-            context["return_type"] = ""
+            context["return_type"] = "void"
         else:
             context["return_type"] = self.get_return_type().get_name_springboot()
         return context
@@ -585,6 +611,10 @@ class AbstractMethodCallObject(ABC):
         context["method_name"] = self.__method.get_name()
         if isinstance(self, ClassMethodCallObject):
             context["instance_name"] = self.get_instance_name()
+            context["service"] = (
+                self.get_method().get_class_object_name()[0].lower()
+                + self.get_method().get_class_object_name()[1:]
+            )
 
         context["arguments"] = []
 

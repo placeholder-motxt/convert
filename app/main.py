@@ -202,6 +202,23 @@ async def convert_django(
                 os.remove(file)
 
 
+def set_springboot_method_call(class_object: ClassObject, seq_reference: dict):
+    # Check if the class is processed in the Sequence Diagram
+    if class_object.get_name() in seq_reference:
+        seq_object_reference = seq_reference[class_object.get_name()]
+        for seq_method in seq_object_reference.get_methods():
+            # Check if there any method call from the Sequence Diagram Parser
+            if seq_method.get_method_calls() != []:
+                # If method call is detected, copy all the method call
+                # into the original method from Class Diagram Parser
+                for model_method in class_object.get_methods():
+                    if model_method.get_name() == seq_method.get_name():
+                        model_method.set_class_object_name(
+                            seq_method.get_class_object_name()
+                        )
+                        model_method.set_method_calls(seq_method.get_method_calls())
+
+
 async def convert_spring(
     project_name: str, group_id: str, filenames: list[str], contents: list[list[str]]
 ) -> str:
@@ -232,6 +249,7 @@ async def convert_spring(
         data = fetch_data(filenames, contents)
 
         writer_models = data["model_element"]
+        seq_reference = data["seq_class"]
 
         model_files = writer_models.print_springboot_style(project_name, group_id)
 
@@ -255,6 +273,7 @@ async def convert_spring(
                     ),
                 )
 
+            set_springboot_method_call(class_object, seq_reference)
             zipf.writestr(
                 write_springboot_path(src_path, "service", class_object.get_name()),
                 generate_service_java(project_name, class_object, group_id),
@@ -269,7 +288,7 @@ async def convert_spring(
                 generate_repository_java(project_name, class_object, group_id),
             )
         zipf.writestr(
-            write_springboot_path(src_path, "service", "SequenceService"),
+            write_springboot_path(src_path, "service", "Sequence"),
             generate_sequence_service_java(
                 project_name, data["views_element"], group_id
             ),
@@ -514,6 +533,8 @@ def fetch_data(_filenames: list[str], contents: list[list[str]]) -> DataResult:
     writer_models = ModelsElements("models.py")
     writer_views = ViewsElements("views.py")
 
+    seq_class_object = []
+
     classes = []
     for content in contents:
         json_content = json.loads(content[0])
@@ -545,6 +566,8 @@ def fetch_data(_filenames: list[str], contents: list[list[str]]) -> DataResult:
                     duplicate_class_method_checker = check_duplicate(
                         class_objects, class_object, duplicate_class_method_checker
                     )
+
+                seq_class_object = seq_parser.get_class_objects()
 
         else:
             raise ValueError(
@@ -586,6 +609,7 @@ def fetch_data(_filenames: list[str], contents: list[list[str]]) -> DataResult:
         "views": response_content_views.getvalue(),
         "model_element": writer_models,
         "views_element": writer_views,
+        "seq_class": seq_class_object,
     }
 
 
