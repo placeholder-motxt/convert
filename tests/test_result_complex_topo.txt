@@ -1,0 +1,20 @@
+from django.db import models
+
+class Urutan4(models.Model):
+
+        pass
+
+
+class Urutan3(Urutan4):
+
+        pass
+
+
+class Urutan2(Urutan3):
+
+        pass
+
+
+class Urutan1(Urutan2):
+
+        pass

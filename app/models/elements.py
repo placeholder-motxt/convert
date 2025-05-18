@@ -80,12 +80,48 @@ class ModelsElements(FileElements):
     Writes classes to models.py
     """
 
+    def topological_sort_model(self) -> list[ClassObject]:
+        visited = set()
+        result = []
+        temp_mark = set()
+
+        def visit(cls: ClassObject):
+            """
+            This method will check whether a ClassObject is visited or not
+            If the ClassObject has any parent, it will check if the parent
+            has been visited and if not, it directly visits the parent before
+            being added into result and visited
+            """
+            class_name = cls.get_name()
+            if class_name in visited:
+                return
+
+            if class_name in temp_mark:
+                raise ValueError(f"Cyclic Inheritance Detected at {class_name}")
+
+            temp_mark.add(class_name)
+            if cls.get_parent():
+                visit(cls.get_parent())
+            temp_mark.remove(class_name)
+
+            visited.add(class_name)
+            result.append(cls)
+
+        for cls in self.__classes:
+            visit(cls)
+
+        return result
+
     def print_django_style(self) -> str:
         # A faster way to build string
         # https://stackoverflow.com/questions/2414667/python-string-class-like-stringbuilder-in-c
         response_content = "from django.db import models\n\n"
+
         response_content += "".join(
-            [model_class.to_models_code() for model_class in self.__classes]
+            [
+                model_class.to_models_code()
+                for model_class in self.topological_sort_model()
+            ]
         )
         response_content = response_content.strip()
         response_content += "\n" if len(response_content) != 0 else ""
