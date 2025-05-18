@@ -51,6 +51,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_1 = ClassMethodObject()
         self.class_method_1.set_name("class_method_1")
         self.class_method_1.set_return_type(str_type)
+        self.class_method_1.set_class_object_name("class1")
 
         self.class_method_call_1 = ClassMethodCallObject()
         self.class_method_call_1.set_method(self.class_method_1)
@@ -167,6 +168,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_1 = ClassMethodObject()
         self.class_method_1.set_name("class_method_1")
         self.class_method_1.set_return_type(str_type)
+        self.class_method_1.set_class_object_name("class1")
 
         self.class_method_call_1 = ClassMethodCallObject()
         self.class_method_call_1.set_method(self.class_method_1)
@@ -217,6 +219,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_1 = ClassMethodObject()
         self.class_method_1.set_name("class_method_1")
         self.class_method_1.set_return_type(str_type)
+        self.class_method_1.set_class_object_name("class1")
 
         self.class_method_call_1 = ClassMethodCallObject()
         self.class_method_call_1.set_method(self.class_method_1)
@@ -262,6 +265,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_1 = ClassMethodObject()
         self.class_method_1.set_name("class_method_1")
         self.class_method_1.set_return_type(str_type)
+        self.class_method_1.set_class_object_name("class1")
 
         self.class_method_call_1 = ClassMethodCallObject()
         self.class_method_call_1.set_method(self.class_method_1)
@@ -308,6 +312,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_1 = ClassMethodObject()
         self.class_method_1.set_name("class_method_1")
         self.class_method_1.set_return_type(str_type)
+        self.class_method_1.set_class_object_name("class1")
 
         self.class_method_call_1 = ClassMethodCallObject()
         self.class_method_call_1.set_method(self.class_method_1)
@@ -336,6 +341,7 @@ class TestGenerateSequenceService(unittest.TestCase):
         self.class_method_1 = ClassMethodObject()
         self.class_method_1.set_name("class_method_1")
         self.class_method_1.set_return_type(str_type)
+        self.class_method_1.set_class_object_name("class1")
 
         self.parameter_1 = ParameterObject()
         self.parameter_1.set_name("parameter_1")

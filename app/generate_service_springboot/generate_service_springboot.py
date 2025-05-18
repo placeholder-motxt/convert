@@ -2,7 +2,7 @@ import re
 
 from app.models.diagram import ClassObject
 from app.models.elements import ViewsElements
-from app.utils import render_template
+from app.utils import render_template, to_camel_case, to_pascal_case
 
 
 def generate_service_java(project_name: str, model: ClassObject, group_id: str) -> str:
@@ -84,4 +84,28 @@ def generate_sequence_service_java(
         for controller_method_object in views_elements.get_controller_methods()
     ]
     context["controller_methods"] = controller_method_context
+
+    # Class names are obtained for instantiating Services
+    class_names = handle_duplicate_service_instantiation(controller_method_context)
+    class_names_pairs = [
+        {
+            "pascal_name": to_pascal_case(class_name),
+            "camel_name": to_camel_case(class_name),
+        }
+        for class_name in class_names
+    ]
+    context["class_names"] = class_names_pairs
+
     return render_template("SequenceService.java.j2", context)
+
+
+def handle_duplicate_service_instantiation(
+    controller_method_context: list,
+) -> list[str]:
+    duplicate_service_instantiation_remover = set()
+    for controller_method in controller_method_context:
+        for method_call in controller_method["method_calls"]:
+            class_name = method_call.get("class_name", None)
+            if class_name is not None:
+                duplicate_service_instantiation_remover.add(class_name)
+    return list(duplicate_service_instantiation_remover)
