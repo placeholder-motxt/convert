@@ -4,9 +4,10 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, check_duplicate, convert_spring
+from app.main import app, check_duplicate, convert_spring, set_springboot_method_call
 from app.models.elements import ClassObject, ModelsElements
-from app.models.methods import ClassMethodObject
+from app.models.methods import ClassMethodCallObject, ClassMethodObject
+from app.models.properties import TypeObject
 
 client = TestClient(app)
 
@@ -553,3 +554,41 @@ async def test_convert_spring():
         assert isinstance(response, str)
         assert os.path.isfile(response)
         os.remove(response)
+
+def test_set_springboot_method_call():
+    class_object_class = ClassObject()
+    class_object_class.set_name("Pembeli")
+    class_object = ClassObject()
+    class_object.set_name("Pembeli")
+
+    class_method_object_class = ClassMethodObject()
+    class_method_object_class.set_class_object_name("Pembeli")
+    class_method_object_class.set_name("checkout")
+    class_method_object_return = TypeObject()
+    class_method_object_return.set_name("string")
+    class_method_object_class.set_return_type(class_method_object_return)
+    class_object_class.add_method(class_method_object_class)
+
+    class_method_object = ClassMethodObject()
+    class_method_object.set_class_object_name("Pembeli")
+    class_method_object.set_name("checkout")
+    class_method_object_return = TypeObject()
+    class_method_object_return.set_name("string")
+    class_method_object.set_return_type(class_method_object_return)
+
+    class_method_call_1 = ClassMethodCallObject()
+    class_method_object1 = ClassMethodObject()
+    class_method_object1.set_name("cariBarang")
+    class_method_call_1.set_method(class_method_object1)
+    class_method_object1.set_class_object_name("Pembeli")
+    class_method_call_1.set_return_var_name("barang")
+    class_method_call_1.set_return_var_type(class_method_object_return)
+    
+    class_method_object.add_class_method_call(class_method_call_1)
+    class_object.add_method(class_method_object)
+
+    set_springboot_method_call(class_object_class, {'Pembeli': class_object})
+
+    assert class_object_class.get_methods()[0].get_method_calls()[0].get_methods().get_name() == "cariBarang" 
+
+    
