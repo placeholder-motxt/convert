@@ -209,7 +209,7 @@ class TestControllerMethodObject(unittest.TestCase):
             "method_name": "testControllerMethod",
             "params": [{"param_name": "exampleParam"}],
             "method_calls": [{"method_name": "methodCall"}],
-            "return_type": "",
+            "return_type": "void",
             "return_var_declaration": [],
         }
 

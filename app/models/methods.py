@@ -430,7 +430,7 @@ class ControllerMethodObject(AbstractMethodObject):
             context["method_calls"]
         )
         if self.get_return_type() is None:
-            context["return_type"] = ""
+            context["return_type"] = "void"
         else:
             context["return_type"] = self.get_return_type().get_name_springboot()
         return context
