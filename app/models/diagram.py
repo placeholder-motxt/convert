@@ -230,16 +230,17 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
             join = None
         else:
-            cascade_values = (
-                "{CascadeType.PERSIST, CascadeType.MERGE}"
-                if self.get_type() == RelationshipType.AGGREGATION
-                else "{CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
-            )
-            orphan = (
-                "orphanRemoval = false"
-                if self.get_type() == RelationshipType.AGGREGATION
-                else "orphanRemoval = true"
-            )
+            if self.get_type() == RelationshipType.AGGREGATION:
+                cascade_values = "{CascadeType.PERSIST, CascadeType.MERGE}"
+                orphan = "orphanRemoval = false"
+            elif self.get_type() == RelationshipType.COMPOSITION:
+                cascade_values = (
+                    "{CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
+                )
+                orphan = "orphanRemoval = true"
+            else:  # default to ASSOCIATION
+                cascade_values = "{CascadeType.PERSIST, CascadeType.MERGE}"
+                orphan = "orphanRemoval = true"
             rel_type = f"@OneToOne(\n\t\tcascade = {cascade_values},\n\t\t{orphan}\n)"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
@@ -341,7 +342,7 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
             params.append("orphanRemoval = true\n")
             params_str = ",\n\t\t".join(params)
             rel_type = f"@ManyToMany(\n\t\t{params_str})\n\t@JsonIgnore"
-        else:
+        else:  # AGGREGATION OR ASSOCIATION
             rel_type = (
                 "@ManyToMany("
                 "cascade = {CascadeType.PERSIST, CascadeType.MERGE})\n\t@JsonIgnore"
