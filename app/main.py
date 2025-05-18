@@ -246,7 +246,7 @@ async def convert_spring(
         zipf.writestr("run.bat", windows_runner)
         zipf.writestr("run.sh", linux_runner)
 
-        data = fetch_data(filenames, contents)
+        data = fetch_data(filenames, contents, bidirectional=True)
 
         writer_models = data["model_element"]
         seq_reference = data["seq_class"]
@@ -520,7 +520,9 @@ def process_parsed_class(
             duplicate_checker[(model_class.get_name(), method.get_name())] = method
 
 
-def fetch_data(_filenames: list[str], contents: list[list[str]]) -> DataResult:
+def fetch_data(
+    _filenames: list[str], contents: list[list[str]], bidirectional: bool = False
+) -> DataResult:
     """
     This is the logic from convert() method to process the requested
     files. To use this method, pass the request.filename and request.content
@@ -545,7 +547,7 @@ def fetch_data(_filenames: list[str], contents: list[list[str]]) -> DataResult:
 
         if diagram_type == "ClassDiagram":
             with parse_latency.labels(diagram="UML class").time():
-                classes = writer_models.parse(json_content)
+                classes = writer_models.parse(json_content, bidirectional=bidirectional)
 
                 process_parsed_class(classes, duplicate_class_method_checker)
 
