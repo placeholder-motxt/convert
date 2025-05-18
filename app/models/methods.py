@@ -118,6 +118,12 @@ class ClassMethodObject(AbstractMethodObject):
         self.__class_object_name = class_object_name
 
     def get_class_object_name(self) -> str:  # pragma: no cover
+        if self.__class_object_name is None:
+            # Ensure that the class object name is always set before being accessed.
+            raise AttributeError(
+                f"'_ClassMethodObject__class_object_name' has not been set for method "
+                f"'{self.get_name()}'. It should be initialized during parsing."
+            )
         return self.__class_object_name
 
     def get_method_calls(self) -> list[ClassMethodCallObject]:  # pragma: no cover
