@@ -203,10 +203,14 @@ async def convert_django(
 
 
 def set_springboot_method_call(class_object: ClassObject, seq_reference: dict):
+    # Check if the class is processed in the Sequence Diagram
     if class_object.get_name() in seq_reference:
         seq_object_reference = seq_reference[class_object.get_name()]
         for seq_method in seq_object_reference.get_methods():
+            # Check if there any method call from the Sequence Diagram Parser
             if seq_method.get_method_calls() != []:
+                # If method call is detected, copy all the method call
+                # into the original method from Class Diagram Parser
                 for model_method in class_object.get_methods():
                     if model_method.get_name() == seq_method.get_name():
                         model_method.set_class_object_name(
