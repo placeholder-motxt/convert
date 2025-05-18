@@ -85,6 +85,12 @@ class ModelsElements(FileElements):
         result = []
 
         def visit(cls: ClassObject):
+            """
+            This method will check whether a ClassObject is visited or not
+            If the ClassObject has any parent, it will check if the parent
+            has been visited and if not, it directly visits the parent before
+            being added into result and visited
+            """
             if cls.get_name() in visited:
                 return
             if cls.get_parent() and cls.get_parent().get_name() not in visited:
