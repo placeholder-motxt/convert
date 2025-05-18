@@ -67,6 +67,18 @@ class TestReplaceModelAndViews(unittest.TestCase):
         output = processed_data["models"]
 
         self.assertEqual(output.strip().replace("\t", "    ").replace(" ", ""), expected_result.replace(" ", "").strip())
+    
+    def test_render_cyclic_inheritance(self):
+        with open("tests/test_cylic.txt", "r", encoding="utf-8") as file:
+            json_data = file.read()
+
+        with self.assertRaises(ValueError) as ctx:
+            fetch_data(["tes.class.jet"], [[json_data]])
+        
+        self.assertEqual(
+            str(ctx.exception),
+            "Cyclic Inheritance Detected at Test1",
+        )
 
     def test_render_model_in_zip(self):
         with open("tests/test_render_model.txt", "r", encoding="utf-8") as file:
