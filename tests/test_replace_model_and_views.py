@@ -52,9 +52,19 @@ class TestReplaceModelAndViews(unittest.TestCase):
         processed_data = fetch_data(["tes.class.jet"], [[json_data]])
 
         output = processed_data["models"]
-        
-        print(output)
-        
+
+        self.assertEqual(output.strip().replace("\t", "    ").replace(" ", ""), expected_result.replace(" ", "").strip())
+    
+    def test_render_complex_sort(self):
+        with open("tests/test_render_complex_topo.txt", "r", encoding="utf-8") as file:
+            json_data = file.read()
+
+        with open("tests/test_result_complex_topo.txt", "r", encoding="utf-8") as file:
+            expected_result = file.read()
+
+        processed_data = fetch_data(["tes.class.jet"], [[json_data]])
+
+        output = processed_data["models"]
 
         self.assertEqual(output.strip().replace("\t", "    ").replace(" ", ""), expected_result.replace(" ", "").strip())
 
