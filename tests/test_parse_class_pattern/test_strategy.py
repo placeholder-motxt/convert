@@ -210,32 +210,15 @@ class TestRelationshipStrategyBidirectional(unittest.TestCase):
         edge = {"startLabel": "1", "endLabel": "1"}
         class_from = ClassObject()
         class_to = ClassObject()
-
-        strategy.create_relationship(
-            edge, class_from, class_to, RelationshipType.AGGREGATION, bidirectional=True
-        )
-        self.assertEqual(len(class_from._ClassObject__relationships), 1)
-        self.assertEqual(
-            class_from._ClassObject__relationships[0].get_target_class(), class_to
-        )
-        self.assertEqual(
-            class_to._ClassObject__relationships[0].get_target_class(), class_from
-        )
-
         self.maxDiff = None
-        self.assertEqual(
-            class_from._ClassObject__relationships[0].to_springboot_models_template(),
-            {
-                "join": '@JoinColumn(name = "_id")',
-                "name": "private  ;",
-                "type": "@OneToOne(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},"
-                "\n\t\torphanRemoval = true\n)",
-            },
-        )
-        self.assertEqual(
-            class_to._ClassObject__relationships[0].to_springboot_models_template(),
-            {"name": "private  ;", "type": '@OneToOne(mappedBy="")', "join": None},
-        )
+        with self.assertRaises(ValueError):
+            strategy.create_relationship(
+                edge,
+                class_from,
+                class_to,
+                RelationshipType.AGGREGATION,
+                bidirectional=True,
+            )
 
     def test_many_to_one_bidirectional(self):
         strategy = ManyToOneStrategy()

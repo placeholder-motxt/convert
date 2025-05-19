@@ -17,29 +17,40 @@ def _relation_obj_setter_helper(
     bidirectional: bool = False,
 ):
     ro.set_type(relation_type)
-
-    # This is for django implementation of aggregation only
-    # It needs to be swapped because the "end" on JETUML is the class that is "a part of"
+    print("zczc", relation_type, bidirectional, ro)
     if ro.get_type() in [
         RelationshipType.AGGREGATION,
         RelationshipType.COMPOSITION,
     ]:
-        ro.set_source_class(class_to_id)
-        ro.set_target_class(class_from_id)
-        ro.set_source_class_own_amount(edge["endLabel"])
-        ro.set_target_class_own_amount(edge["startLabel"])
-        class_to_id.add_relationship(ro)
+        if not bidirectional:
+            ro.set_source_class(class_to_id)
+            ro.set_target_class(class_from_id)
+            ro.set_source_class_own_amount(edge["endLabel"])
+            ro.set_target_class_own_amount(edge["startLabel"])
+            class_to_id.add_relationship(ro)
+            return
         if bidirectional:
-            # Set up ownee side
+            if relation_type == RelationshipType.AGGREGATION and isinstance(
+                ro, OneToOneRelationshipObject
+            ):
+                raise ValueError("Aggregation cannot be one to one")
+            ro.set_source_class(class_from_id)
+            ro.set_target_class(class_to_id)
+            # 1+ itu pemilik
+            ro.set_source_class_own_amount(edge["startLabel"] + "+")
+            ro.set_target_class_own_amount(edge["endLabel"] + "+")
+            # ro ownee dikasih ke product
+            class_from_id.add_relationship(ro)
+            # Set up owner side
             if isinstance(ro, OneToOneRelationshipObject):
                 ro2 = OneToOneRelationshipObject()
             elif isinstance(ro, ManyToManyRelationshipObject):
                 ro2 = ManyToManyRelationshipObject()
-            ro2.set_source_class(class_from_id)
-            ro2.set_target_class(class_to_id)
-            ro2.set_source_class_own_amount(edge["startLabel"] + "+")
-            ro2.set_target_class_own_amount(edge["endLabel"] + "+")
-            class_from_id.add_relationship(ro2)
+            ro2.set_source_class(class_to_id)
+            ro2.set_target_class(class_from_id)
+            ro2.set_source_class_own_amount(edge["endLabel"])
+            ro2.set_target_class_own_amount(edge["startLabel"])
+            class_to_id.add_relationship(ro2)
         return
 
     ro.set_source_class(class_from_id)
@@ -128,12 +139,25 @@ class ManyToOneStrategy(RelationshipStrategy):
                 RelationshipType.AGGREGATION,
                 RelationshipType.COMPOSITION,
             ]:
-                ro.set_source_class(class_to_id)
-                ro.set_target_class(class_from_id)
-                ro.set_source_class_own_amount(edge["endLabel"])
-                ro.set_target_class_own_amount(edge["startLabel"])
-                class_to_id.add_relationship(ro)
-                return
+                if not bidirectional:
+                    ro.set_source_class(class_to_id)
+                    ro.set_target_class(class_from_id)
+                    ro.set_source_class_own_amount(edge["endLabel"])
+                    ro.set_target_class_own_amount(edge["startLabel"])
+                    class_to_id.add_relationship(ro)
+                    return
+                else:
+                    ro.set_source_class(class_from_id)
+                    ro.set_target_class(class_to_id)
+
+                    # This may look weird but I swear to God don't touch it
+                    # this is for UAT quick ducktape fix
+                    ro.set_source_class_own_amount(edge["endLabel"])
+                    ro.set_target_class_own_amount(edge["startLabel"])
+                    #######################################################
+
+                    class_from_id.add_relationship(ro)
+                    return
 
             ro.set_source_class_own_amount(edge["endLabel"])
             ro.set_target_class_own_amount(edge["startLabel"])
