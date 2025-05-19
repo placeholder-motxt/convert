@@ -10,6 +10,7 @@ from app.generate_service_springboot.generate_service_springboot import (
 from app.models.diagram import ClassObject
 from app.models.methods import ClassMethodObject
 from app.models.properties import FieldObject, ParameterObject, TypeObject
+from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # Go from tests/ to project-root/
 FEATURE_PATH = os.path.join(
@@ -57,6 +58,99 @@ class TestGenerateService(unittest.TestCase):
             output.replace(" ", "").replace("\n", "").strip(),
             expected_output.replace(" ", "").replace("\n", "").strip(),
         )
+
+    def test_multilevel_inheritance(self):
+        class_object_parent = ClassObject()
+        class_object_parent.set_name("AbstractUser")
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("id")
+        field_type.set_name("string")
+        field.set_type(field_type)
+        class_object_parent.add_field(field)
+
+        class_object = ClassObject()
+        class_object.set_name("User")
+        class_object.set_parent(class_object_parent)
+
+        project_name = "burhanpedia"
+
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("email")
+        field_type.set_name("string")
+        field.set_type(field_type)
+        class_object.add_field(field)
+
+        parent = ClassObject()
+        parent.set_name("Pembeli")
+        field = FieldObject()
+        field_type = TypeObject()
+        field.set_name("username")
+        field_type.set_name("string")
+        field.set_type(field_type)
+        parent.add_field(field)
+        parent.set_parent(class_object)
+        parent.set_is_public(True)
+
+        output = generate_service_java(project_name, parent, "com.example")
+
+        assert "existingPembeli.setId(pembeli.getId())" in output  # Level: AsbtractUser
+        assert "existingPembeli.setEmail(pembeli.getEmail())" in output  # Level: User
+        assert (
+            "existingPembeli.setUsername(pembeli.getUsername())" in output
+        )  # Level: Pembeli
+
+    def test_method_call(self):
+        """
+        This test already handle the case when the method call contains parameters and not
+        For other cases like invalid diagram etc is already handled in Sequence Parser Test
+        """
+        with open("tests/springboot/test_valid_json_seq.txt", "r", encoding="utf-8") as file:
+            json_data = file.read()
+
+        parser = ParseJsonToObjectSeq()
+        parser.set_json(json_data)
+        parser.parse()
+
+        class_objects = parser.get_class_objects()
+
+        # ListCopy Case
+        output = generate_service_java("tes", class_objects['ListCopy'], "com.example")
+        
+        expected_contains = """
+        void borrow(String isbn) {
+            String copyBuku = findCopyBuku(isbn);
+            copyBukuService.isBorrowed();
+            return ;
+"""
+        assert "import com.example.tes.service.CopyBukuService;" in output
+        assert "private final CopyBukuService copyBukuService;" in output
+        assert expected_contains.replace(" ", "").replace("\n", "") in output.replace(" ", "").replace("\n", "")
+
+    def test_edge_multilevel_cyclic_inheritance(self):
+        class_a = ClassObject()
+        class_a.set_name("TestA")
+
+        class_b = ClassObject()
+        class_b.set_name("TestB")
+
+        class_c = ClassObject()
+        class_c.set_name("TestC")
+
+        class_a.set_parent(class_b)
+        class_b.set_parent(class_c)
+        class_c.set_parent(class_a)
+
+        with self.assertRaises(ValueError) as ctx:
+            generate_service_java("TestInvalid", class_a, "com.example")
+
+        self.assertEqual(
+            str(ctx.exception),
+            "Cyclic Inheritance detected! It should not be allowed!"
+        )
+
+
 
 
 # Behavior Test
@@ -108,9 +202,12 @@ def check_output(context):
     assert "setFull(cart.isFull())" in expected_output
     assert "setCartId(cart.getCartId())" in expected_output
 
+    assert "setFull(cart.isFull())" in expected_output
+    assert "setCartId(cart.getCartId())" in expected_output
+
     assert (
-        context["output"].replace(" ", "").replace("\n", "").strip()
-        == expected_output.replace(" ", "").replace("\n", "").strip()
+        context["output"].strip().replace(" ", "").replace("\n", "")
+        == expected_output.strip().replace(" ", "").replace("\n", "")
     )
 
 
@@ -193,7 +290,6 @@ def check_output(context):
         == expected_output.replace(" ", "").replace("\n", "").strip()
     )
 
-
 @given(
     "the project name and private class object with method is processed and ready as context"
 )
@@ -251,6 +347,7 @@ def check_output(context):
         "tests/springboot/test_service_method_only.txt", "r", encoding="utf-8"
     ) as file:
         expected_output = file.read()
+    
     assert (
         context["output"].replace(" ", "").replace("\n", "").strip()
         == expected_output.replace(" ", "").replace("\n", "").strip()
@@ -300,6 +397,6 @@ public class CartService {
 """
 
     assert (
-        context["output"].replace(" ", "").strip()
-        == expected_output.replace(" ", "").strip()
+        context["output"].replace(" ", "").replace("\n", "").strip()
+        == expected_output.replace(" ", "").replace("\n", "").strip()
     )

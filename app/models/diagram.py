@@ -8,6 +8,7 @@ from app.utils import is_valid_python_identifier, to_camel_case, to_pascal_case
 
 from .methods import ClassMethodObject
 from .properties import FieldObject
+from .relationship_enum import RelationshipType
 
 
 class ClassObject:
@@ -25,6 +26,9 @@ class ClassObject:
 
     def get_fields(self) -> list[FieldObject]:  # pragma: no cover
         return self.__fields
+
+    def get_parent(self) -> ClassObject:  # pragma: no cover
+        return self.__parent
 
     def to_models_code(self) -> str:
         return (
@@ -147,6 +151,7 @@ class AbstractRelationshipObject(ABC):
         self.__target_class: Optional[ClassObject] = None
         self.__sourceClassOwnAmount: str = ""
         self.__targetClassOwnAmount: str = ""
+        self.__relation_type: RelationshipType = RelationshipType.ASSOCIATION
 
     def set_source_class(self, source_class: ClassObject):
         if source_class is None:
@@ -170,6 +175,12 @@ class AbstractRelationshipObject(ABC):
     def set_target_class_own_amount(self, amount: str):
         self.__targetClassOwnAmount = amount
 
+    def set_type(self, type: RelationshipType):
+        self.__relation_type = type
+
+    def get_type(self) -> RelationshipType:
+        return self.__relation_type
+
     def get_source_class(self) -> ClassObject:
         return self.__source_class
 
@@ -190,6 +201,12 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
     def to_models_code(self) -> str:
+        if self.get_type() == RelationshipType.AGGREGATION:
+            return (
+                f"{self.get_target_class().get_name().lower()} = "
+                + f"models.OneToOneField('{self.get_target_class().get_name()}',"
+                + " on_delete = models.SET_NULL, null=True)"
+            )
         return (
             f"{self.get_target_class().get_name().lower()} = "
             + f"models.OneToOneField('{self.get_target_class().get_name()}',"
@@ -199,6 +216,11 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
         rel_type = f"models.OneToOneField('{name}', on_delete=models.CASCADE)"
+        if self.get_type() == RelationshipType.AGGREGATION:
+            rel_type = (
+                f"models.OneToOneField('{name}', on_delete=models.SET_NULL, null=True)"
+            )
+
         return {"name": name.lower(), "type": rel_type}
 
     def to_springboot_models_template(self) -> dict[str, str]:
@@ -208,10 +230,18 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             rel_type = f'@OneToOne(mappedBy="{source.replace(" ", "_")}")'
             join = None
         else:
-            rel_type = (
-                "@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, "
-                "CascadeType.REMOVE})"
-            )
+            if self.get_type() == RelationshipType.AGGREGATION:
+                cascade_values = "{CascadeType.PERSIST, CascadeType.MERGE}"
+                orphan = "orphanRemoval = false"
+            elif self.get_type() == RelationshipType.COMPOSITION:
+                cascade_values = (
+                    "{CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
+                )
+                orphan = "orphanRemoval = true"
+            else:  # default to ASSOCIATION
+                cascade_values = "{CascadeType.PERSIST, CascadeType.MERGE}"
+                orphan = "orphanRemoval = true"
+            rel_type = f"@OneToOne(\n\t\tcascade = {cascade_values},\n\t\t{orphan}\n)"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
@@ -230,6 +260,12 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
         super().__init__()
 
     def to_models_code(self) -> str:
+        if self.get_type() == RelationshipType.AGGREGATION:
+            return (
+                f"{self.get_target_class().get_name().lower()}FK = "
+                + f"models.ForeignKey('{self.get_target_class().get_name()}',"
+                + " on_delete = models.SET_NULL, null=True)"
+            )
         return (
             f"{self.get_target_class().get_name().lower()}FK "
             + f"= models.ForeignKey('{self.get_target_class().get_name()}', "
@@ -239,22 +275,38 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
     def to_models_code_template(self) -> dict[str, str]:
         name = self.get_target_class().get_name()
         rel_type = f"models.ForeignKey('{name}', on_delete=models.CASCADE)"
+        if self.get_type() == RelationshipType.AGGREGATION:
+            rel_type = (
+                f"models.ForeignKey('{name}', on_delete=models.SET_NULL, null=True)"
+            )
+
         return {"name": f"{name.lower()}FK", "type": rel_type}
 
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
+
         if self.get_source_class_own_amount() == "1":
             rel_type = f'@ManyToOne(mappedBy="{source.replace(" ", "_")}_id")'
             rel_type += f'\n\t@JsonIgnoreProperties("{source.replace(" ", "_")}s")'
             join = None
             var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         else:
-            rel_type = (
-                "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},"
-            )
-            rel_type += "\n\t\torphanRemoval = true\n)"
-            rel_type += "\n\t@JsonIgnore"
+            onetomany_params = []
+            if self.get_type() == RelationshipType.AGGREGATION:
+                onetomany_params.append(
+                    "cascade = {CascadeType.PERSIST, CascadeType.MERGE}"
+                )
+                onetomany_params.append("orphanRemoval = false")
+            elif self.get_type() == RelationshipType.COMPOSITION:
+                onetomany_params.append(
+                    "cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
+                )
+                onetomany_params.append("orphanRemoval = true")
+
+            params_str = ",\n\t\t".join(onetomany_params)
+            rel_type = f"@OneToMany(\n\t\t{params_str}\n)\n\t@JsonIgnore"
+            # FK in target table referencing source
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}
@@ -281,16 +333,31 @@ class ManyToManyRelationshipObject(AbstractRelationshipObject):
     def to_springboot_models_template(self) -> dict[str, str]:
         source = self.get_source_class().get_name().lower()
         target = self.get_target_class().get_name()
-        rel_type = "@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})"
-        rel_type += "\n\t@JsonIgnore"
-        join = "@JoinTable("
-        join += f'\n\t\tname = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}",'
-        join += (
-            f'\n\t\tjoinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id"),'
+        params = []
+
+        if self.get_type() == RelationshipType.COMPOSITION:
+            params.append(
+                "cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}"
+            )
+            params.append("orphanRemoval = true\n")
+            params_str = ",\n\t\t".join(params)
+            rel_type = f"@ManyToMany(\n\t\t{params_str})\n\t@JsonIgnore"
+        else:  # AGGREGATION OR ASSOCIATION
+            rel_type = (
+                "@ManyToMany("
+                "cascade = {CascadeType.PERSIST, CascadeType.MERGE})\n\t@JsonIgnore"
+            )
+        param = []
+        param.append(
+            f'name = "{source.replace(" ", "_")}_{target.replace(" ", "_").lower()}"'
         )
-        join += (
-            f"\n\t\tinverseJoinColumns = @JoinColumn("
-            f'name = "{target.replace(" ", "_").lower()}_id")\n\t)'
+        param.append(
+            f'joinColumns = @JoinColumn(name = "{source.replace(" ", "_")}_id")'
         )
+        param.append(
+            f'inverseJoinColumns = @JoinColumn(name = "{target.replace(" ", "_").lower()}_id")'
+        )
+        params_str = ",\n\t\t".join(param)
+        join = f"@JoinTable(\n\t\t{params_str}\n\t)"
         var = f"private List<{to_pascal_case(target)}> listOf{to_pascal_case(target)}s;"
         return {"name": var, "type": rel_type, "join": join}

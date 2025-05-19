@@ -1,6 +1,8 @@
 import os
 import unittest
+from unittest.mock import MagicMock
 
+from app.models.properties import TypeObject
 from app.parse_json_to_object_seq import ParseJsonToObjectSeq
 
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -575,3 +577,267 @@ class TestParseJsonToObjectSeq(unittest.TestCase):
             "Invalid param name 'try' on sequence diagram \n"
             "please consult the user manual document on how to name parameters",
         )
+
+
+class TestProcessReturnVariable(unittest.TestCase):
+    # ----------  POSITIVE PATHS  ----------
+    def test_valid_string_mapping(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("person: String")
+        self.assertEqual(name, "person")
+
+        expected = TypeObject()
+        expected.set_name("str")
+        self.assertEqual(typ, expected)
+
+    def test_valid_integer_mapping(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("age: integer")
+        self.assertEqual(name, "age")
+
+        expected = TypeObject()
+        expected.set_name("int")
+        self.assertEqual(typ, expected)
+
+    def test_valid_boolean_with_leading_space(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable(
+            "flag:  Boolean"
+        )  # double-space before “Boolean”
+        self.assertEqual(name, "flag")
+
+        expected = TypeObject()
+        expected.set_name("bool")
+        self.assertEqual(typ, expected)
+
+    def test_valid_no_space_between_parts(self):
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("score:float")
+        self.assertEqual(name, "score")
+
+        expected = TypeObject()
+        expected.set_name("float")
+        self.assertEqual(typ, expected)
+
+    # ----------  NEGATIVE / ERROR PATHS  ----------
+    def test_error_no_colon(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable("invalid")
+
+    def test_error_multiple_colons(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable("a:b:c")
+
+    def test_error_empty_type(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable("name:")
+
+    def test_error_empty_name(self):
+        parser = ParseJsonToObjectSeq()
+        with self.assertRaises(ValueError):
+            parser.process_return_variable(":String")
+
+    # ===== NEW *CORNER* CASES =====
+    def test_case_insensitive_and_uppercase(self):
+        """Alias mapping should be case-insensitive."""
+        parser = ParseJsonToObjectSeq()
+        _, typ = parser.process_return_variable("note: STRING")
+        exp = TypeObject()
+        exp.set_name("str")
+        self.assertEqual(typ, exp)
+
+    def test_extra_whitespace_around_colon(self):
+        """
+        Only a single leading space in front of the type is removed by the
+        implementation; trailing/embedded spaces remain.
+        """
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("data  : String")
+        self.assertEqual(name, "data")  # trailing spaces in name removed
+        self.assertEqual(typ.get_name(), "str")  # mapping still works
+
+    def test_multiple_leading_spaces_before_type(self):
+        """Two+ leading spaces leave one space behind ⇢ alias mapping NOT applied."""
+        parser = ParseJsonToObjectSeq()
+        _, typ = parser.process_return_variable("value:   int")
+        # should keep the leading spaces _inside_ the stored name
+        self.assertEqual(typ.get_name(), "int")  # spaces removed
+
+    def test_unknown_custom_type_passthrough(self):
+        """Unrecognised types are stored verbatim."""
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("payload: CustomType")
+        self.assertEqual(name, "payload")
+        self.assertEqual(typ.get_name(), "CustomType")  # untouched
+
+    def test_unicode_name(self):
+        """Non-ASCII variable names should parse fine."""
+        parser = ParseJsonToObjectSeq()
+        name, typ = parser.process_return_variable("имя: Boolean")
+        exp = TypeObject()
+        exp.set_name("bool")
+        self.assertEqual((name, typ), ("имя", exp))
+
+
+class DummyMethodCall:
+    def __init__(self):
+        self.ret_var_name = None
+        self.ret_var_type = None
+
+    def set_ret_var(self, name: str):
+        self.ret_var_name = name
+
+    def set_return_var_type(self, var_type: str):
+        self.ret_var_type = var_type
+
+    def get_name(self) -> str:
+        return "name"
+
+
+class TestParseReturnEdge(unittest.TestCase):
+    def setUp(self):
+        self.parser = ParseJsonToObjectSeq()
+        # Patch the process_return_variable method for simplicity
+        self.parser.process_return_variable = MagicMock(
+            side_effect=lambda label: (f"{label}_name", f"{label}_type")
+        )
+
+    def test_no_edges_returns_empty_list(self):
+        self.parser._ParseJsonToObjectSeq__edges = []
+        self.parser._ParseJsonToObjectSeq__method_call = {}
+        self.assertEqual(self.parser.parse_return_edge(), [])
+
+    def test_edges_with_no_return_type_ignored(self):
+        # Edges of other types should be ignored
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "CallEdge", "label": "call()", "start": "A", "end": "B"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {}
+        self.assertEqual(self.parser.parse_return_edge(), [])
+
+    def test_return_edge_without_corresponding_call_raises(self):
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "ret()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {}
+        with self.assertRaises(ValueError) as cm:
+            self.parser.parse_return_edge()
+        self.assertIn(
+            "Return edge must have a corresponding call edge", str(cm.exception)
+        )
+
+    def test_return_edge_with_matching_call_sets_return_vars_and_appends_label(self):
+        # Setup a matching call tuple in __method_call with a mock method_call object
+        method_call_mock = DummyMethodCall()
+        call_tuple = ("A", "B")  # (end, start)
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "retLabel()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {"end": "B", "method_call": method_call_mock}
+        }
+        result = self.parser.parse_return_edge()
+        self.assertEqual(result, ["retLabel()_name"])
+        self.assertEqual(method_call_mock.ret_var_name, "retLabel()_name")
+        self.assertEqual(method_call_mock.ret_var_type, "retLabel()_type")
+        self.parser.process_return_variable.assert_called_once_with("retLabel()")
+
+    def test_return_edge_with_matching_call_but_method_call_is_none(self):
+        # If "method_call" is None or falsy, it should not process or append label
+        call_tuple = ("A", "B")
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "ret()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {
+                "end": "B",
+                "method_call": None,  # method_call falsy
+            }
+        }
+        # Should return empty list and not raise
+        self.assertEqual(self.parser.parse_return_edge(), [])
+
+    def test_multiple_return_edges(self):
+        # Multiple edges processed, some ignored
+        method_call_1 = DummyMethodCall()
+        method_call_2 = DummyMethodCall()
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "ret1()", "start": "B", "end": "A"},
+            {"type": "ReturnEdge", "label": "ret2()", "start": "D", "end": "C"},
+            {"type": "CallEdge", "label": "call()", "start": "X", "end": "Y"},
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            ("A", "B"): {"end": "B", "method_call": method_call_1},
+            ("C", "D"): {"end": "D", "method_call": method_call_2},
+        }
+        results = self.parser.parse_return_edge()
+        self.assertEqual(results, ["ret1()_name", "ret2()_name"])
+        self.assertEqual(method_call_1.ret_var_name, "ret1()_name")
+        self.assertEqual(method_call_2.ret_var_name, "ret2()_name")
+        self.parser.process_return_variable.assert_has_calls(
+            [
+                unittest.mock.call("ret1()"),
+                unittest.mock.call("ret2()"),
+            ]
+        )
+
+    def test_label_with_extra_spaces_stripped(self):
+        method_call_mock = DummyMethodCall()
+        call_tuple = ("A", "B")
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {
+                "type": "ReturnEdge",
+                "label": "  retWithSpaces()  ",
+                "start": "B",
+                "end": "A",
+            }
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {"end": "B", "method_call": method_call_mock}
+        }
+        result = self.parser.parse_return_edge()
+        self.assertEqual(result, ["retWithSpaces()_name"])
+        self.assertEqual(method_call_mock.ret_var_name, "retWithSpaces()_name")
+
+    def test_return_edge_with_empty_return_var_name_raises(self):
+        method_call_mock = DummyMethodCall()
+        call_tuple = ("A", "B")
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "retLabel()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {"end": "B", "method_call": method_call_mock}
+        }
+        # process_return_variable returns invalid (empty name)
+        self.parser.process_return_variable = MagicMock(return_value=("", "retVarType"))
+
+        with self.assertRaises(ValueError) as cm:
+            self.parser.parse_return_edge()
+        self.assertIn(
+            "Return value name or return value type not set", str(cm.exception)
+        )
+        self.assertIn(method_call_mock.get_name(), str(cm.exception))
+
+    def test_return_edge_with_empty_return_var_type_raises(self):
+        method_call_mock = DummyMethodCall()
+        call_tuple = ("A", "B")
+        self.parser._ParseJsonToObjectSeq__edges = [
+            {"type": "ReturnEdge", "label": "retLabel()", "start": "B", "end": "A"}
+        ]
+        self.parser._ParseJsonToObjectSeq__method_call = {
+            call_tuple: {"end": "B", "method_call": method_call_mock}
+        }
+        # process_return_variable returns invalid (empty type)
+        self.parser.process_return_variable = MagicMock(
+            return_value=("retVarName", None)
+        )
+
+        with self.assertRaises(ValueError) as cm:
+            self.parser.parse_return_edge()
+        self.assertIn(
+            "Return value name or return value type not set", str(cm.exception)
+        )
+        self.assertIn(method_call_mock.get_name(), str(cm.exception))

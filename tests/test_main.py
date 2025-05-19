@@ -4,9 +4,10 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, check_duplicate, convert_spring, fix_build_gradle_kts
+from app.main import app, check_duplicate, convert_spring, set_springboot_method_call
 from app.models.elements import ClassObject, ModelsElements
-from app.models.methods import ClassMethodObject
+from app.models.methods import ClassMethodCallObject, ClassMethodObject
+from app.models.properties import TypeObject
 
 client = TestClient(app)
 
@@ -24,6 +25,7 @@ def test_file() -> dict:
 
 
 def test_file_already_exists():
+    """This should now be successfull"""
     with open("file1_models.py", "w") as f:
         f.write("Some initial content")
 
@@ -65,8 +67,7 @@ def test_file_already_exists():
                     "project_name": "file1",
                 },
             )
-            assert response.status_code == 400
-            assert response.json()["detail"] == "Please try again later"
+            assert response.status_code == 200
     finally:
         # Clean up: remove the file created for the test
         if os.path.exists("file1_models.py"):
@@ -74,6 +75,7 @@ def test_file_already_exists():
 
 
 def test_slash_on_filename():
+    """This should now be successfull as we don't need to check the given filenames"""
     # Try to upload a file
     with (
         patch("app.main.ModelsElements") as mockparser,
@@ -104,8 +106,7 @@ def test_slash_on_filename():
                 "project_name": "file1",
             },
         )
-        assert response.status_code == 400
-        assert response.json()["detail"] == "/ not allowed in file name"
+        assert response.status_code == 200
 
 
 @pytest.mark.asyncio
@@ -148,6 +149,7 @@ async def test_convert_endpoint_valid_content_class_diagram():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "file1.zip" in response.headers["content-disposition"]
+        assert response.content[8:10] == b"\x08\x00"  # Compression method = DEFLATE
 
 
 @pytest.mark.asyncio
@@ -211,6 +213,7 @@ async def test_convert_endpoint_class_diagram():
         assert response.content.startswith(
             b"PK\x03\x04"
         )  # Check that the response is a zip file
+        assert response.content[8:10] == b"\x08\x00"  # Compression method = DEFLATE
 
 
 @pytest.mark.asyncio
@@ -273,6 +276,7 @@ async def test_convert_endpoint_sequence_diagram():
         assert response.content.startswith(
             b"PK\x03\x04"
         )  # Check that the response is a zip file
+        assert response.content[8:10] == b"\x08\x00"  # Compression method = DEFLATE
 
 
 @pytest.mark.asyncio
@@ -361,6 +365,7 @@ async def test_convert_endpoint_valid_sequence_diagram():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "file1.zip" in response.headers["content-disposition"]
+        assert response.content[8:10] == b"\x08\x00"
 
 
 @pytest.mark.asyncio
@@ -398,6 +403,7 @@ async def test_convert_endpoint_valid_multiple_file_content():
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/zip"
         assert "file1.zip" in response.headers["content-disposition"]
+        assert response.content[8:10] == b"\x08\x00"
 
 
 @pytest.mark.asyncio
@@ -442,7 +448,8 @@ def test_check_duplicate_no_matching_method():
     duplicate_class_method_checker = {"hello": ClassObject()}
     with pytest.raises(
         ValueError,
-        match="Cannot call class 'class1' objects not defined in Class Diagram!",
+        match="Cannot call method 'method1' of class 'class1'! The method or class is not defined "
+        "in Class Diagram!",
     ):
         check_duplicate(
             class_objects, class_object.get_name(), duplicate_class_method_checker
@@ -509,7 +516,8 @@ def test_check_duplicate_empty_duplicate_class_method_checker():
 
     with pytest.raises(
         ValueError,
-        match="Cannot call class 'class1' objects not defined in Class Diagram!",
+        match="Cannot call method 'method1' of class 'class1'! The method or class is "
+        "not defined in Class Diagram!",
     ):
         check_duplicate(
             class_objects, class_object.get_name(), duplicate_class_method_checker
@@ -535,9 +543,7 @@ def test_raise_value_error_on_main():
 async def test_convert_spring():
     with (
         patch("app.main.initialize_springboot_zip") as mock_zip,
-        patch("app.main.fix_build_gradle_kts") as mock_fix,
     ):
-        mock_fix.return_value = ""
         mock_zip.return_value = "a.zip"
         content = [
             [
@@ -554,26 +560,40 @@ async def test_convert_spring():
         assert os.path.isfile(response)
         os.remove(response)
 
+def test_set_springboot_method_call():
+    class_object_class = ClassObject()
+    class_object_class.set_name("Pembeli")
+    class_object = ClassObject()
+    class_object.set_name("Pembeli")
 
-def test_fix_build_gradle_kts_with_patch():
-    # Mock the zipfile.ZipFile
-    mock_zipf = MagicMock()
+    class_method_object_class = ClassMethodObject()
+    class_method_object_class.set_class_object_name("Pembeli")
+    class_method_object_class.set_name("checkout")
+    class_method_object_return = TypeObject()
+    class_method_object_return.set_name("string")
+    class_method_object_class.set_return_type(class_method_object_return)
+    class_object_class.add_method(class_method_object_class)
 
-    # Mock reading the original build.gradle.kts content
-    original_content = (
-        'implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")'
-    )
-    expected_content = (
-        'implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")'
-    )
+    class_method_object = ClassMethodObject()
+    class_method_object.set_class_object_name("Pembeli")
+    class_method_object.set_name("checkout")
+    class_method_object_return = TypeObject()
+    class_method_object_return.set_name("string")
+    class_method_object.set_return_type(class_method_object_return)
 
-    # Mock zipf.open().read().decode()
-    mock_file = MagicMock()
-    mock_file.read.return_value = original_content.encode("utf-8")
-    mock_zipf.open.return_value = mock_file
+    class_method_call_1 = ClassMethodCallObject()
+    class_method_object1 = ClassMethodObject()
+    class_method_object1.set_name("cariBarang")
+    class_method_call_1.set_method(class_method_object1)
+    class_method_object1.set_class_object_name("Pembeli")
+    class_method_call_1.set_return_var_name("barang")
+    class_method_call_1.set_return_var_type(class_method_object_return)
+    
+    class_method_object.add_class_method_call(class_method_call_1)
+    class_object.add_method(class_method_object)
 
-    # Call the function with the mocked zip
-    fix_build_gradle_kts(mock_zipf)
+    set_springboot_method_call(class_object_class, {'Pembeli': class_object})
 
-    # Check that writestr is called with the correct modified content
-    mock_zipf.writestr.assert_called_once_with("build.gradle.kts", expected_content)
+    assert class_object_class.get_methods()[0].get_method_calls()[0].get_methods().get_name() == "cariBarang" 
+
+    

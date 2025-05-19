@@ -1,5 +1,6 @@
 import unittest
 from copy import copy, deepcopy
+from unittest.mock import MagicMock, patch
 
 from app.models.properties import (
     FieldObject,
@@ -156,6 +157,57 @@ class TestTypeObject(unittest.TestCase):
         self.type_object.set_name("TestType")
         self.assertEqual(self.type_object._TypeObject__name, "TestType")
 
+    def test_get_name_springboot_str(self):
+        """Test case for 'str' mapped to 'String' in Spring Boot."""
+        type_obj = TypeObject()
+        type_obj.set_name("string")
+        self.assertEqual(type_obj.get_name_springboot(), "String")
+
+    def test_get_name_springboot_int(self):
+        """Test case for 'int' mapped to 'Integer' in Spring Boot."""
+        type_obj = TypeObject()
+        type_obj.set_name("integer")
+        self.assertEqual(type_obj.get_name_springboot(), "Integer")
+
+    def test_get_name_springboot_bool(self):
+        """Test case for 'bool' mapped to 'boolean' in Spring Boot."""
+        type_obj = TypeObject()
+        type_obj.set_name("boolean")
+        self.assertEqual(type_obj.get_name_springboot(), "boolean")
+
+    def test_get_name_springboot_invalid_type(self):
+        """Test case for invalid type that should not map to a known Spring Boot type."""
+        type_obj = TypeObject()
+        type_obj.set_name("wee")
+        with self.assertRaises(ValueError):
+            type_obj.get_name_springboot()
+
+    def test_get_name_springboot_empty_string(self):
+        """Test case for empty string passed as name."""
+        type_obj = TypeObject()
+        type_obj.set_name("")
+        with self.assertRaises(ValueError):
+            type_obj.get_name_springboot()  # Empty string maps to None
+
+    def test_get_name_springboot_case_insensitivity(self):
+        """Test case for case insensitivity when setting name."""
+        type_obj = TypeObject()
+        type_obj.set_name("STRING")
+        self.assertEqual(type_obj.get_name_springboot(), "String")
+
+    def test_get_name_springboot_non_standard_case(self):
+        """Test case for non-standard names, e.g., mixed case strings."""
+        type_obj = TypeObject()
+        type_obj.set_name("BoOlEan")
+        self.assertEqual(type_obj.get_name_springboot(), "boolean")
+
+    def test_get_name_springboot_edge_large_input(self):
+        """Test case for handling very large inputs."""
+        type_obj = TypeObject()
+        type_obj.set_name("a" * 1000)  # Arbitrary large string
+        with self.assertRaises(ValueError):
+            type_obj.get_name_springboot()
+
 
 class TestParameterObject(unittest.TestCase):
     def setUp(self):
@@ -245,6 +297,82 @@ class TestParameterObject(unittest.TestCase):
         field_object.set_modifier("private")
         self.assertEqual(field_object._FieldObject__modifier, "private")
 
+    # Positive test case where everything is valid
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_valid_param(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = TypeObject()
+        string_type.set_name("string")
+        param.set_type(string_type)
+        result = param.to_springboot_code_template()
+        self.assertEqual(result["param_name"], "param1")
+        self.assertEqual(result["param_type"], "String")
 
-if __name__ == "__main__":
-    unittest.main()
+    # Negative case when param name is invalid
+    @patch("app.utils.is_valid_java_identifier", return_value=False)
+    def test_invalid_param_name(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("invalid param name")
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()
+
+    # Negative case when param type is not standard
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_non_standard_param_type(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = TypeObject()
+        string_type.set_name("hallo")
+        param.set_type(string_type)
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()
+
+    # Corner case when param name is None
+    @patch("app.utils.is_valid_java_identifier", return_value=False)
+    def test_param_name_none(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name(None)
+        param.set_type(TypeObject().set_name("string"))
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()
+
+    # Corner case when param name is an empty string
+    @patch("app.utils.is_valid_java_identifier", return_value=False)
+    def test_empty_param_name(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("")
+        param.set_type(TypeObject().set_name("string"))
+        with self.assertRaises(IndexError):
+            param.to_springboot_code_template()
+
+    # Test case when param type is None
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_param_type_none(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        param.set_type(None)
+        result = param.to_springboot_code_template()
+        self.assertEqual(result["param_name"], "param1")
+        self.assertNotIn("param_type", result)
+
+    # Test case when param type has a valid mapping (non-None param type)
+    @patch("app.utils.is_valid_java_identifier", return_value=True)
+    def test_param_type_valid(self, mock_is_valid: MagicMock):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = TypeObject()
+        string_type.set_name("string")
+        param.set_type(string_type)
+        result = param.to_springboot_code_template()
+        self.assertEqual(result["param_type"], "String")
+
+    # Test case when param type is not valid java identifier
+    def test_param_type_invalid_param_type(self):
+        param = ParameterObject()
+        param.set_name("param1")
+        string_type = MagicMock()
+        string_type.get_name_springboot.return_value = "&&&"
+        param.set_type(string_type)
+        with self.assertRaises(ValueError):
+            param.to_springboot_code_template()

@@ -4,6 +4,7 @@ import tempfile
 import zipfile
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import anyio
 from pytest import fixture
 from pytest_bdd import given, scenarios, then, when
 
@@ -18,34 +19,30 @@ scenarios(FEATURE_PATH)
 
 
 @fixture
-def context():
+def context() -> dict:
     return {}
 
 
 @given("the parsed class diagram project name and group id")
-def prepare_context(context):
+def prepare_context(context: dict):
     asyncio.run(_prepare_context(context))
 
 
-async def _prepare_context(context):
-    with (
-        patch("httpx.AsyncClient") as mock_client_class,
-        patch("app.main.fix_build_gradle_kts") as mock_fix,
-    ):
+async def _prepare_context(context: dict):
+    with patch("httpx.AsyncClient") as mock_client_class:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {"content-type": "application/zip"}
-
-        mock_fix.return_value = ""
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, "w") as zipf:
                 zipf.writestr("src/main/java/", "")
                 zipf.writestr("src/test/java/", "")
                 zipf.writestr("build.gradle.kts", "")
+                zipf.writestr("src/main/resources/application.properties", "abcd=abcd")
 
-            with open(tmp_zip.name, "rb") as f:
-                mock_response.content = f.read()
+            async with await anyio.open_file(tmp_zip.name, "rb") as f:
+                mock_response.content = await f.read()
 
             context["mock_zip_path"] = tmp_zip.name
 
@@ -61,13 +58,15 @@ async def _prepare_context(context):
             "content": [
                 [
                     '{"diagram":"ClassDiagram","nodes":['
-                    '{"methods":"","name":"+ Shape","x":100,"y":70,"attributes":"+ colour: string","id":0,"type":"ClassNode"},'
-                    '{"methods":"+ getId (): string\\n+ setRadius (radius: integer): void","name":"+ Circle","x":320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":"ClassNode"},'
-                    '{"methods":"+ findCircle(circleid: string): string","name":"+ Circles","x":190,"y":300,"attributes":"","id":2,"type":"ClassNode"}'
-                    '],"edges":['
-                    '{"Generalization Type":"Inheritance","start":1,"end":0,"type":"GeneralizationEdge"},'
+                    '{"methods":"","name":"+ Shape","x":100,"y":70,"attributes":"+ colour: string"'
+                    ',"id":0,"type":"ClassNode"},{"methods":"+ getId (): string\\n+ setRadius '
+                    '(radius: integer): void","name":"+ Circle","x":320,"y":70,"attributes":'
+                    '"- radius: integer\\n- id: string","id":1,"type":"ClassNode"},{"methods":'
+                    '"+ findCircle(circleid: string): string","name":"+ Circles","x":190,"y":'
+                    '300,"attributes":"","id":2,"type":"ClassNode"}],"edges":[{"Generalization '
+                    'Type":"Inheritance","start":1,"end":0,"type":"GeneralizationEdge"},'
                     '{"startLabel":"*","middleLabel":"","start":1,"directionality":"Unspecified","end":2,"endLabel":"1","type":"AssociationEdge"}'
-                    '],"version":"3.8"}\r\n'
+                    '],"version":"3.8"}'
                 ]
             ],
         }
@@ -86,7 +85,7 @@ async def _prepare_context(context):
 
 
 @when("the zip is unzip")
-def unzip_result(context):
+def unzip_result(context: dict):
     with zipfile.ZipFile(context["result_zip_path"], "r") as zip_ref:
         context["file_list"] = zip_ref.namelist()
         context["src_path"] = (
@@ -100,26 +99,26 @@ def unzip_result(context):
 
 
 @then("the zip contains model folder that consists of all models")
-def check_model_folder(context):
+def check_model_folder(context: dict):
     for model in ["Shape", "Circle", "Circles"]:
         assert f"{context['src_path']}/model/{model}.java" in context["file_list"]
 
 
 @then("the zip contains repository folder for all models")
-def check_repository_folder(context):
+def check_repository_folder(context: dict):
     print("aaaa", context["file_list"])
     for model in ["ShapeRepository", "CircleRepository", "CirclesRepository"]:
         assert f"{context['src_path']}/repository/{model}.java" in context["file_list"]
 
 
 @then("the zip contains service folder for all models")
-def check_service_folder(context):
+def check_service_folder(context: dict):
     for model in ["ShapeService", "CircleService", "CirclesService"]:
         assert f"{context['src_path']}/service/{model}.java" in context["file_list"]
 
 
 @then("the zip contains controller folder for all models")
-def check_controller_folder(context):
+def check_controller_folder(context: dict):
     for model in [
         "ShapeController",
         "CircleController",
@@ -130,12 +129,12 @@ def check_controller_folder(context):
 
 
 @then("the zip contains application.properties")
-def check_application_properties(context):
+def check_application_properties(context: dict):
     assert "src/main/resources/application.properties" in context["file_list"]
 
 
 @given("the context JSON with no diagram type")
-def prepare_invalid_jet_content(context):
+def prepare_invalid_jet_content(context: dict):
     context["data"] = {
         "project_name": "invalidProj",
         "group_id": "com.test",
@@ -143,45 +142,42 @@ def prepare_invalid_jet_content(context):
         "filename": ["Invalid_1.class.jet"],
         "content": [
             [
-                '{"nodes":['
-                '{"methods":"","name":"Shape","x":100,"y":70,"attributes":"+ colour: string","id":0,"type":"ClassNode"},'
-                '{"methods":"+ getId (): string\\n+ setRadius (radius: integer): void","name":"Circle","x":320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":"ClassNode"},'
-                '{"methods":"+ findCircle(circleid: string): string","name":"Circles","x":190,"y":300,"attributes":"","id":2,"type":"ClassNode"}'
-                '],"edges":['
-                '{"Generalization Type":"Inheritance","start":1,"end":0,"type":"GeneralizationEdge"},'
-                '{"startLabel":"*","middleLabel":"","start":1,"directionality":"Unspecified","end":2,"endLabel":"1","type":"AssociationEdge"}'
-                '],"version":"3.8"}\r\n'
+                '{"nodes":[{"methods":"","name":"Shape","x":100,"y":70,"attributes":"+ colour: '
+                'string","id":0,"type":"ClassNode"},{"methods":"+ getId (): string\\n+ setRadius '
+                '(radius: integer): void","name":"Circle","x":320,"y":70,"attributes":"- radius: '
+                'integer\\n- id: string","id":1,"type":"ClassNode"},{"methods":"+ findCircle('
+                'circleid: string): string","name":"Circles","x":190,"y":300,"attributes":"",'
+                '"id":2,'
+                '"type":"ClassNode"}],"edges":[{"Generalization Type":"Inheritance",'
+                '"start":1,"end":0,"type":"GeneralizationEdge"},{"startLabel":"*","middleLabel":'
+                '"","start":1,"directionality":"Unspecified","end":2,"endLabel":"1","type":"AssociationEdge"}'
+                '],"version":"3.8"}'
             ]
         ],
     }
 
 
 @when("the content is parsed")
-def prepare_content(context):
+def prepare_content(context: dict):
     try:
         asyncio.run(call_convert_spring(context))
     except Exception as e:
         context["exception"] = e
 
 
-async def call_convert_spring(context):
-    with (
-        patch("httpx.AsyncClient") as mock_client_class,
-        patch("app.main.fix_build_gradle_kts") as mock_fix,
-    ):
+async def call_convert_spring(context: dict):
+    with patch("httpx.AsyncClient") as mock_client_class:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {"content-type": "application/zip"}
-
-        mock_fix.return_value = ""
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, "w") as zipf:
                 zipf.writestr("src/main/java/", "")
                 zipf.writestr("src/test/java/", "")
 
-            with open(tmp_zip.name, "rb") as f:
-                mock_response.content = f.read()
+            async with await anyio.open_file(tmp_zip.name, "rb") as f:
+                mock_response.content = await f.read()
 
             context["mock_zip_path"] = tmp_zip.name
 
@@ -215,14 +211,14 @@ async def call_convert_spring(context):
 
 
 @then("program will raise error for no diagram")
-def check_error(context):
+def check_error(context: dict):
     assert context["exception"] is not None, "Expected exception, but none was raised"
     assert isinstance(context["exception"], ValueError)
     assert str(context["exception"]) == "Diagram type not found on .jet file"
 
 
 @given("the context JSON with invalid diagram")
-def prepare_invalid_diagram(context):
+def prepare_invalid_diagram(context: dict):
     context["data2"] = {
         "project_name": "invalidProj",
         "group_id": "com.test",
@@ -230,12 +226,13 @@ def prepare_invalid_diagram(context):
         "filename": ["Invalid_1.class.jet"],
         "content": [
             [
-                '{"diagram":"SequenceDiagram","nodes":['
-                '{"methods":"","name":"Shape","x":100,"y":70,"attributes":"+ colour: string","id":0,"type":"ClassNode"},'
-                '{"methods":"+ getId (): string\\n+ setRadius (radius: integer): void","name":"Circle","x":320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":"ClassNode"},'
-                '{"methods":"+ findCircle(circleid: string): string","name":"Circles","x":190,"y":300,"attributes":"","id":2,"type":"ClassNode"}'
-                '],"edges":['
-                '{"Generalization Type":"Inheritance","start":1,"end":0,"type":"GeneralizationEdge"},'
+                '{"diagram":"Diagram","nodes":[{"methods":"","name":"Shape","x":100,"y":70,'
+                '"attributes":"+ colour: string","id":0,"type":"ClassNode"},{"methods":'
+                '"+ getId (): string\\n+ setRadius (radius: integer): void","name":"Circle","x":'
+                '320,"y":70,"attributes":"- radius: integer\\n- id: string","id":1,"type":'
+                '"ClassNode"},{"methods":"+ findCircle(circleid: string): string","name":"Circles",'
+                '"x":190,"y":300,"attributes":"","id":2,"type":"ClassNode"}],"edges":[{"'
+                'Generalization Type":"Inheritance","start":1,"end":0,"type":"GeneralizationEdge"},'
                 '{"startLabel":"*","middleLabel":"","start":1,"directionality":"Unspecified","end":2,"endLabel":"1","type":"AssociationEdge"}'
                 '],"version":"3.8"}\r\n'
             ]
@@ -244,31 +241,26 @@ def prepare_invalid_diagram(context):
 
 
 @when("content is parsed")
-def prepare_content2(context):
+def prepare_content2(context: dict):
     try:
         asyncio.run(call_convert_spring2(context))
     except Exception as e:
         context["exception2"] = e
 
 
-async def call_convert_spring2(context):
-    with (
-        patch("httpx.AsyncClient") as mock_client_class,
-        patch("app.main.fix_build_gradle_kts") as mock_fix,
-    ):
+async def call_convert_spring2(context: dict):
+    with patch("httpx.AsyncClient") as mock_client_class:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {"content-type": "application/zip"}
-
-        mock_fix.return_value = ""
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, "w") as zipf:
                 zipf.writestr("src/main/java/", "")
                 zipf.writestr("src/test/java/", "")
 
-            with open(tmp_zip.name, "rb") as f:
-                mock_response.content = f.read()
+            async with await anyio.open_file(tmp_zip.name, "rb") as f:
+                mock_response.content = await f.read()
 
             context["mock_zip_path2"] = tmp_zip.name
 
@@ -299,13 +291,16 @@ async def call_convert_spring2(context):
 
 
 @then("program will raise error for invalid diagram")
-def check_error_2(context):
+def check_error_2(context: dict):
     assert context["exception2"] is not None, "Expected exception, but none was raised"
     assert isinstance(context["exception2"], ValueError)
-    assert str(context["exception2"]) == "Given diagram is not Class Diagram"
+    assert str(context["exception2"]) == (
+        "Unknown diagram type. Diagram type must be "
+        "ClassDiagram or SequenceDiagram! Got 'Diagram'"
+    )
 
 
-def cleanup(context):
+def cleanup(context: dict):
     if "result_zip_path" in context and os.path.exists(context["result_zip_path"]):
         os.unlink(context["result_zip_path"])
     if "mock_zip_path" in context and os.path.exists(context["mock_zip_path"]):

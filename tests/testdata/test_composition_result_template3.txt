@@ -1,0 +1,32 @@
+"""
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+"""
+
+from django.db import models
+
+
+class Buku(models.Model):
+    ISBN = models.CharField(max_length=255)
+    judul = models.CharField(max_length=255)
+    penulis = models.CharField(max_length=255)
+    penerbit = models.CharField(max_length=255)
+
+
+class Peminjaman(models.Model):
+    ID = models.CharField(max_length=255)
+    isDikembalikan = models.BooleanField()
+    tglPinjam = models.DateField()
+    tglKembali = models.DateField()
+    isLunasDenda = models.BooleanField()
+    besaranDenda = models.IntegerField()
+
+
+class CopyBuku(models.Model):
+    kodeBarcode = models.CharField(max_length=255)
+    jenisCopy = models.CharField(max_length=255)
+    kondisi = models.CharField(max_length=255)
+    isAvailable = models.BooleanField()
+    edisi = models.IntegerField()
+    tahunTerbit = models.IntegerField()
+    buku = models.OneToOneField('Buku', on_delete=models.CASCADE)

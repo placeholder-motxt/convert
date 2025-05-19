@@ -336,7 +336,7 @@
       "signal": false
     },
     {
-      "middleLabel": "findCopyBuku (isbn) -> copyBuku",
+      "middleLabel": "findCopyBuku (isbn) -> copyBuku:string",
       "start": 20,
       "end": 21,
       "type": "CallEdge",

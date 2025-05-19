@@ -3,9 +3,32 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Optional
 
-from app.utils import JAVA_TYPE_MAPPING, is_valid_python_identifier
+from app.utils import (
+    JAVA_TYPE_MAPPING,
+    is_valid_java_identifier,
+    is_valid_python_identifier,
+)
 
 MODELS_CHARFIELD = "models.CharField(max_length=255)"
+
+SPRING_TYPE_MAPPING = {
+    "boolean": "boolean",
+    "String": "String",
+    "str": "String",
+    "int": "Integer",
+    "bool": "boolean",
+    "integer": "Integer",
+    "float": "float",
+    "double": "double",
+    "Date": "LocalDate",
+    "DateTime": "LocalDateTime",
+    "Time": "LocalTime",
+    "Text": "String",
+    "Email": "String",
+    "URL": "String",
+    "UUID": "UUID",
+    "Decimal": "BigDecimal",
+}
 
 
 class TypeObject:
@@ -32,6 +55,12 @@ class TypeObject:
 
     def get_name(self) -> str:
         return self.__name
+
+    def get_name_springboot(self) -> str:
+        for key, value in SPRING_TYPE_MAPPING.items():
+            if self.__name == key:
+                return value
+        raise ValueError(f"Invalid Springboot type name: {self.__name}")
 
     def __copy__(self) -> TypeObject:
         copy = TypeObject()
@@ -70,25 +99,6 @@ class FieldObject:
         "URL": "models.URLField()",
         "UUID": "models.UUIDField()",
         "Decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
-    }
-
-    SPRING_TYPE_MAPPING = {
-        "boolean": "boolean",
-        "String": "String",
-        "str": "String",
-        "int": "Integer",
-        "bool": "boolean",
-        "integer": "Integer",
-        "float": "float",
-        "double": "double",
-        "Date": "LocalDate",
-        "DateTime": "LocalDateTime",
-        "Time": "LocalTime",
-        "Text": "String",
-        "Email": "String",
-        "URL": "String",
-        "UUID": "UUID",
-        "Decimal": "BigDecimal",
     }
 
     def __init__(self):
@@ -148,7 +158,7 @@ class FieldObject:
         # Default fallback
         result = {"name": self.__name, "type": "String", "modifier": self.__modifier}
 
-        for key, value in self.SPRING_TYPE_MAPPING.items():
+        for key, value in SPRING_TYPE_MAPPING.items():
             if key.lower() in field_type:
                 result["type"] = value
                 return result
@@ -231,6 +241,26 @@ class ParameterObject:
         if self.__type is not None:
             param_type = self.__type.get_name()
             if not is_valid_python_identifier(param_type):
+                raise ValueError(
+                    f"Invalid param type '{param_type}'\n"
+                    "please consult the user manual document on how to name parameter types"
+                )
+            context["param_type"] = param_type
+        return context
+
+    def to_springboot_code_template(self) -> dict[str]:
+        context = {}
+        context["param_name"] = ""
+        if self.__name is None or not is_valid_java_identifier(self.__name):
+            raise ValueError(
+                f"Invalid param name '{self.__name}'\n"
+                "please consult the user manual document on how to name parameters"
+            )
+
+        context["param_name"] = self.__name
+        if self.__type is not None:
+            param_type = self.__type.get_name_springboot()
+            if not is_valid_java_identifier(param_type):
                 raise ValueError(
                     f"Invalid param type '{param_type}'\n"
                     "please consult the user manual document on how to name parameter types"

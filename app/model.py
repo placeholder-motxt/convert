@@ -1,8 +1,19 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
+from app.models.elements import ModelsElements, ViewsElements
+from app.models.methods import ClassMethodObject
+
 Style = Literal["classic", "dark", "minimalist", "modern", "vibrant"]
+DuplicateChecker = dict[tuple[str, str], ClassMethodObject]
+
+
+class DataResult(TypedDict):
+    models: str
+    views: str
+    model_element: ModelsElements
+    views_element: ViewsElements
 
 
 class ConvertRequest(BaseModel):

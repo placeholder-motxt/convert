@@ -12,6 +12,9 @@ from app.models.elements import (
     ViewsElements,
 )
 
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = os.path.join(CUR_DIR, "testdata")
+
 
 class TestModelsElements(unittest.TestCase):
     def test_models_elements_valid_filename(self):
@@ -36,7 +39,7 @@ class TestModelsElements(unittest.TestCase):
                 obj.parse("content"), mock_parser_instance.parse_classes.return_value
             )
 
-    def test_print_django_style_not_implemented(self):
+    def test_print_django_style(self):
         obj = ModelsElements("models.py")
         obj.parse(open("tests/test_input.txt", "r").read())
         res = obj.print_django_style()
@@ -101,6 +104,104 @@ class TestModelsElements(unittest.TestCase):
         self.assertEqual(len(classes), 2)
         self.assertEqual(classes[0].get_name(), "DuplicateClass")
         self.assertEqual(classes[1].get_name(), "DuplicateClass")
+
+    def test_composition_one_to_many(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition1.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result1.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style()
+        self.assertEqual(res, expected)
+
+    def test_composition_many_to_one(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition2.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result2.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style()
+        self.assertEqual(res, expected)
+
+    def test_composition_one_to_many_template(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition1.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result_template1.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
+
+    def test_composition_many_to_one_template(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition2.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result_template2.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
+
+    def test_composition_one_to_one_template(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_composition3.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_composition_result_template3.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_composition")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
+
+    def test_aggregation_one_to_one_template(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_aggregation1.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_aggregation_result_template1.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_aggregation")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
+
+    def test_aggregation_one_to_many_template(self):
+        data = ""
+        with open(os.path.join(TEST_DIR, "test_aggregation2.json")) as f:
+            data = f.read()
+
+        expected = ""
+        with open(os.path.join(TEST_DIR, "test_aggregation_result_template2.txt")) as f:
+            expected = f.read()
+
+        model = ModelsElements("test_aggregation")
+        model.parse(data)
+        res = model.print_django_style_template()
+        self.assertEqual(res, expected)
 
 
 class TestViewsElements(unittest.TestCase):
