@@ -193,6 +193,9 @@ class AbstractRelationshipObject(ABC):
     def get_target_class_own_amount(self) -> str:  # pragma: no cover
         return self.__targetClassOwnAmount
 
+    def __str__(self) -> str:
+        return str(self.__source_class) + " " + str(self.__target_class)
+
 
 class OneToOneRelationshipObject(AbstractRelationshipObject):
     """Represents JetUML's AssociationEdge where the the startLabel and endLabel are both '1'"""
@@ -241,8 +244,8 @@ class OneToOneRelationshipObject(AbstractRelationshipObject):
             else:  # default to ASSOCIATION
                 cascade_values = "{CascadeType.PERSIST, CascadeType.MERGE}"
                 orphan = "orphanRemoval = true"
-            rel_type = f"@OneToOne(\n\t\tcascade = {cascade_values},\n\t\t{orphan}\n)"
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
+            rel_type = f"@OneToOne(\n\t\tcascade = {cascade_values},\n\t\t{orphan}\n)"
         var = f"private {to_pascal_case(target)} {to_camel_case(target)};"
         return {"name": var, "type": rel_type, "join": join}
 
@@ -305,7 +308,7 @@ class ManyToOneRelationshipObject(AbstractRelationshipObject):
                 onetomany_params.append("orphanRemoval = true")
 
             params_str = ",\n\t\t".join(onetomany_params)
-            rel_type = f"@OneToMany(\n\t\t{params_str}\n)\n\t@JsonIgnore"
+            rel_type = f"@OneToMany(\n\t\t{params_str}\n)\n\t"
             # FK in target table referencing source
             join = f'@JoinColumn(name = "{source.replace(" ", "_")}_id")'
             var = f"private List<{to_pascal_case(target)}> {to_camel_case(target)}s;"
