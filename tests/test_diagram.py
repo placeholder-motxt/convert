@@ -476,7 +476,7 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
         expected_output = {
             "name": "private List<TargetClass> targetClasss;",
             "type": "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE},\n\t\t"
-            "orphanRemoval = false\n)\n\t@JsonIgnore",
+            "orphanRemoval = false\n)\n\t",
             "join": '@JoinColumn(name = "source_class_id")',
         }
         self.assertEqual(relationship.to_springboot_models_template(), expected_output)
@@ -492,7 +492,7 @@ class TestToSpringbootModelsTemplate(unittest.TestCase):
             "type": (
                 "@OneToMany(\n\t\tcascade = {CascadeType.PERSIST, CascadeType.MERGE"
                 ", CascadeType.REMOVE},\n\t\t"
-                "orphanRemoval = true\n)\n\t@JsonIgnore"
+                "orphanRemoval = true\n)\n\t"
             ),
             "join": '@JoinColumn(name = "source_class_id")',
         }
