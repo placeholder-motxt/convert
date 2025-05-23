@@ -8,6 +8,49 @@ from app.models.diagram import (
 from app.models.relationship_enum import RelationshipType
 
 
+def __set_attribute_to_relationship(
+    ro: AbstractRelationshipObject,
+    class_from_id: ClassObject,
+    class_to_id: ClassObject,
+    source_amount: str,
+    target_amount: str,
+):
+    ro.set_source_class(class_from_id)
+    ro.set_target_class(class_to_id)
+    ro.set_source_class_own_amount(source_amount)
+    ro.set_target_class_own_amount(target_amount)
+
+
+def __association_django(
+    ro: AbstractRelationshipObject,
+    class_from_id: ClassObject,
+    class_to_id: ClassObject,
+    source_amount: str,
+    target_amount: str,
+):
+    __set_attribute_to_relationship(
+        ro, class_from_id, class_to_id, source_amount, target_amount
+    )
+    class_from_id.add_relationship(ro)
+
+
+def __association_springboot(
+    ro: AbstractRelationshipObject,
+    class_from_id: ClassObject,
+    class_to_id: ClassObject,
+    source_amount: str,
+    target_amount: str,
+):
+    if isinstance(ro, OneToOneRelationshipObject):
+        ro2 = OneToOneRelationshipObject()
+    elif isinstance(ro, ManyToManyRelationshipObject):
+        ro2 = ManyToManyRelationshipObject()
+    __set_attribute_to_relationship(
+        ro2, class_to_id, class_from_id, source_amount, target_amount
+    )
+    class_to_id.add_relationship(ro2)
+
+
 def _relation_obj_setter_helper(
     ro: AbstractRelationshipObject,
     edge: dict,
@@ -17,16 +60,14 @@ def _relation_obj_setter_helper(
     bidirectional: bool = False,
 ):
     ro.set_type(relation_type)
-    print("zczc", relation_type, bidirectional, ro)
     if ro.get_type() in [
         RelationshipType.AGGREGATION,
         RelationshipType.COMPOSITION,
     ]:
         if not bidirectional:
-            ro.set_source_class(class_to_id)
-            ro.set_target_class(class_from_id)
-            ro.set_source_class_own_amount(edge["endLabel"])
-            ro.set_target_class_own_amount(edge["startLabel"])
+            __set_attribute_to_relationship(
+                ro, class_to_id, class_from_id, edge["endLabel"], edge["startLabel"]
+            )
             class_to_id.add_relationship(ro)
             return
         if bidirectional:
@@ -34,11 +75,13 @@ def _relation_obj_setter_helper(
                 ro, OneToOneRelationshipObject
             ):
                 raise ValueError("Aggregation cannot be one to one")
-            ro.set_source_class(class_from_id)
-            ro.set_target_class(class_to_id)
-            # 1+ itu pemilik
-            ro.set_source_class_own_amount(edge["startLabel"] + "+")
-            ro.set_target_class_own_amount(edge["endLabel"] + "+")
+            __set_attribute_to_relationship(
+                ro,
+                class_from_id,
+                class_to_id,
+                edge["startLabel"] + "+",
+                edge["endLabel"] + "+",
+            )
             # ro ownee dikasih ke product
             class_from_id.add_relationship(ro)
             # Set up owner side
@@ -46,28 +89,23 @@ def _relation_obj_setter_helper(
                 ro2 = OneToOneRelationshipObject()
             elif isinstance(ro, ManyToManyRelationshipObject):
                 ro2 = ManyToManyRelationshipObject()
-            ro2.set_source_class(class_to_id)
-            ro2.set_target_class(class_from_id)
-            ro2.set_source_class_own_amount(edge["endLabel"])
-            ro2.set_target_class_own_amount(edge["startLabel"])
+            __set_attribute_to_relationship(
+                ro2, class_to_id, class_from_id, edge["endLabel"], edge["startLabel"]
+            )
             class_to_id.add_relationship(ro2)
         return
 
-    ro.set_source_class(class_from_id)
-    ro.set_target_class(class_to_id)
-    ro.set_source_class_own_amount(edge["startLabel"])
-    ro.set_target_class_own_amount(edge["endLabel"])
-    class_from_id.add_relationship(ro)
+    __association_django(
+        ro, class_from_id, class_to_id, edge["startLabel"], edge["endLabel"]
+    )
     if bidirectional:
-        if isinstance(ro, OneToOneRelationshipObject):
-            ro2 = OneToOneRelationshipObject()
-        elif isinstance(ro, ManyToManyRelationshipObject):
-            ro2 = ManyToManyRelationshipObject()
-        ro2.set_source_class(class_to_id)
-        ro2.set_target_class(class_from_id)
-        ro2.set_source_class_own_amount(edge["startLabel"] + "+")
-        ro2.set_target_class_own_amount(edge["endLabel"] + "+")
-        class_to_id.add_relationship(ro2)
+        __association_springboot(
+            ro,
+            class_from_id,
+            class_to_id,
+            edge["startLabel"] + "+",
+            edge["endLabel"] + "+",
+        )
 
 
 class RelationshipStrategy:
