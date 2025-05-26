@@ -15,6 +15,7 @@ from starlette.background import BackgroundTasks
 
 from app.config import APP_CONFIG, SPRING_DEPENDENCIES, SPRING_SERVICE_URL
 from app.generate_controller_springboot.generate_controller_springboot import (
+    generate_sequence_controller_java,
     generate_springboot_controller_file,
 )
 from app.generate_frontend.create.create_page_views import generate_create_page_views
@@ -290,6 +291,12 @@ async def convert_spring(
         zipf.writestr(
             write_springboot_path(src_path, "service", "Sequence"),
             generate_sequence_service_java(
+                project_name, data["views_element"], group_id
+            ),
+        )
+        zipf.writestr(
+            write_springboot_path(src_path, "controller", "Sequence"),
+            generate_sequence_controller_java(
                 project_name, data["views_element"], group_id
             ),
         )
