@@ -1,0 +1,43 @@
+/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
+
+package com.example.burhanpedia.controller;
+
+import com.example.burhanpedia.model.*;
+import com.example.burhanpedia.service.SequenceService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+@RestController
+@RequestMapping("/sequence-diagram")
+@RequiredArgsConstructor
+public class SequenceController {
+    private final SequenceService sequenceService;
+
+    @PostMapping
+    @Operation(summary = "method controller_method_1 from sequence diagram")
+    public String controller_method_1 (@RequestParam String parameter_1, @RequestParam String parameter_1, @RequestParam String parameter_1, @RequestParam String parameter_1) {
+        return SequenceService.controller_method_1(parameter_1, parameter_1, parameter_1, parameter_1);
+    }
+
+
+    @PostMapping
+    @Operation(summary = "method controller_method_1 from sequence diagram")
+    public String controller_method_1 (@RequestParam String parameter_1, @RequestParam String parameter_1, @RequestParam String parameter_1, @RequestParam String parameter_1) {
+        return SequenceService.controller_method_1(parameter_1, parameter_1, parameter_1, parameter_1);
+    }
+
+
+    @PostMapping
+    @Operation(summary = "method controller_method_1 from sequence diagram")
+    public String controller_method_1 (@RequestParam String parameter_1, @RequestParam String parameter_1, @RequestParam String parameter_1, @RequestParam String parameter_1) {
+        return SequenceService.controller_method_1(parameter_1, parameter_1, parameter_1, parameter_1);
+    }
+
+
+}
