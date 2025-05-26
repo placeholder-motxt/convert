@@ -1,0 +1,29 @@
+/*
+This code is generated using MoTxT,
+checkout more about us on https://motxt.ppl.cs.ui.ac.id
+*/
+
+package {{group_id}}.{{project_name}}.controller;
+
+import {{group_id}}.{{project_name}}.model.*;
+import {{group_id}}.{{project_name}}.service.SequenceService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+@RestController
+@RequestMapping("/sequence-diagram")
+@RequiredArgsConstructor
+public class SequenceController {
+    private final SequenceService sequenceService;
+{% for controller_method in controller_methods %}
+    @PostMapping
+    @Operation(summary = "method {{controller_method.method_name}} from sequence diagram")
+    public {{controller_method.return_type}} {{controller_method.method_name}} ({% for param in controller_method.params %}@RequestParam {{param.param_type}} {{param.param_name}}{% if not loop.last %}, {% endif %}{%endfor%}) {
+        {% if controller_method.return_type != "void" %}return {%endif%}sequenceService.{{controller_method.method_name}}({% for param in controller_method.params %}{{param.param_name}}{% if not loop.last %}, {% endif %}{%endfor%});
+    }
+
+{% endfor %}
+}
