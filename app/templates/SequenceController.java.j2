@@ -22,7 +22,7 @@ public class SequenceController {
     @PostMapping
     @Operation(summary = "method {{controller_method.method_name}} from sequence diagram")
     public {{controller_method.return_type}} {{controller_method.method_name}} ({% for param in controller_method.params %}@RequestParam {{param.param_type}} {{param.param_name}}{% if not loop.last %}, {% endif %}{%endfor%}) {
-        return SequenceService.{{controller_method.method_name}}({% for param in controller_method.params %}{{param.param_name}}{% if not loop.last %}, {% endif %}{%endfor%});
+        return sequenceService.{{controller_method.method_name}}({% for param in controller_method.params %}{{param.param_name}}{% if not loop.last %}, {% endif %}{%endfor%});
     }
 
 {% endfor %}
