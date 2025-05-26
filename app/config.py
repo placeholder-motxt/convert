@@ -2,7 +2,7 @@ import os
 
 DEBUG = not os.getenv("PRODUCTION", False)
 
-VERSION = "8.8.1"
+VERSION = "8.9.0"
 
 APP_CONFIG = {
     "debug": DEBUG,
