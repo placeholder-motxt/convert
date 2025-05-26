@@ -5,9 +5,6 @@ import pytest
 from app.generate_controller_springboot.generate_controller_springboot import (
     generate_sequence_controller_java,
 )
-from app.generate_service_springboot.generate_service_springboot import (
-    generate_sequence_service_java,
-)
 from app.models.elements import ViewsElements
 from app.models.methods import (
     ArgumentObject,
@@ -80,7 +77,7 @@ class TestGenerateSequenceController(unittest.TestCase):
         expected = ""
 
         views_elements = ViewsElements("views.py")
-        result = generate_sequence_service_java(
+        result = generate_sequence_controller_java(
             "burhanpedia", views_elements, "com.example"
         )
         self.assertEqual(result, expected)
@@ -97,7 +94,9 @@ class TestGenerateSequenceController(unittest.TestCase):
         views_elements = ViewsElements("views.py")
         views_elements.add_controller_method(controller_method_1)
         with pytest.raises(ValueError):
-            generate_sequence_service_java("burhanpedia", views_elements, "com.example")
+            generate_sequence_controller_java(
+                "burhanpedia", views_elements, "com.example"
+            )
 
     def test_sequence_invalid_controller_method_name(self):
         controller_method_1 = ControllerMethodObject()
@@ -105,7 +104,9 @@ class TestGenerateSequenceController(unittest.TestCase):
         views_elements = ViewsElements("views.py")
         views_elements.add_controller_method(controller_method_1)
         with pytest.raises(ValueError):
-            generate_sequence_service_java("burhanpedia", views_elements, "com.example")
+            generate_sequence_controller_java(
+                "burhanpedia", views_elements, "com.example"
+            )
 
     def test_sequence_invalid_return_type(self):
         controller_method_1 = ControllerMethodObject()
@@ -119,7 +120,9 @@ class TestGenerateSequenceController(unittest.TestCase):
         views_elements = ViewsElements("views.py")
         views_elements.add_controller_method(controller_method_1)
         with pytest.raises(ValueError):
-            generate_sequence_service_java("burhanpedia", views_elements, "com.example")
+            generate_sequence_controller_java(
+                "burhanpedia", views_elements, "com.example"
+            )
 
     def test_sequence_invalid_param_type(self):
         controller_method_1 = ControllerMethodObject()
@@ -138,7 +141,9 @@ class TestGenerateSequenceController(unittest.TestCase):
         views_elements = ViewsElements("views.py")
         views_elements.add_controller_method(controller_method_1)
         with pytest.raises(ValueError):
-            generate_sequence_service_java("burhanpedia", views_elements, "com.example")
+            generate_sequence_controller_java(
+                "burhanpedia", views_elements, "com.example"
+            )
 
     def test_sequence_no_condition(self):
         str_type = TypeObject()
