@@ -865,7 +865,7 @@ class TestHandleReturnVarDeclaration(unittest.TestCase):
         expected_output = """
         String checkout() {
             String barang = barangService.cariBarang();
-            return barang;}
+            return \"\";}
 """
         self.assertEqual(expected_output.replace(" ", "").replace("\n", "").strip(), class_method_object.to_springboot_code().replace(" ", "").replace("\n", "").strip())
 
@@ -932,7 +932,7 @@ class TestHandleReturnVarDeclaration(unittest.TestCase):
         expected_output = """
         String checkout() {
             String barang = cariBarang();
-            return barang;}
+            return \"\";}
     """
         self.assertEqual(expected_output.replace(" ", "").replace("\n", "").strip(), class_method_object.to_springboot_code().replace(" ", "").replace("\n", "").strip())
 

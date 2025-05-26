@@ -244,8 +244,26 @@ class ClassMethodObject(AbstractMethodObject):
                 arguments = ", ".join(
                     elem["argument_name"] for elem in result["arguments"]
                 )
-                return_var = call.get_return_var_name()
                 method_call_string.append(self.__render_method_call(result, arguments))
+
+            if self.get_return_type() is not None:
+                if "list" in self.get_return_type().get_name().lower():
+                    return_var = "[]"
+
+                elif self.get_return_type().get_name_springboot() == "boolean":
+                    return_var = "true"
+
+                elif self.get_return_type().get_name_springboot() == "String":
+                    return_var = '""'
+
+                elif self.get_return_type().get_name_springboot() == "Integer":
+                    return_var = "1"
+
+                elif self.get_return_type().get_name_springboot() == "float":
+                    return_var = "1.0"
+
+                elif self.get_return_type().get_name_springboot() == "double":
+                    return_var = "1"
 
             method_call_string.append(f"    return {return_var};" + "}\n")
 
