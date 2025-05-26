@@ -22,7 +22,7 @@ public class SequenceController {
     @PostMapping
     @Operation(summary = "method controller_method_1 from sequence diagram")
     public String controller_method_1 () {
-        return SequenceService.controller_method_1();
+        return sequenceService.controller_method_1();
     }
 
 
